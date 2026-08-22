@@ -157,4 +157,4 @@ npm link          # makes `carbon-dl` available globally
 
 ## 📄 License
 
-[MIT](LICENSE)
+Apache-2.0](LICENSE)
