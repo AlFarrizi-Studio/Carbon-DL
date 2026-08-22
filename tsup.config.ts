@@ -1,8 +1,10 @@
 import {defineConfig} from 'tsup'
 import path from 'node:path'
 import {fileURLToPath} from 'node:url'
+import {readFileSync} from 'node:fs'
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url))
+const pkg = JSON.parse(readFileSync(path.join(__dirname, 'package.json'), 'utf8'))
 
 export default defineConfig({
   entry: ['src/cli.tsx'],
@@ -29,6 +31,11 @@ export default defineConfig({
     options.alias = {
       ...options.alias,
       'react-devtools-core': path.join(__dirname, 'scripts', 'empty-devtools.js'),
+    }
+    // Inject the version from package.json at build time so it's always in sync.
+    options.define = {
+      ...options.define,
+      'process.env.CARBON_VERSION': JSON.stringify(pkg.version),
     }
   },
 })

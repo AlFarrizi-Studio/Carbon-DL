@@ -95199,7 +95199,7 @@ function randomTip() {
 
 // src/lib/update-check.ts
 var GITHUB_REPO = "AlFarrizi-Studio/Carbon-DL";
-var CURRENT_VERSION = "1.0.8-beta";
+var CURRENT_VERSION = "1.0.9-beta";
 function isNewerVersion(a2, b) {
   const parse = (v) => {
     const clean = v.replace(/^v/, "");

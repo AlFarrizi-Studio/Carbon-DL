@@ -4,7 +4,9 @@
  */
 
 const GITHUB_REPO = 'AlFarrizi-Studio/Carbon-DL'
-const CURRENT_VERSION = '1.0.8-beta'
+// Injected at build time from package.json via tsup define.
+// Falls back to '0.0.0' when running from source without a build.
+const CURRENT_VERSION = process.env.CARBON_VERSION ?? '0.0.0'
 
 export type UpdateInfo = {
   hasUpdate: boolean
