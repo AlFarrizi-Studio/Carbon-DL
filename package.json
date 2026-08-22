@@ -43,6 +43,7 @@
     "ink": "^7.1.0",
     "ink-select-input": "^6.2.0",
     "ink-spinner": "^5.0.0",
+    "jimp": "^1.6.1",
     "react": "^19.2.7",
     "sharp": "^0.35.3",
     "sixel": "^0.16.0"

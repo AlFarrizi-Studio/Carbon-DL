@@ -24,6 +24,16 @@ YouTube · X/Twitter · Instagram · Threads · TikTok and 1,800+ other sites
 
 **Carbon** is a terminal-based video & audio downloader with a beautiful interactive UI. Paste any link from YouTube, TikTok, Instagram, X, SoundCloud, or 1800+ other sites, and Carbon walks you through picking exactly what you want — format, resolution, FPS, bitrate.
 
+## 📸 Screenshots
+
+<div align="center">
+
+| Input screen | Download wizard |
+|:---:|:---:|
+| ![Input screen](assets/1.png) | ![Download wizard](assets/2.png) |
+
+</div>
+
 ## ✨ Features
 
 - 🎬 **Video downloads** — MP4, MKV, WEBM, MOV, AVI
@@ -37,14 +47,6 @@ YouTube · X/Twitter · Instagram · Threads · TikTok and 1,800+ other sites
 - 🔔 **Update notifications** — in-app badge when a new GitHub release is available
 - 📋 **History** — recall recent links with ↑/↓
 - ⚡ **Zero setup** — auto-downloads yt-dlp on first run, bundles ffmpeg fallback
-
-<div align="center">
-
-| Input screen | Download wizard |
-|:---:|:---:|
-| ![Input screen](assets/1.png) | ![Download wizard](assets/2.png) |
-
-</div>
 
 ## 🚀 Install
 

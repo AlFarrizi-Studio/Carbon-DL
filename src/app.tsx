@@ -36,8 +36,18 @@ import {
 import {Thumbnail} from './components/thumbnail.js'
 import {fetchThumbnail, type ThumbResult} from './lib/thumbnail.js'
 import {detectProtocol, getCellPixelSize} from './lib/image-protocol.js'
+import fs from 'node:fs'
 
 const OUT_DIR = path.join(os.homedir(), 'Downloads')
+
+const DEBUG = process.env.CARBON_DEBUG === '1' || process.env.CARBON_DEBUG === 'true'
+const DEBUG_LOG = path.join(os.tmpdir(), 'carbon-debug.log')
+function debugLog(msg: string): void {
+  if (!DEBUG) return
+  const line = `[app] ${new Date().toISOString()} ${msg}\n`
+  process.stderr.write(line)
+  try { fs.appendFileSync(DEBUG_LOG, line) } catch { /* ignore */ }
+}
 
 function UpdateBadge({info}: {info: UpdateInfo | null}) {
   const theme = useTheme()
@@ -139,6 +149,7 @@ function MetadataBlock({info, platform, maxWidth}: {info: VideoInfo; platform?: 
 function CoverArt({thumbInfo, cols}: {thumbInfo: ThumbnailInfo; cols: number}) {
   const protocol = detectProtocol()
   const cell = getCellPixelSize()
+  debugLog(`CoverArt: url=${thumbInfo.url} cols=${cols} protocol=${protocol} cell=${cell.width}x${cell.height}`)
   // Reproduce the artwork's true aspect ratio in terminal cells. Cells are
   // ~twice as tall as wide, so rows = cols * cellW / (aspect * cellH).
   const aspect = thumbInfo.width && thumbInfo.height ? thumbInfo.width / thumbInfo.height : 1
@@ -149,6 +160,7 @@ function CoverArt({thumbInfo, cols}: {thumbInfo: ThumbnailInfo; cols: number}) {
     const controller = new AbortController()
     let cancelled = false
     void fetchThumbnail(thumbInfo.url, cols, rows, protocol, controller.signal).then(result => {
+      debugLog(`CoverArt: fetchThumbnail result=${result ? 'OK' : 'UNDEFINED'}`)
       if (!cancelled && result) setThumb(result)
     })
     return () => {
@@ -179,6 +191,7 @@ function MediaHeader({info, platform, contentWidth}: {info: VideoInfo; platform?
   const minMeta = 24
   const showCover = Boolean(thumbInfo) && contentWidth >= coverCols + gap + minMeta
   const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth
+  debugLog(`MediaHeader: thumbInfo=${thumbInfo ? thumbInfo.url : 'NONE'} contentWidth=${contentWidth} showCover=${showCover}`)
 
   return (
     <Box flexDirection="row" width={contentWidth}>

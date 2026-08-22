@@ -15,16 +15,27 @@ export type UpdateInfo = {
 
 /**
  * Compare semver strings. Returns true if `a` > `b`.
+ * Handles pre-release suffixes (-beta, -alpha, -rc): a pre-release version
+ * is considered older than the same version without a suffix.
  */
-function isNewerVersion(a: string, b: string): boolean {
-  const pa = a.replace(/^v/, '').split('.').map(Number)
-  const pb = b.replace(/^v/, '').split('.').map(Number)
+export function isNewerVersion(a: string, b: string): boolean {
+  const parse = (v: string) => {
+    const clean = v.replace(/^v/, '')
+    const [core, pre] = clean.split('-', 2)
+    const parts = (core ?? '').split('.').map(Number)
+    return {parts, pre: pre ?? ''}
+  }
+  const va = parse(a)
+  const vb = parse(b)
   for (let i = 0; i < 3; i++) {
-    const na = pa[i] ?? 0
-    const nb = pb[i] ?? 0
+    const na = va.parts[i] ?? 0
+    const nb = vb.parts[i] ?? 0
     if (na > nb) return true
     if (na < nb) return false
   }
+  // Same numeric version: release > pre-release
+  if (va.pre && !vb.pre) return false
+  if (!va.pre && vb.pre) return true
   return false
 }
 
