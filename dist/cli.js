@@ -13,8 +13,8 @@ var __require = /* @__PURE__ */ ((x) => typeof require !== "undefined" ? require
   if (typeof require !== "undefined") return require.apply(this, arguments);
   throw Error('Dynamic require of "' + x + '" is not supported');
 });
-var __esm = (fn, res) => function __init() {
-  return fn && (res = (0, fn[__getOwnPropNames(fn)[0]])(fn = 0)), res;
+var __esm = (fn2, res) => function __init() {
+  return fn2 && (res = (0, fn2[__getOwnPropNames(fn2)[0]])(fn2 = 0)), res;
 };
 var __commonJS = (cb, mod) => function __require2() {
   return mod || (0, cb[__getOwnPropNames(cb)[0]])((mod = { exports: {} }).exports, mod), mod.exports;
@@ -123,8 +123,8 @@ var require_react_production = __commonJS({
     function cloneAndReplaceKey(oldElement, newKey) {
       return ReactElement(oldElement.type, newKey, oldElement.props);
     }
-    function isValidElement(object) {
-      return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
+    function isValidElement(object2) {
+      return "object" === typeof object2 && null !== object2 && object2.$$typeof === REACT_ELEMENT_TYPE;
     }
     function escape3(key) {
       var escaperLookup = { "=": "=0", ":": "=2" };
@@ -321,9 +321,9 @@ var require_react_production = __commonJS({
         return ReactSharedInternals.H.useMemoCache(size);
       }
     };
-    exports.cache = function(fn) {
+    exports.cache = function(fn2) {
       return function() {
-        return fn.apply(null, arguments);
+        return fn2.apply(null, arguments);
       };
     };
     exports.cacheSignal = function() {
@@ -698,8 +698,8 @@ var require_react_development = __commonJS({
       function validateChildKeys(node) {
         isValidElement(node) ? node._store && (node._store.validated = 1) : "object" === typeof node && null !== node && node.$$typeof === REACT_LAZY_TYPE && ("fulfilled" === node._payload.status ? isValidElement(node._payload.value) && node._payload.value._store && (node._payload.value._store.validated = 1) : node._store && (node._store.validated = 1));
       }
-      function isValidElement(object) {
-        return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
+      function isValidElement(object2) {
+        return "object" === typeof object2 && null !== object2 && object2.$$typeof === REACT_ELEMENT_TYPE;
       }
       function escape3(key) {
         var escaperLookup = { "=": "=0", ":": "=2" };
@@ -896,8 +896,8 @@ var require_react_development = __commonJS({
           }
         return enqueueTaskImpl(task);
       }
-      function aggregateErrors(errors) {
-        return 1 < errors.length && "function" === typeof AggregateError ? new AggregateError(errors) : errors[0];
+      function aggregateErrors(errors2) {
+        return 1 < errors2.length && "function" === typeof AggregateError ? new AggregateError(errors2) : errors2[0];
       }
       function popActScope(prevActQueue, prevActScopeDepth) {
         prevActScopeDepth !== actScopeDepth - 1 && console.error(
@@ -906,11 +906,11 @@ var require_react_development = __commonJS({
         actScopeDepth = prevActScopeDepth;
       }
       function recursivelyFlushAsyncActWork(returnValue, resolve, reject) {
-        var queue = ReactSharedInternals.actQueue;
-        if (null !== queue)
-          if (0 !== queue.length)
+        var queue2 = ReactSharedInternals.actQueue;
+        if (null !== queue2)
+          if (0 !== queue2.length)
             try {
-              flushActQueue(queue);
+              flushActQueue(queue2);
               enqueueTask(function() {
                 return recursivelyFlushAsyncActWork(returnValue, resolve, reject);
               });
@@ -919,31 +919,31 @@ var require_react_development = __commonJS({
               ReactSharedInternals.thrownErrors.push(error);
             }
           else ReactSharedInternals.actQueue = null;
-        0 < ReactSharedInternals.thrownErrors.length ? (queue = aggregateErrors(ReactSharedInternals.thrownErrors), ReactSharedInternals.thrownErrors.length = 0, reject(queue)) : resolve(returnValue);
+        0 < ReactSharedInternals.thrownErrors.length ? (queue2 = aggregateErrors(ReactSharedInternals.thrownErrors), ReactSharedInternals.thrownErrors.length = 0, reject(queue2)) : resolve(returnValue);
       }
-      function flushActQueue(queue) {
+      function flushActQueue(queue2) {
         if (!isFlushing) {
           isFlushing = true;
           var i = 0;
           try {
-            for (; i < queue.length; i++) {
-              var callback = queue[i];
+            for (; i < queue2.length; i++) {
+              var callback = queue2[i];
               do {
                 ReactSharedInternals.didUsePromise = false;
                 var continuation = callback(false);
                 if (null !== continuation) {
                   if (ReactSharedInternals.didUsePromise) {
-                    queue[i] = callback;
-                    queue.splice(0, i);
+                    queue2[i] = callback;
+                    queue2.splice(0, i);
                     return;
                   }
                   callback = continuation;
                 } else break;
               } while (1);
             }
-            queue.length = 0;
+            queue2.length = 0;
           } catch (error) {
-            queue.splice(0, i + 1), ReactSharedInternals.thrownErrors.push(error);
+            queue2.splice(0, i + 1), ReactSharedInternals.thrownErrors.push(error);
           } finally {
             isFlushing = false;
           }
@@ -1090,7 +1090,7 @@ var require_react_development = __commonJS({
       exports.act = function(callback) {
         var prevActQueue = ReactSharedInternals.actQueue, prevActScopeDepth = actScopeDepth;
         actScopeDepth++;
-        var queue = ReactSharedInternals.actQueue = null !== prevActQueue ? prevActQueue : [], didAwaitActCall = false;
+        var queue2 = ReactSharedInternals.actQueue = null !== prevActQueue ? prevActQueue : [], didAwaitActCall = false;
         try {
           var result = callback();
         } catch (error) {
@@ -1113,7 +1113,7 @@ var require_react_development = __commonJS({
                   popActScope(prevActQueue, prevActScopeDepth);
                   if (0 === prevActScopeDepth) {
                     try {
-                      flushActQueue(queue), enqueueTask(function() {
+                      flushActQueue(queue2), enqueueTask(function() {
                         return recursivelyFlushAsyncActWork(
                           returnValue,
                           resolve,
@@ -1144,7 +1144,7 @@ var require_react_development = __commonJS({
         }
         var returnValue$jscomp$0 = result;
         popActScope(prevActQueue, prevActScopeDepth);
-        0 === prevActScopeDepth && (flushActQueue(queue), 0 !== queue.length && queueSeveralMicrotasks(function() {
+        0 === prevActScopeDepth && (flushActQueue(queue2), 0 !== queue2.length && queueSeveralMicrotasks(function() {
           didAwaitActCall || didWarnNoAwaitAct || (didWarnNoAwaitAct = true, console.error(
             "A component suspended inside an `act` scope, but the `act` call was not awaited. When testing React components that depend on asynchronous data, you must await the result:\n\nawait act(() => ...)"
           ));
@@ -1154,7 +1154,7 @@ var require_react_development = __commonJS({
         return {
           then: function(resolve, reject) {
             didAwaitActCall = true;
-            0 === prevActScopeDepth ? (ReactSharedInternals.actQueue = queue, enqueueTask(function() {
+            0 === prevActScopeDepth ? (ReactSharedInternals.actQueue = queue2, enqueueTask(function() {
               return recursivelyFlushAsyncActWork(
                 returnValue$jscomp$0,
                 resolve,
@@ -1164,9 +1164,9 @@ var require_react_development = __commonJS({
           }
         };
       };
-      exports.cache = function(fn) {
+      exports.cache = function(fn2) {
         return function() {
-          return fn.apply(null, arguments);
+          return fn2.apply(null, arguments);
         };
       };
       exports.cacheSignal = function() {
@@ -1928,30 +1928,30 @@ var require_scheduler_production = __commonJS({
       "object" === typeof options && null !== options ? (options = options.delay, options = "number" === typeof options && 0 < options ? currentTime + options : currentTime) : options = currentTime;
       switch (priorityLevel) {
         case 1:
-          var timeout = -1;
+          var timeout2 = -1;
           break;
         case 2:
-          timeout = 250;
+          timeout2 = 250;
           break;
         case 5:
-          timeout = 1073741823;
+          timeout2 = 1073741823;
           break;
         case 4:
-          timeout = 1e4;
+          timeout2 = 1e4;
           break;
         default:
-          timeout = 5e3;
+          timeout2 = 5e3;
       }
-      timeout = options + timeout;
+      timeout2 = options + timeout2;
       priorityLevel = {
         id: taskIdCounter++,
         callback,
         priorityLevel,
         startTime: options,
-        expirationTime: timeout,
+        expirationTime: timeout2,
         sortIndex: -1
       };
-      options > currentTime ? (priorityLevel.sortIndex = options, push(timerQueue, priorityLevel), null === peek(taskQueue) && priorityLevel === peek(timerQueue) && (isHostTimeoutScheduled ? (localClearTimeout(taskTimeoutID), taskTimeoutID = -1) : isHostTimeoutScheduled = true, requestHostTimeout(handleTimeout, options - currentTime))) : (priorityLevel.sortIndex = timeout, push(taskQueue, priorityLevel), isHostCallbackScheduled || isPerformingWork || (isHostCallbackScheduled = true, isMessageLoopRunning || (isMessageLoopRunning = true, schedulePerformWorkUntilDeadline())));
+      options > currentTime ? (priorityLevel.sortIndex = options, push(timerQueue, priorityLevel), null === peek(taskQueue) && priorityLevel === peek(timerQueue) && (isHostTimeoutScheduled ? (localClearTimeout(taskTimeoutID), taskTimeoutID = -1) : isHostTimeoutScheduled = true, requestHostTimeout(handleTimeout, options - currentTime))) : (priorityLevel.sortIndex = timeout2, push(taskQueue, priorityLevel), isHostCallbackScheduled || isPerformingWork || (isHostCallbackScheduled = true, isMessageLoopRunning || (isMessageLoopRunning = true, schedulePerformWorkUntilDeadline())));
       return priorityLevel;
     };
     exports.unstable_shouldYield = shouldYieldToHost;
@@ -2185,30 +2185,30 @@ var require_scheduler_development = __commonJS({
         "object" === typeof options && null !== options ? (options = options.delay, options = "number" === typeof options && 0 < options ? currentTime + options : currentTime) : options = currentTime;
         switch (priorityLevel) {
           case 1:
-            var timeout = -1;
+            var timeout2 = -1;
             break;
           case 2:
-            timeout = 250;
+            timeout2 = 250;
             break;
           case 5:
-            timeout = 1073741823;
+            timeout2 = 1073741823;
             break;
           case 4:
-            timeout = 1e4;
+            timeout2 = 1e4;
             break;
           default:
-            timeout = 5e3;
+            timeout2 = 5e3;
         }
-        timeout = options + timeout;
+        timeout2 = options + timeout2;
         priorityLevel = {
           id: taskIdCounter++,
           callback,
           priorityLevel,
           startTime: options,
-          expirationTime: timeout,
+          expirationTime: timeout2,
           sortIndex: -1
         };
-        options > currentTime ? (priorityLevel.sortIndex = options, push(timerQueue, priorityLevel), null === peek(taskQueue) && priorityLevel === peek(timerQueue) && (isHostTimeoutScheduled ? (localClearTimeout(taskTimeoutID), taskTimeoutID = -1) : isHostTimeoutScheduled = true, requestHostTimeout(handleTimeout, options - currentTime))) : (priorityLevel.sortIndex = timeout, push(taskQueue, priorityLevel), isHostCallbackScheduled || isPerformingWork || (isHostCallbackScheduled = true, isMessageLoopRunning || (isMessageLoopRunning = true, schedulePerformWorkUntilDeadline())));
+        options > currentTime ? (priorityLevel.sortIndex = options, push(timerQueue, priorityLevel), null === peek(taskQueue) && priorityLevel === peek(timerQueue) && (isHostTimeoutScheduled ? (localClearTimeout(taskTimeoutID), taskTimeoutID = -1) : isHostTimeoutScheduled = true, requestHostTimeout(handleTimeout, options - currentTime))) : (priorityLevel.sortIndex = timeout2, push(taskQueue, priorityLevel), isHostCallbackScheduled || isPerformingWork || (isHostCallbackScheduled = true, isMessageLoopRunning || (isMessageLoopRunning = true, schedulePerformWorkUntilDeadline())));
         return priorityLevel;
       };
       exports.unstable_shouldYield = shouldYieldToHost;
@@ -2640,7 +2640,7 @@ var require_react_reconciler_production = __commonJS({
         return 2 < lanes ? 8 < lanes ? 0 !== (lanes & 134217727) ? 32 : 268435456 : 8 : 2;
       }
       function setIsStrictModeForDevtools(newIsStrictMode) {
-        "function" === typeof log && unstable_setDisableYieldValue(newIsStrictMode);
+        "function" === typeof log2 && unstable_setDisableYieldValue(newIsStrictMode);
         if (injectedHook && "function" === typeof injectedHook.setStrictMode)
           try {
             injectedHook.setStrictMode(rendererID, newIsStrictMode);
@@ -2661,8 +2661,8 @@ var require_react_reconciler_production = __commonJS({
           }
         return "\n" + prefix + name + suffix;
       }
-      function describeNativeComponentFrame(fn, construct) {
-        if (!fn || reentry) return "";
+      function describeNativeComponentFrame(fn2, construct) {
+        if (!fn2 || reentry) return "";
         reentry = true;
         var previousPrepareStackTrace = Error.prepareStackTrace;
         Error.prepareStackTrace = void 0;
@@ -2685,14 +2685,14 @@ var require_react_reconciler_production = __commonJS({
                     } catch (x) {
                       var control = x;
                     }
-                    Reflect.construct(fn, [], Fake);
+                    Reflect.construct(fn2, [], Fake);
                   } else {
                     try {
                       Fake.call();
                     } catch (x$8) {
                       control = x$8;
                     }
-                    fn.call(Fake.prototype);
+                    fn2.call(Fake.prototype);
                   }
                 } else {
                   try {
@@ -2700,7 +2700,7 @@ var require_react_reconciler_production = __commonJS({
                   } catch (x$9) {
                     control = x$9;
                   }
-                  (Fake = fn()) && "function" === typeof Fake.catch && Fake.catch(function() {
+                  (Fake = fn2()) && "function" === typeof Fake.catch && Fake.catch(function() {
                   });
                 }
               } catch (sample) {
@@ -2738,7 +2738,7 @@ var require_react_reconciler_production = __commonJS({
                   do
                     if (RunInRootFrame--, namePropDescriptor--, 0 > namePropDescriptor || sampleLines[RunInRootFrame] !== controlLines[namePropDescriptor]) {
                       var frame = "\n" + sampleLines[RunInRootFrame].replace(" at new ", " at ");
-                      fn.displayName && frame.includes("<anonymous>") && (frame = frame.replace("<anonymous>", fn.displayName));
+                      fn2.displayName && frame.includes("<anonymous>") && (frame = frame.replace("<anonymous>", fn2.displayName));
                       return frame;
                     }
                   while (1 <= RunInRootFrame && 0 <= namePropDescriptor);
@@ -2749,7 +2749,7 @@ var require_react_reconciler_production = __commonJS({
         } finally {
           reentry = false, Error.prepareStackTrace = previousPrepareStackTrace;
         }
-        return (previousPrepareStackTrace = fn ? fn.displayName || fn.name : "") ? describeBuiltInComponentFrame(previousPrepareStackTrace) : "";
+        return (previousPrepareStackTrace = fn2 ? fn2.displayName || fn2.name : "") ? describeBuiltInComponentFrame(previousPrepareStackTrace) : "";
       }
       function describeFiber(fiber, childFiber) {
         switch (fiber.tag) {
@@ -3088,10 +3088,10 @@ var require_react_reconciler_production = __commonJS({
           refCount: 0
         };
       }
-      function releaseCache(cache3) {
-        cache3.refCount--;
-        0 === cache3.refCount && scheduleCallback$2(NormalPriority, function() {
-          cache3.controller.abort();
+      function releaseCache(cache4) {
+        cache4.refCount--;
+        0 === cache4.refCount && scheduleCallback$2(NormalPriority, function() {
+          cache4.controller.abort();
         });
       }
       function noop$1() {
@@ -3857,23 +3857,23 @@ var require_react_reconciler_production = __commonJS({
         for (var endIndex = concurrentQueuesIndex, i = concurrentlyUpdatedLanes = concurrentQueuesIndex = 0; i < endIndex; ) {
           var fiber = concurrentQueues[i];
           concurrentQueues[i++] = null;
-          var queue = concurrentQueues[i];
+          var queue2 = concurrentQueues[i];
           concurrentQueues[i++] = null;
           var update = concurrentQueues[i];
           concurrentQueues[i++] = null;
           var lane = concurrentQueues[i];
           concurrentQueues[i++] = null;
-          if (null !== queue && null !== update) {
-            var pending = queue.pending;
+          if (null !== queue2 && null !== update) {
+            var pending = queue2.pending;
             null === pending ? update.next = update : (update.next = pending.next, pending.next = update);
-            queue.pending = update;
+            queue2.pending = update;
           }
           0 !== lane && markUpdateLaneFromFiberToRoot(fiber, update, lane);
         }
       }
-      function enqueueUpdate$1(fiber, queue, update, lane) {
+      function enqueueUpdate$1(fiber, queue2, update, lane) {
         concurrentQueues[concurrentQueuesIndex++] = fiber;
-        concurrentQueues[concurrentQueuesIndex++] = queue;
+        concurrentQueues[concurrentQueuesIndex++] = queue2;
         concurrentQueues[concurrentQueuesIndex++] = update;
         concurrentQueues[concurrentQueuesIndex++] = lane;
         concurrentlyUpdatedLanes |= lane;
@@ -3881,8 +3881,8 @@ var require_react_reconciler_production = __commonJS({
         fiber = fiber.alternate;
         null !== fiber && (fiber.lanes |= lane);
       }
-      function enqueueConcurrentHookUpdate(fiber, queue, update, lane) {
-        enqueueUpdate$1(fiber, queue, update, lane);
+      function enqueueConcurrentHookUpdate(fiber, queue2, update, lane) {
+        enqueueUpdate$1(fiber, queue2, update, lane);
         return getRootForUpdatedFiber(fiber);
       }
       function enqueueConcurrentRenderForLane(fiber, lane) {
@@ -3952,37 +3952,37 @@ var require_react_reconciler_production = __commonJS({
         }
       }
       function enqueueCapturedUpdate(workInProgress2, capturedUpdate) {
-        var queue = workInProgress2.updateQueue, current = workInProgress2.alternate;
-        if (null !== current && (current = current.updateQueue, queue === current)) {
+        var queue2 = workInProgress2.updateQueue, current = workInProgress2.alternate;
+        if (null !== current && (current = current.updateQueue, queue2 === current)) {
           var newFirst = null, newLast = null;
-          queue = queue.firstBaseUpdate;
-          if (null !== queue) {
+          queue2 = queue2.firstBaseUpdate;
+          if (null !== queue2) {
             do {
-              var clone = {
-                lane: queue.lane,
-                tag: queue.tag,
-                payload: queue.payload,
+              var clone2 = {
+                lane: queue2.lane,
+                tag: queue2.tag,
+                payload: queue2.payload,
                 callback: null,
                 next: null
               };
-              null === newLast ? newFirst = newLast = clone : newLast = newLast.next = clone;
-              queue = queue.next;
-            } while (null !== queue);
+              null === newLast ? newFirst = newLast = clone2 : newLast = newLast.next = clone2;
+              queue2 = queue2.next;
+            } while (null !== queue2);
             null === newLast ? newFirst = newLast = capturedUpdate : newLast = newLast.next = capturedUpdate;
           } else newFirst = newLast = capturedUpdate;
-          queue = {
+          queue2 = {
             baseState: current.baseState,
             firstBaseUpdate: newFirst,
             lastBaseUpdate: newLast,
             shared: current.shared,
             callbacks: current.callbacks
           };
-          workInProgress2.updateQueue = queue;
+          workInProgress2.updateQueue = queue2;
           return;
         }
-        workInProgress2 = queue.lastBaseUpdate;
-        null === workInProgress2 ? queue.firstBaseUpdate = capturedUpdate : workInProgress2.next = capturedUpdate;
-        queue.lastBaseUpdate = capturedUpdate;
+        workInProgress2 = queue2.lastBaseUpdate;
+        null === workInProgress2 ? queue2.firstBaseUpdate = capturedUpdate : workInProgress2.next = capturedUpdate;
+        queue2.lastBaseUpdate = capturedUpdate;
       }
       function suspendIfUpdateReadFromEntangledAsyncAction() {
         if (didReadFromEntangledAsyncAction) {
@@ -3992,11 +3992,11 @@ var require_react_reconciler_production = __commonJS({
       }
       function processUpdateQueue(workInProgress$jscomp$0, props, instance$jscomp$0, renderLanes2) {
         didReadFromEntangledAsyncAction = false;
-        var queue = workInProgress$jscomp$0.updateQueue;
+        var queue2 = workInProgress$jscomp$0.updateQueue;
         hasForceUpdate = false;
-        var firstBaseUpdate = queue.firstBaseUpdate, lastBaseUpdate = queue.lastBaseUpdate, pendingQueue = queue.shared.pending;
+        var firstBaseUpdate = queue2.firstBaseUpdate, lastBaseUpdate = queue2.lastBaseUpdate, pendingQueue = queue2.shared.pending;
         if (null !== pendingQueue) {
-          queue.shared.pending = null;
+          queue2.shared.pending = null;
           var lastPendingUpdate = pendingQueue, firstPendingUpdate = lastPendingUpdate.next;
           lastPendingUpdate.next = null;
           null === lastBaseUpdate ? firstBaseUpdate = firstPendingUpdate : lastBaseUpdate.next = firstPendingUpdate;
@@ -4005,7 +4005,7 @@ var require_react_reconciler_production = __commonJS({
           null !== current && (current = current.updateQueue, pendingQueue = current.lastBaseUpdate, pendingQueue !== lastBaseUpdate && (null === pendingQueue ? current.firstBaseUpdate = firstPendingUpdate : pendingQueue.next = firstPendingUpdate, current.lastBaseUpdate = lastPendingUpdate));
         }
         if (null !== firstBaseUpdate) {
-          var newState = queue.baseState;
+          var newState = queue2.baseState;
           lastBaseUpdate = 0;
           current = firstPendingUpdate = lastPendingUpdate = null;
           pendingQueue = firstBaseUpdate;
@@ -4050,7 +4050,7 @@ var require_react_reconciler_production = __commonJS({
                 }
               }
               updateLane = pendingQueue.callback;
-              null !== updateLane && (workInProgress$jscomp$0.flags |= 64, isHiddenUpdate && (workInProgress$jscomp$0.flags |= 8192), isHiddenUpdate = queue.callbacks, null === isHiddenUpdate ? queue.callbacks = [updateLane] : isHiddenUpdate.push(updateLane));
+              null !== updateLane && (workInProgress$jscomp$0.flags |= 64, isHiddenUpdate && (workInProgress$jscomp$0.flags |= 8192), isHiddenUpdate = queue2.callbacks, null === isHiddenUpdate ? queue2.callbacks = [updateLane] : isHiddenUpdate.push(updateLane));
             } else
               isHiddenUpdate = {
                 lane: updateLane,
@@ -4061,16 +4061,16 @@ var require_react_reconciler_production = __commonJS({
               }, null === current ? (firstPendingUpdate = current = isHiddenUpdate, lastPendingUpdate = newState) : current = current.next = isHiddenUpdate, lastBaseUpdate |= updateLane;
             pendingQueue = pendingQueue.next;
             if (null === pendingQueue)
-              if (pendingQueue = queue.shared.pending, null === pendingQueue)
+              if (pendingQueue = queue2.shared.pending, null === pendingQueue)
                 break;
               else
-                isHiddenUpdate = pendingQueue, pendingQueue = isHiddenUpdate.next, isHiddenUpdate.next = null, queue.lastBaseUpdate = isHiddenUpdate, queue.shared.pending = null;
+                isHiddenUpdate = pendingQueue, pendingQueue = isHiddenUpdate.next, isHiddenUpdate.next = null, queue2.lastBaseUpdate = isHiddenUpdate, queue2.shared.pending = null;
           } while (1);
           null === current && (lastPendingUpdate = newState);
-          queue.baseState = lastPendingUpdate;
-          queue.firstBaseUpdate = firstPendingUpdate;
-          queue.lastBaseUpdate = current;
-          null === firstBaseUpdate && (queue.shared.lanes = 0);
+          queue2.baseState = lastPendingUpdate;
+          queue2.firstBaseUpdate = firstPendingUpdate;
+          queue2.lastBaseUpdate = current;
+          null === firstBaseUpdate && (queue2.shared.lanes = 0);
           workInProgressRootSkippedLanes |= lastBaseUpdate;
           workInProgress$jscomp$0.lanes = lastBaseUpdate;
           workInProgress$jscomp$0.memoizedState = newState;
@@ -4229,8 +4229,8 @@ var require_react_reconciler_production = __commonJS({
       function resetHooksOnUnwind(workInProgress2) {
         if (didScheduleRenderPhaseUpdate) {
           for (workInProgress2 = workInProgress2.memoizedState; null !== workInProgress2; ) {
-            var queue = workInProgress2.queue;
-            null !== queue && (queue.pending = null);
+            var queue2 = workInProgress2.queue;
+            null !== queue2 && (queue2.pending = null);
             workInProgress2 = workInProgress2.next;
           }
           didScheduleRenderPhaseUpdate = false;
@@ -4327,10 +4327,10 @@ var require_react_reconciler_production = __commonJS({
         return updateReducerImpl(hook, currentHook, reducer);
       }
       function updateReducerImpl(hook, current, reducer) {
-        var queue = hook.queue;
-        if (null === queue) throw Error(formatProdErrorMessage(311));
-        queue.lastRenderedReducer = reducer;
-        var baseQueue = hook.baseQueue, pendingQueue = queue.pending;
+        var queue2 = hook.queue;
+        if (null === queue2) throw Error(formatProdErrorMessage(311));
+        queue2.lastRenderedReducer = reducer;
+        var baseQueue = hook.baseQueue, pendingQueue = queue2.pending;
         if (null !== pendingQueue) {
           if (null !== baseQueue) {
             var baseFirst = baseQueue.next;
@@ -4338,7 +4338,7 @@ var require_react_reconciler_production = __commonJS({
             pendingQueue.next = baseFirst;
           }
           current.baseQueue = baseQueue = pendingQueue;
-          queue.pending = null;
+          queue2.pending = null;
         }
         pendingQueue = hook.baseState;
         if (null === baseQueue) hook.memoizedState = pendingQueue;
@@ -4394,18 +4394,18 @@ var require_react_reconciler_production = __commonJS({
           hook.memoizedState = pendingQueue;
           hook.baseState = baseFirst;
           hook.baseQueue = newBaseQueueLast;
-          queue.lastRenderedState = pendingQueue;
+          queue2.lastRenderedState = pendingQueue;
         }
-        null === baseQueue && (queue.lanes = 0);
-        return [hook.memoizedState, queue.dispatch];
+        null === baseQueue && (queue2.lanes = 0);
+        return [hook.memoizedState, queue2.dispatch];
       }
       function rerenderReducer(reducer) {
-        var hook = updateWorkInProgressHook(), queue = hook.queue;
-        if (null === queue) throw Error(formatProdErrorMessage(311));
-        queue.lastRenderedReducer = reducer;
-        var dispatch = queue.dispatch, lastRenderPhaseUpdate = queue.pending, newState = hook.memoizedState;
+        var hook = updateWorkInProgressHook(), queue2 = hook.queue;
+        if (null === queue2) throw Error(formatProdErrorMessage(311));
+        queue2.lastRenderedReducer = reducer;
+        var dispatch = queue2.dispatch, lastRenderPhaseUpdate = queue2.pending, newState = hook.memoizedState;
         if (null !== lastRenderPhaseUpdate) {
-          queue.pending = null;
+          queue2.pending = null;
           var update = lastRenderPhaseUpdate = lastRenderPhaseUpdate.next;
           do
             newState = reducer(newState, update.action), update = update.next;
@@ -4413,7 +4413,7 @@ var require_react_reconciler_production = __commonJS({
           objectIs(newState, hook.memoizedState) || (didReceiveUpdate = true);
           hook.memoizedState = newState;
           null === hook.baseQueue && (hook.baseState = newState);
-          queue.lastRenderedState = newState;
+          queue2.lastRenderedState = newState;
         }
         return [newState, dispatch];
       }
@@ -4748,8 +4748,8 @@ var require_react_reconciler_production = __commonJS({
         if (null === componentUpdateQueue)
           componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload];
         else {
-          var events = componentUpdateQueue.events;
-          null === events ? componentUpdateQueue.events = [payload] : events.push(payload);
+          var events2 = componentUpdateQueue.events;
+          null === events2 ? componentUpdateQueue.events = [payload] : events2.push(payload);
         }
       }
       function updateEvent(callback) {
@@ -4838,14 +4838,14 @@ var require_react_reconciler_production = __commonJS({
         workInProgressRootSkippedLanes |= hook;
         return prevValue;
       }
-      function startTransition(fiber, queue, pendingState, finishedState, callback) {
+      function startTransition(fiber, queue2, pendingState, finishedState, callback) {
         var previousPriority = getCurrentUpdatePriority();
         setCurrentUpdatePriority(
           0 !== previousPriority && 8 > previousPriority ? previousPriority : 8
         );
         var prevTransition = ReactSharedInternals.T, currentTransition = {};
         ReactSharedInternals.T = currentTransition;
-        dispatchOptimisticSetState(fiber, false, queue, pendingState);
+        dispatchOptimisticSetState(fiber, false, queue2, pendingState);
         try {
           var returnValue = callback(), onStartTransitionFinish = ReactSharedInternals.S;
           null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
@@ -4856,21 +4856,21 @@ var require_react_reconciler_production = __commonJS({
             );
             dispatchSetStateInternal(
               fiber,
-              queue,
+              queue2,
               thenableForFinishedState,
               requestUpdateLane(fiber)
             );
           } else
             dispatchSetStateInternal(
               fiber,
-              queue,
+              queue2,
               finishedState,
               requestUpdateLane(fiber)
             );
         } catch (error) {
           dispatchSetStateInternal(
             fiber,
-            queue,
+            queue2,
             { then: function() {
             }, status: "rejected", reason: error },
             requestUpdateLane()
@@ -4939,7 +4939,7 @@ var require_react_reconciler_production = __commonJS({
           provider = provider.return;
         }
       }
-      function dispatchReducerAction(fiber, queue, action) {
+      function dispatchReducerAction(fiber, queue2, action) {
         var lane = requestUpdateLane();
         action = {
           lane,
@@ -4950,13 +4950,13 @@ var require_react_reconciler_production = __commonJS({
           eagerState: null,
           next: null
         };
-        isRenderPhaseUpdate(fiber) ? enqueueRenderPhaseUpdate(queue, action) : (action = enqueueConcurrentHookUpdate(fiber, queue, action, lane), null !== action && (scheduleUpdateOnFiber(action, fiber, lane), entangleTransitionUpdate(action, queue, lane)));
+        isRenderPhaseUpdate(fiber) ? enqueueRenderPhaseUpdate(queue2, action) : (action = enqueueConcurrentHookUpdate(fiber, queue2, action, lane), null !== action && (scheduleUpdateOnFiber(action, fiber, lane), entangleTransitionUpdate(action, queue2, lane)));
       }
-      function dispatchSetState(fiber, queue, action) {
+      function dispatchSetState(fiber, queue2, action) {
         var lane = requestUpdateLane();
-        dispatchSetStateInternal(fiber, queue, action, lane);
+        dispatchSetStateInternal(fiber, queue2, action, lane);
       }
-      function dispatchSetStateInternal(fiber, queue, action, lane) {
+      function dispatchSetStateInternal(fiber, queue2, action, lane) {
         var update = {
           lane,
           revertLane: 0,
@@ -4966,26 +4966,26 @@ var require_react_reconciler_production = __commonJS({
           eagerState: null,
           next: null
         };
-        if (isRenderPhaseUpdate(fiber)) enqueueRenderPhaseUpdate(queue, update);
+        if (isRenderPhaseUpdate(fiber)) enqueueRenderPhaseUpdate(queue2, update);
         else {
           var alternate = fiber.alternate;
-          if (0 === fiber.lanes && (null === alternate || 0 === alternate.lanes) && (alternate = queue.lastRenderedReducer, null !== alternate))
+          if (0 === fiber.lanes && (null === alternate || 0 === alternate.lanes) && (alternate = queue2.lastRenderedReducer, null !== alternate))
             try {
-              var currentState = queue.lastRenderedState, eagerState = alternate(currentState, action);
+              var currentState = queue2.lastRenderedState, eagerState = alternate(currentState, action);
               update.hasEagerState = true;
               update.eagerState = eagerState;
               if (objectIs(eagerState, currentState))
-                return enqueueUpdate$1(fiber, queue, update, 0), null === workInProgressRoot && finishQueueingConcurrentUpdates(), false;
+                return enqueueUpdate$1(fiber, queue2, update, 0), null === workInProgressRoot && finishQueueingConcurrentUpdates(), false;
             } catch (error) {
             } finally {
             }
-          action = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
+          action = enqueueConcurrentHookUpdate(fiber, queue2, update, lane);
           if (null !== action)
-            return scheduleUpdateOnFiber(action, fiber, lane), entangleTransitionUpdate(action, queue, lane), true;
+            return scheduleUpdateOnFiber(action, fiber, lane), entangleTransitionUpdate(action, queue2, lane), true;
         }
         return false;
       }
-      function dispatchOptimisticSetState(fiber, throwIfDuringRender, queue, action) {
+      function dispatchOptimisticSetState(fiber, throwIfDuringRender, queue2, action) {
         action = {
           lane: 2,
           revertLane: requestTransitionLane(),
@@ -5000,7 +5000,7 @@ var require_react_reconciler_production = __commonJS({
         } else
           throwIfDuringRender = enqueueConcurrentHookUpdate(
             fiber,
-            queue,
+            queue2,
             action,
             2
           ), null !== throwIfDuringRender && scheduleUpdateOnFiber(throwIfDuringRender, fiber, 2);
@@ -5009,18 +5009,18 @@ var require_react_reconciler_production = __commonJS({
         var alternate = fiber.alternate;
         return fiber === currentlyRenderingFiber || null !== alternate && alternate === currentlyRenderingFiber;
       }
-      function enqueueRenderPhaseUpdate(queue, update) {
+      function enqueueRenderPhaseUpdate(queue2, update) {
         didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
-        var pending = queue.pending;
+        var pending = queue2.pending;
         null === pending ? update.next = update : (update.next = pending.next, pending.next = update);
-        queue.pending = update;
+        queue2.pending = update;
       }
-      function entangleTransitionUpdate(root, queue, lane) {
+      function entangleTransitionUpdate(root, queue2, lane) {
         if (0 !== (lane & 4194048)) {
-          var queueLanes = queue.lanes;
+          var queueLanes = queue2.lanes;
           queueLanes &= root.pendingLanes;
           lane |= queueLanes;
-          queue.lanes = lane;
+          queue2.lanes = lane;
           markRootEntangled(root, lane);
         }
       }
@@ -8367,21 +8367,21 @@ var require_react_reconciler_production = __commonJS({
             case 23:
             case 22:
               if (null !== fiber.memoizedState && null !== fiber.memoizedState.cachePool) {
-                var cache3 = fiber.memoizedState.cachePool.pool;
-                null != cache3 && cache3.refCount++;
+                var cache4 = fiber.memoizedState.cachePool.pool;
+                null != cache4 && cache4.refCount++;
               }
               break;
             case 24:
               releaseCache(fiber.memoizedState.cache);
           }
-          cache3 = fiber.child;
-          if (null !== cache3) cache3.return = fiber, nextEffect = cache3;
+          cache4 = fiber.child;
+          if (null !== cache4) cache4.return = fiber, nextEffect = cache4;
           else
             a: for (fiber = deletedSubtreeRoot; null !== nextEffect; ) {
-              cache3 = nextEffect;
-              var sibling = cache3.sibling, returnFiber = cache3.return;
-              detachFiberAfterEffects(cache3);
-              if (cache3 === fiber) {
+              cache4 = nextEffect;
+              var sibling = cache4.sibling, returnFiber = cache4.return;
+              detachFiberAfterEffects(cache4);
+              if (cache4 === fiber) {
                 nextEffect = null;
                 break a;
               }
@@ -9633,14 +9633,14 @@ var require_react_reconciler_production = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React18 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React19 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React18.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React19.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -9690,7 +9690,7 @@ var require_react_reconciler_production = __commonJS({
       $$$config.diffHydratedPropsForDevWarnings;
       $$$config.diffHydratedTextForDevWarnings;
       $$$config.describeHydratableInstanceForDevWarnings;
-      var validateHydratableInstance = $$$config.validateHydratableInstance, validateHydratableTextInstance = $$$config.validateHydratableTextInstance, supportsResources = $$$config.supportsResources, isHostHoistableType = $$$config.isHostHoistableType, getHoistableRoot = $$$config.getHoistableRoot, getResource = $$$config.getResource, acquireResource = $$$config.acquireResource, releaseResource = $$$config.releaseResource, hydrateHoistable = $$$config.hydrateHoistable, mountHoistable = $$$config.mountHoistable, unmountHoistable = $$$config.unmountHoistable, createHoistableInstance = $$$config.createHoistableInstance, prepareToCommitHoistables = $$$config.prepareToCommitHoistables, mayResourceSuspendCommit = $$$config.mayResourceSuspendCommit, preloadResource = $$$config.preloadResource, suspendResource = $$$config.suspendResource, supportsSingletons = $$$config.supportsSingletons, resolveSingletonInstance = $$$config.resolveSingletonInstance, acquireSingletonInstance = $$$config.acquireSingletonInstance, releaseSingletonInstance = $$$config.releaseSingletonInstance, isHostSingletonType = $$$config.isHostSingletonType, isSingletonScope = $$$config.isSingletonScope, valueStack = [], index$jscomp$0 = -1, emptyContextObject = {}, clz32 = Math.clz32 ? Math.clz32 : clz32Fallback, log$1 = Math.log, LN2 = Math.LN2, nextTransitionUpdateLane = 256, nextTransitionDeferredLane = 262144, nextRetryLane = 4194304, scheduleCallback$3 = Scheduler2.unstable_scheduleCallback, cancelCallback$1 = Scheduler2.unstable_cancelCallback, shouldYield = Scheduler2.unstable_shouldYield, requestPaint = Scheduler2.unstable_requestPaint, now = Scheduler2.unstable_now, ImmediatePriority = Scheduler2.unstable_ImmediatePriority, UserBlockingPriority = Scheduler2.unstable_UserBlockingPriority, NormalPriority$1 = Scheduler2.unstable_NormalPriority, IdlePriority = Scheduler2.unstable_IdlePriority, log = Scheduler2.log, unstable_setDisableYieldValue = Scheduler2.unstable_setDisableYieldValue, rendererID = null, injectedHook = null, objectIs = "function" === typeof Object.is ? Object.is : is, reportGlobalError = "function" === typeof reportError ? reportError : function(error) {
+      var validateHydratableInstance = $$$config.validateHydratableInstance, validateHydratableTextInstance = $$$config.validateHydratableTextInstance, supportsResources = $$$config.supportsResources, isHostHoistableType = $$$config.isHostHoistableType, getHoistableRoot = $$$config.getHoistableRoot, getResource = $$$config.getResource, acquireResource = $$$config.acquireResource, releaseResource = $$$config.releaseResource, hydrateHoistable = $$$config.hydrateHoistable, mountHoistable = $$$config.mountHoistable, unmountHoistable = $$$config.unmountHoistable, createHoistableInstance = $$$config.createHoistableInstance, prepareToCommitHoistables = $$$config.prepareToCommitHoistables, mayResourceSuspendCommit = $$$config.mayResourceSuspendCommit, preloadResource = $$$config.preloadResource, suspendResource = $$$config.suspendResource, supportsSingletons = $$$config.supportsSingletons, resolveSingletonInstance = $$$config.resolveSingletonInstance, acquireSingletonInstance = $$$config.acquireSingletonInstance, releaseSingletonInstance = $$$config.releaseSingletonInstance, isHostSingletonType = $$$config.isHostSingletonType, isSingletonScope = $$$config.isSingletonScope, valueStack = [], index$jscomp$0 = -1, emptyContextObject = {}, clz32 = Math.clz32 ? Math.clz32 : clz32Fallback, log$1 = Math.log, LN2 = Math.LN2, nextTransitionUpdateLane = 256, nextTransitionDeferredLane = 262144, nextRetryLane = 4194304, scheduleCallback$3 = Scheduler2.unstable_scheduleCallback, cancelCallback$1 = Scheduler2.unstable_cancelCallback, shouldYield = Scheduler2.unstable_shouldYield, requestPaint = Scheduler2.unstable_requestPaint, now = Scheduler2.unstable_now, ImmediatePriority = Scheduler2.unstable_ImmediatePriority, UserBlockingPriority = Scheduler2.unstable_UserBlockingPriority, NormalPriority$1 = Scheduler2.unstable_NormalPriority, IdlePriority = Scheduler2.unstable_IdlePriority, log2 = Scheduler2.log, unstable_setDisableYieldValue = Scheduler2.unstable_setDisableYieldValue, rendererID = null, injectedHook = null, objectIs = "function" === typeof Object.is ? Object.is : is, reportGlobalError = "function" === typeof reportError ? reportError : function(error) {
         if ("object" === typeof window && "function" === typeof window.ErrorEvent) {
           var event = new window.ErrorEvent("error", {
             bubbles: true,
@@ -9835,12 +9835,12 @@ var require_react_reconciler_production = __commonJS({
         },
         useState: function(initialState) {
           initialState = mountStateImpl(initialState);
-          var queue = initialState.queue, dispatch = dispatchSetState.bind(
+          var queue2 = initialState.queue, dispatch = dispatchSetState.bind(
             null,
             currentlyRenderingFiber,
-            queue
+            queue2
           );
-          queue.dispatch = dispatch;
+          queue2.dispatch = dispatch;
           return [initialState.memoizedState, dispatch];
         },
         useDebugValue: mountDebugValue,
@@ -9913,21 +9913,21 @@ var require_react_reconciler_production = __commonJS({
         useOptimistic: function(passthrough) {
           var hook = mountWorkInProgressHook();
           hook.memoizedState = hook.baseState = passthrough;
-          var queue = {
+          var queue2 = {
             pending: null,
             lanes: 0,
             dispatch: null,
             lastRenderedReducer: null,
             lastRenderedState: null
           };
-          hook.queue = queue;
+          hook.queue = queue2;
           hook = dispatchOptimisticSetState.bind(
             null,
             currentlyRenderingFiber,
             true,
-            queue
+            queue2
           );
-          queue.dispatch = hook;
+          queue2.dispatch = hook;
           return [passthrough, hook];
         },
         useMemoCache,
@@ -10072,8 +10072,8 @@ var require_react_reconciler_production = __commonJS({
         hydrationErrors: null
       }, offscreenSubtreeIsHidden = false, offscreenSubtreeWasHidden = false, needsFormReset = false, PossiblyWeakSet = "function" === typeof WeakSet ? WeakSet : Set, nextEffect = null, hostParent = null, hostParentIsContainer = false, currentHoistableRoot = null, suspenseyCommitFlag = 8192, DefaultAsyncDispatcher = {
         getCacheForType: function(resourceType) {
-          var cache3 = readContext(CacheContext), cacheForType = cache3.data.get(resourceType);
-          void 0 === cacheForType && (cacheForType = resourceType(), cache3.data.set(resourceType, cacheForType));
+          var cache4 = readContext(CacheContext), cacheForType = cache4.data.get(resourceType);
+          void 0 === cacheForType && (cacheForType = resourceType(), cache4.data.set(resourceType, cacheForType));
           return cacheForType;
         },
         cacheSignal: function() {
@@ -10128,8 +10128,8 @@ var require_react_reconciler_production = __commonJS({
             lanes = enqueueConcurrentRenderForLane(fiber, 2), null !== lanes && scheduleUpdateOnFiber(lanes, fiber, 2), flushSyncWork(), markRetryLaneIfNotHydrated(fiber, 2);
         }
       };
-      exports2.batchedUpdates = function(fn, a) {
-        return fn(a);
+      exports2.batchedUpdates = function(fn2, a) {
+        return fn2(a);
       };
       exports2.createComponentSelector = function(component) {
         return { $$typeof: COMPONENT_TYPE, value: component };
@@ -10209,18 +10209,18 @@ var require_react_reconciler_production = __commonJS({
       exports2.defaultOnUncaughtError = function(error) {
         reportGlobalError(error);
       };
-      exports2.deferredUpdates = function(fn) {
+      exports2.deferredUpdates = function(fn2) {
         var prevTransition = ReactSharedInternals.T, previousPriority = getCurrentUpdatePriority();
         try {
-          return setCurrentUpdatePriority(32), ReactSharedInternals.T = null, fn();
+          return setCurrentUpdatePriority(32), ReactSharedInternals.T = null, fn2();
         } finally {
           setCurrentUpdatePriority(previousPriority), ReactSharedInternals.T = prevTransition;
         }
       };
-      exports2.discreteUpdates = function(fn, a, b, c, d) {
+      exports2.discreteUpdates = function(fn2, a, b, c, d) {
         var prevTransition = ReactSharedInternals.T, previousPriority = getCurrentUpdatePriority();
         try {
-          return setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn(a, b, c, d);
+          return setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn2(a, b, c, d);
         } finally {
           setCurrentUpdatePriority(previousPriority), ReactSharedInternals.T = prevTransition, 0 === executionContext && (workInProgressRootRenderTargetTime = now() + 500);
         }
@@ -10265,13 +10265,13 @@ var require_react_reconciler_production = __commonJS({
         return findHostInstance(component);
       };
       exports2.flushPassiveEffects = flushPendingEffects;
-      exports2.flushSyncFromReconciler = function(fn) {
+      exports2.flushSyncFromReconciler = function(fn2) {
         var prevExecutionContext = executionContext;
         executionContext |= 1;
         var prevTransition = ReactSharedInternals.T, previousPriority = getCurrentUpdatePriority();
         try {
-          if (setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn)
-            return fn();
+          if (setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn2)
+            return fn2();
         } finally {
           setCurrentUpdatePriority(previousPriority), ReactSharedInternals.T = prevTransition, executionContext = prevExecutionContext, 0 === (executionContext & 6) && flushSyncWorkAcrossRoots_impl(0, false);
         }
@@ -10371,10 +10371,10 @@ var require_react_reconciler_production = __commonJS({
       };
       exports2.startHostTransition = function(formFiber, pendingState, action, formData) {
         if (5 !== formFiber.tag) throw Error(formatProdErrorMessage(476));
-        var queue = ensureFormComponentIsStateful(formFiber).queue;
+        var queue2 = ensureFormComponentIsStateful(formFiber).queue;
         startTransition(
           formFiber,
-          queue,
+          queue2,
           pendingState,
           NotPendingTransition,
           null === action ? noop2 : function() {
@@ -10430,10 +10430,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id2--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path4, index2, value) {
-        if (index2 >= path4.length) return value;
-        var key = path4[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path4, index2 + 1, value);
+      function copyWithSetImpl(obj, path5, index2, value) {
+        if (index2 >= path5.length) return value;
+        var key = path5[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path5, index2 + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10460,11 +10460,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path4, index2) {
-        var key = path4[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index2 + 1 === path4.length)
+      function copyWithDeleteImpl(obj, path5, index2) {
+        var key = path5[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index2 + 1 === path5.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path4, index2 + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path5, index2 + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -11013,7 +11013,7 @@ var require_react_reconciler_development = __commonJS({
         return hook.checkDCE ? true : false;
       }
       function setIsStrictModeForDevtools(newIsStrictMode) {
-        "function" === typeof log && unstable_setDisableYieldValue(newIsStrictMode);
+        "function" === typeof log2 && unstable_setDisableYieldValue(newIsStrictMode);
         if (injectedHook && "function" === typeof injectedHook.setStrictMode)
           try {
             injectedHook.setStrictMode(rendererID, newIsStrictMode);
@@ -11043,9 +11043,9 @@ var require_react_reconciler_development = __commonJS({
         }
         return kind;
       }
-      function addObjectToProperties(object, properties, indent, prefix2) {
-        for (var key in object)
-          hasOwnProperty.call(object, key) && "_" !== key[0] && addValueToProperties(key, object[key], properties, indent, prefix2);
+      function addObjectToProperties(object2, properties, indent, prefix2) {
+        for (var key in object2)
+          hasOwnProperty.call(object2, key) && "_" !== key[0] && addValueToProperties(key, object2[key], properties, indent, prefix2);
       }
       function addValueToProperties(propertyName, value, properties, indent, prefix2) {
         switch (typeof value) {
@@ -11314,12 +11314,12 @@ var require_react_reconciler_development = __commonJS({
           );
         }
       }
-      function logComponentErrored(fiber, startTime, endTime, errors) {
+      function logComponentErrored(fiber, startTime, endTime, errors2) {
         if (supportsUserTiming) {
           var name = getComponentNameFromFiber(fiber);
           if (null !== name) {
-            for (var debugTask = null, properties = [], i = 0; i < errors.length; i++) {
-              var capturedValue = errors[i];
+            for (var debugTask = null, properties = [], i = 0; i < errors2.length; i++) {
+              var capturedValue = errors2[i];
               null == debugTask && null !== capturedValue.source && (debugTask = capturedValue.source._debugTask);
               capturedValue = capturedValue.value;
               properties.push([
@@ -11348,14 +11348,14 @@ var require_react_reconciler_development = __commonJS({
           }
         }
       }
-      function logComponentEffect(fiber, startTime, endTime, selfTime, errors) {
-        if (null !== errors) {
+      function logComponentEffect(fiber, startTime, endTime, selfTime, errors2) {
+        if (null !== errors2) {
           if (supportsUserTiming) {
             var name = getComponentNameFromFiber(fiber);
             if (null !== name) {
               selfTime = [];
-              for (var i = 0; i < errors.length; i++) {
-                var error = errors[i].value;
+              for (var i = 0; i < errors2.length; i++) {
+                var error = errors2[i].value;
                 selfTime.push([
                   "Error",
                   "object" === typeof error && null !== error && "string" === typeof error.message ? String(error.message) : String(error)
@@ -11385,7 +11385,7 @@ var require_react_reconciler_development = __commonJS({
             }
           }
         } else
-          name = getComponentNameFromFiber(fiber), null !== name && supportsUserTiming && (errors = 1 > selfTime ? "secondary-light" : 100 > selfTime ? "secondary" : 500 > selfTime ? "secondary-dark" : "error", (fiber = fiber._debugTask) ? fiber.run(
+          name = getComponentNameFromFiber(fiber), null !== name && supportsUserTiming && (errors2 = 1 > selfTime ? "secondary-light" : 100 > selfTime ? "secondary" : 500 > selfTime ? "secondary-dark" : "error", (fiber = fiber._debugTask) ? fiber.run(
             console.timeStamp.bind(
               console,
               name,
@@ -11393,7 +11393,7 @@ var require_react_reconciler_development = __commonJS({
               endTime,
               "Components \u269B",
               void 0,
-              errors
+              errors2
             )
           ) : console.timeStamp(
             name,
@@ -11401,12 +11401,12 @@ var require_react_reconciler_development = __commonJS({
             endTime,
             "Components \u269B",
             void 0,
-            errors
+            errors2
           ));
       }
       function logRenderPhase(startTime, endTime, lanes, debugTask) {
         if (supportsUserTiming && !(endTime <= startTime)) {
-          var color = (lanes & 738197653) === lanes ? "tertiary-dark" : "primary-dark";
+          var color2 = (lanes & 738197653) === lanes ? "tertiary-dark" : "primary-dark";
           lanes = (lanes & 536870912) === lanes ? "Prepared" : (lanes & 201326741) === lanes ? "Hydrated" : "Render";
           debugTask ? debugTask.run(
             console.timeStamp.bind(
@@ -11416,7 +11416,7 @@ var require_react_reconciler_development = __commonJS({
               endTime,
               currentTrack,
               "Scheduler \u269B",
-              color
+              color2
             )
           ) : console.timeStamp(
             lanes,
@@ -11424,7 +11424,7 @@ var require_react_reconciler_development = __commonJS({
             endTime,
             currentTrack,
             "Scheduler \u269B",
-            color
+            color2
           );
         }
       }
@@ -11536,10 +11536,10 @@ var require_react_reconciler_development = __commonJS({
           "secondary-light"
         ));
       }
-      function logCommitErrored(startTime, endTime, errors, passive, debugTask) {
+      function logCommitErrored(startTime, endTime, errors2, passive, debugTask) {
         if (supportsUserTiming && !(endTime <= startTime)) {
-          for (var properties = [], i = 0; i < errors.length; i++) {
-            var error = errors[i].value;
+          for (var properties = [], i = 0; i < errors2.length; i++) {
+            var error = errors2[i].value;
             properties.push([
               "Error",
               "object" === typeof error && null !== error && "string" === typeof error.message ? String(error.message) : String(error)
@@ -11639,9 +11639,9 @@ var require_react_reconciler_development = __commonJS({
           }
         return "\n" + prefix + name + suffix;
       }
-      function describeNativeComponentFrame(fn, construct) {
-        if (!fn || reentry) return "";
-        var frame = componentFrameCache.get(fn);
+      function describeNativeComponentFrame(fn2, construct) {
+        if (!fn2 || reentry) return "";
+        var frame = componentFrameCache.get(fn2);
         if (void 0 !== frame) return frame;
         reentry = true;
         frame = Error.prepareStackTrace;
@@ -11669,14 +11669,14 @@ var require_react_reconciler_development = __commonJS({
                     } catch (x) {
                       var control = x;
                     }
-                    Reflect.construct(fn, [], Fake);
+                    Reflect.construct(fn2, [], Fake);
                   } else {
                     try {
                       Fake.call();
                     } catch (x$0) {
                       control = x$0;
                     }
-                    fn.call(Fake.prototype);
+                    fn2.call(Fake.prototype);
                   }
                 } else {
                   try {
@@ -11684,7 +11684,7 @@ var require_react_reconciler_development = __commonJS({
                   } catch (x$1) {
                     control = x$1;
                   }
-                  (Fake = fn()) && "function" === typeof Fake.catch && Fake.catch(function() {
+                  (Fake = fn2()) && "function" === typeof Fake.catch && Fake.catch(function() {
                   });
                 }
               } catch (sample) {
@@ -11727,8 +11727,8 @@ var require_react_reconciler_development = __commonJS({
                         " at new ",
                         " at "
                       );
-                      fn.displayName && _frame.includes("<anonymous>") && (_frame = _frame.replace("<anonymous>", fn.displayName));
-                      "function" === typeof fn && componentFrameCache.set(fn, _frame);
+                      fn2.displayName && _frame.includes("<anonymous>") && (_frame = _frame.replace("<anonymous>", fn2.displayName));
+                      "function" === typeof fn2 && componentFrameCache.set(fn2, _frame);
                       return _frame;
                     }
                   while (1 <= namePropDescriptor && 0 <= _RunInRootFrame$Deter);
@@ -11739,8 +11739,8 @@ var require_react_reconciler_development = __commonJS({
         } finally {
           reentry = false, ReactSharedInternals.H = previousDispatcher, reenableLogs(), Error.prepareStackTrace = frame;
         }
-        sampleLines = (sampleLines = fn ? fn.displayName || fn.name : "") ? describeBuiltInComponentFrame(sampleLines) : "";
-        "function" === typeof fn && componentFrameCache.set(fn, sampleLines);
+        sampleLines = (sampleLines = fn2 ? fn2.displayName || fn2.name : "") ? describeBuiltInComponentFrame(sampleLines) : "";
+        "function" === typeof fn2 && componentFrameCache.set(fn2, sampleLines);
         return sampleLines;
       }
       function describeFiber(fiber, childFiber) {
@@ -11803,8 +11803,8 @@ var require_react_reconciler_development = __commonJS({
           return "\nError generating stack: " + x.message + "\n" + x.stack;
         }
       }
-      function describeFunctionComponentFrameWithoutLineNumber(fn) {
-        return (fn = fn ? fn.displayName || fn.name : "") ? describeBuiltInComponentFrame(fn) : "";
+      function describeFunctionComponentFrameWithoutLineNumber(fn2) {
+        return (fn2 = fn2 ? fn2.displayName || fn2.name : "") ? describeBuiltInComponentFrame(fn2) : "";
       }
       function createCapturedValueAtFiber(value, source) {
         if ("object" === typeof value && null !== value) {
@@ -11963,8 +11963,8 @@ var require_react_reconciler_development = __commonJS({
         }
         return indentation(indent) + describeTextNode(clientText, maxLength) + "\n";
       }
-      function objectName(object) {
-        return Object.prototype.toString.call(object).replace(/^\[object (.*)\]$/, function(m, p0) {
+      function objectName(object2) {
+        return Object.prototype.toString.call(object2).replace(/^\[object (.*)\]$/, function(m, p0) {
           return p0;
         });
       }
@@ -12568,19 +12568,19 @@ var require_react_reconciler_development = __commonJS({
           refCount: 0
         };
       }
-      function retainCache(cache3) {
-        cache3.controller.signal.aborted && console.warn(
+      function retainCache(cache4) {
+        cache4.controller.signal.aborted && console.warn(
           "A cache instance was retained after it was already freed. This likely indicates a bug in React."
         );
-        cache3.refCount++;
+        cache4.refCount++;
       }
-      function releaseCache(cache3) {
-        cache3.refCount--;
-        0 > cache3.refCount && console.warn(
+      function releaseCache(cache4) {
+        cache4.refCount--;
+        0 > cache4.refCount && console.warn(
           "A cache instance was released after it was already freed. This likely indicates a bug in React."
         );
-        0 === cache3.refCount && scheduleCallback$2(NormalPriority, function() {
-          cache3.controller.abort();
+        0 === cache4.refCount && scheduleCallback$2(NormalPriority, function() {
+          cache4.controller.abort();
         });
       }
       function startUpdateTimerByLane(lane, method, fiber) {
@@ -13769,23 +13769,23 @@ var require_react_reconciler_development = __commonJS({
         for (var endIndex = concurrentQueuesIndex, i = concurrentlyUpdatedLanes = concurrentQueuesIndex = 0; i < endIndex; ) {
           var fiber = concurrentQueues[i];
           concurrentQueues[i++] = null;
-          var queue = concurrentQueues[i];
+          var queue2 = concurrentQueues[i];
           concurrentQueues[i++] = null;
           var update = concurrentQueues[i];
           concurrentQueues[i++] = null;
           var lane = concurrentQueues[i];
           concurrentQueues[i++] = null;
-          if (null !== queue && null !== update) {
-            var pending = queue.pending;
+          if (null !== queue2 && null !== update) {
+            var pending = queue2.pending;
             null === pending ? update.next = update : (update.next = pending.next, pending.next = update);
-            queue.pending = update;
+            queue2.pending = update;
           }
           0 !== lane && markUpdateLaneFromFiberToRoot(fiber, update, lane);
         }
       }
-      function enqueueUpdate$1(fiber, queue, update, lane) {
+      function enqueueUpdate$1(fiber, queue2, update, lane) {
         concurrentQueues[concurrentQueuesIndex++] = fiber;
-        concurrentQueues[concurrentQueuesIndex++] = queue;
+        concurrentQueues[concurrentQueuesIndex++] = queue2;
         concurrentQueues[concurrentQueuesIndex++] = update;
         concurrentQueues[concurrentQueuesIndex++] = lane;
         concurrentlyUpdatedLanes |= lane;
@@ -13793,8 +13793,8 @@ var require_react_reconciler_development = __commonJS({
         fiber = fiber.alternate;
         null !== fiber && (fiber.lanes |= lane);
       }
-      function enqueueConcurrentHookUpdate(fiber, queue, update, lane) {
-        enqueueUpdate$1(fiber, queue, update, lane);
+      function enqueueConcurrentHookUpdate(fiber, queue2, update, lane) {
+        enqueueUpdate$1(fiber, queue2, update, lane);
         return getRootForUpdatedFiber(fiber);
       }
       function enqueueConcurrentRenderForLane(fiber, lane) {
@@ -13878,37 +13878,37 @@ var require_react_reconciler_development = __commonJS({
         }
       }
       function enqueueCapturedUpdate(workInProgress2, capturedUpdate) {
-        var queue = workInProgress2.updateQueue, current2 = workInProgress2.alternate;
-        if (null !== current2 && (current2 = current2.updateQueue, queue === current2)) {
+        var queue2 = workInProgress2.updateQueue, current2 = workInProgress2.alternate;
+        if (null !== current2 && (current2 = current2.updateQueue, queue2 === current2)) {
           var newFirst = null, newLast = null;
-          queue = queue.firstBaseUpdate;
-          if (null !== queue) {
+          queue2 = queue2.firstBaseUpdate;
+          if (null !== queue2) {
             do {
-              var clone = {
-                lane: queue.lane,
-                tag: queue.tag,
-                payload: queue.payload,
+              var clone2 = {
+                lane: queue2.lane,
+                tag: queue2.tag,
+                payload: queue2.payload,
                 callback: null,
                 next: null
               };
-              null === newLast ? newFirst = newLast = clone : newLast = newLast.next = clone;
-              queue = queue.next;
-            } while (null !== queue);
+              null === newLast ? newFirst = newLast = clone2 : newLast = newLast.next = clone2;
+              queue2 = queue2.next;
+            } while (null !== queue2);
             null === newLast ? newFirst = newLast = capturedUpdate : newLast = newLast.next = capturedUpdate;
           } else newFirst = newLast = capturedUpdate;
-          queue = {
+          queue2 = {
             baseState: current2.baseState,
             firstBaseUpdate: newFirst,
             lastBaseUpdate: newLast,
             shared: current2.shared,
             callbacks: current2.callbacks
           };
-          workInProgress2.updateQueue = queue;
+          workInProgress2.updateQueue = queue2;
           return;
         }
-        workInProgress2 = queue.lastBaseUpdate;
-        null === workInProgress2 ? queue.firstBaseUpdate = capturedUpdate : workInProgress2.next = capturedUpdate;
-        queue.lastBaseUpdate = capturedUpdate;
+        workInProgress2 = queue2.lastBaseUpdate;
+        null === workInProgress2 ? queue2.firstBaseUpdate = capturedUpdate : workInProgress2.next = capturedUpdate;
+        queue2.lastBaseUpdate = capturedUpdate;
       }
       function suspendIfUpdateReadFromEntangledAsyncAction() {
         if (didReadFromEntangledAsyncAction) {
@@ -13918,12 +13918,12 @@ var require_react_reconciler_development = __commonJS({
       }
       function processUpdateQueue(workInProgress2, props, instance$jscomp$0, renderLanes2) {
         didReadFromEntangledAsyncAction = false;
-        var queue = workInProgress2.updateQueue;
+        var queue2 = workInProgress2.updateQueue;
         hasForceUpdate = false;
-        currentlyProcessingQueue = queue.shared;
-        var firstBaseUpdate = queue.firstBaseUpdate, lastBaseUpdate = queue.lastBaseUpdate, pendingQueue = queue.shared.pending;
+        currentlyProcessingQueue = queue2.shared;
+        var firstBaseUpdate = queue2.firstBaseUpdate, lastBaseUpdate = queue2.lastBaseUpdate, pendingQueue = queue2.shared.pending;
         if (null !== pendingQueue) {
-          queue.shared.pending = null;
+          queue2.shared.pending = null;
           var lastPendingUpdate = pendingQueue, firstPendingUpdate = lastPendingUpdate.next;
           lastPendingUpdate.next = null;
           null === lastBaseUpdate ? firstBaseUpdate = firstPendingUpdate : lastBaseUpdate.next = firstPendingUpdate;
@@ -13932,7 +13932,7 @@ var require_react_reconciler_development = __commonJS({
           null !== current2 && (current2 = current2.updateQueue, pendingQueue = current2.lastBaseUpdate, pendingQueue !== lastBaseUpdate && (null === pendingQueue ? current2.firstBaseUpdate = firstPendingUpdate : pendingQueue.next = firstPendingUpdate, current2.lastBaseUpdate = lastPendingUpdate));
         }
         if (null !== firstBaseUpdate) {
-          var newState = queue.baseState;
+          var newState = queue2.baseState;
           lastBaseUpdate = 0;
           current2 = firstPendingUpdate = lastPendingUpdate = null;
           pendingQueue = firstBaseUpdate;
@@ -14004,7 +14004,7 @@ var require_react_reconciler_development = __commonJS({
                 }
               }
               updateLane = pendingQueue.callback;
-              null !== updateLane && (workInProgress2.flags |= 64, isHiddenUpdate && (workInProgress2.flags |= 8192), isHiddenUpdate = queue.callbacks, null === isHiddenUpdate ? queue.callbacks = [updateLane] : isHiddenUpdate.push(updateLane));
+              null !== updateLane && (workInProgress2.flags |= 64, isHiddenUpdate && (workInProgress2.flags |= 8192), isHiddenUpdate = queue2.callbacks, null === isHiddenUpdate ? queue2.callbacks = [updateLane] : isHiddenUpdate.push(updateLane));
             } else
               isHiddenUpdate = {
                 lane: updateLane,
@@ -14015,16 +14015,16 @@ var require_react_reconciler_development = __commonJS({
               }, null === current2 ? (firstPendingUpdate = current2 = isHiddenUpdate, lastPendingUpdate = newState) : current2 = current2.next = isHiddenUpdate, lastBaseUpdate |= updateLane;
             pendingQueue = pendingQueue.next;
             if (null === pendingQueue)
-              if (pendingQueue = queue.shared.pending, null === pendingQueue)
+              if (pendingQueue = queue2.shared.pending, null === pendingQueue)
                 break;
               else
-                isHiddenUpdate = pendingQueue, pendingQueue = isHiddenUpdate.next, isHiddenUpdate.next = null, queue.lastBaseUpdate = isHiddenUpdate, queue.shared.pending = null;
+                isHiddenUpdate = pendingQueue, pendingQueue = isHiddenUpdate.next, isHiddenUpdate.next = null, queue2.lastBaseUpdate = isHiddenUpdate, queue2.shared.pending = null;
           } while (1);
           null === current2 && (lastPendingUpdate = newState);
-          queue.baseState = lastPendingUpdate;
-          queue.firstBaseUpdate = firstPendingUpdate;
-          queue.lastBaseUpdate = current2;
-          null === firstBaseUpdate && (queue.shared.lanes = 0);
+          queue2.baseState = lastPendingUpdate;
+          queue2.firstBaseUpdate = firstPendingUpdate;
+          queue2.lastBaseUpdate = current2;
+          null === firstBaseUpdate && (queue2.shared.lanes = 0);
           workInProgressRootSkippedLanes |= lastBaseUpdate;
           workInProgress2.lanes = lastBaseUpdate;
           workInProgress2.memoizedState = newState;
@@ -14298,8 +14298,8 @@ var require_react_reconciler_development = __commonJS({
       function resetHooksOnUnwind(workInProgress2) {
         if (didScheduleRenderPhaseUpdate) {
           for (workInProgress2 = workInProgress2.memoizedState; null !== workInProgress2; ) {
-            var queue = workInProgress2.queue;
-            null !== queue && (queue.pending = null);
+            var queue2 = workInProgress2.queue;
+            null !== queue2 && (queue2.pending = null);
             workInProgress2 = workInProgress2.next;
           }
           didScheduleRenderPhaseUpdate = false;
@@ -14435,13 +14435,13 @@ var require_react_reconciler_development = __commonJS({
         return updateReducerImpl(hook, currentHook, reducer);
       }
       function updateReducerImpl(hook, current2, reducer) {
-        var queue = hook.queue;
-        if (null === queue)
+        var queue2 = hook.queue;
+        if (null === queue2)
           throw Error(
             "Should have a queue. You are likely calling Hooks conditionally, which is not allowed. (https://react.dev/link/invalid-hook-call)"
           );
-        queue.lastRenderedReducer = reducer;
-        var baseQueue = hook.baseQueue, pendingQueue = queue.pending;
+        queue2.lastRenderedReducer = reducer;
+        var baseQueue = hook.baseQueue, pendingQueue = queue2.pending;
         if (null !== pendingQueue) {
           if (null !== baseQueue) {
             var baseFirst = baseQueue.next;
@@ -14452,7 +14452,7 @@ var require_react_reconciler_development = __commonJS({
             "Internal error: Expected work-in-progress queue to be a clone. This is a bug in React."
           );
           current2.baseQueue = baseQueue = pendingQueue;
-          queue.pending = null;
+          queue2.pending = null;
         }
         pendingQueue = hook.baseState;
         if (null === baseQueue) hook.memoizedState = pendingQueue;
@@ -14508,21 +14508,21 @@ var require_react_reconciler_development = __commonJS({
           hook.memoizedState = pendingQueue;
           hook.baseState = baseFirst;
           hook.baseQueue = newBaseQueueLast;
-          queue.lastRenderedState = pendingQueue;
+          queue2.lastRenderedState = pendingQueue;
         }
-        null === baseQueue && (queue.lanes = 0);
-        return [hook.memoizedState, queue.dispatch];
+        null === baseQueue && (queue2.lanes = 0);
+        return [hook.memoizedState, queue2.dispatch];
       }
       function rerenderReducer(reducer) {
-        var hook = updateWorkInProgressHook(), queue = hook.queue;
-        if (null === queue)
+        var hook = updateWorkInProgressHook(), queue2 = hook.queue;
+        if (null === queue2)
           throw Error(
             "Should have a queue. You are likely calling Hooks conditionally, which is not allowed. (https://react.dev/link/invalid-hook-call)"
           );
-        queue.lastRenderedReducer = reducer;
-        var dispatch = queue.dispatch, lastRenderPhaseUpdate = queue.pending, newState = hook.memoizedState;
+        queue2.lastRenderedReducer = reducer;
+        var dispatch = queue2.dispatch, lastRenderPhaseUpdate = queue2.pending, newState = hook.memoizedState;
         if (null !== lastRenderPhaseUpdate) {
-          queue.pending = null;
+          queue2.pending = null;
           var update = lastRenderPhaseUpdate = lastRenderPhaseUpdate.next;
           do
             newState = reducer(newState, update.action), update = update.next;
@@ -14530,7 +14530,7 @@ var require_react_reconciler_development = __commonJS({
           objectIs(newState, hook.memoizedState) || (didReceiveUpdate = true);
           hook.memoizedState = newState;
           null === hook.baseQueue && (hook.baseState = newState);
-          queue.lastRenderedState = newState;
+          queue2.lastRenderedState = newState;
         }
         return [newState, dispatch];
       }
@@ -14678,28 +14678,28 @@ var require_react_reconciler_development = __commonJS({
       }
       function mountState(initialState) {
         initialState = mountStateImpl(initialState);
-        var queue = initialState.queue, dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue);
-        queue.dispatch = dispatch;
+        var queue2 = initialState.queue, dispatch = dispatchSetState.bind(null, currentlyRenderingFiber, queue2);
+        queue2.dispatch = dispatch;
         return [initialState.memoizedState, dispatch];
       }
       function mountOptimistic(passthrough) {
         var hook = mountWorkInProgressHook();
         hook.memoizedState = hook.baseState = passthrough;
-        var queue = {
+        var queue2 = {
           pending: null,
           lanes: 0,
           dispatch: null,
           lastRenderedReducer: null,
           lastRenderedState: null
         };
-        hook.queue = queue;
+        hook.queue = queue2;
         hook = dispatchOptimisticSetState.bind(
           null,
           currentlyRenderingFiber,
           true,
-          queue
+          queue2
         );
-        queue.dispatch = hook;
+        queue2.dispatch = hook;
         return [passthrough, hook];
       }
       function updateOptimistic(passthrough, reducer) {
@@ -14962,8 +14962,8 @@ var require_react_reconciler_development = __commonJS({
         if (null === componentUpdateQueue)
           componentUpdateQueue = createFunctionComponentUpdateQueue(), currentlyRenderingFiber.updateQueue = componentUpdateQueue, componentUpdateQueue.events = [payload];
         else {
-          var events = componentUpdateQueue.events;
-          null === events ? componentUpdateQueue.events = [payload] : events.push(payload);
+          var events2 = componentUpdateQueue.events;
+          null === events2 ? componentUpdateQueue.events = [payload] : events2.push(payload);
         }
       }
       function mountEvent(callback) {
@@ -15131,7 +15131,7 @@ var require_react_reconciler_development = __commonJS({
       function releaseAsyncTransition() {
         ReactSharedInternals.asyncTransitions--;
       }
-      function startTransition(fiber, queue, pendingState, finishedState, callback) {
+      function startTransition(fiber, queue2, pendingState, finishedState, callback) {
         var previousPriority = getCurrentUpdatePriority();
         setCurrentUpdatePriority(
           0 !== previousPriority && 8 > previousPriority ? previousPriority : 8
@@ -15139,7 +15139,7 @@ var require_react_reconciler_development = __commonJS({
         var prevTransition = ReactSharedInternals.T, currentTransition = {};
         currentTransition._updatedFibers = /* @__PURE__ */ new Set();
         ReactSharedInternals.T = currentTransition;
-        dispatchOptimisticSetState(fiber, false, queue, pendingState);
+        dispatchOptimisticSetState(fiber, false, queue2, pendingState);
         try {
           var returnValue = callback(), onStartTransitionFinish = ReactSharedInternals.S;
           null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
@@ -15152,21 +15152,21 @@ var require_react_reconciler_development = __commonJS({
             );
             dispatchSetStateInternal(
               fiber,
-              queue,
+              queue2,
               thenableForFinishedState,
               requestUpdateLane(fiber)
             );
           } else
             dispatchSetStateInternal(
               fiber,
-              queue,
+              queue2,
               finishedState,
               requestUpdateLane(fiber)
             );
         } catch (error) {
           dispatchSetStateInternal(
             fiber,
-            queue,
+            queue2,
             { then: function() {
             }, status: "rejected", reason: error },
             requestUpdateLane(fiber)
@@ -15280,7 +15280,7 @@ var require_react_reconciler_development = __commonJS({
           provider = provider.return;
         }
       }
-      function dispatchReducerAction(fiber, queue, action) {
+      function dispatchReducerAction(fiber, queue2, action) {
         var args2 = arguments;
         "function" === typeof args2[3] && console.error(
           "State updates from the useState() and useReducer() Hooks don't support the second callback argument. To execute a side effect after rendering, declare it in the component body with useEffect()."
@@ -15295,17 +15295,17 @@ var require_react_reconciler_development = __commonJS({
           eagerState: null,
           next: null
         };
-        isRenderPhaseUpdate(fiber) ? enqueueRenderPhaseUpdate(queue, update) : (update = enqueueConcurrentHookUpdate(fiber, queue, update, args2), null !== update && (startUpdateTimerByLane(args2, "dispatch()", fiber), scheduleUpdateOnFiber(update, fiber, args2), entangleTransitionUpdate(update, queue, args2)));
+        isRenderPhaseUpdate(fiber) ? enqueueRenderPhaseUpdate(queue2, update) : (update = enqueueConcurrentHookUpdate(fiber, queue2, update, args2), null !== update && (startUpdateTimerByLane(args2, "dispatch()", fiber), scheduleUpdateOnFiber(update, fiber, args2), entangleTransitionUpdate(update, queue2, args2)));
       }
-      function dispatchSetState(fiber, queue, action) {
+      function dispatchSetState(fiber, queue2, action) {
         var args2 = arguments;
         "function" === typeof args2[3] && console.error(
           "State updates from the useState() and useReducer() Hooks don't support the second callback argument. To execute a side effect after rendering, declare it in the component body with useEffect()."
         );
         args2 = requestUpdateLane(fiber);
-        dispatchSetStateInternal(fiber, queue, action, args2) && startUpdateTimerByLane(args2, "setState()", fiber);
+        dispatchSetStateInternal(fiber, queue2, action, args2) && startUpdateTimerByLane(args2, "setState()", fiber);
       }
-      function dispatchSetStateInternal(fiber, queue, action, lane) {
+      function dispatchSetStateInternal(fiber, queue2, action, lane) {
         var update = {
           lane,
           revertLane: 0,
@@ -15315,30 +15315,30 @@ var require_react_reconciler_development = __commonJS({
           eagerState: null,
           next: null
         };
-        if (isRenderPhaseUpdate(fiber)) enqueueRenderPhaseUpdate(queue, update);
+        if (isRenderPhaseUpdate(fiber)) enqueueRenderPhaseUpdate(queue2, update);
         else {
           var alternate = fiber.alternate;
-          if (0 === fiber.lanes && (null === alternate || 0 === alternate.lanes) && (alternate = queue.lastRenderedReducer, null !== alternate)) {
+          if (0 === fiber.lanes && (null === alternate || 0 === alternate.lanes) && (alternate = queue2.lastRenderedReducer, null !== alternate)) {
             var prevDispatcher = ReactSharedInternals.H;
             ReactSharedInternals.H = InvalidNestedHooksDispatcherOnUpdateInDEV;
             try {
-              var currentState = queue.lastRenderedState, eagerState = alternate(currentState, action);
+              var currentState = queue2.lastRenderedState, eagerState = alternate(currentState, action);
               update.hasEagerState = true;
               update.eagerState = eagerState;
               if (objectIs(eagerState, currentState))
-                return enqueueUpdate$1(fiber, queue, update, 0), null === workInProgressRoot && finishQueueingConcurrentUpdates(), false;
+                return enqueueUpdate$1(fiber, queue2, update, 0), null === workInProgressRoot && finishQueueingConcurrentUpdates(), false;
             } catch (error) {
             } finally {
               ReactSharedInternals.H = prevDispatcher;
             }
           }
-          action = enqueueConcurrentHookUpdate(fiber, queue, update, lane);
+          action = enqueueConcurrentHookUpdate(fiber, queue2, update, lane);
           if (null !== action)
-            return scheduleUpdateOnFiber(action, fiber, lane), entangleTransitionUpdate(action, queue, lane), true;
+            return scheduleUpdateOnFiber(action, fiber, lane), entangleTransitionUpdate(action, queue2, lane), true;
         }
         return false;
       }
-      function dispatchOptimisticSetState(fiber, throwIfDuringRender, queue, action) {
+      function dispatchOptimisticSetState(fiber, throwIfDuringRender, queue2, action) {
         null === ReactSharedInternals.T && 0 === currentEntangledLane && console.error(
           "An optimistic state update occurred outside a transition or action. To fix, move the update to an action, or wrap with startTransition."
         );
@@ -15358,7 +15358,7 @@ var require_react_reconciler_development = __commonJS({
         } else
           throwIfDuringRender = enqueueConcurrentHookUpdate(
             fiber,
-            queue,
+            queue2,
             action,
             2
           ), null !== throwIfDuringRender && (startUpdateTimerByLane(2, "setOptimistic()", fiber), scheduleUpdateOnFiber(throwIfDuringRender, fiber, 2));
@@ -15367,18 +15367,18 @@ var require_react_reconciler_development = __commonJS({
         var alternate = fiber.alternate;
         return fiber === currentlyRenderingFiber || null !== alternate && alternate === currentlyRenderingFiber;
       }
-      function enqueueRenderPhaseUpdate(queue, update) {
+      function enqueueRenderPhaseUpdate(queue2, update) {
         didScheduleRenderPhaseUpdateDuringThisPass = didScheduleRenderPhaseUpdate = true;
-        var pending = queue.pending;
+        var pending = queue2.pending;
         null === pending ? update.next = update : (update.next = pending.next, pending.next = update);
-        queue.pending = update;
+        queue2.pending = update;
       }
-      function entangleTransitionUpdate(root, queue, lane) {
+      function entangleTransitionUpdate(root, queue2, lane) {
         if (0 !== (lane & 4194048)) {
-          var queueLanes = queue.lanes;
+          var queueLanes = queue2.lanes;
           queueLanes &= root.pendingLanes;
           lane |= queueLanes;
-          queue.lanes = lane;
+          queue2.lanes = lane;
           markRootEntangled(root, lane);
         }
       }
@@ -20653,7 +20653,7 @@ var require_react_reconciler_development = __commonJS({
           else {
             var endTime = renderStartTime, debugTask = workInProgressUpdateTask;
             if (supportsUserTiming && !(endTime <= previousRenderStartTime)) {
-              var color = (lanes & 738197653) === lanes ? "tertiary-dark" : "primary-dark", label = (lanes & 536870912) === lanes ? "Prewarm" : (lanes & 201326741) === lanes ? "Interrupted Hydration" : "Interrupted Render";
+              var color2 = (lanes & 738197653) === lanes ? "tertiary-dark" : "primary-dark", label = (lanes & 536870912) === lanes ? "Prewarm" : (lanes & 201326741) === lanes ? "Interrupted Hydration" : "Interrupted Render";
               debugTask ? debugTask.run(
                 console.timeStamp.bind(
                   console,
@@ -20662,7 +20662,7 @@ var require_react_reconciler_development = __commonJS({
                   endTime,
                   currentTrack,
                   "Scheduler \u269B",
-                  color
+                  color2
                 )
               ) : console.timeStamp(
                 label,
@@ -20670,7 +20670,7 @@ var require_react_reconciler_development = __commonJS({
                 endTime,
                 currentTrack,
                 "Scheduler \u269B",
-                color
+                color2
               );
             }
           }
@@ -20682,10 +20682,10 @@ var require_react_reconciler_development = __commonJS({
           workInProgressUpdateTask = blockingUpdateTask;
           debugTask = 0 <= blockingUpdateTime && blockingUpdateTime < blockingClampTime ? blockingClampTime : blockingUpdateTime;
           endTime = 0 <= blockingEventTime && blockingEventTime < blockingClampTime ? blockingClampTime : blockingEventTime;
-          color = 0 <= endTime ? endTime : 0 <= debugTask ? debugTask : renderStartTime;
+          color2 = 0 <= endTime ? endTime : 0 <= debugTask ? debugTask : renderStartTime;
           0 <= blockingSuspendedTime && (setCurrentTrackFromLanes(2), logSuspendedWithDelayPhase(
             blockingSuspendedTime,
-            color,
+            color2,
             lanes,
             previousRenderStartTime
           ));
@@ -20693,7 +20693,7 @@ var require_react_reconciler_development = __commonJS({
           var eventTime = endTime, eventType = blockingEventType, eventIsRepeat = 0 < blockingEventRepeatTime, isSpawnedUpdate = 1 === blockingUpdateType, isPingedUpdate = 2 === blockingUpdateType;
           debugTask = renderStartTime;
           endTime = blockingUpdateTask;
-          color = blockingUpdateMethodName;
+          color2 = blockingUpdateMethodName;
           label = blockingUpdateComponentName;
           if (supportsUserTiming) {
             currentTrack = "Blocking";
@@ -20720,7 +20720,7 @@ var require_react_reconciler_development = __commonJS({
                 color$jscomp$0
               );
             }
-            debugTask > previousRenderStartTime && (eventTime = isSpawnedUpdate ? "error" : (lanes & 738197653) === lanes ? "tertiary-light" : "primary-light", isSpawnedUpdate = isPingedUpdate ? "Promise Resolved" : isSpawnedUpdate ? "Cascading Update" : 5 < debugTask - previousRenderStartTime ? "Update Blocked" : "Update", isPingedUpdate = [], null != label && isPingedUpdate.push(["Component name", label]), null != color && isPingedUpdate.push(["Method name", color]), previousRenderStartTime = {
+            debugTask > previousRenderStartTime && (eventTime = isSpawnedUpdate ? "error" : (lanes & 738197653) === lanes ? "tertiary-light" : "primary-light", isSpawnedUpdate = isPingedUpdate ? "Promise Resolved" : isSpawnedUpdate ? "Cascading Update" : 5 < debugTask - previousRenderStartTime ? "Update Blocked" : "Update", isPingedUpdate = [], null != label && isPingedUpdate.push(["Component name", label]), null != color2 && isPingedUpdate.push(["Method name", color2]), previousRenderStartTime = {
               start: previousRenderStartTime,
               end: debugTask,
               detail: {
@@ -20747,12 +20747,12 @@ var require_react_reconciler_development = __commonJS({
           blockingEventTime = -1.1;
           blockingClampTime = now();
         }
-        0 !== (lanes & 4194048) && (workInProgressUpdateTask = transitionUpdateTask, debugTask = 0 <= transitionStartTime && transitionStartTime < transitionClampTime ? transitionClampTime : transitionStartTime, previousRenderStartTime = 0 <= transitionUpdateTime && transitionUpdateTime < transitionClampTime ? transitionClampTime : transitionUpdateTime, endTime = 0 <= transitionEventTime && transitionEventTime < transitionClampTime ? transitionClampTime : transitionEventTime, color = 0 <= endTime ? endTime : 0 <= previousRenderStartTime ? previousRenderStartTime : renderStartTime, 0 <= transitionSuspendedTime && (setCurrentTrackFromLanes(256), logSuspendedWithDelayPhase(
+        0 !== (lanes & 4194048) && (workInProgressUpdateTask = transitionUpdateTask, debugTask = 0 <= transitionStartTime && transitionStartTime < transitionClampTime ? transitionClampTime : transitionStartTime, previousRenderStartTime = 0 <= transitionUpdateTime && transitionUpdateTime < transitionClampTime ? transitionClampTime : transitionUpdateTime, endTime = 0 <= transitionEventTime && transitionEventTime < transitionClampTime ? transitionClampTime : transitionEventTime, color2 = 0 <= endTime ? endTime : 0 <= previousRenderStartTime ? previousRenderStartTime : renderStartTime, 0 <= transitionSuspendedTime && (setCurrentTrackFromLanes(256), logSuspendedWithDelayPhase(
           transitionSuspendedTime,
-          color,
+          color2,
           lanes,
           workInProgressUpdateTask
-        )), isPingedUpdate = endTime, eventTime = transitionEventType, eventType = 0 < transitionEventRepeatTime, eventIsRepeat = 2 === transitionUpdateType, color = renderStartTime, endTime = transitionUpdateTask, label = transitionUpdateMethodName, isSpawnedUpdate = transitionUpdateComponentName, supportsUserTiming && (currentTrack = "Transition", 0 < previousRenderStartTime ? previousRenderStartTime > color && (previousRenderStartTime = color) : previousRenderStartTime = color, 0 < debugTask ? debugTask > previousRenderStartTime && (debugTask = previousRenderStartTime) : debugTask = previousRenderStartTime, 0 < isPingedUpdate ? isPingedUpdate > debugTask && (isPingedUpdate = debugTask) : isPingedUpdate = debugTask, debugTask > isPingedUpdate && null !== eventTime && (color$jscomp$0 = eventType ? "secondary-light" : "warning", endTime ? endTime.run(
+        )), isPingedUpdate = endTime, eventTime = transitionEventType, eventType = 0 < transitionEventRepeatTime, eventIsRepeat = 2 === transitionUpdateType, color2 = renderStartTime, endTime = transitionUpdateTask, label = transitionUpdateMethodName, isSpawnedUpdate = transitionUpdateComponentName, supportsUserTiming && (currentTrack = "Transition", 0 < previousRenderStartTime ? previousRenderStartTime > color2 && (previousRenderStartTime = color2) : previousRenderStartTime = color2, 0 < debugTask ? debugTask > previousRenderStartTime && (debugTask = previousRenderStartTime) : debugTask = previousRenderStartTime, 0 < isPingedUpdate ? isPingedUpdate > debugTask && (isPingedUpdate = debugTask) : isPingedUpdate = debugTask, debugTask > isPingedUpdate && null !== eventTime && (color$jscomp$0 = eventType ? "secondary-light" : "warning", endTime ? endTime.run(
           console.timeStamp.bind(
             console,
             eventType ? "Consecutive" : "Event: " + eventTime,
@@ -20786,9 +20786,9 @@ var require_react_reconciler_development = __commonJS({
           currentTrack,
           "Scheduler \u269B",
           "primary-dark"
-        )), color > previousRenderStartTime && (debugTask = eventIsRepeat ? "Promise Resolved" : 5 < color - previousRenderStartTime ? "Update Blocked" : "Update", isPingedUpdate = [], null != isSpawnedUpdate && isPingedUpdate.push(["Component name", isSpawnedUpdate]), null != label && isPingedUpdate.push(["Method name", label]), previousRenderStartTime = {
+        )), color2 > previousRenderStartTime && (debugTask = eventIsRepeat ? "Promise Resolved" : 5 < color2 - previousRenderStartTime ? "Update Blocked" : "Update", isPingedUpdate = [], null != isSpawnedUpdate && isPingedUpdate.push(["Component name", isSpawnedUpdate]), null != label && isPingedUpdate.push(["Method name", label]), previousRenderStartTime = {
           start: previousRenderStartTime,
-          end: color,
+          end: color2,
           detail: {
             devtools: {
               properties: isPingedUpdate,
@@ -20829,7 +20829,7 @@ var require_react_reconciler_development = __commonJS({
         endTime = root.entangledLanes;
         if (0 !== endTime)
           for (root = root.entanglements, endTime &= lanes; 0 < endTime; )
-            debugTask = 31 - clz32(endTime), color = 1 << debugTask, lanes |= root[debugTask], endTime &= ~color;
+            debugTask = 31 - clz32(endTime), color2 = 1 << debugTask, lanes |= root[debugTask], endTime &= ~color2;
         entangledRenderLanes = lanes;
         finishQueueingConcurrentUpdates();
         root = getCurrentTime();
@@ -22233,14 +22233,14 @@ var require_react_reconciler_development = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React18 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React19 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React18.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React19.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -22282,7 +22282,7 @@ var require_react_reconciler_development = __commonJS({
       var fiberStack = [];
       var index$jscomp$0 = -1, emptyContextObject = {};
       Object.freeze(emptyContextObject);
-      var clz32 = Math.clz32 ? Math.clz32 : clz32Fallback, log$1 = Math.log, LN2 = Math.LN2, nextTransitionUpdateLane = 256, nextTransitionDeferredLane = 262144, nextRetryLane = 4194304, scheduleCallback$3 = Scheduler2.unstable_scheduleCallback, cancelCallback$1 = Scheduler2.unstable_cancelCallback, shouldYield = Scheduler2.unstable_shouldYield, requestPaint = Scheduler2.unstable_requestPaint, now$1 = Scheduler2.unstable_now, ImmediatePriority = Scheduler2.unstable_ImmediatePriority, UserBlockingPriority = Scheduler2.unstable_UserBlockingPriority, NormalPriority$1 = Scheduler2.unstable_NormalPriority, IdlePriority = Scheduler2.unstable_IdlePriority, log = Scheduler2.log, unstable_setDisableYieldValue = Scheduler2.unstable_setDisableYieldValue, rendererID = null, injectedHook = null, hasLoggedError = false, isDevToolsPresent = "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__, lastResetTime = 0;
+      var clz32 = Math.clz32 ? Math.clz32 : clz32Fallback, log$1 = Math.log, LN2 = Math.LN2, nextTransitionUpdateLane = 256, nextTransitionDeferredLane = 262144, nextRetryLane = 4194304, scheduleCallback$3 = Scheduler2.unstable_scheduleCallback, cancelCallback$1 = Scheduler2.unstable_cancelCallback, shouldYield = Scheduler2.unstable_shouldYield, requestPaint = Scheduler2.unstable_requestPaint, now$1 = Scheduler2.unstable_now, ImmediatePriority = Scheduler2.unstable_ImmediatePriority, UserBlockingPriority = Scheduler2.unstable_UserBlockingPriority, NormalPriority$1 = Scheduler2.unstable_NormalPriority, IdlePriority = Scheduler2.unstable_IdlePriority, log2 = Scheduler2.log, unstable_setDisableYieldValue = Scheduler2.unstable_setDisableYieldValue, rendererID = null, injectedHook = null, hasLoggedError = false, isDevToolsPresent = "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__, lastResetTime = 0;
       if ("object" === typeof performance && "function" === typeof performance.now) {
         var localPerformance = performance;
         var getCurrentTime = function() {
@@ -23708,8 +23708,8 @@ var require_react_reconciler_development = __commonJS({
       didWarnAboutUndefinedSnapshotBeforeUpdate = /* @__PURE__ */ new Set();
       var offscreenSubtreeIsHidden = false, offscreenSubtreeWasHidden = false, needsFormReset = false, PossiblyWeakSet = "function" === typeof WeakSet ? WeakSet : Set, nextEffect = null, inProgressLanes = null, inProgressRoot = null, hostParent = null, hostParentIsContainer = false, currentHoistableRoot = null, inHydratedSubtree = false, suspenseyCommitFlag = 8192, DefaultAsyncDispatcher = {
         getCacheForType: function(resourceType) {
-          var cache3 = readContext(CacheContext), cacheForType = cache3.data.get(resourceType);
-          void 0 === cacheForType && (cacheForType = resourceType(), cache3.data.set(resourceType, cacheForType));
+          var cache4 = readContext(CacheContext), cacheForType = cache4.data.get(resourceType);
+          void 0 === cacheForType && (cacheForType = resourceType(), cache4.data.set(resourceType, cacheForType));
           return cacheForType;
         },
         cacheSignal: function() {
@@ -23741,29 +23741,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id2, path4, value) {
+      overrideHookState = function(fiber, id2, path5, value) {
         id2 = findHook(fiber, id2);
-        null !== id2 && (path4 = copyWithSetImpl(id2.memoizedState, path4, 0, value), id2.memoizedState = path4, id2.baseState = path4, fiber.memoizedProps = assign({}, fiber.memoizedProps), path4 = enqueueConcurrentRenderForLane(fiber, 2), null !== path4 && scheduleUpdateOnFiber(path4, fiber, 2));
+        null !== id2 && (path5 = copyWithSetImpl(id2.memoizedState, path5, 0, value), id2.memoizedState = path5, id2.baseState = path5, fiber.memoizedProps = assign({}, fiber.memoizedProps), path5 = enqueueConcurrentRenderForLane(fiber, 2), null !== path5 && scheduleUpdateOnFiber(path5, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id2, path4) {
+      overrideHookStateDeletePath = function(fiber, id2, path5) {
         id2 = findHook(fiber, id2);
-        null !== id2 && (path4 = copyWithDeleteImpl(id2.memoizedState, path4, 0), id2.memoizedState = path4, id2.baseState = path4, fiber.memoizedProps = assign({}, fiber.memoizedProps), path4 = enqueueConcurrentRenderForLane(fiber, 2), null !== path4 && scheduleUpdateOnFiber(path4, fiber, 2));
+        null !== id2 && (path5 = copyWithDeleteImpl(id2.memoizedState, path5, 0), id2.memoizedState = path5, id2.baseState = path5, fiber.memoizedProps = assign({}, fiber.memoizedProps), path5 = enqueueConcurrentRenderForLane(fiber, 2), null !== path5 && scheduleUpdateOnFiber(path5, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id2, oldPath, newPath) {
         id2 = findHook(fiber, id2);
         null !== id2 && (oldPath = copyWithRename(id2.memoizedState, oldPath, newPath), id2.memoizedState = oldPath, id2.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path4, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path4, 0, value);
+      overrideProps = function(fiber, path5, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path5, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path4 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path4 && scheduleUpdateOnFiber(path4, fiber, 2);
+        path5 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path5 && scheduleUpdateOnFiber(path5, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path4) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path4, 0);
+      overridePropsDeletePath = function(fiber, path5) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path5, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path4 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path4 && scheduleUpdateOnFiber(path4, fiber, 2);
+        path5 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path5 && scheduleUpdateOnFiber(path5, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -23828,8 +23828,8 @@ var require_react_reconciler_development = __commonJS({
             lanes = enqueueConcurrentRenderForLane(fiber, 2), null !== lanes && scheduleUpdateOnFiber(lanes, fiber, 2), flushSyncWork(), markRetryLaneIfNotHydrated(fiber, 2);
         }
       };
-      exports2.batchedUpdates = function(fn, a) {
-        return fn(a);
+      exports2.batchedUpdates = function(fn2, a) {
+        return fn2(a);
       };
       exports2.createComponentSelector = function(component) {
         return { $$typeof: COMPONENT_TYPE, value: component };
@@ -23935,18 +23935,18 @@ var require_react_reconciler_development = __commonJS({
           "Consider adding an error boundary to your tree to customize error handling behavior.\nVisit https://react.dev/link/error-boundaries to learn more about error boundaries."
         );
       };
-      exports2.deferredUpdates = function(fn) {
+      exports2.deferredUpdates = function(fn2) {
         var prevTransition = ReactSharedInternals.T, previousPriority = getCurrentUpdatePriority();
         try {
-          return setCurrentUpdatePriority(32), ReactSharedInternals.T = null, fn();
+          return setCurrentUpdatePriority(32), ReactSharedInternals.T = null, fn2();
         } finally {
           setCurrentUpdatePriority(previousPriority), ReactSharedInternals.T = prevTransition;
         }
       };
-      exports2.discreteUpdates = function(fn, a, b, c, d) {
+      exports2.discreteUpdates = function(fn2, a, b, c, d) {
         var prevTransition = ReactSharedInternals.T, previousPriority = getCurrentUpdatePriority();
         try {
-          return setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn(a, b, c, d);
+          return setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn2(a, b, c, d);
         } finally {
           setCurrentUpdatePriority(previousPriority), ReactSharedInternals.T = prevTransition, executionContext === NoContext && (workInProgressRootRenderTargetTime = now$1() + RENDER_TIMEOUT_MS);
         }
@@ -24031,13 +24031,13 @@ var require_react_reconciler_development = __commonJS({
         return getPublicInstance(component.stateNode);
       };
       exports2.flushPassiveEffects = flushPendingEffects;
-      exports2.flushSyncFromReconciler = function(fn) {
+      exports2.flushSyncFromReconciler = function(fn2) {
         var prevExecutionContext = executionContext;
         executionContext |= 1;
         var prevTransition = ReactSharedInternals.T, previousPriority = getCurrentUpdatePriority();
         try {
-          if (setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn)
-            return fn();
+          if (setCurrentUpdatePriority(2), ReactSharedInternals.T = null, fn2)
+            return fn2();
         } finally {
           setCurrentUpdatePriority(previousPriority), ReactSharedInternals.T = prevTransition, executionContext = prevExecutionContext, (executionContext & (RenderContext | CommitContext)) === NoContext && flushSyncWorkAcrossRoots_impl(0, false);
         }
@@ -24152,11 +24152,11 @@ var require_react_reconciler_development = __commonJS({
           throw Error(
             "Expected the form instance to be a HostComponent. This is a bug in React."
           );
-        var queue = ensureFormComponentIsStateful(formFiber).queue;
+        var queue2 = ensureFormComponentIsStateful(formFiber).queue;
         startHostActionTimer(formFiber);
         startTransition(
           formFiber,
-          queue,
+          queue2,
           pendingState,
           NotPendingTransition,
           null === action ? noop2 : function() {
@@ -24254,9 +24254,9 @@ var require_buffer_util = __commonJS({
         output[offset + i] = source[i] ^ mask[i & 3];
       }
     }
-    function _unmask(buffer, mask) {
-      for (let i = 0; i < buffer.length; i++) {
-        buffer[i] ^= mask[i & 3];
+    function _unmask(buffer2, mask) {
+      for (let i = 0; i < buffer2.length; i++) {
+        buffer2[i] ^= mask[i & 3];
       }
     }
     function toArrayBuffer(buf) {
@@ -24265,8 +24265,8 @@ var require_buffer_util = __commonJS({
       }
       return buf.buffer.slice(buf.byteOffset, buf.byteOffset + buf.length);
     }
-    function toBuffer(data) {
-      toBuffer.readOnly = true;
+    function toBuffer2(data) {
+      toBuffer2.readOnly = true;
       if (Buffer.isBuffer(data)) return data;
       let buf;
       if (data instanceof ArrayBuffer) {
@@ -24275,7 +24275,7 @@ var require_buffer_util = __commonJS({
         buf = new FastBuffer(data.buffer, data.byteOffset, data.byteLength);
       } else {
         buf = Buffer.from(data);
-        toBuffer.readOnly = false;
+        toBuffer2.readOnly = false;
       }
       return buf;
     }
@@ -24283,7 +24283,7 @@ var require_buffer_util = __commonJS({
       concat,
       mask: _mask,
       toArrayBuffer,
-      toBuffer,
+      toBuffer: toBuffer2,
       unmask: _unmask
     };
     if (!process.env.WS_NO_BUFFER_UTIL) {
@@ -24293,9 +24293,9 @@ var require_buffer_util = __commonJS({
           if (length < 48) _mask(source, mask, output, offset, length);
           else bufferUtil.mask(source, mask, output, offset, length);
         };
-        module.exports.unmask = function(buffer, mask) {
-          if (buffer.length < 32) _unmask(buffer, mask);
-          else bufferUtil.unmask(buffer, mask);
+        module.exports.unmask = function(buffer2, mask) {
+          if (buffer2.length < 32) _unmask(buffer2, mask);
+          else bufferUtil.unmask(buffer2, mask);
         };
       } catch (e) {
       }
@@ -24316,12 +24316,12 @@ var require_limiter = __commonJS({
        * @param {Number} [concurrency=Infinity] The maximum number of jobs allowed
        *     to run concurrently
        */
-      constructor(concurrency) {
+      constructor(concurrency2) {
         this[kDone] = () => {
           this.pending--;
           this[kRun]();
         };
-        this.concurrency = concurrency || Infinity;
+        this.concurrency = concurrency2 || Infinity;
         this.jobs = [];
         this.pending = 0;
       }
@@ -24403,8 +24403,8 @@ var require_permessage_deflate = __commonJS({
         this._inflate = null;
         this.params = null;
         if (!zlibLimiter) {
-          const concurrency = this._options.concurrencyLimit !== void 0 ? this._options.concurrencyLimit : 10;
-          zlibLimiter = new Limiter(concurrency);
+          const concurrency2 = this._options.concurrencyLimit !== void 0 ? this._options.concurrencyLimit : 10;
+          zlibLimiter = new Limiter(concurrency2);
         }
       }
       /**
@@ -25572,7 +25572,7 @@ var require_sender = __commonJS({
     var PerMessageDeflate2 = require_permessage_deflate();
     var { EMPTY_BUFFER, kWebSocket, NOOP } = require_constants2();
     var { isBlob, isValidStatusCode } = require_validation();
-    var { mask: applyMask, toBuffer } = require_buffer_util();
+    var { mask: applyMask, toBuffer: toBuffer2 } = require_buffer_util();
     var kByteLength = /* @__PURE__ */ Symbol("kByteLength");
     var maskBuffer = Buffer.alloc(4);
     var RANDOM_POOL_SIZE = 8 * 1024;
@@ -25762,9 +25762,9 @@ var require_sender = __commonJS({
           byteLength = data.size;
           readOnly = false;
         } else {
-          data = toBuffer(data);
+          data = toBuffer2(data);
           byteLength = data.length;
-          readOnly = toBuffer.readOnly;
+          readOnly = toBuffer2.readOnly;
         }
         if (byteLength > 125) {
           throw new RangeError("The data size must not be greater than 125 bytes");
@@ -25809,9 +25809,9 @@ var require_sender = __commonJS({
           byteLength = data.size;
           readOnly = false;
         } else {
-          data = toBuffer(data);
+          data = toBuffer2(data);
           byteLength = data.length;
-          readOnly = toBuffer.readOnly;
+          readOnly = toBuffer2.readOnly;
         }
         if (byteLength > 125) {
           throw new RangeError("The data size must not be greater than 125 bytes");
@@ -25867,9 +25867,9 @@ var require_sender = __commonJS({
           byteLength = data.size;
           readOnly = false;
         } else {
-          data = toBuffer(data);
+          data = toBuffer2(data);
           byteLength = data.length;
-          readOnly = toBuffer.readOnly;
+          readOnly = toBuffer2.readOnly;
         }
         if (this._firstFragment) {
           this._firstFragment = false;
@@ -25930,7 +25930,7 @@ var require_sender = __commonJS({
       getBlobData(blob, compress, options, cb) {
         this._bufferedBytes += options[kByteLength];
         this._state = GET_BLOB_DATA;
-        blob.arrayBuffer().then((arrayBuffer) => {
+        blob.arrayBuffer().then((arrayBuffer2) => {
           if (this._socket.destroyed) {
             const err = new Error(
               "The socket was closed while the blob was being read"
@@ -25939,7 +25939,7 @@ var require_sender = __commonJS({
             return;
           }
           this._bufferedBytes -= options[kByteLength];
-          const data = toBuffer(arrayBuffer);
+          const data = toBuffer2(arrayBuffer2);
           if (!compress) {
             this._state = DEFAULT;
             this.sendFrame(_Sender.frame(data, options), cb);
@@ -26416,7 +26416,7 @@ var require_extension = __commonJS({
       }
       return offers;
     }
-    function format(extensions) {
+    function format2(extensions) {
       return Object.keys(extensions).map((extension2) => {
         let configurations = extensions[extension2];
         if (!Array.isArray(configurations)) configurations = [configurations];
@@ -26431,7 +26431,7 @@ var require_extension = __commonJS({
         }).join(", ");
       }).join(", ");
     }
-    module.exports = { format, parse };
+    module.exports = { format: format2, parse };
   }
 });
 
@@ -26444,7 +26444,7 @@ var require_websocket = __commonJS({
     var http = __require("http");
     var net = __require("net");
     var tls = __require("tls");
-    var { randomBytes, createHash } = __require("crypto");
+    var { randomBytes, createHash: createHash2 } = __require("crypto");
     var { Duplex, Readable: Readable2 } = __require("stream");
     var { URL: URL2 } = __require("url");
     var PerMessageDeflate2 = require_permessage_deflate();
@@ -26465,8 +26465,8 @@ var require_websocket = __commonJS({
     var {
       EventTarget: { addEventListener, removeEventListener }
     } = require_event_target();
-    var { format, parse } = require_extension();
-    var { toBuffer } = require_buffer_util();
+    var { format: format2, parse } = require_extension();
+    var { toBuffer: toBuffer2 } = require_buffer_util();
     var kAborted = /* @__PURE__ */ Symbol("kAborted");
     var protocolVersions = [8, 13];
     var readyStates = ["CONNECTING", "OPEN", "CLOSING", "CLOSED"];
@@ -27005,7 +27005,7 @@ var require_websocket = __commonJS({
           isServer: false,
           maxPayload: opts.maxPayload
         });
-        opts.headers["Sec-WebSocket-Extensions"] = format({
+        opts.headers["Sec-WebSocket-Extensions"] = format2({
           [PerMessageDeflate2.extensionName]: perMessageDeflate.offer()
         });
       }
@@ -27112,7 +27112,7 @@ var require_websocket = __commonJS({
           abortHandshake(websocket, socket, "Invalid Upgrade header");
           return;
         }
-        const digest = createHash("sha1").update(key + GUID).digest("base64");
+        const digest = createHash2("sha1").update(key + GUID).digest("base64");
         if (res.headers["sec-websocket-accept"] !== digest) {
           abortHandshake(websocket, socket, "Invalid Sec-WebSocket-Accept header");
           return;
@@ -27195,26 +27195,26 @@ var require_websocket = __commonJS({
       }
       return tls.connect(options);
     }
-    function abortHandshake(websocket, stream, message) {
+    function abortHandshake(websocket, stream2, message) {
       websocket._readyState = WebSocket2.CLOSING;
       const err = new Error(message);
       Error.captureStackTrace(err, abortHandshake);
-      if (stream.setHeader) {
-        stream[kAborted] = true;
-        stream.abort();
-        if (stream.socket && !stream.socket.destroyed) {
-          stream.socket.destroy();
+      if (stream2.setHeader) {
+        stream2[kAborted] = true;
+        stream2.abort();
+        if (stream2.socket && !stream2.socket.destroyed) {
+          stream2.socket.destroy();
         }
         process.nextTick(emitErrorAndClose, websocket, err);
       } else {
-        stream.destroy(err);
-        stream.once("error", websocket.emit.bind(websocket, "error"));
-        stream.once("close", websocket.emitClose.bind(websocket));
+        stream2.destroy(err);
+        stream2.once("error", websocket.emit.bind(websocket, "error"));
+        stream2.once("close", websocket.emitClose.bind(websocket));
       }
     }
     function sendAfterClose(websocket, data, cb) {
       if (data) {
-        const length = isBlob(data) ? data.size : toBuffer(data).length;
+        const length = isBlob(data) ? data.size : toBuffer2(data).length;
         if (websocket._socket) websocket._sender._bufferedBytes += length;
         else websocket._bufferedAmount += length;
       }
@@ -27266,8 +27266,8 @@ var require_websocket = __commonJS({
     function receiverOnPong(data) {
       this[kWebSocket].emit("pong", data);
     }
-    function resume(stream) {
-      stream.resume();
+    function resume(stream2) {
+      stream2.resume();
     }
     function senderOnError(err) {
       const websocket = this[kWebSocket];
@@ -27337,8 +27337,8 @@ var require_stream = __commonJS({
     "use strict";
     var WebSocket2 = require_websocket();
     var { Duplex } = __require("stream");
-    function emitClose(stream) {
-      stream.emit("close");
+    function emitClose(stream2) {
+      stream2.emit("close");
     }
     function duplexOnEnd() {
       if (!this.destroyed && this._writableState.finished) {
@@ -27481,7 +27481,7 @@ var require_websocket_server = __commonJS({
     var EventEmitter3 = __require("events");
     var http = __require("http");
     var { Duplex } = __require("stream");
-    var { createHash } = __require("crypto");
+    var { createHash: createHash2 } = __require("crypto");
     var extension2 = require_extension();
     var PerMessageDeflate2 = require_permessage_deflate();
     var subprotocol2 = require_subprotocol();
@@ -27682,7 +27682,7 @@ var require_websocket_server = __commonJS({
         socket.on("error", socketOnError);
         const key = req.headers["sec-websocket-key"];
         const upgrade = req.headers.upgrade;
-        const version = +req.headers["sec-websocket-version"];
+        const version2 = +req.headers["sec-websocket-version"];
         if (req.method !== "GET") {
           const message = "Invalid HTTP method";
           abortHandshakeOrEmitwsClientError(this, req, socket, 405, message);
@@ -27698,7 +27698,7 @@ var require_websocket_server = __commonJS({
           abortHandshakeOrEmitwsClientError(this, req, socket, 400, message);
           return;
         }
-        if (version !== 13 && version !== 8) {
+        if (version2 !== 13 && version2 !== 8) {
           const message = "Missing or invalid Sec-WebSocket-Version header";
           abortHandshakeOrEmitwsClientError(this, req, socket, 400, message, {
             "Sec-WebSocket-Version": "13, 8"
@@ -27742,7 +27742,7 @@ var require_websocket_server = __commonJS({
         }
         if (this.options.verifyClient) {
           const info = {
-            origin: req.headers[`${version === 8 ? "sec-websocket-origin" : "origin"}`],
+            origin: req.headers[`${version2 === 8 ? "sec-websocket-origin" : "origin"}`],
             secure: !!(req.socket.authorized || req.socket.encrypted),
             req
           };
@@ -27788,7 +27788,7 @@ var require_websocket_server = __commonJS({
           );
         }
         if (this._state > RUNNING) return abortHandshake(socket, 503);
-        const digest = createHash("sha1").update(key + GUID).digest("base64");
+        const digest = createHash2("sha1").update(key + GUID).digest("base64");
         const headers = [
           "HTTP/1.1 101 Switching Protocols",
           "Upgrade: websocket",
@@ -27976,18 +27976,18 @@ var init_devtools = __esm({
     init_empty_devtools();
     isDevToolsReachable = async () => new Promise((resolve) => {
       const socket = new wrapper_default("ws://localhost:8097");
-      const timeout = setTimeout(() => {
+      const timeout2 = setTimeout(() => {
         socket.terminate();
         resolve(false);
       }, 2e3);
-      timeout.unref();
+      timeout2.unref();
       socket.on("open", () => {
-        clearTimeout(timeout);
+        clearTimeout(timeout2);
         socket.terminate();
         resolve(true);
       });
       socket.on("error", () => {
-        clearTimeout(timeout);
+        clearTimeout(timeout2);
         socket.terminate();
         resolve(false);
       });
@@ -28059,11 +28059,11 @@ var require_escape_string_regexp = __commonJS({
   "node_modules/escape-string-regexp/index.js"(exports, module) {
     "use strict";
     var matchOperatorsRegex = /[|\\{}()[\]^$+*?.-]/g;
-    module.exports = (string) => {
-      if (typeof string !== "string") {
+    module.exports = (string2) => {
+      if (typeof string2 !== "string") {
         throw new TypeError("Expected a string");
       }
-      return string.replace(matchOperatorsRegex, "\\$&");
+      return string2.replace(matchOperatorsRegex, "\\$&");
     };
   }
 });
@@ -28148,9 +28148,9 @@ var require_stack_utils = __commonJS({
         return result.map((line) => `${indent}${line}
 `).join("");
       }
-      captureString(limit, fn = this.captureString) {
+      captureString(limit, fn2 = this.captureString) {
         if (typeof limit === "function") {
-          fn = limit;
+          fn2 = limit;
           limit = Infinity;
         }
         const { stackTraceLimit } = Error;
@@ -28158,14 +28158,14 @@ var require_stack_utils = __commonJS({
           Error.stackTraceLimit = limit;
         }
         const obj = {};
-        Error.captureStackTrace(obj, fn);
+        Error.captureStackTrace(obj, fn2);
         const { stack } = obj;
         Error.stackTraceLimit = stackTraceLimit;
         return this.clean(stack);
       }
-      capture(limit, fn = this.capture) {
+      capture(limit, fn2 = this.capture) {
         if (typeof limit === "function") {
-          fn = limit;
+          fn2 = limit;
           limit = Infinity;
         }
         const { prepareStackTrace, stackTraceLimit } = Error;
@@ -28179,13 +28179,13 @@ var require_stack_utils = __commonJS({
           Error.stackTraceLimit = limit;
         }
         const obj = {};
-        Error.captureStackTrace(obj, fn);
+        Error.captureStackTrace(obj, fn2);
         const { stack } = obj;
         Object.assign(Error, { prepareStackTrace, stackTraceLimit });
         return stack;
       }
-      at(fn = this.at) {
-        const [site] = this.capture(1, fn);
+      at(fn2 = this.at) {
+        const [site] = this.capture(1, fn2);
         if (!site) {
           return {};
         }
@@ -30207,21 +30207,21 @@ var require_react_jsx_runtime_development = __commonJS({
       function validateChildKeys(node) {
         isValidElement(node) ? node._store && (node._store.validated = 1) : "object" === typeof node && null !== node && node.$$typeof === REACT_LAZY_TYPE && ("fulfilled" === node._payload.status ? isValidElement(node._payload.value) && node._payload.value._store && (node._payload.value._store.validated = 1) : node._store && (node._store.validated = 1));
       }
-      function isValidElement(object) {
-        return "object" === typeof object && null !== object && object.$$typeof === REACT_ELEMENT_TYPE;
+      function isValidElement(object2) {
+        return "object" === typeof object2 && null !== object2 && object2.$$typeof === REACT_ELEMENT_TYPE;
       }
-      var React18 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React18.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
+      var React19 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React19.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
         return null;
       };
-      React18 = {
+      React19 = {
         react_stack_bottom_frame: function(callStackForError) {
           return callStackForError();
         }
       };
       var specialPropKeyWarningShown;
       var didWarnAboutElementRef = {};
-      var unknownOwnerDebugStack = React18.react_stack_bottom_frame.bind(
-        React18,
+      var unknownOwnerDebugStack = React19.react_stack_bottom_frame.bind(
+        React19,
         UnknownOwner
       )();
       var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
@@ -30262,6 +30262,9940 @@ var require_jsx_runtime = __commonJS({
     } else {
       module.exports = require_react_jsx_runtime_development();
     }
+  }
+});
+
+// node_modules/sixel/lib/Colors.js
+var require_Colors = __commonJS({
+  "node_modules/sixel/lib/Colors.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DEFAULT_FOREGROUND = exports.DEFAULT_BACKGROUND = exports.PALETTE_ANSI_256 = exports.PALETTE_VT340_GREY = exports.PALETTE_VT340_COLOR = exports.normalizeHLS = exports.normalizeRGB = exports.nearestColorIndex = exports.fromRGBA8888 = exports.toRGBA8888 = exports.alpha = exports.blue = exports.green = exports.red = exports.BIG_ENDIAN = void 0;
+    exports.BIG_ENDIAN = new Uint8Array(new Uint32Array([4278190080]).buffer)[0] === 255;
+    if (exports.BIG_ENDIAN) {
+      console.warn("BE platform detected. This version of node-sixel works only on LE properly.");
+    }
+    function red(n) {
+      return n & 255;
+    }
+    exports.red = red;
+    function green(n) {
+      return n >>> 8 & 255;
+    }
+    exports.green = green;
+    function blue(n) {
+      return n >>> 16 & 255;
+    }
+    exports.blue = blue;
+    function alpha(n) {
+      return n >>> 24 & 255;
+    }
+    exports.alpha = alpha;
+    function toRGBA8888(r, g, b, a = 255) {
+      return ((a & 255) << 24 | (b & 255) << 16 | (g & 255) << 8 | r & 255) >>> 0;
+    }
+    exports.toRGBA8888 = toRGBA8888;
+    function fromRGBA8888(color2) {
+      return [color2 & 255, color2 >> 8 & 255, color2 >> 16 & 255, color2 >>> 24];
+    }
+    exports.fromRGBA8888 = fromRGBA8888;
+    function nearestColorIndex(color2, palette) {
+      const r = red(color2);
+      const g = green(color2);
+      const b = blue(color2);
+      let min = Number.MAX_SAFE_INTEGER;
+      let idx = -1;
+      for (let i = 0; i < palette.length; ++i) {
+        const dr = r - palette[i][0];
+        const dg = g - palette[i][1];
+        const db = b - palette[i][2];
+        const d = dr * dr + dg * dg + db * db;
+        if (!d)
+          return i;
+        if (d < min) {
+          min = d;
+          idx = i;
+        }
+      }
+      return idx;
+    }
+    exports.nearestColorIndex = nearestColorIndex;
+    function clamp(low, high, value) {
+      return Math.max(low, Math.min(value, high));
+    }
+    function h2c(t1, t2, c) {
+      if (c < 0)
+        c += 1;
+      if (c > 1)
+        c -= 1;
+      return c * 6 < 1 ? t2 + (t1 - t2) * 6 * c : c * 2 < 1 ? t1 : c * 3 < 2 ? t2 + (t1 - t2) * (4 - c * 6) : t2;
+    }
+    function HLStoRGB(h, l, s) {
+      if (!s) {
+        const v = Math.round(l * 255);
+        return toRGBA8888(v, v, v);
+      }
+      const t1 = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const t2 = 2 * l - t1;
+      return toRGBA8888(clamp(0, 255, Math.round(h2c(t1, t2, h + 1 / 3) * 255)), clamp(0, 255, Math.round(h2c(t1, t2, h) * 255)), clamp(0, 255, Math.round(h2c(t1, t2, h - 1 / 3) * 255)));
+    }
+    function normalizeRGB(r, g, b) {
+      return (4278190080 | Math.round(b / 100 * 255) << 16 | Math.round(g / 100 * 255) << 8 | Math.round(r / 100 * 255)) >>> 0;
+    }
+    exports.normalizeRGB = normalizeRGB;
+    function normalizeHLS(h, l, s) {
+      return HLStoRGB((h + 240 % 360) / 360, l / 100, s / 100);
+    }
+    exports.normalizeHLS = normalizeHLS;
+    exports.PALETTE_VT340_COLOR = new Uint32Array([
+      normalizeRGB(0, 0, 0),
+      normalizeRGB(20, 20, 80),
+      normalizeRGB(80, 13, 13),
+      normalizeRGB(20, 80, 20),
+      normalizeRGB(80, 20, 80),
+      normalizeRGB(20, 80, 80),
+      normalizeRGB(80, 80, 20),
+      normalizeRGB(53, 53, 53),
+      normalizeRGB(26, 26, 26),
+      normalizeRGB(33, 33, 60),
+      normalizeRGB(60, 26, 26),
+      normalizeRGB(33, 60, 33),
+      normalizeRGB(60, 33, 60),
+      normalizeRGB(33, 60, 60),
+      normalizeRGB(60, 60, 33),
+      normalizeRGB(80, 80, 80)
+    ]);
+    exports.PALETTE_VT340_GREY = new Uint32Array([
+      normalizeRGB(0, 0, 0),
+      normalizeRGB(13, 13, 13),
+      normalizeRGB(26, 26, 26),
+      normalizeRGB(40, 40, 40),
+      normalizeRGB(6, 6, 6),
+      normalizeRGB(20, 20, 20),
+      normalizeRGB(33, 33, 33),
+      normalizeRGB(46, 46, 46),
+      normalizeRGB(0, 0, 0),
+      normalizeRGB(13, 13, 13),
+      normalizeRGB(26, 26, 26),
+      normalizeRGB(40, 40, 40),
+      normalizeRGB(6, 6, 6),
+      normalizeRGB(20, 20, 20),
+      normalizeRGB(33, 33, 33),
+      normalizeRGB(46, 46, 46)
+    ]);
+    exports.PALETTE_ANSI_256 = (() => {
+      const p = [
+        toRGBA8888(0, 0, 0),
+        toRGBA8888(205, 0, 0),
+        toRGBA8888(0, 205, 0),
+        toRGBA8888(205, 205, 0),
+        toRGBA8888(0, 0, 238),
+        toRGBA8888(205, 0, 205),
+        toRGBA8888(0, 250, 205),
+        toRGBA8888(229, 229, 229),
+        toRGBA8888(127, 127, 127),
+        toRGBA8888(255, 0, 0),
+        toRGBA8888(0, 255, 0),
+        toRGBA8888(255, 255, 0),
+        toRGBA8888(92, 92, 255),
+        toRGBA8888(255, 0, 255),
+        toRGBA8888(0, 255, 255),
+        toRGBA8888(255, 255, 255)
+      ];
+      const d = [0, 95, 135, 175, 215, 255];
+      for (let r = 0; r < 6; ++r) {
+        for (let g = 0; g < 6; ++g) {
+          for (let b = 0; b < 6; ++b) {
+            p.push(toRGBA8888(d[r], d[g], d[b]));
+          }
+        }
+      }
+      for (let v = 8; v <= 238; v += 10) {
+        p.push(toRGBA8888(v, v, v));
+      }
+      return new Uint32Array(p);
+    })();
+    exports.DEFAULT_BACKGROUND = toRGBA8888(0, 0, 0, 255);
+    exports.DEFAULT_FOREGROUND = toRGBA8888(255, 255, 255, 255);
+  }
+});
+
+// node_modules/sixel/lib/wasm.js
+var require_wasm = __commonJS({
+  "node_modules/sixel/lib/wasm.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.LIMITS = void 0;
+    exports.LIMITS = {
+      CHUNK_SIZE: 16384,
+      PALETTE_SIZE: 4096,
+      MAX_WIDTH: 16384,
+      BYTES: "AGFzbQEAAAABJAdgAAF/YAJ/fwBgA39/fwF/YAF/AX9gAABgBH9/f38AYAF/AAIlAgNlbnYLaGFuZGxlX2JhbmQAAwNlbnYLbW9kZV9wYXJzZWQAAwMTEgQAAAAAAQQBAQUBAAACAgAGAwQFAXABBwcFBAEBBwcGCAF/AUGAihoLB9wBDgZtZW1vcnkCABFnZXRfc3RhdGVfYWRkcmVzcwADEWdldF9jaHVua19hZGRyZXNzAAQOZ2V0X3AwX2FkZHJlc3MABRNnZXRfcGFsZXR0ZV9hZGRyZXNzAAYEaW5pdAALBmRlY29kZQAMDWN1cnJlbnRfd2lkdGgADQ5jdXJyZW50X2hlaWdodAAOGV9faW5kaXJlY3RfZnVuY3Rpb25fdGFibGUBAAtfaW5pdGlhbGl6ZQACCXN0YWNrU2F2ZQARDHN0YWNrUmVzdG9yZQASCnN0YWNrQWxsb2MAEwkMAQBBAQsGCgcJDxACDAEBCq5UEgMAAQsFAEGgCAsGAEGQiQELBgBBsIkCCwUAQZAJC+okAQh/QeQIKAIAIQVB4AgoAgAhA0HoCCgCACEIIAFBkIkBaiIJQf8BOgAAIAAgAUgEQCAAQZCJAWohBgNAIAMhBCAGQQFqIQECQCAGLQAAQf8AcSIDQTBrQQlLBEAgASEGDAELQewIKAIAQQJ0QewIaiICKAIAIQADQCACIAMgAEEKbGpBMGsiADYCACABLQAAIQMgAUEBaiIGIQEgA0H/AHEiA0Ewa0EKSQ0ACwsCQAJAAkACQAJAAkACQAJ/AkACQCADQT9rIgBBP00EQCAERQ0BIARBIUYEQAJAQfAIKAIAIgFBASABGyIHIAhqIgFB1AgoAgAiA0gNACADQf//AEoNAANAIANBAnQiAkGgiQJqIgRBoAgpAwA3AwAgAkGoiQJqQaAIKQMANwMAIAJBsIkCakGgCCkDADcDACACQbiJAmpBoAgpAwA3AwAgAkHAiQJqQaAIKQMANwMAIAJByIkCakGgCCkDADcDACACQdCJAmpBoAgpAwA3AwAgAkHYiQJqQaAIKQMANwMAIAJB4IkCakGgCCkDADcDACACQeiJAmpBoAgpAwA3AwAgAkHwiQJqQaAIKQMANwMAIAJB+IkCakGgCCkDADcDACACQYCKAmpBoAgpAwA3AwAgAkGIigJqQaAIKQMANwMAIAJBkIoCakGgCCkDADcDACACQZiKAmpBoAgpAwA3AwAgAkGgigJqQaAIKQMANwMAIAJBqIoCakGgCCkDADcDACACQbCKAmpBoAgpAwA3AwAgAkG4igJqQaAIKQMANwMAIAJBwIoCakGgCCkDADcDACACQciKAmpBoAgpAwA3AwAgAkHQigJqQaAIKQMANwMAIAJB2IoCakGgCCkDADcDACACQeCKAmpBoAgpAwA3AwAgAkHoigJqQaAIKQMANwMAIAJB8IoCakGgCCkDADcDACACQfiKAmpBoAgpAwA3AwAgAkGAiwJqQaAIKQMANwMAIAJBiIsCakGgCCkDADcDACACQZCLAmpBoAgpAwA3AwAgAkGYiwJqQaAIKQMANwMAIAJBoIsCakGgCCkDADcDACACQaiLAmpBoAgpAwA3AwAgAkGwiwJqQaAIKQMANwMAIAJBuIsCakGgCCkDADcDACACQcCLAmpBoAgpAwA3AwAgAkHIiwJqQaAIKQMANwMAIAJB0IsCakGgCCkDADcDACACQdiLAmpBoAgpAwA3AwAgAkHgiwJqQaAIKQMANwMAIAJB6IsCakGgCCkDADcDACACQfCLAmpBoAgpAwA3AwAgAkH4iwJqQaAIKQMANwMAIAJBgIwCakGgCCkDADcDACACQYiMAmpBoAgpAwA3AwAgAkGQjAJqQaAIKQMANwMAIAJBmIwCakGgCCkDADcDACACQaCMAmpBoAgpAwA3AwAgAkGojAJqQaAIKQMANwMAIAJBsIwCakGgCCkDADcDACACQbiMAmpBoAgpAwA3AwAgAkHAjAJqQaAIKQMANwMAIAJByIwCakGgCCkDADcDACACQdCMAmpBoAgpAwA3AwAgAkHYjAJqQaAIKQMANwMAIAJB4IwCakGgCCkDADcDACACQeiMAmpBoAgpAwA3AwAgAkHwjAJqQaAIKQMANwMAIAJB+IwCakGgCCkDADcDACACQYCNAmpBoAgpAwA3AwAgAkGIjQJqQaAIKQMANwMAIAJBkI0CakGgCCkDADcDACACQZiNAmpBoAgpAwA3AwAgAkGwiQZqIARBgAT8CgAAQdQIKAIAQQJ0QcCJCmogBEGABPwKAABB1AgoAgBBAnRB0IkOaiAEQYAE/AoAAEHUCCgCAEECdEHgiRJqIARBgAT8CgAAQdQIKAIAQQJ0QfCJFmogBEGABPwKAABB1AhB1AgoAgAiAkGAAWoiAzYCACABIANIDQEgAkGA/wBIDQALCwJAIABFDQAgCEH//wBLDQBBgIABIAhrIAcgAUH//wBLGyECAkAgAEEBcUUNACACRQ0AIAhBAnRBoIkCaiEDIAIhBCACQQdxIgcEQANAIAMgBTYCACADQQRqIQMgBEEBayEEIAdBAWsiBw0ACwsgAkEBa0EHSQ0AA0AgAyAFNgIcIAMgBTYCGCADIAU2AhQgAyAFNgIQIAMgBTYCDCADIAU2AgggAyAFNgIEIAMgBTYCACADQSBqIQMgBEEIayIEDQALCwJAIABBAnFFDQAgAkUNACAIQQJ0QbCJBmohAyACIQQgAkEHcSIHBEADQCADIAU2AgAgA0EEaiEDIARBAWshBCAHQQFrIgcNAAsLIAJBAWtBB0kNAANAIAMgBTYCHCADIAU2AhggAyAFNgIUIAMgBTYCECADIAU2AgwgAyAFNgIIIAMgBTYCBCADIAU2AgAgA0EgaiEDIARBCGsiBA0ACwsCQCAAQQRxRQ0AIAJFDQAgCEECdEHAiQpqIQMgAiEEIAJBB3EiBwRAA0AgAyAFNgIAIANBBGohAyAEQQFrIQQgB0EBayIHDQALCyACQQFrQQdJDQADQCADIAU2AhwgAyAFNgIYIAMgBTYCFCADIAU2AhAgAyAFNgIMIAMgBTYCCCADIAU2AgQgAyAFNgIAIANBIGohAyAEQQhrIgQNAAsLAkAgAEEIcUUNACACRQ0AIAhBAnRB0IkOaiEDIAIhBCACQQdxIgcEQANAIAMgBTYCACADQQRqIQMgBEEBayEEIAdBAWsiBw0ACwsgAkEBa0EHSQ0AA0AgAyAFNgIcIAMgBTYCGCADIAU2AhQgAyAFNgIQIAMgBTYCDCADIAU2AgggAyAFNgIEIAMgBTYCACADQSBqIQMgBEEIayIEDQALCwJAIABBEHFFDQAgAkUNACAIQQJ0QeCJEmohAyACIQQgAkEHcSIHBEADQCADIAU2AgAgA0EEaiEDIARBAWshBCAHQQFrIgcNAAsLIAJBAWtBB0kNAANAIAMgBTYCHCADIAU2AhggAyAFNgIUIAMgBTYCECADIAU2AgwgAyAFNgIIIAMgBTYCBCADIAU2AgAgA0EgaiEDIARBCGsiBA0ACwsgAEEgcUUNACACRQ0AIAJBAWshByAIQQJ0QfCJFmohAyACQQdxIgQEQANAIAMgBTYCACADQQRqIQMgAkEBayECIARBAWsiBA0ACwsgB0EHSQ0AA0AgAyAFNgIcIAMgBTYCGCADIAU2AhQgAyAFNgIQIAMgBTYCDCADIAU2AgggAyAFNgIEIAMgBTYCACADQSBqIQMgAkEIayICDQALC0HcCEHcCCgCACAAcjYCACAGQQFqIgIgBi0AAEH/AHEiA0E/ayIAQT9LDQQaDAMLAkBB7AgoAgAiBEEBRgRAQfAIKAIAIgNBzAgoAgAiAUkNASADIAFwIQMMAQtB+AgoAgAhAkH0CCgCACEBAkACQCAEQQVHDQAgAUEBRw0AIAJB6QJODQQMAQsgAkHkAEoNA0H8CCgCAEHkAEoNA0GACSgCAEHkAEoNAwsCQCABRQ0AIAFBAkoNACACQfwIKAIAQYAJKAIAIAFBAnRBiAhqKAIAEQIAIQFB8AgoAgAiA0HMCCgCACICTwR/IAMgAnAFIAMLQQJ0QZAJaiABNgIAC0HwCCgCACIDQcwIKAIAIgFJDQAgAyABcCEDCyADQQJ0QZAJaigCACEFDAELIANB/QBxQSFHBEAgCCEBIAYhAgwECyAEQSNHDQQCQEHsCCgCACICQQFGBEBB8AgoAgAiAUHMCCgCACIASQ0BIAEgAHAhAQwBC0H4CCgCACEBQfQIKAIAIQACQAJAIAJBBUcNACAAQQFHDQAgAUHpAkgNAQwHCyABQeQASg0GQfwIKAIAQeQASg0GQYAJKAIAQeQASg0GCwJAIABFDQAgAEECSg0AIAFB/AgoAgBBgAkoAgAgAEECdEGICGooAgARAgAhAEHwCCgCACIBQcwIKAIAIgJPBH8gASACcAUgAQtBAnRBkAlqIAA2AgALQfAIKAIAIgFBzAgoAgAiAEkNACABIABwIQELIAFBAnRBkAlqKAIAIQUMBAsgCCEBIAYhAgtB1AgoAgAhBgNAAkAgASAGSA0AIAZB//8ASg0AIAZBAnQiBEGgiQJqIgZBoAgpAwA3AwAgBEGoiQJqQaAIKQMANwMAIARBsIkCakGgCCkDADcDACAEQbiJAmpBoAgpAwA3AwAgBEHAiQJqQaAIKQMANwMAIARByIkCakGgCCkDADcDACAEQdCJAmpBoAgpAwA3AwAgBEHYiQJqQaAIKQMANwMAIARB4IkCakGgCCkDADcDACAEQeiJAmpBoAgpAwA3AwAgBEHwiQJqQaAIKQMANwMAIARB+IkCakGgCCkDADcDACAEQYCKAmpBoAgpAwA3AwAgBEGIigJqQaAIKQMANwMAIARBkIoCakGgCCkDADcDACAEQZiKAmpBoAgpAwA3AwAgBEGgigJqQaAIKQMANwMAIARBqIoCakGgCCkDADcDACAEQbCKAmpBoAgpAwA3AwAgBEG4igJqQaAIKQMANwMAIARBwIoCakGgCCkDADcDACAEQciKAmpBoAgpAwA3AwAgBEHQigJqQaAIKQMANwMAIARB2IoCakGgCCkDADcDACAEQeCKAmpBoAgpAwA3AwAgBEHoigJqQaAIKQMANwMAIARB8IoCakGgCCkDADcDACAEQfiKAmpBoAgpAwA3AwAgBEGAiwJqQaAIKQMANwMAIARBiIsCakGgCCkDADcDACAEQZCLAmpBoAgpAwA3AwAgBEGYiwJqQaAIKQMANwMAIARBoIsCakGgCCkDADcDACAEQaiLAmpBoAgpAwA3AwAgBEGwiwJqQaAIKQMANwMAIARBuIsCakGgCCkDADcDACAEQcCLAmpBoAgpAwA3AwAgBEHIiwJqQaAIKQMANwMAIARB0IsCakGgCCkDADcDACAEQdiLAmpBoAgpAwA3AwAgBEHgiwJqQaAIKQMANwMAIARB6IsCakGgCCkDADcDACAEQfCLAmpBoAgpAwA3AwAgBEH4iwJqQaAIKQMANwMAIARBgIwCakGgCCkDADcDACAEQYiMAmpBoAgpAwA3AwAgBEGQjAJqQaAIKQMANwMAIARBmIwCakGgCCkDADcDACAEQaCMAmpBoAgpAwA3AwAgBEGojAJqQaAIKQMANwMAIARBsIwCakGgCCkDADcDACAEQbiMAmpBoAgpAwA3AwAgBEHAjAJqQaAIKQMANwMAIARByIwCakGgCCkDADcDACAEQdCMAmpBoAgpAwA3AwAgBEHYjAJqQaAIKQMANwMAIARB4IwCakGgCCkDADcDACAEQeiMAmpBoAgpAwA3AwAgBEHwjAJqQaAIKQMANwMAIARB+IwCakGgCCkDADcDACAEQYCNAmpBoAgpAwA3AwAgBEGIjQJqQaAIKQMANwMAIARBkI0CakGgCCkDADcDACAEQZiNAmpBoAgpAwA3AwAgBEGwiQZqIAZBgAT8CgAAQdQIKAIAQQJ0QcCJCmogBkGABPwKAABB1AgoAgBBAnRB0IkOaiAGQYAE/AoAAEHUCCgCAEECdEHgiRJqIAZBgAT8CgAAQdQIKAIAQQJ0QfCJFmogBkGABPwKAABB1AhB1AgoAgBBgAFqIgY2AgALIAFB//8ATQRAIABBAXEgAWxBAnRBoIkCaiAFNgIAIABBAXZBAXEgAWxBAnRBsIkGaiAFNgIAIABBAnZBAXEgAWxBAnRBwIkKaiAFNgIAIABBA3ZBAXEgAWxBAnRB0IkOaiAFNgIAIABBBHZBAXEgAWxBAnRB4IkSaiAFNgIAIABBBXYgAWxBAnRB8IkWaiAFNgIAQdQIKAIAIQYLIAFBAWohAUHcCEHcCCgCACAAcjYCACACLQAAIQAgAkEBaiIEIQIgAEH/AHEiA0E/ayIAQcAASQ0ACyAECyECQQAhBCACIQYgASEIIANB/QBxQSFGDQELIANBJGsOCgEDAwMDAwMDAwIDC0HsCEIBNwIADAQLQdgIIAFB2AgoAgAiACAAIAFIGyIAQYCAASAAQYCAAUgbNgIADAILQegIIAFB2AgoAgAiACAAIAFIGyIAQYCAASAAQYCAAUgbIgA2AgBB2AggADYCACAAQQRrEAAEQEHoCEEENgIAQdgIQQQ2AgBB0AhBATYCAA8LEAgMAQsCQCADQTtHDQBB7AgoAgAiAEEHSg0AQewIIABBAWo2AgAgAEECdEHwCGpBADYCAAsgAiEGIAQhAyABIQgMAQtBBCEIIAIhBiAEIQMLIAYgCUkNAAsLQeQIIAU2AgBB4AggAzYCAEHoCCAINgIAC9ELAgF+CH9B2AhCBDcDAEGojQJBoAgpAwAiADcDAEGgjQIgADcDAEGYjQIgADcDAEGQjQIgADcDAEGIjQIgADcDAEGAjQIgADcDAEH4jAIgADcDAEHwjAIgADcDAEHojAIgADcDAEHgjAIgADcDAEHYjAIgADcDAEHQjAIgADcDAEHIjAIgADcDAEHAjAIgADcDAEG4jAIgADcDAEGwjAIgADcDAEGojAIgADcDAEGgjAIgADcDAEGYjAIgADcDAEGQjAIgADcDAEGIjAIgADcDAEGAjAIgADcDAEH4iwIgADcDAEHwiwIgADcDAEHoiwIgADcDAEHgiwIgADcDAEHYiwIgADcDAEHQiwIgADcDAEHIiwIgADcDAEHAiwIgADcDAEG4iwIgADcDAEGwiwIgADcDAEGoiwIgADcDAEGgiwIgADcDAEGYiwIgADcDAEGQiwIgADcDAEGIiwIgADcDAEGAiwIgADcDAEH4igIgADcDAEHwigIgADcDAEHoigIgADcDAEHgigIgADcDAEHYigIgADcDAEHQigIgADcDAEHIigIgADcDAEHAigIgADcDAEG4igIgADcDAEGwigIgADcDAEGoigIgADcDAEGgigIgADcDAEGYigIgADcDAEGQigIgADcDAEGIigIgADcDAEGAigIgADcDAEH4iQIgADcDAEHwiQIgADcDAEHoiQIgADcDAEHgiQIgADcDAEHYiQIgADcDAEHQiQIgADcDAEHIiQIgADcDAEHAiQIgADcDAEG4iQIgADcDAEGwiQIgADcDAEGoCCgCACIEQf8AakGAAW0hCAJAIARBgQFIDQBBASEBIAhBAiAIQQJKG0EBayICQQFxIQMgBEGBAk4EQCACQX5xIQIDQCABQQl0IgdBEHJBoIkCakGwiQJBgAT8CgAAIAdBsI0CakGwiQJBgAT8CgAAIAFBAmohASACQQJrIgINAAsLIANFDQAgAUEJdEEQckGgiQJqQbCJAkGABPwKAAALAkAgBEEBSA0AIAhBASAIQQFKGyIDQQFxIQUCQCADQQFrIgdFBEBBACEBDAELIANB/v///wdxIQJBACEBA0AgAUEJdCIGQRByQbCJBmpBsIkCQYAE/AoAACAGQZAEckGwiQZqQbCJAkGABPwKAAAgAUECaiEBIAJBAmsiAg0ACwsgBQRAIAFBCXRBEHJBsIkGakGwiQJBgAT8CgAACyAEQQFIDQAgA0EBcSEFIAcEfyADQf7///8HcSECQQAhAQNAIAFBCXQiBkEQckHAiQpqQbCJAkGABPwKAAAgBkGQBHJBwIkKakGwiQJBgAT8CgAAIAFBAmohASACQQJrIgINAAsgAUEHdEEEcgVBBAshASAFBEAgAUECdEHAiQpqQbCJAkGABPwKAAALIARBAUgNACADQQFxIQUgBwR/IANB/v///wdxIQJBACEBA0AgAUEJdCIGQRByQdCJDmpBsIkCQYAE/AoAACAGQZAEckHQiQ5qQbCJAkGABPwKAAAgAUECaiEBIAJBAmsiAg0ACyABQQd0QQRyBUEECyEBIAUEQCABQQJ0QdCJDmpBsIkCQYAE/AoAAAsgBEEBSA0AIANBAXEhBSAHBH8gA0H+////B3EhAkEAIQEDQCABQQl0IgZBEHJB4IkSakGwiQJBgAT8CgAAIAZBkARyQeCJEmpBsIkCQYAE/AoAACABQQJqIQEgAkECayICDQALIAFBB3RBBHIFQQQLIQEgBQRAIAFBAnRB4IkSakGwiQJBgAT8CgAACyAEQQFIDQAgA0EBcSEEIAcEfyADQf7///8HcSECQQAhAQNAIAFBCXQiA0EQckHwiRZqQbCJAkGABPwKAAAgA0GQBHJB8IkWakGwiQJBgAT8CgAAIAFBAmohASACQQJrIgINAAsgAUEHdEEEcgVBBAshASAERQ0AIAFBAnRB8IkWakGwiQJBgAT8CgAAC0HUCCAIQQd0QQRyNgIAC58TAgh/AX5B5AgoAgAhA0HgCCgCACECQegIKAIAIQcgAUGQiQFqIglB/wE6AAAgACABSARAIABBkIkBaiEIA0AgAiEEIAhBAWohAQJAIAgtAABB/wBxIgJBMGtBCUsEQCABIQgMAQtB7AgoAgBBAnRB7AhqIgUoAgAhAANAIAUgAiAAQQpsakEwayIANgIAIAEtAAAhAiABQQFqIgghASACQf8AcSICQTBrQQpJDQALCwJAAkACQAJAAkACQAJ/AkAgAkE/ayIAQT9NBEAgBEUNASAEQSFGBEBB8AgoAgAiAUEBIAEbIgQgB2ohAQJAIABFDQAgB0H//wBLDQBBgIABIAdrIAQgAUH//wBLGyEFAkAgAEEBcUUNACAHQQJ0QaCJAmohAiAFIgRBB3EiBgRAA0AgAiADNgIAIAJBBGohAiAEQQFrIQQgBkEBayIGDQALCyAFQQFrQQdJDQADQCACIAM2AhwgAiADNgIYIAIgAzYCFCACIAM2AhAgAiADNgIMIAIgAzYCCCACIAM2AgQgAiADNgIAIAJBIGohAiAEQQhrIgQNAAsLAkAgAEECcUUNACAHQQJ0QbCJBmohAiAFIgRBB3EiBgRAA0AgAiADNgIAIAJBBGohAiAEQQFrIQQgBkEBayIGDQALCyAFQQFrQQdJDQADQCACIAM2AhwgAiADNgIYIAIgAzYCFCACIAM2AhAgAiADNgIMIAIgAzYCCCACIAM2AgQgAiADNgIAIAJBIGohAiAEQQhrIgQNAAsLAkAgAEEEcUUNACAHQQJ0QcCJCmohAiAFIgRBB3EiBgRAA0AgAiADNgIAIAJBBGohAiAEQQFrIQQgBkEBayIGDQALCyAFQQFrQQdJDQADQCACIAM2AhwgAiADNgIYIAIgAzYCFCACIAM2AhAgAiADNgIMIAIgAzYCCCACIAM2AgQgAiADNgIAIAJBIGohAiAEQQhrIgQNAAsLAkAgAEEIcUUNACAHQQJ0QdCJDmohAiAFIgRBB3EiBgRAA0AgAiADNgIAIAJBBGohAiAEQQFrIQQgBkEBayIGDQALCyAFQQFrQQdJDQADQCACIAM2AhwgAiADNgIYIAIgAzYCFCACIAM2AhAgAiADNgIMIAIgAzYCCCACIAM2AgQgAiADNgIAIAJBIGohAiAEQQhrIgQNAAsLAkAgAEEQcUUNACAHQQJ0QeCJEmohAiAFIgRBB3EiBgRAA0AgAiADNgIAIAJBBGohAiAEQQFrIQQgBkEBayIGDQALCyAFQQFrQQdJDQADQCACIAM2AhwgAiADNgIYIAIgAzYCFCACIAM2AhAgAiADNgIMIAIgAzYCCCACIAM2AgQgAiADNgIAIAJBIGohAiAEQQhrIgQNAAsLIABBIHFFDQAgBUEBayEEIAdBAnRB8IkWaiEAIAVBB3EiAgRAA0AgACADNgIAIABBBGohACAFQQFrIQUgAkEBayICDQALCyAEQQdJDQADQCAAIAM2AhwgACADNgIYIAAgAzYCFCAAIAM2AhAgACADNgIMIAAgAzYCCCAAIAM2AgQgACADNgIAIABBIGohACAFQQhrIgUNAAsLIAhBAWoiBSAILQAAQf8AcSICQT9rIgBBP00NAxoMBAsCQEHsCCgCACIFQQFGBEBB8AgoAgAiAUHMCCgCACIESQ0BIAEgBHAhAQwBC0H4CCgCACEEQfQIKAIAIQECQAJAIAVBBUcNACABQQFHDQAgBEHpAk4NBAwBCyAEQeQASg0DQfwIKAIAQeQASg0DQYAJKAIAQeQASg0DCwJAIAFFDQAgAUECSg0AIARB/AgoAgBBgAkoAgAgAUECdEGICGooAgARAgAhBEHwCCgCACIBQcwIKAIAIgVPBH8gASAFcAUgAQtBAnRBkAlqIAQ2AgALQfAIKAIAIgFBzAgoAgAiBEkNACABIARwIQELIAFBAnRBkAlqKAIAIQMMAQsgAkH9AHFBIUcEQCAHIQEgAiEADAQLIARBI0cNBAJAQewIKAIAIgRBAUYEQEHwCCgCACIBQcwIKAIAIgBJDQEgASAAcCEBDAELQfgIKAIAIQFB9AgoAgAhAAJAAkAgBEEFRw0AIABBAUcNACABQekCSA0BDAcLIAFB5ABKDQZB/AgoAgBB5ABKDQZBgAkoAgBB5ABKDQYLAkAgAEUNACAAQQJKDQAgAUH8CCgCAEGACSgCACAAQQJ0QYgIaigCABECACEAQfAIKAIAIgFBzAgoAgAiBE8EfyABIARwBSABC0ECdEGQCWogADYCAAtB8AgoAgAiAUHMCCgCACIASQ0AIAEgAHAhAQsgAUECdEGQCWooAgAhAwwECyAHIQEgCAshBQNAIAFB//8ATQRAIABBAXEgAWxBAnRBoIkCaiADNgIAIABBAXZBAXEgAWxBAnRBsIkGaiADNgIAIABBAnZBAXEgAWxBAnRBwIkKaiADNgIAIABBA3ZBAXEgAWxBAnRB0IkOaiADNgIAIABBBHZBAXEgAWxBAnRB4IkSaiADNgIAIABBBXYgAWxBAnRB8IkWaiADNgIACyABQQFqIQEgBS0AACEAIAVBAWoiBCEFIABB/wBxIgJBP2siAEHAAEkNAAsgBCEFC0EAIQQgBSEIIAEhByACIQAgAkH9AHFBIUYNAQtBBCEHIAQhAiAAQSRrDgoDAgICAgICAgIBAgtB7AhCATcCAAwCC0GoCCgCAEEEaxAABEBB0AhBATYCAA8LAkBBqAgoAgAiBkEFSA0AQaAIKQMAIQogBkEDa0EBdiIBQQdxIQJBACEAIAFBAWtBB08EQCABQfj///8HcSEFA0AgAEEDdCIBQbCJAmogCjcDACABQQhyQbCJAmogCjcDACABQRByQbCJAmogCjcDACABQRhyQbCJAmogCjcDACABQSByQbCJAmogCjcDACABQShyQbCJAmogCjcDACABQTByQbCJAmogCjcDACABQThyQbCJAmogCjcDACAAQQhqIQAgBUEIayIFDQALCyACRQ0AA0AgAEEDdEGwiQJqIAo3AwAgAEEBaiEAIAJBAWsiAg0ACwtBwIkGQbCJAiAGQQJ0IgD8CgAAQdCJCkGwiQIgAPwKAABB4IkOQbCJAiAA/AoAAEHwiRJBsIkCIAD8CgAAQYCKFkGwiQIgAPwKAAAgBCECDAELAkAgAEE7Rw0AQewIKAIAIgBBB0oNAEHsCCAAQQFqNgIAIABBAnRB8AhqQQA2AgALIAEhBwsgCCAJSQ0ACwtB5AggAzYCAEHgCCACNgIAQegIIAc2AgAL4gcCBX8BfgJAQdAIAn8CQAJAIAAgAU4NACABQZCJAWohBiAAQZCJAWohBQNAIAUtAAAiA0H/AHEhAgJAAkACQAJAAkACQAJAQeAIKAIAIgRBIkcEQCAEDQcgAkEiRgRAQewIQgE3AgBB4AhBIjYCAAwICyACQT9rQcAASQ0GIANBIWsiAkEMTQ0BDAULAkAgAkEwayIEQQlNBEBB7AgoAgBBAnRB7AhqIgIgBCACKAIAQQpsajYCAAwBC0HsCCgCACEEIAJBO0YEQCAEQQdKDQFB7AggBEEBajYCACAEQQJ0QfAIakEANgIADAELIARBBEYEQEHECEECNgIAQbAIQfAIKQMANwMAQbgIQfgIKAIAIgI2AgBBvAhB/AgoAgAiBDYCAEHICEECQQFBwAgoAgAiAxs2AgBBrAggBEEAIAMbNgIAQagIIAJBgIABIAJBgIABSBtBBGpBACADGzYCAEHgCEEANgIADAoLIAJBP2tBwABJDQQLIANBIWsiAkEMTQ0BDAILQQEgAnRBjSBxRQ0DDAQLQQEgAnRBjSBxDQELIANBoQFrIgJBDEsNA0EBIAJ0QY0gcUUNAwtBxAhCgYCAgBA3AgBBsAhB8AgoAgBBAEHsCCgCACICQQBKGzYCAEG0CEH0CCgCAEEAIAJBAUobNgIAQbgIQfgIKAIAQQAgAkECShs2AgBB4AhBADYCAEG8CEEANgIADAQLIANBoQFrIgJBDEsNAUEBIAJ0QY0gcUUNAQtBxAhCgYCAgBA3AgBBsAhCADcDAEG4CEIANwMADAMLIAVBAWoiBSAGSQ0ACwsCQEHICCgCAA4DAwEAAQsCQEGoCCgCACIFQQVIDQBBoAgpAwAhByAFQQNrQQF2IgNBB3EhBEEAIQIgA0EBa0EHTwRAIANB+P///wdxIQYDQCACQQN0IgNBsIkCaiAHNwMAIANBCHJBsIkCaiAHNwMAIANBEHJBsIkCaiAHNwMAIANBGHJBsIkCaiAHNwMAIANBIHJBsIkCaiAHNwMAIANBKHJBsIkCaiAHNwMAIANBMHJBsIkCaiAHNwMAIANBOHJBsIkCaiAHNwMAIAJBCGohAiAGQQhrIgYNAAsLIARFDQADQCACQQN0QbCJAmogBzcDACACQQFqIQIgBEEBayIEDQALC0HAiQZBsIkCIAVBAnQiA/wKAABB0IkKQbCJAiAD/AoAAEHgiQ5BsIkCIAP8CgAAQfCJEkGwiQIgA/wKAABBgIoWQbCJAiAD/AoAAEECDAELEAhByAgoAgALEAEiAjYCACACDQAgACABQcgIKAIAQQJ0QYAIaigCABEBAAsLdABB6AhBBDYCAEHkCCAANgIAQewIQgE3AgBBxAhCADcCAEHACCADNgIAQdwIQgA3AgBBqAhCADcDAEGwCEIANwMAQbgIQgA3AwBBzAggAkGAICACQYAgSRs2AgBBoAggAa1CgYCAgBB+NwMAQdAIQQA2AgALIwBB0AgoAgBFBEAgACABQcgIKAIAQQJ0QYAIaigCABEBAAsLWgECfwJAAkACQEHICCgCAEEBaw4CAAECC0HYCEHoCCgCACIAQdgIKAIAIgEgACABShsiAEGAgAEgAEGAgAFIGyIANgIAIABBBGsPC0GoCCgCAEEEayEACyAAC0IBAX8Cf0EGQdwIKAIAIgBBIHENABpBBSAAQRBxDQAaQQQgAEEIcQ0AGkEDIABBBHENABpBAiAAQQFxIABBAnEbCwu9BQEFfQJ/IAJFBEAgAUH/AWxBMmpB5ABtIgBBCHQgAHIgAEEQdHIMAQsgArJDAADIQpUhBiAAQfABarJDAAC0Q5UhBQJ9IAGyQwAAyEKVIgNDAAAAP10EQCADIAZDAACAP5KUDAELIAYgA0MAAIA/IAaTlJILIQcgAyADkiEGAkAgBUOrqqo+kiIEQwAAAABdBEAgBEMAAIA/kiEEDAELIARDAACAP15FDQAgBEMAAIC/kiEECyAGIAeTIQMgBUMAAAAAXSEAAn8CfSADIAcgA5NDAADAQJQgBJSSIARDq6oqPl0NABogByAEQwAAAD9dDQAaIAMgBEOrqio/XUUNABogAyAHIAOTIARDAADAwJRDAACAQJKUkgtDAAB/Q5RDAAAAP5IiBkMAAIBPXSAGQwAAAABgcQRAIAapDAELQQALIQECQCAABEAgBUMAAIA/kiEEDAELIAUiBEMAAIA/XkUNACAFQwAAgL+SIQQLIAVDq6qqvpIiBUMAAAAAXSECAn8CfSADIAcgA5NDAADAQJQgBJSSIARDq6oqPl0NABogByAEQwAAAD9dDQAaIAMgBEOrqio/XUUNABogAyAHIAOTIARDAADAwJRDAACAQJKUkgtDAAB/Q5RDAAAAP5IiBkMAAIBPXSAGQwAAAABgcQRAIAapDAELQQALIQACQCACBEAgBUMAAIA/kiEFDAELIAVDAACAP15FDQAgBUMAAIC/kiEFCwJAIAVDq6oqPl0EQCADIAcgA5NDAADAQJQgBZSSIQcMAQsgBUMAAAA/XQ0AIAVDq6oqP11FBEAgAyEHDAELIAMgByADkyAFQwAAwMCUQwAAgECSlJIhBwsgAEEIdAJ/IAdDAAB/Q5RDAAAAP5IiBkMAAIBPXSAGQwAAAABgcQRAIAapDAELQQALQRB0ciABcgtBgICAeHILNwAgAEH/AWxBMmpB5ABtIAFB/wFsQTJqQeQAbUEIdHIgAkH/AWxBMmpB5ABtQRB0ckGAgIB4cgsEACMACwYAIAAkAAsQACMAIABrQXBxIgAkACAACwsYAQBBgAgLEQEAAAACAAAAAwAAAAQAAAAF"
+    };
+  }
+});
+
+// node_modules/sixel/lib/Decoder.js
+var require_Decoder = __commonJS({
+  "node_modules/sixel/lib/Decoder.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.decodeAsync = exports.decode = exports.Decoder = exports.DecoderAsync = void 0;
+    var Colors_1 = require_Colors();
+    var wasm_1 = require_wasm();
+    function decodeBase64(s) {
+      if (typeof Buffer !== "undefined") {
+        return Buffer.from(s, "base64");
+      }
+      const bytestring = atob(s);
+      const result = new Uint8Array(bytestring.length);
+      for (let i = 0; i < result.length; ++i) {
+        result[i] = bytestring.charCodeAt(i);
+      }
+      return result;
+    }
+    var WASM_BYTES = decodeBase64(wasm_1.LIMITS.BYTES);
+    var WASM_MODULE;
+    var NULL_CANVAS = new Uint32Array();
+    var CallbackProxy = class {
+      constructor() {
+        this.bandHandler = (width) => 1;
+        this.modeHandler = (mode) => 1;
+      }
+      handle_band(width) {
+        return this.bandHandler(width);
+      }
+      mode_parsed(mode) {
+        return this.modeHandler(mode);
+      }
+    };
+    var DEFAULT_OPTIONS = {
+      memoryLimit: 2048 * 65536,
+      sixelColor: Colors_1.DEFAULT_FOREGROUND,
+      fillColor: Colors_1.DEFAULT_BACKGROUND,
+      palette: Colors_1.PALETTE_VT340_COLOR,
+      paletteLimit: wasm_1.LIMITS.PALETTE_SIZE,
+      truncate: true
+    };
+    function DecoderAsync(opts) {
+      const cbProxy = new CallbackProxy();
+      const importObj = {
+        env: {
+          handle_band: cbProxy.handle_band.bind(cbProxy),
+          mode_parsed: cbProxy.mode_parsed.bind(cbProxy)
+        }
+      };
+      return WebAssembly.instantiate(WASM_MODULE || WASM_BYTES, importObj).then((inst) => {
+        WASM_MODULE = WASM_MODULE || inst.module;
+        return new Decoder(opts, inst.instance || inst, cbProxy);
+      });
+    }
+    exports.DecoderAsync = DecoderAsync;
+    var Decoder = class {
+      /**
+       * Synchonous ctor. Can be called from nodejs or a webworker context.
+       * For instantiation in the browser main thread use `WasmDecoderAsync` instead.
+       */
+      constructor(opts, _instance, _cbProxy) {
+        this._PIXEL_OFFSET = wasm_1.LIMITS.MAX_WIDTH + 4;
+        this._canvas = NULL_CANVAS;
+        this._bandWidths = [];
+        this._maxWidth = 0;
+        this._minWidth = wasm_1.LIMITS.MAX_WIDTH;
+        this._lastOffset = 0;
+        this._currentHeight = 0;
+        this._opts = Object.assign({}, DEFAULT_OPTIONS, opts);
+        if (this._opts.paletteLimit > wasm_1.LIMITS.PALETTE_SIZE) {
+          throw new Error(`DecoderOptions.paletteLimit must not exceed ${wasm_1.LIMITS.PALETTE_SIZE}`);
+        }
+        if (!_instance) {
+          const module2 = WASM_MODULE || (WASM_MODULE = new WebAssembly.Module(WASM_BYTES));
+          _instance = new WebAssembly.Instance(module2, {
+            env: {
+              handle_band: this._handle_band.bind(this),
+              mode_parsed: this._initCanvas.bind(this)
+            }
+          });
+        } else {
+          _cbProxy.bandHandler = this._handle_band.bind(this);
+          _cbProxy.modeHandler = this._initCanvas.bind(this);
+        }
+        this._instance = _instance;
+        this._wasm = this._instance.exports;
+        this._chunk = new Uint8Array(this._wasm.memory.buffer, this._wasm.get_chunk_address(), wasm_1.LIMITS.CHUNK_SIZE);
+        this._states = new Uint32Array(this._wasm.memory.buffer, this._wasm.get_state_address(), 12);
+        this._palette = new Uint32Array(this._wasm.memory.buffer, this._wasm.get_palette_address(), wasm_1.LIMITS.PALETTE_SIZE);
+        this._palette.set(this._opts.palette);
+        this._pSrc = new Uint32Array(this._wasm.memory.buffer, this._wasm.get_p0_address());
+        this._wasm.init(Colors_1.DEFAULT_FOREGROUND, 0, this._opts.paletteLimit, 0);
+      }
+      // some readonly parser states for internal usage
+      get _fillColor() {
+        return this._states[0];
+      }
+      get _truncate() {
+        return this._states[8];
+      }
+      get _rasterWidth() {
+        return this._states[6];
+      }
+      get _rasterHeight() {
+        return this._states[7];
+      }
+      get _width() {
+        return this._states[2] ? this._states[2] - 4 : 0;
+      }
+      get _height() {
+        return this._states[3];
+      }
+      get _level() {
+        return this._states[9];
+      }
+      get _mode() {
+        return this._states[10];
+      }
+      get _paletteLimit() {
+        return this._states[11];
+      }
+      _initCanvas(mode) {
+        if (mode === 2) {
+          const pixels = this.width * this.height;
+          if (pixels > this._canvas.length) {
+            if (this._opts.memoryLimit && pixels * 4 > this._opts.memoryLimit) {
+              this.release();
+              throw new Error("image exceeds memory limit");
+            }
+            this._canvas = new Uint32Array(pixels);
+          }
+          this._maxWidth = this._width;
+        } else if (mode === 1) {
+          if (this._level === 2) {
+            const pixels = Math.min(this._rasterWidth, wasm_1.LIMITS.MAX_WIDTH) * this._rasterHeight;
+            if (pixels > this._canvas.length) {
+              if (this._opts.memoryLimit && pixels * 4 > this._opts.memoryLimit) {
+                this.release();
+                throw new Error("image exceeds memory limit");
+              }
+              this._canvas = new Uint32Array(pixels);
+            }
+          } else {
+            if (this._canvas.length < 65536) {
+              this._canvas = new Uint32Array(65536);
+            }
+          }
+        }
+        return 0;
+      }
+      _realloc(offset, additionalPixels) {
+        const pixels = offset + additionalPixels;
+        if (pixels > this._canvas.length) {
+          if (this._opts.memoryLimit && pixels * 4 > this._opts.memoryLimit) {
+            this.release();
+            throw new Error("image exceeds memory limit");
+          }
+          const newCanvas = new Uint32Array(Math.ceil(pixels / 65536) * 65536);
+          newCanvas.set(this._canvas);
+          this._canvas = newCanvas;
+        }
+      }
+      _handle_band(width) {
+        const adv = this._PIXEL_OFFSET;
+        let offset = this._lastOffset;
+        if (this._mode === 2) {
+          let remaining = this.height - this._currentHeight;
+          let c = 0;
+          while (c < 6 && remaining > 0) {
+            this._canvas.set(this._pSrc.subarray(adv * c, adv * c + width), offset + width * c);
+            c++;
+            remaining--;
+          }
+          this._lastOffset += width * c;
+          this._currentHeight += c;
+        } else if (this._mode === 1) {
+          this._realloc(offset, width * 6);
+          this._maxWidth = Math.max(this._maxWidth, width);
+          this._minWidth = Math.min(this._minWidth, width);
+          for (let i = 0; i < 6; ++i) {
+            this._canvas.set(this._pSrc.subarray(adv * i, adv * i + width), offset + width * i);
+          }
+          this._bandWidths.push(width);
+          this._lastOffset += width * 6;
+          this._currentHeight += 6;
+        }
+        return 0;
+      }
+      /**
+       * Width of the image data.
+       * Returns the rasterWidth in level2/truncating mode,
+       * otherwise the max width, that has been seen so far.
+       */
+      get width() {
+        return this._mode !== 1 ? this._width : Math.max(this._maxWidth, this._wasm.current_width());
+      }
+      /**
+       * Height of the image data.
+       * Returns the rasterHeight in level2/truncating mode,
+       * otherwise height touched by sixels.
+       */
+      get height() {
+        return this._mode !== 1 ? this._height : this._wasm.current_width() ? this._bandWidths.length * 6 + this._wasm.current_height() : this._bandWidths.length * 6;
+      }
+      /**
+       * Get active palette colors as RGBA8888[] (borrowed).
+       */
+      get palette() {
+        return this._palette.subarray(0, this._paletteLimit);
+      }
+      /**
+       * Get the memory used by the decoder.
+       *
+       * This is a rough estimate accounting the wasm instance memory
+       * and pixel buffers held on JS side (real value will be slightly
+       * higher due to JS book-keeping).
+       * Note that the decoder does not free ressources on its own,
+       * call `release` to free excess memory.
+       */
+      get memoryUsage() {
+        return this._canvas.byteLength + this._wasm.memory.buffer.byteLength + 8 * this._bandWidths.length;
+      }
+      /**
+       * Get various properties of the decoder and the current image.
+       */
+      get properties() {
+        return {
+          width: this.width,
+          height: this.height,
+          mode: this._mode,
+          level: this._level,
+          truncate: !!this._truncate,
+          paletteLimit: this._paletteLimit,
+          fillColor: this._fillColor,
+          memUsage: this.memoryUsage,
+          rasterAttributes: {
+            numerator: this._states[4],
+            denominator: this._states[5],
+            width: this._rasterWidth,
+            height: this._rasterHeight
+          }
+        };
+      }
+      /**
+       * Initialize decoder for next image. Must be called before
+       * any calls to `decode` or `decodeString`.
+       */
+      // FIXME: reorder arguments, better palette handling
+      init(fillColor = this._opts.fillColor, palette = this._opts.palette, paletteLimit = this._opts.paletteLimit, truncate2 = this._opts.truncate) {
+        this._wasm.init(this._opts.sixelColor, fillColor, paletteLimit, truncate2 ? 1 : 0);
+        if (palette) {
+          this._palette.set(palette.subarray(0, wasm_1.LIMITS.PALETTE_SIZE));
+        }
+        this._bandWidths.length = 0;
+        this._maxWidth = 0;
+        this._minWidth = wasm_1.LIMITS.MAX_WIDTH;
+        this._lastOffset = 0;
+        this._currentHeight = 0;
+      }
+      /**
+       * Decode next chunk of data from start to end index (exclusive).
+       * @throws Will throw if the image exceeds the memory limit.
+       */
+      decode(data, start = 0, end = data.length) {
+        let p = start;
+        while (p < end) {
+          const length = Math.min(end - p, wasm_1.LIMITS.CHUNK_SIZE);
+          this._chunk.set(data.subarray(p, p += length));
+          this._wasm.decode(0, length);
+        }
+      }
+      /**
+       * Decode next chunk of string data from start to end index (exclusive).
+       * Note: Decoding from string data is rather slow, use `decode` with byte data instead.
+       * @throws Will throw if the image exceeds the memory limit.
+       */
+      decodeString(data, start = 0, end = data.length) {
+        let p = start;
+        while (p < end) {
+          const length = Math.min(end - p, wasm_1.LIMITS.CHUNK_SIZE);
+          for (let i = 0, j = p; i < length; ++i, ++j) {
+            this._chunk[i] = data.charCodeAt(j);
+          }
+          p += length;
+          this._wasm.decode(0, length);
+        }
+      }
+      /**
+       * Get current pixel data as 32-bit typed array (RGBA8888).
+       * Also peeks into pixel data of the current band, that got not pushed yet.
+       */
+      get data32() {
+        if (this._mode === 0 || !this.width || !this.height) {
+          return NULL_CANVAS;
+        }
+        const currentWidth = this._wasm.current_width();
+        if (this._mode === 2) {
+          let remaining = this.height - this._currentHeight;
+          if (remaining > 0) {
+            const adv = this._PIXEL_OFFSET;
+            let offset = this._lastOffset;
+            let c = 0;
+            while (c < 6 && remaining > 0) {
+              this._canvas.set(this._pSrc.subarray(adv * c, adv * c + currentWidth), offset + currentWidth * c);
+              c++;
+              remaining--;
+            }
+            if (remaining) {
+              this._canvas.fill(this._fillColor, offset + currentWidth * c);
+            }
+          }
+          return this._canvas.subarray(0, this.width * this.height);
+        }
+        if (this._mode === 1) {
+          if (this._minWidth === this._maxWidth) {
+            let escape3 = false;
+            if (currentWidth) {
+              if (currentWidth !== this._minWidth) {
+                escape3 = true;
+              } else {
+                const adv = this._PIXEL_OFFSET;
+                let offset = this._lastOffset;
+                this._realloc(offset, currentWidth * 6);
+                for (let i = 0; i < 6; ++i) {
+                  this._canvas.set(this._pSrc.subarray(adv * i, adv * i + currentWidth), offset + currentWidth * i);
+                }
+              }
+            }
+            if (!escape3) {
+              return this._canvas.subarray(0, this.width * this.height);
+            }
+          }
+          const final = new Uint32Array(this.width * this.height);
+          final.fill(this._fillColor);
+          let finalOffset = 0;
+          let start = 0;
+          for (let i = 0; i < this._bandWidths.length; ++i) {
+            const bw = this._bandWidths[i];
+            for (let p = 0; p < 6; ++p) {
+              final.set(this._canvas.subarray(start, start += bw), finalOffset);
+              finalOffset += this.width;
+            }
+          }
+          if (currentWidth) {
+            const adv = this._PIXEL_OFFSET;
+            const currentHeight = this._wasm.current_height();
+            for (let i = 0; i < currentHeight; ++i) {
+              final.set(this._pSrc.subarray(adv * i, adv * i + currentWidth), finalOffset + this.width * i);
+            }
+          }
+          return final;
+        }
+        return NULL_CANVAS;
+      }
+      /**
+       * Same as `data32`, but returning pixel data as Uint8ClampedArray suitable
+       * for direct usage with `ImageData`.
+       */
+      get data8() {
+        return new Uint8ClampedArray(this.data32.buffer, 0, this.width * this.height * 4);
+      }
+      /**
+       * Release image ressources on JS side held by the decoder.
+       *
+       * The decoder tries to re-use memory ressources of a previous image
+       * to lower allocation and GC pressure. Decoding a single big image
+       * will grow the memory usage of the decoder permanently.
+       * Call `release` to reset the internal buffers and free the memory.
+       * Note that this destroys the image data, call it when done processing
+       * a rather big image, otherwise it is not needed. Use `memoryUsage`
+       * to decide, whether the held memory is still within your limits.
+       * This does not affect the wasm module (operates on static memory).
+       */
+      release() {
+        this._canvas = NULL_CANVAS;
+        this._bandWidths.length = 0;
+        this._maxWidth = 0;
+        this._minWidth = wasm_1.LIMITS.MAX_WIDTH;
+        this._wasm.init(Colors_1.DEFAULT_FOREGROUND, 0, this._opts.paletteLimit, 0);
+      }
+    };
+    exports.Decoder = Decoder;
+    function decode(data, opts) {
+      const dec = new Decoder(opts);
+      dec.init();
+      typeof data === "string" ? dec.decodeString(data) : dec.decode(data);
+      return {
+        width: dec.width,
+        height: dec.height,
+        data32: dec.data32,
+        data8: dec.data8
+      };
+    }
+    exports.decode = decode;
+    async function decodeAsync(data, opts) {
+      const dec = await DecoderAsync(opts);
+      dec.init();
+      typeof data === "string" ? dec.decodeString(data) : dec.decode(data);
+      return {
+        width: dec.width,
+        height: dec.height,
+        data32: dec.data32,
+        data8: dec.data8
+      };
+    }
+    exports.decodeAsync = decodeAsync;
+  }
+});
+
+// node_modules/sixel/upng.js
+var require_upng = __commonJS({
+  "node_modules/sixel/upng.js"(exports, module) {
+    "use strict";
+    module.exports = UPNG = {};
+    UPNG.toRGBA8 = function(out) {
+      var w = out.width, h = out.height;
+      if (out.tabs.acTL == null) return [UPNG.toRGBA8.decodeImage(out.data, w, h, out).buffer];
+      var frms = [];
+      if (out.frames[0].data == null) out.frames[0].data = out.data;
+      var len = w * h * 4, img = new Uint8Array(len), empty = new Uint8Array(len), prev = new Uint8Array(len);
+      for (var i = 0; i < out.frames.length; i++) {
+        var frm = out.frames[i];
+        var fx = frm.rect.x, fy = frm.rect.y, fw = frm.rect.width, fh = frm.rect.height;
+        var fdata = UPNG.toRGBA8.decodeImage(frm.data, fw, fh, out);
+        if (i != 0) for (var j = 0; j < len; j++) prev[j] = img[j];
+        if (frm.blend == 0) UPNG._copyTile(fdata, fw, fh, img, w, h, fx, fy, 0);
+        else if (frm.blend == 1) UPNG._copyTile(fdata, fw, fh, img, w, h, fx, fy, 1);
+        frms.push(img.buffer.slice(0));
+        if (frm.dispose == 0) {
+        } else if (frm.dispose == 1) UPNG._copyTile(empty, fw, fh, img, w, h, fx, fy, 0);
+        else if (frm.dispose == 2) for (var j = 0; j < len; j++) img[j] = prev[j];
+      }
+      return frms;
+    };
+    UPNG.toRGBA8.decodeImage = function(data, w, h, out) {
+      var area = w * h, bpp = UPNG.decode._getBPP(out);
+      var bpl = Math.ceil(w * bpp / 8);
+      var bf = new Uint8Array(area * 4), bf32 = new Uint32Array(bf.buffer);
+      var ctype = out.ctype, depth = out.depth;
+      var rs = UPNG._bin.readUshort;
+      var time = Date.now();
+      if (ctype == 6) {
+        var qarea = area << 2;
+        if (depth == 8) for (var i = 0; i < qarea; i += 4) {
+          bf[i] = data[i];
+          bf[i + 1] = data[i + 1];
+          bf[i + 2] = data[i + 2];
+          bf[i + 3] = data[i + 3];
+        }
+        if (depth == 16) for (var i = 0; i < qarea; i++) {
+          bf[i] = data[i << 1];
+        }
+      } else if (ctype == 2) {
+        var ts = out.tabs["tRNS"];
+        if (ts == null) {
+          if (depth == 8) for (var i = 0; i < area; i++) {
+            var ti = i * 3;
+            bf32[i] = 255 << 24 | data[ti + 2] << 16 | data[ti + 1] << 8 | data[ti];
+          }
+          if (depth == 16) for (var i = 0; i < area; i++) {
+            var ti = i * 6;
+            bf32[i] = 255 << 24 | data[ti + 4] << 16 | data[ti + 2] << 8 | data[ti];
+          }
+        } else {
+          var tr2 = ts[0], tg = ts[1], tb = ts[2];
+          if (depth == 8) for (var i = 0; i < area; i++) {
+            var qi = i << 2, ti = i * 3;
+            bf32[i] = 255 << 24 | data[ti + 2] << 16 | data[ti + 1] << 8 | data[ti];
+            if (data[ti] == tr2 && data[ti + 1] == tg && data[ti + 2] == tb) bf[qi + 3] = 0;
+          }
+          if (depth == 16) for (var i = 0; i < area; i++) {
+            var qi = i << 2, ti = i * 6;
+            bf32[i] = 255 << 24 | data[ti + 4] << 16 | data[ti + 2] << 8 | data[ti];
+            if (rs(data, ti) == tr2 && rs(data, ti + 2) == tg && rs(data, ti + 4) == tb) bf[qi + 3] = 0;
+          }
+        }
+      } else if (ctype == 3) {
+        var p = out.tabs["PLTE"], ap = out.tabs["tRNS"], tl = ap ? ap.length : 0;
+        if (depth == 1) for (var y = 0; y < h; y++) {
+          var s0 = y * bpl, t0 = y * w;
+          for (var i = 0; i < w; i++) {
+            var qi = t0 + i << 2, j = data[s0 + (i >> 3)] >> 7 - ((i & 7) << 0) & 1, cj = 3 * j;
+            bf[qi] = p[cj];
+            bf[qi + 1] = p[cj + 1];
+            bf[qi + 2] = p[cj + 2];
+            bf[qi + 3] = j < tl ? ap[j] : 255;
+          }
+        }
+        if (depth == 2) for (var y = 0; y < h; y++) {
+          var s0 = y * bpl, t0 = y * w;
+          for (var i = 0; i < w; i++) {
+            var qi = t0 + i << 2, j = data[s0 + (i >> 2)] >> 6 - ((i & 3) << 1) & 3, cj = 3 * j;
+            bf[qi] = p[cj];
+            bf[qi + 1] = p[cj + 1];
+            bf[qi + 2] = p[cj + 2];
+            bf[qi + 3] = j < tl ? ap[j] : 255;
+          }
+        }
+        if (depth == 4) for (var y = 0; y < h; y++) {
+          var s0 = y * bpl, t0 = y * w;
+          for (var i = 0; i < w; i++) {
+            var qi = t0 + i << 2, j = data[s0 + (i >> 1)] >> 4 - ((i & 1) << 2) & 15, cj = 3 * j;
+            bf[qi] = p[cj];
+            bf[qi + 1] = p[cj + 1];
+            bf[qi + 2] = p[cj + 2];
+            bf[qi + 3] = j < tl ? ap[j] : 255;
+          }
+        }
+        if (depth == 8) for (var i = 0; i < area; i++) {
+          var qi = i << 2, j = data[i], cj = 3 * j;
+          bf[qi] = p[cj];
+          bf[qi + 1] = p[cj + 1];
+          bf[qi + 2] = p[cj + 2];
+          bf[qi + 3] = j < tl ? ap[j] : 255;
+        }
+      } else if (ctype == 4) {
+        if (depth == 8) for (var i = 0; i < area; i++) {
+          var qi = i << 2, di = i << 1, gr = data[di];
+          bf[qi] = gr;
+          bf[qi + 1] = gr;
+          bf[qi + 2] = gr;
+          bf[qi + 3] = data[di + 1];
+        }
+        if (depth == 16) for (var i = 0; i < area; i++) {
+          var qi = i << 2, di = i << 2, gr = data[di];
+          bf[qi] = gr;
+          bf[qi + 1] = gr;
+          bf[qi + 2] = gr;
+          bf[qi + 3] = data[di + 2];
+        }
+      } else if (ctype == 0) {
+        var tr2 = out.tabs["tRNS"] ? out.tabs["tRNS"] : -1;
+        for (var y = 0; y < h; y++) {
+          var off = y * bpl, to = y * w;
+          if (depth == 1) for (var x = 0; x < w; x++) {
+            var gr = 255 * (data[off + (x >>> 3)] >>> 7 - (x & 7) & 1), al = gr == tr2 * 255 ? 0 : 255;
+            bf32[to + x] = al << 24 | gr << 16 | gr << 8 | gr;
+          }
+          else if (depth == 2) for (var x = 0; x < w; x++) {
+            var gr = 85 * (data[off + (x >>> 2)] >>> 6 - ((x & 3) << 1) & 3), al = gr == tr2 * 85 ? 0 : 255;
+            bf32[to + x] = al << 24 | gr << 16 | gr << 8 | gr;
+          }
+          else if (depth == 4) for (var x = 0; x < w; x++) {
+            var gr = 17 * (data[off + (x >>> 1)] >>> 4 - ((x & 1) << 2) & 15), al = gr == tr2 * 17 ? 0 : 255;
+            bf32[to + x] = al << 24 | gr << 16 | gr << 8 | gr;
+          }
+          else if (depth == 8) for (var x = 0; x < w; x++) {
+            var gr = data[off + x], al = gr == tr2 ? 0 : 255;
+            bf32[to + x] = al << 24 | gr << 16 | gr << 8 | gr;
+          }
+          else if (depth == 16) for (var x = 0; x < w; x++) {
+            var gr = data[off + (x << 1)], al = rs(data, off + (x << i)) == tr2 ? 0 : 255;
+            bf32[to + x] = al << 24 | gr << 16 | gr << 8 | gr;
+          }
+        }
+      }
+      return bf;
+    };
+    UPNG.decode = function(buff) {
+      var data = new Uint8Array(buff), offset = 8, bin = UPNG._bin, rUs = bin.readUshort, rUi = bin.readUint;
+      var out = { tabs: {}, frames: [] };
+      var dd = new Uint8Array(data.length), doff = 0;
+      var fd, foff = 0;
+      var mgck = [137, 80, 78, 71, 13, 10, 26, 10];
+      for (var i = 0; i < 8; i++) if (data[i] != mgck[i]) throw "The input is not a PNG file!";
+      while (offset < data.length) {
+        var len = bin.readUint(data, offset);
+        offset += 4;
+        var type = bin.readASCII(data, offset, 4);
+        offset += 4;
+        if (type == "IHDR") {
+          UPNG.decode._IHDR(data, offset, out);
+        } else if (type == "CgBI") {
+          out.tabs[type] = data.slice(offset, offset + 4);
+        } else if (type == "IDAT") {
+          for (var i = 0; i < len; i++) dd[doff + i] = data[offset + i];
+          doff += len;
+        } else if (type == "acTL") {
+          out.tabs[type] = { num_frames: rUi(data, offset), num_plays: rUi(data, offset + 4) };
+          fd = new Uint8Array(data.length);
+        } else if (type == "fcTL") {
+          if (foff != 0) {
+            var fr2 = out.frames[out.frames.length - 1];
+            fr2.data = UPNG.decode._decompress(out, fd.slice(0, foff), fr2.rect.width, fr2.rect.height);
+            foff = 0;
+          }
+          var rct = { x: rUi(data, offset + 12), y: rUi(data, offset + 16), width: rUi(data, offset + 4), height: rUi(data, offset + 8) };
+          var del = rUs(data, offset + 22);
+          del = rUs(data, offset + 20) / (del == 0 ? 100 : del);
+          var frm = { rect: rct, delay: Math.round(del * 1e3), dispose: data[offset + 24], blend: data[offset + 25] };
+          out.frames.push(frm);
+        } else if (type == "fdAT") {
+          for (var i = 0; i < len - 4; i++) fd[foff + i] = data[offset + i + 4];
+          foff += len - 4;
+        } else if (type == "pHYs") {
+          out.tabs[type] = [bin.readUint(data, offset), bin.readUint(data, offset + 4), data[offset + 8]];
+        } else if (type == "cHRM") {
+          out.tabs[type] = [];
+          for (var i = 0; i < 8; i++) out.tabs[type].push(bin.readUint(data, offset + i * 4));
+        } else if (type == "tEXt" || type == "zTXt") {
+          if (out.tabs[type] == null) out.tabs[type] = {};
+          var nz = bin.nextZero(data, offset);
+          var keyw = bin.readASCII(data, offset, nz - offset);
+          var text, tl = offset + len - nz - 1;
+          if (type == "tEXt") text = bin.readASCII(data, nz + 1, tl);
+          else {
+            var bfr = UPNG.decode._inflate(data.slice(nz + 2, nz + 2 + tl));
+            text = bin.readUTF8(bfr, 0, bfr.length);
+          }
+          out.tabs[type][keyw] = text;
+        } else if (type == "iTXt") {
+          if (out.tabs[type] == null) out.tabs[type] = {};
+          var nz = 0, off = offset;
+          nz = bin.nextZero(data, off);
+          var keyw = bin.readASCII(data, off, nz - off);
+          off = nz + 1;
+          var cflag = data[off], cmeth = data[off + 1];
+          off += 2;
+          nz = bin.nextZero(data, off);
+          var ltag = bin.readASCII(data, off, nz - off);
+          off = nz + 1;
+          nz = bin.nextZero(data, off);
+          var tkeyw = bin.readUTF8(data, off, nz - off);
+          off = nz + 1;
+          var text, tl = len - (off - offset);
+          if (cflag == 0) text = bin.readUTF8(data, off, tl);
+          else {
+            var bfr = UPNG.decode._inflate(data.slice(off, off + tl));
+            text = bin.readUTF8(bfr, 0, bfr.length);
+          }
+          out.tabs[type][keyw] = text;
+        } else if (type == "PLTE") {
+          out.tabs[type] = bin.readBytes(data, offset, len);
+        } else if (type == "hIST") {
+          var pl2 = out.tabs["PLTE"].length / 3;
+          out.tabs[type] = [];
+          for (var i = 0; i < pl2; i++) out.tabs[type].push(rUs(data, offset + i * 2));
+        } else if (type == "tRNS") {
+          if (out.ctype == 3) out.tabs[type] = bin.readBytes(data, offset, len);
+          else if (out.ctype == 0) out.tabs[type] = rUs(data, offset);
+          else if (out.ctype == 2) out.tabs[type] = [rUs(data, offset), rUs(data, offset + 2), rUs(data, offset + 4)];
+        } else if (type == "gAMA") out.tabs[type] = bin.readUint(data, offset) / 1e5;
+        else if (type == "sRGB") out.tabs[type] = data[offset];
+        else if (type == "bKGD") {
+          if (out.ctype == 0 || out.ctype == 4) out.tabs[type] = [rUs(data, offset)];
+          else if (out.ctype == 2 || out.ctype == 6) out.tabs[type] = [rUs(data, offset), rUs(data, offset + 2), rUs(data, offset + 4)];
+          else if (out.ctype == 3) out.tabs[type] = data[offset];
+        } else if (type == "IEND") {
+          break;
+        }
+        offset += len;
+        var crc = bin.readUint(data, offset);
+        offset += 4;
+      }
+      if (foff != 0) {
+        var fr2 = out.frames[out.frames.length - 1];
+        fr2.data = UPNG.decode._decompress(out, fd.slice(0, foff), fr2.rect.width, fr2.rect.height);
+        foff = 0;
+      }
+      out.data = UPNG.decode._decompress(out, dd, out.width, out.height);
+      delete out.compress;
+      delete out.interlace;
+      delete out.filter;
+      return out;
+    };
+    UPNG.decode._decompress = function(out, dd, w, h) {
+      var time = Date.now();
+      var bpp = UPNG.decode._getBPP(out), bpl = Math.ceil(w * bpp / 8), buff = new Uint8Array((bpl + 1 + out.interlace) * h);
+      if (out.tabs["CgBI"]) dd = UPNG.inflateRaw(dd, buff);
+      else dd = UPNG.decode._inflate(dd, buff);
+      var time = Date.now();
+      if (out.interlace == 0) dd = UPNG.decode._filterZero(dd, out, 0, w, h);
+      else if (out.interlace == 1) dd = UPNG.decode._readInterlace(dd, out);
+      return dd;
+    };
+    UPNG.decode._inflate = function(data, buff) {
+      var out = UPNG["inflateRaw"](new Uint8Array(data.buffer, 2, data.length - 6), buff);
+      return out;
+    };
+    UPNG.inflateRaw = (function() {
+      var H = {};
+      H.H = {};
+      H.H.N = function(N, W) {
+        var R = Uint8Array, i = 0, m = 0, J = 0, h = 0, Q = 0, X = 0, u = 0, w = 0, d = 0, v, C;
+        if (N[0] == 3 && N[1] == 0) return W ? W : new R(0);
+        var V = H.H, n = V.b, A = V.e, l = V.R, M = V.n, I = V.A, e = V.Z, b = V.m, Z = W == null;
+        if (Z) W = new R(N.length >>> 2 << 3);
+        while (i == 0) {
+          i = n(N, d, 1);
+          m = n(N, d + 1, 2);
+          d += 3;
+          if (m == 0) {
+            if ((d & 7) != 0) d += 8 - (d & 7);
+            var D = (d >>> 3) + 4, q = N[D - 4] | N[D - 3] << 8;
+            if (Z) W = H.H.W(W, w + q);
+            W.set(new R(N.buffer, N.byteOffset + D, q), w);
+            d = D + q << 3;
+            w += q;
+            continue;
+          }
+          if (Z) W = H.H.W(W, w + (1 << 17));
+          if (m == 1) {
+            v = b.J;
+            C = b.h;
+            X = (1 << 9) - 1;
+            u = (1 << 5) - 1;
+          }
+          if (m == 2) {
+            J = A(N, d, 5) + 257;
+            h = A(N, d + 5, 5) + 1;
+            Q = A(N, d + 10, 4) + 4;
+            d += 14;
+            var E = d, j = 1;
+            for (var c = 0; c < 38; c += 2) {
+              b.Q[c] = 0;
+              b.Q[c + 1] = 0;
+            }
+            for (var c = 0; c < Q; c++) {
+              var K = A(N, d + c * 3, 3);
+              b.Q[(b.X[c] << 1) + 1] = K;
+              if (K > j) j = K;
+            }
+            d += 3 * Q;
+            M(b.Q, j);
+            I(b.Q, j, b.u);
+            v = b.w;
+            C = b.d;
+            d = l(b.u, (1 << j) - 1, J + h, N, d, b.v);
+            var r = V.V(b.v, 0, J, b.C);
+            X = (1 << r) - 1;
+            var S = V.V(b.v, J, h, b.D);
+            u = (1 << S) - 1;
+            M(b.C, r);
+            I(b.C, r, v);
+            M(b.D, S);
+            I(b.D, S, C);
+          }
+          while (true) {
+            var T = v[e(N, d) & X];
+            d += T & 15;
+            var p = T >>> 4;
+            if (p >>> 8 == 0) {
+              W[w++] = p;
+            } else if (p == 256) {
+              break;
+            } else {
+              var z = w + p - 254;
+              if (p > 264) {
+                var _ = b.q[p - 257];
+                z = w + (_ >>> 3) + A(N, d, _ & 7);
+                d += _ & 7;
+              }
+              var $ = C[e(N, d) & u];
+              d += $ & 15;
+              var s = $ >>> 4, Y = b.c[s], a = (Y >>> 4) + n(N, d, Y & 15);
+              d += Y & 15;
+              while (w < z) {
+                W[w] = W[w++ - a];
+                W[w] = W[w++ - a];
+                W[w] = W[w++ - a];
+                W[w] = W[w++ - a];
+              }
+              w = z;
+            }
+          }
+        }
+        return W.length == w ? W : W.slice(0, w);
+      };
+      H.H.W = function(N, W) {
+        var R = N.length;
+        if (W <= R) return N;
+        var V = new Uint8Array(R << 1);
+        V.set(N, 0);
+        return V;
+      };
+      H.H.R = function(N, W, R, V, n, A) {
+        var l = H.H.e, M = H.H.Z, I = 0;
+        while (I < R) {
+          var e = N[M(V, n) & W];
+          n += e & 15;
+          var b = e >>> 4;
+          if (b <= 15) {
+            A[I] = b;
+            I++;
+          } else {
+            var Z = 0, m = 0;
+            if (b == 16) {
+              m = 3 + l(V, n, 2);
+              n += 2;
+              Z = A[I - 1];
+            } else if (b == 17) {
+              m = 3 + l(V, n, 3);
+              n += 3;
+            } else if (b == 18) {
+              m = 11 + l(V, n, 7);
+              n += 7;
+            }
+            var J = I + m;
+            while (I < J) {
+              A[I] = Z;
+              I++;
+            }
+          }
+        }
+        return n;
+      };
+      H.H.V = function(N, W, R, V) {
+        var n = 0, A = 0, l = V.length >>> 1;
+        while (A < R) {
+          var M = N[A + W];
+          V[A << 1] = 0;
+          V[(A << 1) + 1] = M;
+          if (M > n) n = M;
+          A++;
+        }
+        while (A < l) {
+          V[A << 1] = 0;
+          V[(A << 1) + 1] = 0;
+          A++;
+        }
+        return n;
+      };
+      H.H.n = function(N, W) {
+        var R = H.H.m, V = N.length, n, A, l, M, I, e = R.j;
+        for (var M = 0; M <= W; M++) e[M] = 0;
+        for (M = 1; M < V; M += 2) e[N[M]]++;
+        var b = R.K;
+        n = 0;
+        e[0] = 0;
+        for (A = 1; A <= W; A++) {
+          n = n + e[A - 1] << 1;
+          b[A] = n;
+        }
+        for (l = 0; l < V; l += 2) {
+          I = N[l + 1];
+          if (I != 0) {
+            N[l] = b[I];
+            b[I]++;
+          }
+        }
+      };
+      H.H.A = function(N, W, R) {
+        var V = N.length, n = H.H.m, A = n.r;
+        for (var l = 0; l < V; l += 2) if (N[l + 1] != 0) {
+          var M = l >> 1, I = N[l + 1], e = M << 4 | I, b = W - I, Z = N[l] << b, m = Z + (1 << b);
+          while (Z != m) {
+            var J = A[Z] >>> 15 - W;
+            R[J] = e;
+            Z++;
+          }
+        }
+      };
+      H.H.l = function(N, W) {
+        var R = H.H.m.r, V = 15 - W;
+        for (var n = 0; n < N.length; n += 2) {
+          var A = N[n] << W - N[n + 1];
+          N[n] = R[A] >>> V;
+        }
+      };
+      H.H.M = function(N, W, R) {
+        R = R << (W & 7);
+        var V = W >>> 3;
+        N[V] |= R;
+        N[V + 1] |= R >>> 8;
+      };
+      H.H.I = function(N, W, R) {
+        R = R << (W & 7);
+        var V = W >>> 3;
+        N[V] |= R;
+        N[V + 1] |= R >>> 8;
+        N[V + 2] |= R >>> 16;
+      };
+      H.H.e = function(N, W, R) {
+        return (N[W >>> 3] | N[(W >>> 3) + 1] << 8) >>> (W & 7) & (1 << R) - 1;
+      };
+      H.H.b = function(N, W, R) {
+        return (N[W >>> 3] | N[(W >>> 3) + 1] << 8 | N[(W >>> 3) + 2] << 16) >>> (W & 7) & (1 << R) - 1;
+      };
+      H.H.Z = function(N, W) {
+        return (N[W >>> 3] | N[(W >>> 3) + 1] << 8 | N[(W >>> 3) + 2] << 16) >>> (W & 7);
+      };
+      H.H.i = function(N, W) {
+        return (N[W >>> 3] | N[(W >>> 3) + 1] << 8 | N[(W >>> 3) + 2] << 16 | N[(W >>> 3) + 3] << 24) >>> (W & 7);
+      };
+      H.H.m = (function() {
+        var N = Uint16Array, W = Uint32Array;
+        return { K: new N(16), j: new N(16), X: [16, 17, 18, 0, 8, 7, 9, 6, 10, 5, 11, 4, 12, 3, 13, 2, 14, 1, 15], S: [3, 4, 5, 6, 7, 8, 9, 10, 11, 13, 15, 17, 19, 23, 27, 31, 35, 43, 51, 59, 67, 83, 99, 115, 131, 163, 195, 227, 258, 999, 999, 999], T: [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 2, 2, 2, 2, 3, 3, 3, 3, 4, 4, 4, 4, 5, 5, 5, 5, 0, 0, 0, 0], q: new N(32), p: [1, 2, 3, 4, 5, 7, 9, 13, 17, 25, 33, 49, 65, 97, 129, 193, 257, 385, 513, 769, 1025, 1537, 2049, 3073, 4097, 6145, 8193, 12289, 16385, 24577, 65535, 65535], z: [0, 0, 0, 0, 1, 1, 2, 2, 3, 3, 4, 4, 5, 5, 6, 6, 7, 7, 8, 8, 9, 9, 10, 10, 11, 11, 12, 12, 13, 13, 0, 0], c: new W(32), J: new N(512), _: [], h: new N(32), $: [], w: new N(32768), C: [], v: [], d: new N(32768), D: [], u: new N(512), Q: [], r: new N(1 << 15), s: new W(286), Y: new W(30), a: new W(19), t: new W(15e3), k: new N(1 << 16), g: new N(1 << 15) };
+      })();
+      (function() {
+        var N = H.H.m, W = 1 << 15;
+        for (var R = 0; R < W; R++) {
+          var V = R;
+          V = (V & 2863311530) >>> 1 | (V & 1431655765) << 1;
+          V = (V & 3435973836) >>> 2 | (V & 858993459) << 2;
+          V = (V & 4042322160) >>> 4 | (V & 252645135) << 4;
+          V = (V & 4278255360) >>> 8 | (V & 16711935) << 8;
+          N.r[R] = (V >>> 16 | V << 16) >>> 17;
+        }
+        function n(A, l, M) {
+          while (l-- != 0) A.push(0, M);
+        }
+        for (var R = 0; R < 32; R++) {
+          N.q[R] = N.S[R] << 3 | N.T[R];
+          N.c[R] = N.p[R] << 4 | N.z[R];
+        }
+        n(N._, 144, 8);
+        n(N._, 255 - 143, 9);
+        n(N._, 279 - 255, 7);
+        n(N._, 287 - 279, 8);
+        H.H.n(N._, 9);
+        H.H.A(N._, 9, N.J);
+        H.H.l(N._, 9);
+        n(N.$, 32, 5);
+        H.H.n(N.$, 5);
+        H.H.A(N.$, 5, N.h);
+        H.H.l(N.$, 5);
+        n(N.Q, 19, 0);
+        n(N.C, 286, 0);
+        n(N.D, 30, 0);
+        n(N.v, 320, 0);
+      })();
+      return H.H.N;
+    })();
+    UPNG.decode._readInterlace = function(data, out) {
+      var w = out.width, h = out.height;
+      var bpp = UPNG.decode._getBPP(out), cbpp = bpp >> 3, bpl = Math.ceil(w * bpp / 8);
+      var img = new Uint8Array(h * bpl);
+      var di = 0;
+      var starting_row = [0, 0, 4, 0, 2, 0, 1];
+      var starting_col = [0, 4, 0, 2, 0, 1, 0];
+      var row_increment = [8, 8, 8, 4, 4, 2, 2];
+      var col_increment = [8, 8, 4, 4, 2, 2, 1];
+      var pass = 0;
+      while (pass < 7) {
+        var ri = row_increment[pass], ci = col_increment[pass];
+        var sw = 0, sh = 0;
+        var cr = starting_row[pass];
+        while (cr < h) {
+          cr += ri;
+          sh++;
+        }
+        var cc = starting_col[pass];
+        while (cc < w) {
+          cc += ci;
+          sw++;
+        }
+        var bpll = Math.ceil(sw * bpp / 8);
+        UPNG.decode._filterZero(data, out, di, sw, sh);
+        var y = 0, row = starting_row[pass];
+        while (row < h) {
+          var col = starting_col[pass];
+          var cdi = di + y * bpll << 3;
+          while (col < w) {
+            if (bpp == 1) {
+              var val = data[cdi >> 3];
+              val = val >> 7 - (cdi & 7) & 1;
+              img[row * bpl + (col >> 3)] |= val << 7 - ((col & 7) << 0);
+            }
+            if (bpp == 2) {
+              var val = data[cdi >> 3];
+              val = val >> 6 - (cdi & 7) & 3;
+              img[row * bpl + (col >> 2)] |= val << 6 - ((col & 3) << 1);
+            }
+            if (bpp == 4) {
+              var val = data[cdi >> 3];
+              val = val >> 4 - (cdi & 7) & 15;
+              img[row * bpl + (col >> 1)] |= val << 4 - ((col & 1) << 2);
+            }
+            if (bpp >= 8) {
+              var ii = row * bpl + col * cbpp;
+              for (var j = 0; j < cbpp; j++) img[ii + j] = data[(cdi >> 3) + j];
+            }
+            cdi += bpp;
+            col += ci;
+          }
+          y++;
+          row += ri;
+        }
+        if (sw * sh != 0) di += sh * (1 + bpll);
+        pass = pass + 1;
+      }
+      return img;
+    };
+    UPNG.decode._getBPP = function(out) {
+      var noc = [1, null, 3, 1, 2, null, 4][out.ctype];
+      return noc * out.depth;
+    };
+    UPNG.decode._filterZero = function(data, out, off, w, h) {
+      var bpp = UPNG.decode._getBPP(out), bpl = Math.ceil(w * bpp / 8), paeth = UPNG.decode._paeth;
+      bpp = Math.ceil(bpp / 8);
+      var i = 0, di = 1, type = data[off], x = 0;
+      if (type > 1) data[off] = [0, 0, 1][type - 2];
+      if (type == 3) for (x = bpp; x < bpl; x++) data[x + 1] = data[x + 1] + (data[x + 1 - bpp] >>> 1) & 255;
+      for (var y = 0; y < h; y++) {
+        i = off + y * bpl;
+        di = i + y + 1;
+        type = data[di - 1];
+        x = 0;
+        if (type == 0) for (; x < bpl; x++) data[i + x] = data[di + x];
+        else if (type == 1) {
+          for (; x < bpp; x++) data[i + x] = data[di + x];
+          for (; x < bpl; x++) data[i + x] = data[di + x] + data[i + x - bpp];
+        } else if (type == 2) {
+          for (; x < bpl; x++) data[i + x] = data[di + x] + data[i + x - bpl];
+        } else if (type == 3) {
+          for (; x < bpp; x++) data[i + x] = data[di + x] + (data[i + x - bpl] >>> 1);
+          for (; x < bpl; x++) data[i + x] = data[di + x] + (data[i + x - bpl] + data[i + x - bpp] >>> 1);
+        } else {
+          for (; x < bpp; x++) data[i + x] = data[di + x] + paeth(0, data[i + x - bpl], 0);
+          for (; x < bpl; x++) data[i + x] = data[di + x] + paeth(data[i + x - bpp], data[i + x - bpl], data[i + x - bpp - bpl]);
+        }
+      }
+      return data;
+    };
+    UPNG.decode._paeth = function(a, b, c) {
+      var p = a + b - c, pa = p - a, pb = p - b, pc = p - c;
+      if (pa * pa <= pb * pb && pa * pa <= pc * pc) return a;
+      else if (pb * pb <= pc * pc) return b;
+      return c;
+    };
+    UPNG.decode._IHDR = function(data, offset, out) {
+      var bin = UPNG._bin;
+      out.width = bin.readUint(data, offset);
+      offset += 4;
+      out.height = bin.readUint(data, offset);
+      offset += 4;
+      out.depth = data[offset];
+      offset++;
+      out.ctype = data[offset];
+      offset++;
+      out.compress = data[offset];
+      offset++;
+      out.filter = data[offset];
+      offset++;
+      out.interlace = data[offset];
+      offset++;
+    };
+    UPNG._bin = {
+      nextZero: function(data, p) {
+        while (data[p] != 0) p++;
+        return p;
+      },
+      readUshort: function(buff, p) {
+        return buff[p] << 8 | buff[p + 1];
+      },
+      writeUshort: function(buff, p, n) {
+        buff[p] = n >> 8 & 255;
+        buff[p + 1] = n & 255;
+      },
+      readUint: function(buff, p) {
+        return buff[p] * (256 * 256 * 256) + (buff[p + 1] << 16 | buff[p + 2] << 8 | buff[p + 3]);
+      },
+      writeUint: function(buff, p, n) {
+        buff[p] = n >> 24 & 255;
+        buff[p + 1] = n >> 16 & 255;
+        buff[p + 2] = n >> 8 & 255;
+        buff[p + 3] = n & 255;
+      },
+      readASCII: function(buff, p, l) {
+        var s = "";
+        for (var i = 0; i < l; i++) s += String.fromCharCode(buff[p + i]);
+        return s;
+      },
+      writeASCII: function(data, p, s) {
+        for (var i = 0; i < s.length; i++) data[p + i] = s.charCodeAt(i);
+      },
+      readBytes: function(buff, p, l) {
+        var arr = [];
+        for (var i = 0; i < l; i++) arr.push(buff[p + i]);
+        return arr;
+      },
+      pad: function(n) {
+        return n.length < 2 ? "0" + n : n;
+      },
+      readUTF8: function(buff, p, l) {
+        var s = "", ns;
+        for (var i = 0; i < l; i++) s += "%" + UPNG._bin.pad(buff[p + i].toString(16));
+        try {
+          ns = decodeURIComponent(s);
+        } catch (e) {
+          return UPNG._bin.readASCII(buff, p, l);
+        }
+        return ns;
+      }
+    };
+    UPNG._copyTile = function(sb, sw, sh, tb, tw, th2, xoff, yoff, mode) {
+      var w = Math.min(sw, tw), h = Math.min(sh, th2);
+      var si = 0, ti = 0;
+      for (var y = 0; y < h; y++)
+        for (var x = 0; x < w; x++) {
+          if (xoff >= 0 && yoff >= 0) {
+            si = y * sw + x << 2;
+            ti = (yoff + y) * tw + xoff + x << 2;
+          } else {
+            si = (-yoff + y) * sw - xoff + x << 2;
+            ti = y * tw + x << 2;
+          }
+          if (mode == 0) {
+            tb[ti] = sb[si];
+            tb[ti + 1] = sb[si + 1];
+            tb[ti + 2] = sb[si + 2];
+            tb[ti + 3] = sb[si + 3];
+          } else if (mode == 1) {
+            var fa = sb[si + 3] * (1 / 255), fr2 = sb[si] * fa, fg = sb[si + 1] * fa, fb = sb[si + 2] * fa;
+            var ba = tb[ti + 3] * (1 / 255), br = tb[ti] * ba, bg = tb[ti + 1] * ba, bb = tb[ti + 2] * ba;
+            var ifa = 1 - fa, oa = fa + ba * ifa, ioa = oa == 0 ? 0 : 1 / oa;
+            tb[ti + 3] = 255 * oa;
+            tb[ti + 0] = (fr2 + br * ifa) * ioa;
+            tb[ti + 1] = (fg + bg * ifa) * ioa;
+            tb[ti + 2] = (fb + bb * ifa) * ioa;
+          } else if (mode == 2) {
+            var fa = sb[si + 3], fr2 = sb[si], fg = sb[si + 1], fb = sb[si + 2];
+            var ba = tb[ti + 3], br = tb[ti], bg = tb[ti + 1], bb = tb[ti + 2];
+            if (fa == ba && fr2 == br && fg == bg && fb == bb) {
+              tb[ti] = 0;
+              tb[ti + 1] = 0;
+              tb[ti + 2] = 0;
+              tb[ti + 3] = 0;
+            } else {
+              tb[ti] = fr2;
+              tb[ti + 1] = fg;
+              tb[ti + 2] = fb;
+              tb[ti + 3] = fa;
+            }
+          } else if (mode == 3) {
+            var fa = sb[si + 3], fr2 = sb[si], fg = sb[si + 1], fb = sb[si + 2];
+            var ba = tb[ti + 3], br = tb[ti], bg = tb[ti + 1], bb = tb[ti + 2];
+            if (fa == ba && fr2 == br && fg == bg && fb == bb) continue;
+            if (fa < 220 && ba > 20) return false;
+          }
+        }
+      return true;
+    };
+    UPNG.encode = function(bufs, w, h, ps, dels, tabs, forbidPlte) {
+      if (ps == null) ps = 0;
+      if (forbidPlte == null) forbidPlte = false;
+      var nimg = UPNG.encode.compress(bufs, w, h, ps, [false, false, false, 0, forbidPlte]);
+      UPNG.encode.compressPNG(nimg, -1);
+      return UPNG.encode._main(nimg, w, h, dels, tabs);
+    };
+    UPNG.encodeLL = function(bufs, w, h, cc, ac, depth, dels, tabs) {
+      var nimg = { ctype: 0 + (cc == 1 ? 0 : 2) + (ac == 0 ? 0 : 4), depth, frames: [] };
+      var time = Date.now();
+      var bipp = (cc + ac) * depth, bipl = bipp * w;
+      for (var i = 0; i < bufs.length; i++)
+        nimg.frames.push({ rect: { x: 0, y: 0, width: w, height: h }, img: new Uint8Array(bufs[i]), blend: 0, dispose: 1, bpp: Math.ceil(bipp / 8), bpl: Math.ceil(bipl / 8) });
+      UPNG.encode.compressPNG(nimg, 0, true);
+      var out = UPNG.encode._main(nimg, w, h, dels, tabs);
+      return out;
+    };
+    UPNG.encode._main = function(nimg, w, h, dels, tabs) {
+      if (tabs == null) tabs = {};
+      var crc = UPNG.crc.crc, wUi = UPNG._bin.writeUint, wUs = UPNG._bin.writeUshort, wAs = UPNG._bin.writeASCII;
+      var offset = 8, anim = nimg.frames.length > 1, pltAlpha = false;
+      var leng = 8 + (16 + 5 + 4) + (anim ? 20 : 0);
+      if (tabs["sRGB"] != null) leng += 8 + 1 + 4;
+      if (tabs["pHYs"] != null) leng += 8 + 9 + 4;
+      if (nimg.ctype == 3) {
+        var dl = nimg.plte.length;
+        for (var i = 0; i < dl; i++) if (nimg.plte[i] >>> 24 != 255) pltAlpha = true;
+        leng += 8 + dl * 3 + 4 + (pltAlpha ? 8 + dl * 1 + 4 : 0);
+      }
+      for (var j = 0; j < nimg.frames.length; j++) {
+        var fr2 = nimg.frames[j];
+        if (anim) leng += 38;
+        leng += fr2.cimg.length + 12;
+        if (j != 0) leng += 4;
+      }
+      leng += 12;
+      var data = new Uint8Array(leng);
+      var wr = [137, 80, 78, 71, 13, 10, 26, 10];
+      for (var i = 0; i < 8; i++) data[i] = wr[i];
+      wUi(data, offset, 13);
+      offset += 4;
+      wAs(data, offset, "IHDR");
+      offset += 4;
+      wUi(data, offset, w);
+      offset += 4;
+      wUi(data, offset, h);
+      offset += 4;
+      data[offset] = nimg.depth;
+      offset++;
+      data[offset] = nimg.ctype;
+      offset++;
+      data[offset] = 0;
+      offset++;
+      data[offset] = 0;
+      offset++;
+      data[offset] = 0;
+      offset++;
+      wUi(data, offset, crc(data, offset - 17, 17));
+      offset += 4;
+      if (tabs["sRGB"] != null) {
+        wUi(data, offset, 1);
+        offset += 4;
+        wAs(data, offset, "sRGB");
+        offset += 4;
+        data[offset] = tabs["sRGB"];
+        offset++;
+        wUi(data, offset, crc(data, offset - 5, 5));
+        offset += 4;
+      }
+      if (tabs["pHYs"] != null) {
+        wUi(data, offset, 9);
+        offset += 4;
+        wAs(data, offset, "pHYs");
+        offset += 4;
+        wUi(data, offset, tabs["pHYs"][0]);
+        offset += 4;
+        wUi(data, offset, tabs["pHYs"][1]);
+        offset += 4;
+        data[offset] = tabs["pHYs"][2];
+        offset++;
+        wUi(data, offset, crc(data, offset - 13, 13));
+        offset += 4;
+      }
+      if (anim) {
+        wUi(data, offset, 8);
+        offset += 4;
+        wAs(data, offset, "acTL");
+        offset += 4;
+        wUi(data, offset, nimg.frames.length);
+        offset += 4;
+        wUi(data, offset, tabs["loop"] != null ? tabs["loop"] : 0);
+        offset += 4;
+        wUi(data, offset, crc(data, offset - 12, 12));
+        offset += 4;
+      }
+      if (nimg.ctype == 3) {
+        var dl = nimg.plte.length;
+        wUi(data, offset, dl * 3);
+        offset += 4;
+        wAs(data, offset, "PLTE");
+        offset += 4;
+        for (var i = 0; i < dl; i++) {
+          var ti = i * 3, c = nimg.plte[i], r = c & 255, g = c >>> 8 & 255, b = c >>> 16 & 255;
+          data[offset + ti + 0] = r;
+          data[offset + ti + 1] = g;
+          data[offset + ti + 2] = b;
+        }
+        offset += dl * 3;
+        wUi(data, offset, crc(data, offset - dl * 3 - 4, dl * 3 + 4));
+        offset += 4;
+        if (pltAlpha) {
+          wUi(data, offset, dl);
+          offset += 4;
+          wAs(data, offset, "tRNS");
+          offset += 4;
+          for (var i = 0; i < dl; i++) data[offset + i] = nimg.plte[i] >>> 24 & 255;
+          offset += dl;
+          wUi(data, offset, crc(data, offset - dl - 4, dl + 4));
+          offset += 4;
+        }
+      }
+      var fi = 0;
+      for (var j = 0; j < nimg.frames.length; j++) {
+        var fr2 = nimg.frames[j];
+        if (anim) {
+          wUi(data, offset, 26);
+          offset += 4;
+          wAs(data, offset, "fcTL");
+          offset += 4;
+          wUi(data, offset, fi++);
+          offset += 4;
+          wUi(data, offset, fr2.rect.width);
+          offset += 4;
+          wUi(data, offset, fr2.rect.height);
+          offset += 4;
+          wUi(data, offset, fr2.rect.x);
+          offset += 4;
+          wUi(data, offset, fr2.rect.y);
+          offset += 4;
+          wUs(data, offset, dels[j]);
+          offset += 2;
+          wUs(data, offset, 1e3);
+          offset += 2;
+          data[offset] = fr2.dispose;
+          offset++;
+          data[offset] = fr2.blend;
+          offset++;
+          wUi(data, offset, crc(data, offset - 30, 30));
+          offset += 4;
+        }
+        var imgd = fr2.cimg, dl = imgd.length;
+        wUi(data, offset, dl + (j == 0 ? 0 : 4));
+        offset += 4;
+        var ioff = offset;
+        wAs(data, offset, j == 0 ? "IDAT" : "fdAT");
+        offset += 4;
+        if (j != 0) {
+          wUi(data, offset, fi++);
+          offset += 4;
+        }
+        data.set(imgd, offset);
+        offset += dl;
+        wUi(data, offset, crc(data, ioff, offset - ioff));
+        offset += 4;
+      }
+      wUi(data, offset, 0);
+      offset += 4;
+      wAs(data, offset, "IEND");
+      offset += 4;
+      wUi(data, offset, crc(data, offset - 4, 4));
+      offset += 4;
+      return data.buffer;
+    };
+    UPNG.encode.compressPNG = function(out, filter, levelZero) {
+      for (var i = 0; i < out.frames.length; i++) {
+        var frm = out.frames[i], nw = frm.rect.width, nh = frm.rect.height;
+        var fdata = new Uint8Array(nh * frm.bpl + nh);
+        frm.cimg = UPNG.encode._filterZero(frm.img, nh, frm.bpp, frm.bpl, fdata, filter, levelZero);
+      }
+    };
+    UPNG.encode.compress = function(bufs, w, h, ps, prms) {
+      var onlyBlend = prms[0], evenCrd = prms[1], forbidPrev = prms[2], minBits = prms[3], forbidPlte = prms[4];
+      var ctype = 6, depth = 8, alphaAnd = 255;
+      for (var j = 0; j < bufs.length; j++) {
+        var img = new Uint8Array(bufs[j]), ilen = img.length;
+        for (var i = 0; i < ilen; i += 4) alphaAnd &= img[i + 3];
+      }
+      var gotAlpha = alphaAnd != 255;
+      var frms = UPNG.encode.framize(bufs, w, h, onlyBlend, evenCrd, forbidPrev);
+      var cmap = {}, plte = [], inds = [];
+      if (ps != 0) {
+        var nbufs = [];
+        for (var i = 0; i < frms.length; i++) nbufs.push(frms[i].img.buffer);
+        var abuf = UPNG.encode.concatRGBA(nbufs), qres = UPNG.quantize(abuf, ps);
+        console.log(qres);
+        var cof = 0, bb = new Uint8Array(qres.abuf);
+        for (var i = 0; i < frms.length; i++) {
+          var ti = frms[i].img, bln = ti.length;
+          inds.push(new Uint8Array(qres.inds.buffer, cof >> 2, bln >> 2));
+          for (var j = 0; j < bln; j += 4) {
+            ti[j] = bb[cof + j];
+            ti[j + 1] = bb[cof + j + 1];
+            ti[j + 2] = bb[cof + j + 2];
+            ti[j + 3] = bb[cof + j + 3];
+          }
+          cof += bln;
+        }
+        for (var i = 0; i < qres.plte.length; i++) plte.push(qres.plte[i].est.rgba);
+      } else {
+        for (var j = 0; j < frms.length; j++) {
+          var frm = frms[j], img32 = new Uint32Array(frm.img.buffer), nw = frm.rect.width, ilen = img32.length;
+          var ind = new Uint8Array(ilen);
+          inds.push(ind);
+          for (var i = 0; i < ilen; i++) {
+            var c = img32[i];
+            if (i != 0 && c == img32[i - 1]) ind[i] = ind[i - 1];
+            else if (i > nw && c == img32[i - nw]) ind[i] = ind[i - nw];
+            else {
+              var cmc = cmap[c];
+              if (cmc == null) {
+                cmap[c] = cmc = plte.length;
+                plte.push(c);
+                if (plte.length >= 300) break;
+              }
+              ind[i] = cmc;
+            }
+          }
+        }
+      }
+      var cc = plte.length;
+      if (cc <= 256 && forbidPlte == false) {
+        if (cc <= 2) depth = 1;
+        else if (cc <= 4) depth = 2;
+        else if (cc <= 16) depth = 4;
+        else depth = 8;
+        depth = Math.max(depth, minBits);
+      }
+      for (var j = 0; j < frms.length; j++) {
+        var frm = frms[j], nx = frm.rect.x, ny = frm.rect.y, nw = frm.rect.width, nh = frm.rect.height;
+        var cimg = frm.img, cimg32 = new Uint32Array(cimg.buffer);
+        var bpl = 4 * nw, bpp = 4;
+        if (cc <= 256 && forbidPlte == false) {
+          bpl = Math.ceil(depth * nw / 8);
+          var nimg = new Uint8Array(bpl * nh);
+          var inj = inds[j];
+          for (var y = 0; y < nh; y++) {
+            var i = y * bpl, ii = y * nw;
+            if (depth == 8) for (var x = 0; x < nw; x++) nimg[i + x] = inj[ii + x];
+            else if (depth == 4) for (var x = 0; x < nw; x++) nimg[i + (x >> 1)] |= inj[ii + x] << 4 - (x & 1) * 4;
+            else if (depth == 2) for (var x = 0; x < nw; x++) nimg[i + (x >> 2)] |= inj[ii + x] << 6 - (x & 3) * 2;
+            else if (depth == 1) for (var x = 0; x < nw; x++) nimg[i + (x >> 3)] |= inj[ii + x] << 7 - (x & 7) * 1;
+          }
+          cimg = nimg;
+          ctype = 3;
+          bpp = 1;
+        } else if (gotAlpha == false && frms.length == 1) {
+          var nimg = new Uint8Array(nw * nh * 3), area = nw * nh;
+          for (var i = 0; i < area; i++) {
+            var ti = i * 3, qi = i * 4;
+            nimg[ti] = cimg[qi];
+            nimg[ti + 1] = cimg[qi + 1];
+            nimg[ti + 2] = cimg[qi + 2];
+          }
+          cimg = nimg;
+          ctype = 2;
+          bpp = 3;
+          bpl = 3 * nw;
+        }
+        frm.img = cimg;
+        frm.bpl = bpl;
+        frm.bpp = bpp;
+      }
+      return { ctype, depth, plte, frames: frms };
+    };
+    UPNG.encode.framize = function(bufs, w, h, alwaysBlend, evenCrd, forbidPrev) {
+      var frms = [];
+      for (var j = 0; j < bufs.length; j++) {
+        var cimg = new Uint8Array(bufs[j]), cimg32 = new Uint32Array(cimg.buffer);
+        var nimg;
+        var nx = 0, ny = 0, nw = w, nh = h, blend2 = alwaysBlend ? 1 : 0;
+        if (j != 0) {
+          var tlim = forbidPrev || alwaysBlend || j == 1 || frms[j - 2].dispose != 0 ? 1 : 2, tstp = 0, tarea = 1e9;
+          for (var it2 = 0; it2 < tlim; it2++) {
+            var pimg = new Uint8Array(bufs[j - 1 - it2]), p32 = new Uint32Array(bufs[j - 1 - it2]);
+            var mix = w, miy = h, max = -1, may = -1;
+            for (var y = 0; y < h; y++) for (var x = 0; x < w; x++) {
+              var i = y * w + x;
+              if (cimg32[i] != p32[i]) {
+                if (x < mix) mix = x;
+                if (x > max) max = x;
+                if (y < miy) miy = y;
+                if (y > may) may = y;
+              }
+            }
+            if (max == -1) mix = miy = max = may = 0;
+            if (evenCrd) {
+              if ((mix & 1) == 1) mix--;
+              if ((miy & 1) == 1) miy--;
+            }
+            var sarea = (max - mix + 1) * (may - miy + 1);
+            if (sarea < tarea) {
+              tarea = sarea;
+              tstp = it2;
+              nx = mix;
+              ny = miy;
+              nw = max - mix + 1;
+              nh = may - miy + 1;
+            }
+          }
+          var pimg = new Uint8Array(bufs[j - 1 - tstp]);
+          if (tstp == 1) frms[j - 1].dispose = 2;
+          nimg = new Uint8Array(nw * nh * 4);
+          UPNG._copyTile(pimg, w, h, nimg, nw, nh, -nx, -ny, 0);
+          blend2 = UPNG._copyTile(cimg, w, h, nimg, nw, nh, -nx, -ny, 3) ? 1 : 0;
+          if (blend2 == 1) UPNG.encode._prepareDiff(cimg, w, h, nimg, { x: nx, y: ny, width: nw, height: nh });
+          else UPNG._copyTile(cimg, w, h, nimg, nw, nh, -nx, -ny, 0);
+        } else nimg = cimg.slice(0);
+        frms.push({ rect: { x: nx, y: ny, width: nw, height: nh }, img: nimg, blend: blend2, dispose: 0 });
+      }
+      if (alwaysBlend) for (var j = 0; j < frms.length; j++) {
+        var frm = frms[j];
+        if (frm.blend == 1) continue;
+        var r0 = frm.rect, r1 = frms[j - 1].rect;
+        var miX = Math.min(r0.x, r1.x), miY = Math.min(r0.y, r1.y);
+        var maX = Math.max(r0.x + r0.width, r1.x + r1.width), maY = Math.max(r0.y + r0.height, r1.y + r1.height);
+        var r = { x: miX, y: miY, width: maX - miX, height: maY - miY };
+        frms[j - 1].dispose = 1;
+        if (j - 1 != 0)
+          UPNG.encode._updateFrame(bufs, w, h, frms, j - 1, r, evenCrd);
+        UPNG.encode._updateFrame(bufs, w, h, frms, j, r, evenCrd);
+      }
+      var area = 0;
+      if (bufs.length != 1) for (var i = 0; i < frms.length; i++) {
+        var frm = frms[i];
+        area += frm.rect.width * frm.rect.height;
+      }
+      return frms;
+    };
+    UPNG.encode._updateFrame = function(bufs, w, h, frms, i, r, evenCrd) {
+      var U8 = Uint8Array, U32 = Uint32Array;
+      var pimg = new U8(bufs[i - 1]), pimg32 = new U32(bufs[i - 1]), nimg = i + 1 < bufs.length ? new U8(bufs[i + 1]) : null;
+      var cimg = new U8(bufs[i]), cimg32 = new U32(cimg.buffer);
+      var mix = w, miy = h, max = -1, may = -1;
+      for (var y = 0; y < r.height; y++) for (var x = 0; x < r.width; x++) {
+        var cx = r.x + x, cy = r.y + y;
+        var j = cy * w + cx, cc = cimg32[j];
+        if (cc == 0 || frms[i - 1].dispose == 0 && pimg32[j] == cc && (nimg == null || nimg[j * 4 + 3] != 0)) {
+        } else {
+          if (cx < mix) mix = cx;
+          if (cx > max) max = cx;
+          if (cy < miy) miy = cy;
+          if (cy > may) may = cy;
+        }
+      }
+      if (max == -1) mix = miy = max = may = 0;
+      if (evenCrd) {
+        if ((mix & 1) == 1) mix--;
+        if ((miy & 1) == 1) miy--;
+      }
+      r = { x: mix, y: miy, width: max - mix + 1, height: may - miy + 1 };
+      var fr2 = frms[i];
+      fr2.rect = r;
+      fr2.blend = 1;
+      fr2.img = new Uint8Array(r.width * r.height * 4);
+      if (frms[i - 1].dispose == 0) {
+        UPNG._copyTile(pimg, w, h, fr2.img, r.width, r.height, -r.x, -r.y, 0);
+        UPNG.encode._prepareDiff(cimg, w, h, fr2.img, r);
+      } else
+        UPNG._copyTile(cimg, w, h, fr2.img, r.width, r.height, -r.x, -r.y, 0);
+    };
+    UPNG.encode._prepareDiff = function(cimg, w, h, nimg, rec) {
+      UPNG._copyTile(cimg, w, h, nimg, rec.width, rec.height, -rec.x, -rec.y, 2);
+    };
+    UPNG.encode._filterZero = function(img, h, bpp, bpl, data, filter, levelZero) {
+      var fls = [], ftry = [0, 1, 2, 3, 4];
+      if (filter != -1) ftry = [filter];
+      else if (h * bpl > 5e5 || bpp == 1) ftry = [0];
+      var opts;
+      if (levelZero) opts = { level: 0 };
+      var CMPR = data.length > 1e7 && UZIP != null ? UZIP : pako;
+      var time = Date.now();
+      for (var i = 0; i < ftry.length; i++) {
+        for (var y = 0; y < h; y++) UPNG.encode._filterLine(data, img, y, bpl, bpp, ftry[i]);
+        fls.push(CMPR["deflate"](data, opts));
+      }
+      var ti, tsize = 1e9;
+      for (var i = 0; i < fls.length; i++) if (fls[i].length < tsize) {
+        ti = i;
+        tsize = fls[i].length;
+      }
+      return fls[ti];
+    };
+    UPNG.encode._filterLine = function(data, img, y, bpl, bpp, type) {
+      var i = y * bpl, di = i + y, paeth = UPNG.decode._paeth;
+      data[di] = type;
+      di++;
+      if (type == 0) {
+        if (bpl < 500) for (var x = 0; x < bpl; x++) data[di + x] = img[i + x];
+        else data.set(new Uint8Array(img.buffer, i, bpl), di);
+      } else if (type == 1) {
+        for (var x = 0; x < bpp; x++) data[di + x] = img[i + x];
+        for (var x = bpp; x < bpl; x++) data[di + x] = img[i + x] - img[i + x - bpp] + 256 & 255;
+      } else if (y == 0) {
+        for (var x = 0; x < bpp; x++) data[di + x] = img[i + x];
+        if (type == 2) for (var x = bpp; x < bpl; x++) data[di + x] = img[i + x];
+        if (type == 3) for (var x = bpp; x < bpl; x++) data[di + x] = img[i + x] - (img[i + x - bpp] >> 1) + 256 & 255;
+        if (type == 4) for (var x = bpp; x < bpl; x++) data[di + x] = img[i + x] - paeth(img[i + x - bpp], 0, 0) + 256 & 255;
+      } else {
+        if (type == 2) {
+          for (var x = 0; x < bpl; x++) data[di + x] = img[i + x] + 256 - img[i + x - bpl] & 255;
+        }
+        if (type == 3) {
+          for (var x = 0; x < bpp; x++) data[di + x] = img[i + x] + 256 - (img[i + x - bpl] >> 1) & 255;
+          for (var x = bpp; x < bpl; x++) data[di + x] = img[i + x] + 256 - (img[i + x - bpl] + img[i + x - bpp] >> 1) & 255;
+        }
+        if (type == 4) {
+          for (var x = 0; x < bpp; x++) data[di + x] = img[i + x] + 256 - paeth(0, img[i + x - bpl], 0) & 255;
+          for (var x = bpp; x < bpl; x++) data[di + x] = img[i + x] + 256 - paeth(img[i + x - bpp], img[i + x - bpl], img[i + x - bpp - bpl]) & 255;
+        }
+      }
+    };
+    UPNG.crc = {
+      table: (function() {
+        var tab2 = new Uint32Array(256);
+        for (var n = 0; n < 256; n++) {
+          var c = n;
+          for (var k = 0; k < 8; k++) {
+            if (c & 1) c = 3988292384 ^ c >>> 1;
+            else c = c >>> 1;
+          }
+          tab2[n] = c;
+        }
+        return tab2;
+      })(),
+      update: function(c, buf, off, len) {
+        for (var i = 0; i < len; i++) c = UPNG.crc.table[(c ^ buf[off + i]) & 255] ^ c >>> 8;
+        return c;
+      },
+      crc: function(b, o, l) {
+        return UPNG.crc.update(4294967295, b, o, l) ^ 4294967295;
+      }
+    };
+    UPNG.quantize = function(abuf, ps) {
+      var oimg = new Uint8Array(abuf), nimg = oimg.slice(0), nimg32 = new Uint32Array(nimg.buffer);
+      var KD = UPNG.quantize.getKDtree(nimg, ps);
+      var root = KD[0], leafs = KD[1];
+      var planeDst = UPNG.quantize.planeDst;
+      var sb = oimg, tb = nimg32, len = sb.length;
+      var inds = new Uint8Array(oimg.length >> 2), nd;
+      if (oimg.length < 2e7)
+        for (var i = 0; i < len; i += 4) {
+          var r = sb[i] * (1 / 255), g = sb[i + 1] * (1 / 255), b = sb[i + 2] * (1 / 255), a = sb[i + 3] * (1 / 255);
+          nd = UPNG.quantize.getNearest(root, r, g, b, a);
+          inds[i >> 2] = nd.ind;
+          tb[i >> 2] = nd.est.rgba;
+        }
+      else
+        for (var i = 0; i < len; i += 4) {
+          var r = sb[i] * (1 / 255), g = sb[i + 1] * (1 / 255), b = sb[i + 2] * (1 / 255), a = sb[i + 3] * (1 / 255);
+          nd = root;
+          while (nd.left) nd = planeDst(nd.est, r, g, b, a) <= 0 ? nd.left : nd.right;
+          inds[i >> 2] = nd.ind;
+          tb[i >> 2] = nd.est.rgba;
+        }
+      return { abuf: nimg.buffer, inds, plte: leafs };
+    };
+    UPNG.quantize.getKDtree = function(nimg, ps, err) {
+      if (err == null) err = 1e-4;
+      var nimg32 = new Uint32Array(nimg.buffer);
+      var root = { i0: 0, i1: nimg.length, bst: null, est: null, tdst: 0, left: null, right: null };
+      root.bst = UPNG.quantize.stats(nimg, root.i0, root.i1);
+      root.est = UPNG.quantize.estats(root.bst);
+      var leafs = [root];
+      while (leafs.length < ps) {
+        var maxL = 0, mi = 0;
+        for (var i = 0; i < leafs.length; i++) if (leafs[i].est.L > maxL) {
+          maxL = leafs[i].est.L;
+          mi = i;
+        }
+        if (maxL < err) break;
+        var node = leafs[mi];
+        var s0 = UPNG.quantize.splitPixels(nimg, nimg32, node.i0, node.i1, node.est.e, node.est.eMq255);
+        var s0wrong = node.i0 >= s0 || node.i1 <= s0;
+        if (s0wrong) {
+          node.est.L = 0;
+          continue;
+        }
+        var ln = { i0: node.i0, i1: s0, bst: null, est: null, tdst: 0, left: null, right: null };
+        ln.bst = UPNG.quantize.stats(nimg, ln.i0, ln.i1);
+        ln.est = UPNG.quantize.estats(ln.bst);
+        var rn = { i0: s0, i1: node.i1, bst: null, est: null, tdst: 0, left: null, right: null };
+        rn.bst = { R: [], m: [], N: node.bst.N - ln.bst.N };
+        for (var i = 0; i < 16; i++) rn.bst.R[i] = node.bst.R[i] - ln.bst.R[i];
+        for (var i = 0; i < 4; i++) rn.bst.m[i] = node.bst.m[i] - ln.bst.m[i];
+        rn.est = UPNG.quantize.estats(rn.bst);
+        node.left = ln;
+        node.right = rn;
+        leafs[mi] = ln;
+        leafs.push(rn);
+      }
+      leafs.sort(function(a, b) {
+        return b.bst.N - a.bst.N;
+      });
+      for (var i = 0; i < leafs.length; i++) leafs[i].ind = i;
+      return [root, leafs];
+    };
+    UPNG.quantize.getNearest = function(nd, r, g, b, a) {
+      if (nd.left == null) {
+        nd.tdst = UPNG.quantize.dist(nd.est.q, r, g, b, a);
+        return nd;
+      }
+      var planeDst = UPNG.quantize.planeDst(nd.est, r, g, b, a);
+      var node0 = nd.left, node1 = nd.right;
+      if (planeDst > 0) {
+        node0 = nd.right;
+        node1 = nd.left;
+      }
+      var ln = UPNG.quantize.getNearest(node0, r, g, b, a);
+      if (ln.tdst <= planeDst * planeDst) return ln;
+      var rn = UPNG.quantize.getNearest(node1, r, g, b, a);
+      return rn.tdst < ln.tdst ? rn : ln;
+    };
+    UPNG.quantize.planeDst = function(est, r, g, b, a) {
+      var e = est.e;
+      return e[0] * r + e[1] * g + e[2] * b + e[3] * a - est.eMq;
+    };
+    UPNG.quantize.dist = function(q, r, g, b, a) {
+      var d0 = r - q[0], d1 = g - q[1], d2 = b - q[2], d3 = a - q[3];
+      return d0 * d0 + d1 * d1 + d2 * d2 + d3 * d3;
+    };
+    UPNG.quantize.splitPixels = function(nimg, nimg32, i0, i1, e, eMq) {
+      var vecDot = UPNG.quantize.vecDot;
+      i1 -= 4;
+      var shfs = 0;
+      while (i0 < i1) {
+        while (vecDot(nimg, i0, e) <= eMq) i0 += 4;
+        while (vecDot(nimg, i1, e) > eMq) i1 -= 4;
+        if (i0 >= i1) break;
+        var t2 = nimg32[i0 >> 2];
+        nimg32[i0 >> 2] = nimg32[i1 >> 2];
+        nimg32[i1 >> 2] = t2;
+        i0 += 4;
+        i1 -= 4;
+      }
+      while (vecDot(nimg, i0, e) > eMq) i0 -= 4;
+      return i0 + 4;
+    };
+    UPNG.quantize.vecDot = function(nimg, i, e) {
+      return nimg[i] * e[0] + nimg[i + 1] * e[1] + nimg[i + 2] * e[2] + nimg[i + 3] * e[3];
+    };
+    UPNG.quantize.stats = function(nimg, i0, i1) {
+      var R = [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0];
+      var m = [0, 0, 0, 0];
+      var N = i1 - i0 >> 2;
+      for (var i = i0; i < i1; i += 4) {
+        var r = nimg[i] * (1 / 255), g = nimg[i + 1] * (1 / 255), b = nimg[i + 2] * (1 / 255), a = nimg[i + 3] * (1 / 255);
+        m[0] += r;
+        m[1] += g;
+        m[2] += b;
+        m[3] += a;
+        R[0] += r * r;
+        R[1] += r * g;
+        R[2] += r * b;
+        R[3] += r * a;
+        R[5] += g * g;
+        R[6] += g * b;
+        R[7] += g * a;
+        R[10] += b * b;
+        R[11] += b * a;
+        R[15] += a * a;
+      }
+      R[4] = R[1];
+      R[8] = R[2];
+      R[9] = R[6];
+      R[12] = R[3];
+      R[13] = R[7];
+      R[14] = R[11];
+      return { R, m, N };
+    };
+    UPNG.quantize.estats = function(stats2) {
+      var R = stats2.R, m = stats2.m, N = stats2.N;
+      var m0 = m[0], m1 = m[1], m2 = m[2], m3 = m[3], iN = N == 0 ? 0 : 1 / N;
+      var Rj = [
+        R[0] - m0 * m0 * iN,
+        R[1] - m0 * m1 * iN,
+        R[2] - m0 * m2 * iN,
+        R[3] - m0 * m3 * iN,
+        R[4] - m1 * m0 * iN,
+        R[5] - m1 * m1 * iN,
+        R[6] - m1 * m2 * iN,
+        R[7] - m1 * m3 * iN,
+        R[8] - m2 * m0 * iN,
+        R[9] - m2 * m1 * iN,
+        R[10] - m2 * m2 * iN,
+        R[11] - m2 * m3 * iN,
+        R[12] - m3 * m0 * iN,
+        R[13] - m3 * m1 * iN,
+        R[14] - m3 * m2 * iN,
+        R[15] - m3 * m3 * iN
+      ];
+      var A = Rj, M = UPNG.M4;
+      var b = [0.5, 0.5, 0.5, 0.5], mi = 0, tmi = 0;
+      if (N != 0)
+        for (var i = 0; i < 16; i++) {
+          b = M.multVec(A, b);
+          tmi = Math.sqrt(M.dot(b, b));
+          b = M.sml(1 / tmi, b);
+          if (i != 0 && Math.abs(tmi - mi) < 1e-9) break;
+          mi = tmi;
+        }
+      var q = [m0 * iN, m1 * iN, m2 * iN, m3 * iN];
+      var eMq255 = M.dot(M.sml(255, q), b);
+      return {
+        Cov: Rj,
+        q,
+        e: b,
+        L: mi,
+        eMq255,
+        eMq: M.dot(b, q),
+        rgba: (Math.round(255 * q[3]) << 24 | Math.round(255 * q[2]) << 16 | Math.round(255 * q[1]) << 8 | Math.round(255 * q[0]) << 0) >>> 0
+      };
+    };
+    UPNG.M4 = {
+      multVec: function(m, v) {
+        return [
+          m[0] * v[0] + m[1] * v[1] + m[2] * v[2] + m[3] * v[3],
+          m[4] * v[0] + m[5] * v[1] + m[6] * v[2] + m[7] * v[3],
+          m[8] * v[0] + m[9] * v[1] + m[10] * v[2] + m[11] * v[3],
+          m[12] * v[0] + m[13] * v[1] + m[14] * v[2] + m[15] * v[3]
+        ];
+      },
+      dot: function(x, y) {
+        return x[0] * y[0] + x[1] * y[1] + x[2] * y[2] + x[3] * y[3];
+      },
+      sml: function(a, y) {
+        return [a * y[0], a * y[1], a * y[2], a * y[3]];
+      }
+    };
+    UPNG.encode.concatRGBA = function(bufs) {
+      var tlen = 0;
+      for (var i = 0; i < bufs.length; i++) tlen += bufs[i].byteLength;
+      var nimg = new Uint8Array(tlen), noff = 0;
+      for (var i = 0; i < bufs.length; i++) {
+        var img = new Uint8Array(bufs[i]), il = img.length;
+        for (var j = 0; j < il; j += 4) {
+          var r = img[j], g = img[j + 1], b = img[j + 2], a = img[j + 3];
+          if (a == 0) r = g = b = 0;
+          nimg[noff + j] = r;
+          nimg[noff + j + 1] = g;
+          nimg[noff + j + 2] = b;
+          nimg[noff + j + 3] = a;
+        }
+        noff += il;
+      }
+      return nimg.buffer;
+    };
+  }
+});
+
+// node_modules/sixel/lib/upng.js
+var require_upng2 = __commonJS({
+  "node_modules/sixel/lib/upng.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.quantize = void 0;
+    exports.quantize = require_upng().quantize;
+  }
+});
+
+// node_modules/sixel/lib/Quantizer.js
+var require_Quantizer = __commonJS({
+  "node_modules/sixel/lib/Quantizer.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.reduce = void 0;
+    var Colors_1 = require_Colors();
+    var upng_1 = require_upng2();
+    function clamp8Bit(value) {
+      return value >= 255 ? 255 : value < 0 ? 0 : value;
+    }
+    function applyError(value, r, g, b) {
+      return ((65280 | clamp8Bit((0, Colors_1.blue)(value) + b)) << 8 | clamp8Bit((0, Colors_1.green)(value) + g)) << 8 | clamp8Bit((0, Colors_1.red)(value) + r);
+    }
+    function reduce(data, width, colors) {
+      const data32 = new Uint32Array(data.buffer);
+      const KD = upng_1.quantize.getKDtree(data.slice(), colors);
+      const leafs = KD[1];
+      const palette = leafs.map((el) => (0, Colors_1.fromRGBA8888)(el.est.rgba));
+      const cm = new ColorMatcher(palette);
+      const indices = new Uint16Array(data32.length);
+      const len = data32.length;
+      for (let i = 0; i < len; ++i) {
+        const v = data32[i];
+        const r = (0, Colors_1.red)(v);
+        const g = (0, Colors_1.green)(v);
+        const b = (0, Colors_1.blue)(v);
+        const idx = cm.nearest(v);
+        indices[i] = idx;
+        const vp = leafs[idx].est.rgba;
+        let er = r - (0, Colors_1.red)(vp) >> 2;
+        let eg = g - (0, Colors_1.green)(vp) >> 2;
+        let eb = b - (0, Colors_1.blue)(vp) >> 2;
+        data32[i + 1] = applyError(data32[i + 1], er, eg, eb);
+        data32[i + width] = applyError(data32[i + width], er, eg, eb);
+        er >>= 1;
+        eg >>= 1;
+        eb >>= 1;
+        data32[i + width - 1] = applyError(data32[i + width - 1], er, eg, eb);
+        data32[i + width + 1] = applyError(data32[i + width + 1], er, eg, eb);
+      }
+      return { indices, palette: leafs.map((el) => el.est.rgba) };
+    }
+    exports.reduce = reduce;
+    var ColorMatcher = class {
+      constructor(palette, radius = 14, radius2 = 42) {
+        this.palette = palette;
+        this._boxes = {};
+        this._boxes2 = {};
+        const limit = radius * radius * 3;
+        const limit2 = radius2 * radius2 * 3;
+        for (let i = 0; i < 4096; ++i) {
+          const x = i >> 8;
+          const y = i >> 4 & 15;
+          const z = i & 15;
+          this._nearestPoints(i, (x << 4) + 8, (y << 4) + 8, (z << 4) + 8, limit, limit2);
+        }
+      }
+      _nearestPoints(box, r, g, b, limit, limit2) {
+        let min = Number.MAX_SAFE_INTEGER;
+        let idx = -1;
+        const pointIndices = [];
+        const pointIndices2 = [];
+        for (let i = 0; i < this.palette.length; ++i) {
+          const p_color = this.palette[i];
+          const d = this._distance(r, g, b, p_color[0], p_color[1], p_color[2]);
+          if (d < min) {
+            min = d;
+            idx = i;
+          }
+          if (d < limit) {
+            pointIndices.push(i);
+          } else if (d < limit2) {
+            pointIndices2.push(i);
+          }
+        }
+        if (pointIndices.length === 0) {
+          pointIndices.push(idx);
+        }
+        this._boxes[box] = pointIndices;
+        this._boxes2[box] = pointIndices2;
+      }
+      _distance(r1, g1, b1, r2, g2, b2) {
+        const dr = r1 - r2;
+        const dg = g1 - g2;
+        const db = b1 - b2;
+        return dr * dr + dg * dg + db * db;
+      }
+      nearest(color2) {
+        const r = (0, Colors_1.red)(color2);
+        const g = (0, Colors_1.green)(color2);
+        const b = (0, Colors_1.blue)(color2);
+        const box = r >> 4 << 8 | g >> 4 << 4 | b >> 4;
+        const indices = this._boxes[box];
+        let min = Number.MAX_SAFE_INTEGER;
+        let idx = -1;
+        for (let i = 0; i < indices.length; ++i) {
+          const p_color = this.palette[indices[i]];
+          const d = this._distance(r, g, b, p_color[0], p_color[1], p_color[2]);
+          if (!d)
+            return indices[i];
+          if (d < min) {
+            min = d;
+            idx = indices[i];
+          }
+        }
+        if (this._distance(r, g, b, (r & 240) + 8, (g & 240) + 8, (b & 240) + 8) > 192) {
+          const indices2 = this._boxes2[box];
+          for (let i = 0; i < indices2.length; ++i) {
+            const p_color = this.palette[indices2[i]];
+            const d = this._distance(r, g, b, p_color[0], p_color[1], p_color[2]);
+            if (d < min) {
+              min = d;
+              idx = indices2[i];
+            }
+          }
+        }
+        return idx;
+      }
+    };
+  }
+});
+
+// node_modules/sixel/lib/SixelEncoder.js
+var require_SixelEncoder = __commonJS({
+  "node_modules/sixel/lib/SixelEncoder.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.image2sixel = exports.sixelEncodeIndexed = exports.sixelEncode = exports.FINALIZER = exports.introducer = void 0;
+    var Colors_1 = require_Colors();
+    var Quantizer_1 = require_Quantizer();
+    function introducer(backgroundSelect = 0) {
+      return `\x1BP0;${backgroundSelect};q`;
+    }
+    exports.introducer = introducer;
+    exports.FINALIZER = "\x1B\\";
+    function codeToSixel(code, repeat) {
+      const c = String.fromCharCode(code + 63);
+      if (repeat > 3)
+        return "!" + repeat + c;
+      if (repeat === 3)
+        return c + c + c;
+      if (repeat === 2)
+        return c + c;
+      return c;
+    }
+    function processBand(data32, start, bandHeight, width, colorMap, paletteRGB) {
+      const last = new Int8Array(paletteRGB.length + 1);
+      const code = new Uint8Array(paletteRGB.length + 1);
+      const accu = new Uint16Array(paletteRGB.length + 1);
+      const slots = new Int16Array(paletteRGB.length + 1);
+      last.fill(-1);
+      accu.fill(1);
+      slots.fill(-1);
+      const usedColorIdx = [];
+      const targets = [];
+      let oldColor = 0;
+      let idx = 0;
+      for (let i = 0; i < width; ++i) {
+        const p = start + i;
+        let rowOffset = 0;
+        code.fill(0, 0, usedColorIdx.length);
+        for (let row = 0; row < bandHeight; ++row) {
+          const color2 = data32[p + rowOffset];
+          if (color2 !== oldColor) {
+            oldColor = color2;
+            idx = (0, Colors_1.alpha)(color2) ? colorMap.get(color2) || 0 : 0;
+            if (idx === void 0) {
+              idx = (0, Colors_1.nearestColorIndex)(color2, paletteRGB) + 1;
+              colorMap.set(color2, idx);
+            }
+            if (slots[idx] === -1) {
+              targets.push([]);
+              if (i) {
+                last[usedColorIdx.length] = 0;
+                accu[usedColorIdx.length] = i;
+              }
+              slots[idx] = usedColorIdx.length;
+              usedColorIdx.push(idx);
+            }
+          }
+          code[slots[idx]] |= 1 << row;
+          rowOffset += width;
+        }
+        for (let j = 0; j < usedColorIdx.length; ++j) {
+          if (code[j] === last[j]) {
+            accu[j]++;
+          } else {
+            if (~last[j]) {
+              targets[j].push(codeToSixel(last[j], accu[j]));
+            }
+            last[j] = code[j];
+            accu[j] = 1;
+          }
+        }
+      }
+      for (let j = 0; j < usedColorIdx.length; ++j) {
+        if (last[j]) {
+          targets[j].push(codeToSixel(last[j], accu[j]));
+        }
+      }
+      const result = [];
+      for (let j = 0; j < usedColorIdx.length; ++j) {
+        if (!usedColorIdx[j])
+          continue;
+        result.push("#" + (usedColorIdx[j] - 1) + targets[j].join("") + "$");
+      }
+      return result.join("");
+    }
+    function sixelEncode(data, width, height, palette, rasterAttributes = true) {
+      if (!data.length || !width || !height) {
+        return "";
+      }
+      if (width * height * 4 !== data.length) {
+        throw new Error("wrong geometry of data");
+      }
+      if (!palette || !palette.length) {
+        throw new Error("palette must not be empty");
+      }
+      const paletteWithZero = [0];
+      const paletteRGB = [];
+      for (let i = 0; i < palette.length; ++i) {
+        let color2 = palette[i];
+        if (typeof color2 === "number") {
+          if (!(0, Colors_1.alpha)(color2))
+            continue;
+          color2 = (0, Colors_1.toRGBA8888)(...(0, Colors_1.fromRGBA8888)(color2));
+        } else {
+          color2 = (0, Colors_1.toRGBA8888)(...color2);
+        }
+        if (!~paletteWithZero.indexOf(color2)) {
+          paletteWithZero.push(color2);
+          paletteRGB.push((0, Colors_1.fromRGBA8888)(color2).slice(0, -1));
+        }
+      }
+      const chunks = [];
+      if (rasterAttributes) {
+        chunks.push(`"1;1;${width};${height}`);
+      }
+      for (let [idx, [r, g, b]] of paletteRGB.entries()) {
+        chunks.push(`#${idx};2;${Math.round(r / 255 * 100)};${Math.round(g / 255 * 100)};${Math.round(b / 255 * 100)}`);
+      }
+      const colorMap = new Map(paletteWithZero.map((el, idx) => [el, idx]));
+      const bands = [];
+      const data32 = new Uint32Array(data.buffer);
+      for (let b = 0; b < height; b += 6) {
+        bands.push(processBand(data32, b * width, height - b >= 6 ? 6 : height - b, width, colorMap, paletteRGB));
+      }
+      chunks.push(bands.join("-\n"));
+      return chunks.join("");
+    }
+    exports.sixelEncode = sixelEncode;
+    function processBandIndexed(indices, start, bandHeight, width, last, code, accu, slots) {
+      last.fill(-1);
+      code.fill(0);
+      accu.fill(1);
+      slots.fill(-1);
+      const usedColorIdx = [];
+      const targets = [];
+      for (let i = 0; i < width; ++i) {
+        const p = start + i;
+        let rowOffset = 0;
+        code.fill(0, 0, usedColorIdx.length);
+        for (let row = 0; row < bandHeight; ++row) {
+          const idx = indices[p + rowOffset] + 1;
+          if (slots[idx] === -1) {
+            targets.push([]);
+            if (i) {
+              last[usedColorIdx.length] = 0;
+              accu[usedColorIdx.length] = i;
+            }
+            slots[idx] = usedColorIdx.length;
+            usedColorIdx.push(idx);
+          }
+          code[slots[idx]] |= 1 << row;
+          rowOffset += width;
+        }
+        for (let j = 0; j < usedColorIdx.length; ++j) {
+          if (code[j] === last[j]) {
+            accu[j]++;
+          } else {
+            if (~last[j]) {
+              targets[j].push(codeToSixel(last[j], accu[j]));
+            }
+            last[j] = code[j];
+            accu[j] = 1;
+          }
+        }
+      }
+      for (let j = 0; j < usedColorIdx.length; ++j) {
+        if (last[j]) {
+          targets[j].push(codeToSixel(last[j], accu[j]));
+        }
+      }
+      const result = [];
+      for (let j = 0; j < usedColorIdx.length; ++j) {
+        if (!usedColorIdx[j])
+          continue;
+        result.push("#" + (usedColorIdx[j] - 1) + targets[j].join("") + "$");
+      }
+      return result.join("");
+    }
+    function sixelEncodeIndexed(indices, width, height, palette, rasterAttributes = true) {
+      if (!indices.length || !width || !height) {
+        return "";
+      }
+      if (width * height !== indices.length) {
+        throw new Error("wrong geometry of data");
+      }
+      if (!palette || !palette.length) {
+        throw new Error("palette must not be empty");
+      }
+      const paletteWithZero = [0];
+      const paletteRGB = [];
+      for (let i = 0; i < palette.length; ++i) {
+        let color2 = palette[i];
+        if (typeof color2 === "number") {
+          if (!(0, Colors_1.alpha)(color2))
+            continue;
+          color2 = (0, Colors_1.toRGBA8888)(...(0, Colors_1.fromRGBA8888)(color2));
+        } else {
+          color2 = (0, Colors_1.toRGBA8888)(...color2);
+        }
+        if (!~paletteWithZero.indexOf(color2)) {
+          paletteWithZero.push(color2);
+          paletteRGB.push((0, Colors_1.fromRGBA8888)(color2).slice(0, -1));
+        }
+      }
+      const chunks = [];
+      if (rasterAttributes) {
+        chunks.push(`"1;1;${width};${height}`);
+      }
+      for (let [idx, [r, g, b]] of paletteRGB.entries()) {
+        chunks.push(`#${idx};2;${Math.round(r / 255 * 100)};${Math.round(g / 255 * 100)};${Math.round(b / 255 * 100)}`);
+      }
+      const last = new Int8Array(paletteRGB.length + 1);
+      const code = new Uint8Array(paletteRGB.length + 1);
+      const accu = new Uint16Array(paletteRGB.length + 1);
+      const slots = new Int16Array(paletteRGB.length + 1);
+      const bands = [];
+      for (let b = 0; b < height; b += 6) {
+        bands.push(processBandIndexed(indices, b * width, height - b >= 6 ? 6 : height - b, width, last, code, accu, slots));
+      }
+      chunks.push(bands.join("-\n"));
+      return chunks.join("");
+    }
+    exports.sixelEncodeIndexed = sixelEncodeIndexed;
+    function image2sixel(data, width, height, maxColors = 256, backgroundSelect = 0) {
+      const { indices, palette } = (0, Quantizer_1.reduce)(data, width, maxColors);
+      const sixelData = sixelEncodeIndexed(indices, width, height, palette);
+      return [introducer(backgroundSelect), sixelData, exports.FINALIZER].join("");
+    }
+    exports.image2sixel = image2sixel;
+  }
+});
+
+// node_modules/sixel/lib/index.js
+var require_lib = __commonJS({
+  "node_modules/sixel/lib/index.js"(exports) {
+    "use strict";
+    Object.defineProperty(exports, "__esModule", { value: true });
+    exports.DEFAULT_FOREGROUND = exports.DEFAULT_BACKGROUND = exports.PALETTE_VT340_GREY = exports.PALETTE_VT340_COLOR = exports.PALETTE_ANSI_256 = exports.fromRGBA8888 = exports.toRGBA8888 = exports.image2sixel = exports.FINALIZER = exports.introducer = exports.sixelEncode = exports.decodeAsync = exports.decode = exports.DecoderAsync = exports.Decoder = void 0;
+    var Decoder_1 = require_Decoder();
+    Object.defineProperty(exports, "Decoder", { enumerable: true, get: function() {
+      return Decoder_1.Decoder;
+    } });
+    Object.defineProperty(exports, "DecoderAsync", { enumerable: true, get: function() {
+      return Decoder_1.DecoderAsync;
+    } });
+    Object.defineProperty(exports, "decode", { enumerable: true, get: function() {
+      return Decoder_1.decode;
+    } });
+    Object.defineProperty(exports, "decodeAsync", { enumerable: true, get: function() {
+      return Decoder_1.decodeAsync;
+    } });
+    var SixelEncoder_1 = require_SixelEncoder();
+    Object.defineProperty(exports, "sixelEncode", { enumerable: true, get: function() {
+      return SixelEncoder_1.sixelEncode;
+    } });
+    Object.defineProperty(exports, "introducer", { enumerable: true, get: function() {
+      return SixelEncoder_1.introducer;
+    } });
+    Object.defineProperty(exports, "FINALIZER", { enumerable: true, get: function() {
+      return SixelEncoder_1.FINALIZER;
+    } });
+    Object.defineProperty(exports, "image2sixel", { enumerable: true, get: function() {
+      return SixelEncoder_1.image2sixel;
+    } });
+    var Colors_1 = require_Colors();
+    Object.defineProperty(exports, "toRGBA8888", { enumerable: true, get: function() {
+      return Colors_1.toRGBA8888;
+    } });
+    Object.defineProperty(exports, "fromRGBA8888", { enumerable: true, get: function() {
+      return Colors_1.fromRGBA8888;
+    } });
+    Object.defineProperty(exports, "PALETTE_ANSI_256", { enumerable: true, get: function() {
+      return Colors_1.PALETTE_ANSI_256;
+    } });
+    Object.defineProperty(exports, "PALETTE_VT340_COLOR", { enumerable: true, get: function() {
+      return Colors_1.PALETTE_VT340_COLOR;
+    } });
+    Object.defineProperty(exports, "PALETTE_VT340_GREY", { enumerable: true, get: function() {
+      return Colors_1.PALETTE_VT340_GREY;
+    } });
+    Object.defineProperty(exports, "DEFAULT_BACKGROUND", { enumerable: true, get: function() {
+      return Colors_1.DEFAULT_BACKGROUND;
+    } });
+    Object.defineProperty(exports, "DEFAULT_FOREGROUND", { enumerable: true, get: function() {
+      return Colors_1.DEFAULT_FOREGROUND;
+    } });
+  }
+});
+
+// node_modules/sharp/dist/is.mjs
+var defined, object, plainObject, fn, bool, buffer, typedArray, arrayBuffer, string, number, integer, inRange, inArray, invalidParameterError, nativeError, is_default;
+var init_is = __esm({
+  "node_modules/sharp/dist/is.mjs"() {
+    "use strict";
+    defined = (val) => typeof val !== "undefined" && val !== null;
+    object = (val) => typeof val === "object";
+    plainObject = (val) => Object.prototype.toString.call(val) === "[object Object]";
+    fn = (val) => typeof val === "function";
+    bool = (val) => typeof val === "boolean";
+    buffer = (val) => val instanceof Buffer;
+    typedArray = (val) => {
+      if (defined(val)) {
+        switch (val.constructor) {
+          case Uint8Array:
+          case Uint8ClampedArray:
+          case Int8Array:
+          case Uint16Array:
+          case Int16Array:
+          case Uint32Array:
+          case Int32Array:
+          case Float32Array:
+          case Float64Array:
+            return true;
+        }
+      }
+      return false;
+    };
+    arrayBuffer = (val) => val instanceof ArrayBuffer;
+    string = (val) => typeof val === "string" && val.length > 0;
+    number = (val) => typeof val === "number" && Number.isFinite(val);
+    integer = (val) => Number.isInteger(val);
+    inRange = (val, min, max) => val >= min && val <= max;
+    inArray = (val, list) => list.includes(val);
+    invalidParameterError = (name, expected, actual) => new Error(
+      `Expected ${expected} for ${name} but received ${actual} of type ${typeof actual}`
+    );
+    nativeError = (native, context) => {
+      context.message = native.message;
+      return context;
+    };
+    is_default = {
+      defined,
+      object,
+      plainObject,
+      fn,
+      bool,
+      buffer,
+      typedArray,
+      arrayBuffer,
+      string,
+      number,
+      integer,
+      inRange,
+      inArray,
+      invalidParameterError,
+      nativeError
+    };
+  }
+});
+
+// node_modules/detect-libc/lib/process.js
+var require_process = __commonJS({
+  "node_modules/detect-libc/lib/process.js"(exports, module) {
+    "use strict";
+    var isLinux2 = () => process.platform === "linux";
+    var report = null;
+    var getReport = () => {
+      if (!report) {
+        if (isLinux2() && process.report) {
+          const orig = process.report.excludeNetwork;
+          process.report.excludeNetwork = true;
+          report = process.report.getReport();
+          process.report.excludeNetwork = orig;
+        } else {
+          report = {};
+        }
+      }
+      return report;
+    };
+    module.exports = { isLinux: isLinux2, getReport };
+  }
+});
+
+// node_modules/detect-libc/lib/filesystem.js
+var require_filesystem = __commonJS({
+  "node_modules/detect-libc/lib/filesystem.js"(exports, module) {
+    "use strict";
+    var fs5 = __require("fs");
+    var LDD_PATH = "/usr/bin/ldd";
+    var SELF_PATH = "/proc/self/exe";
+    var MAX_LENGTH = 2048;
+    var readFileSync2 = (path5) => {
+      const fd = fs5.openSync(path5, "r");
+      const buffer2 = Buffer.alloc(MAX_LENGTH);
+      const bytesRead = fs5.readSync(fd, buffer2, 0, MAX_LENGTH, 0);
+      fs5.close(fd, () => {
+      });
+      return buffer2.subarray(0, bytesRead);
+    };
+    var readFile = (path5) => new Promise((resolve, reject) => {
+      fs5.open(path5, "r", (err, fd) => {
+        if (err) {
+          reject(err);
+        } else {
+          const buffer2 = Buffer.alloc(MAX_LENGTH);
+          fs5.read(fd, buffer2, 0, MAX_LENGTH, 0, (_, bytesRead) => {
+            resolve(buffer2.subarray(0, bytesRead));
+            fs5.close(fd, () => {
+            });
+          });
+        }
+      });
+    });
+    module.exports = {
+      LDD_PATH,
+      SELF_PATH,
+      readFileSync: readFileSync2,
+      readFile
+    };
+  }
+});
+
+// node_modules/detect-libc/lib/elf.js
+var require_elf = __commonJS({
+  "node_modules/detect-libc/lib/elf.js"(exports, module) {
+    "use strict";
+    var interpreterPath = (elf) => {
+      if (elf.length < 64) {
+        return null;
+      }
+      if (elf.readUInt32BE(0) !== 2135247942) {
+        return null;
+      }
+      if (elf.readUInt8(4) !== 2) {
+        return null;
+      }
+      if (elf.readUInt8(5) !== 1) {
+        return null;
+      }
+      const offset = elf.readUInt32LE(32);
+      const size = elf.readUInt16LE(54);
+      const count = elf.readUInt16LE(56);
+      for (let i = 0; i < count; i++) {
+        const headerOffset = offset + i * size;
+        const type = elf.readUInt32LE(headerOffset);
+        if (type === 3) {
+          const fileOffset = elf.readUInt32LE(headerOffset + 8);
+          const fileSize = elf.readUInt32LE(headerOffset + 32);
+          return elf.subarray(fileOffset, fileOffset + fileSize).toString().replace(/\0.*$/g, "");
+        }
+      }
+      return null;
+    };
+    module.exports = {
+      interpreterPath
+    };
+  }
+});
+
+// node_modules/detect-libc/lib/detect-libc.js
+var require_detect_libc = __commonJS({
+  "node_modules/detect-libc/lib/detect-libc.js"(exports, module) {
+    "use strict";
+    var childProcess = __require("child_process");
+    var { isLinux: isLinux2, getReport } = require_process();
+    var { LDD_PATH, SELF_PATH, readFile, readFileSync: readFileSync2 } = require_filesystem();
+    var { interpreterPath } = require_elf();
+    var cachedFamilyInterpreter;
+    var cachedFamilyFilesystem;
+    var cachedVersionFilesystem;
+    var command = "getconf GNU_LIBC_VERSION 2>&1 || true; ldd --version 2>&1 || true";
+    var commandOut = "";
+    var safeCommand = () => {
+      if (!commandOut) {
+        return new Promise((resolve) => {
+          childProcess.exec(command, (err, out) => {
+            commandOut = err ? " " : out;
+            resolve(commandOut);
+          });
+        });
+      }
+      return commandOut;
+    };
+    var safeCommandSync = () => {
+      if (!commandOut) {
+        try {
+          commandOut = childProcess.execSync(command, { encoding: "utf8" });
+        } catch (_err) {
+          commandOut = " ";
+        }
+      }
+      return commandOut;
+    };
+    var GLIBC = "glibc";
+    var RE_GLIBC_VERSION = /LIBC[a-z0-9 \-).]*?(\d+\.\d+)/i;
+    var MUSL = "musl";
+    var isFileMusl = (f) => f.includes("libc.musl-") || f.includes("ld-musl-");
+    var familyFromReport = () => {
+      const report = getReport();
+      if (report.header && report.header.glibcVersionRuntime) {
+        return GLIBC;
+      }
+      if (Array.isArray(report.sharedObjects)) {
+        if (report.sharedObjects.some(isFileMusl)) {
+          return MUSL;
+        }
+      }
+      return null;
+    };
+    var familyFromCommand = (out) => {
+      const [getconf, ldd1] = out.split(/[\r\n]+/);
+      if (getconf && getconf.includes(GLIBC)) {
+        return GLIBC;
+      }
+      if (ldd1 && ldd1.includes(MUSL)) {
+        return MUSL;
+      }
+      return null;
+    };
+    var familyFromInterpreterPath = (path5) => {
+      if (path5) {
+        if (path5.includes("/ld-musl-")) {
+          return MUSL;
+        } else if (path5.includes("/ld-linux-")) {
+          return GLIBC;
+        }
+      }
+      return null;
+    };
+    var getFamilyFromLddContent = (content) => {
+      content = content.toString();
+      if (content.includes("musl")) {
+        return MUSL;
+      }
+      if (content.includes("GNU C Library")) {
+        return GLIBC;
+      }
+      return null;
+    };
+    var familyFromFilesystem = async () => {
+      if (cachedFamilyFilesystem !== void 0) {
+        return cachedFamilyFilesystem;
+      }
+      cachedFamilyFilesystem = null;
+      try {
+        const lddContent = await readFile(LDD_PATH);
+        cachedFamilyFilesystem = getFamilyFromLddContent(lddContent);
+      } catch (e) {
+      }
+      return cachedFamilyFilesystem;
+    };
+    var familyFromFilesystemSync = () => {
+      if (cachedFamilyFilesystem !== void 0) {
+        return cachedFamilyFilesystem;
+      }
+      cachedFamilyFilesystem = null;
+      try {
+        const lddContent = readFileSync2(LDD_PATH);
+        cachedFamilyFilesystem = getFamilyFromLddContent(lddContent);
+      } catch (e) {
+      }
+      return cachedFamilyFilesystem;
+    };
+    var familyFromInterpreter = async () => {
+      if (cachedFamilyInterpreter !== void 0) {
+        return cachedFamilyInterpreter;
+      }
+      cachedFamilyInterpreter = null;
+      try {
+        const selfContent = await readFile(SELF_PATH);
+        const path5 = interpreterPath(selfContent);
+        cachedFamilyInterpreter = familyFromInterpreterPath(path5);
+      } catch (e) {
+      }
+      return cachedFamilyInterpreter;
+    };
+    var familyFromInterpreterSync = () => {
+      if (cachedFamilyInterpreter !== void 0) {
+        return cachedFamilyInterpreter;
+      }
+      cachedFamilyInterpreter = null;
+      try {
+        const selfContent = readFileSync2(SELF_PATH);
+        const path5 = interpreterPath(selfContent);
+        cachedFamilyInterpreter = familyFromInterpreterPath(path5);
+      } catch (e) {
+      }
+      return cachedFamilyInterpreter;
+    };
+    var family = async () => {
+      let family2 = null;
+      if (isLinux2()) {
+        family2 = await familyFromInterpreter();
+        if (!family2) {
+          family2 = await familyFromFilesystem();
+          if (!family2) {
+            family2 = familyFromReport();
+          }
+          if (!family2) {
+            const out = await safeCommand();
+            family2 = familyFromCommand(out);
+          }
+        }
+      }
+      return family2;
+    };
+    var familySync2 = () => {
+      let family2 = null;
+      if (isLinux2()) {
+        family2 = familyFromInterpreterSync();
+        if (!family2) {
+          family2 = familyFromFilesystemSync();
+          if (!family2) {
+            family2 = familyFromReport();
+          }
+          if (!family2) {
+            const out = safeCommandSync();
+            family2 = familyFromCommand(out);
+          }
+        }
+      }
+      return family2;
+    };
+    var isNonGlibcLinux = async () => isLinux2() && await family() !== GLIBC;
+    var isNonGlibcLinuxSync = () => isLinux2() && familySync2() !== GLIBC;
+    var versionFromFilesystem = async () => {
+      if (cachedVersionFilesystem !== void 0) {
+        return cachedVersionFilesystem;
+      }
+      cachedVersionFilesystem = null;
+      try {
+        const lddContent = await readFile(LDD_PATH);
+        const versionMatch = lddContent.match(RE_GLIBC_VERSION);
+        if (versionMatch) {
+          cachedVersionFilesystem = versionMatch[1];
+        }
+      } catch (e) {
+      }
+      return cachedVersionFilesystem;
+    };
+    var versionFromFilesystemSync = () => {
+      if (cachedVersionFilesystem !== void 0) {
+        return cachedVersionFilesystem;
+      }
+      cachedVersionFilesystem = null;
+      try {
+        const lddContent = readFileSync2(LDD_PATH);
+        const versionMatch = lddContent.match(RE_GLIBC_VERSION);
+        if (versionMatch) {
+          cachedVersionFilesystem = versionMatch[1];
+        }
+      } catch (e) {
+      }
+      return cachedVersionFilesystem;
+    };
+    var versionFromReport = () => {
+      const report = getReport();
+      if (report.header && report.header.glibcVersionRuntime) {
+        return report.header.glibcVersionRuntime;
+      }
+      return null;
+    };
+    var versionSuffix = (s) => s.trim().split(/\s+/)[1];
+    var versionFromCommand = (out) => {
+      const [getconf, ldd1, ldd2] = out.split(/[\r\n]+/);
+      if (getconf && getconf.includes(GLIBC)) {
+        return versionSuffix(getconf);
+      }
+      if (ldd1 && ldd2 && ldd1.includes(MUSL)) {
+        return versionSuffix(ldd2);
+      }
+      return null;
+    };
+    var version2 = async () => {
+      let version3 = null;
+      if (isLinux2()) {
+        version3 = await versionFromFilesystem();
+        if (!version3) {
+          version3 = versionFromReport();
+        }
+        if (!version3) {
+          const out = await safeCommand();
+          version3 = versionFromCommand(out);
+        }
+      }
+      return version3;
+    };
+    var versionSync2 = () => {
+      let version3 = null;
+      if (isLinux2()) {
+        version3 = versionFromFilesystemSync();
+        if (!version3) {
+          version3 = versionFromReport();
+        }
+        if (!version3) {
+          const out = safeCommandSync();
+          version3 = versionFromCommand(out);
+        }
+      }
+      return version3;
+    };
+    module.exports = {
+      GLIBC,
+      MUSL,
+      family,
+      familySync: familySync2,
+      isNonGlibcLinux,
+      isNonGlibcLinuxSync,
+      version: version2,
+      versionSync: versionSync2
+    };
+  }
+});
+
+// node_modules/semver/internal/constants.js
+var require_constants3 = __commonJS({
+  "node_modules/semver/internal/constants.js"(exports, module) {
+    "use strict";
+    var SEMVER_SPEC_VERSION = "2.0.0";
+    var MAX_LENGTH = 256;
+    var MAX_SAFE_INTEGER = Number.MAX_SAFE_INTEGER || /* istanbul ignore next */
+    9007199254740991;
+    var MAX_SAFE_COMPONENT_LENGTH = 16;
+    var MAX_SAFE_BUILD_LENGTH = MAX_LENGTH - 6;
+    var RELEASE_TYPES = [
+      "major",
+      "premajor",
+      "minor",
+      "preminor",
+      "patch",
+      "prepatch",
+      "prerelease"
+    ];
+    module.exports = {
+      MAX_LENGTH,
+      MAX_SAFE_COMPONENT_LENGTH,
+      MAX_SAFE_BUILD_LENGTH,
+      MAX_SAFE_INTEGER,
+      RELEASE_TYPES,
+      SEMVER_SPEC_VERSION,
+      FLAG_INCLUDE_PRERELEASE: 1,
+      FLAG_LOOSE: 2
+    };
+  }
+});
+
+// node_modules/semver/internal/debug.js
+var require_debug = __commonJS({
+  "node_modules/semver/internal/debug.js"(exports, module) {
+    "use strict";
+    var debug = typeof process === "object" && process.env && process.env.NODE_DEBUG && /\bsemver\b/i.test(process.env.NODE_DEBUG) ? (...args2) => console.error("SEMVER", ...args2) : () => {
+    };
+    module.exports = debug;
+  }
+});
+
+// node_modules/semver/internal/re.js
+var require_re = __commonJS({
+  "node_modules/semver/internal/re.js"(exports, module) {
+    "use strict";
+    var {
+      MAX_SAFE_COMPONENT_LENGTH,
+      MAX_SAFE_BUILD_LENGTH,
+      MAX_LENGTH
+    } = require_constants3();
+    var debug = require_debug();
+    exports = module.exports = {};
+    var re = exports.re = [];
+    var safeRe = exports.safeRe = [];
+    var src = exports.src = [];
+    var safeSrc = exports.safeSrc = [];
+    var t2 = exports.t = {};
+    var R = 0;
+    var LETTERDASHNUMBER = "[a-zA-Z0-9-]";
+    var safeRegexReplacements = [
+      ["\\s", 1],
+      ["\\d", MAX_LENGTH],
+      [LETTERDASHNUMBER, MAX_SAFE_BUILD_LENGTH]
+    ];
+    var makeSafeRegex = (value) => {
+      for (const [token, max] of safeRegexReplacements) {
+        value = value.split(`${token}*`).join(`${token}{0,${max}}`).split(`${token}+`).join(`${token}{1,${max}}`);
+      }
+      return value;
+    };
+    var createToken = (name, value, isGlobal) => {
+      const safe = makeSafeRegex(value);
+      const index2 = R++;
+      debug(name, index2, value);
+      t2[name] = index2;
+      src[index2] = value;
+      safeSrc[index2] = safe;
+      re[index2] = new RegExp(value, isGlobal ? "g" : void 0);
+      safeRe[index2] = new RegExp(safe, isGlobal ? "g" : void 0);
+    };
+    createToken("NUMERICIDENTIFIER", "0|[1-9]\\d*");
+    createToken("NUMERICIDENTIFIERLOOSE", "\\d+");
+    createToken("NONNUMERICIDENTIFIER", `\\d*[a-zA-Z-]${LETTERDASHNUMBER}*`);
+    createToken("MAINVERSION", `(${src[t2.NUMERICIDENTIFIER]})\\.(${src[t2.NUMERICIDENTIFIER]})\\.(${src[t2.NUMERICIDENTIFIER]})`);
+    createToken("MAINVERSIONLOOSE", `(${src[t2.NUMERICIDENTIFIERLOOSE]})\\.(${src[t2.NUMERICIDENTIFIERLOOSE]})\\.(${src[t2.NUMERICIDENTIFIERLOOSE]})`);
+    createToken("PRERELEASEIDENTIFIER", `(?:${src[t2.NONNUMERICIDENTIFIER]}|${src[t2.NUMERICIDENTIFIER]})`);
+    createToken("PRERELEASEIDENTIFIERLOOSE", `(?:${src[t2.NONNUMERICIDENTIFIER]}|${src[t2.NUMERICIDENTIFIERLOOSE]})`);
+    createToken("PRERELEASE", `(?:-(${src[t2.PRERELEASEIDENTIFIER]}(?:\\.${src[t2.PRERELEASEIDENTIFIER]})*))`);
+    createToken("PRERELEASELOOSE", `(?:-?(${src[t2.PRERELEASEIDENTIFIERLOOSE]}(?:\\.${src[t2.PRERELEASEIDENTIFIERLOOSE]})*))`);
+    createToken("BUILDIDENTIFIER", `${LETTERDASHNUMBER}+`);
+    createToken("BUILD", `(?:\\+(${src[t2.BUILDIDENTIFIER]}(?:\\.${src[t2.BUILDIDENTIFIER]})*))`);
+    createToken("FULLPLAIN", `v?${src[t2.MAINVERSION]}${src[t2.PRERELEASE]}?${src[t2.BUILD]}?`);
+    createToken("FULL", `^${src[t2.FULLPLAIN]}$`);
+    createToken("LOOSEPLAIN", `[v=\\s]*${src[t2.MAINVERSIONLOOSE]}${src[t2.PRERELEASELOOSE]}?${src[t2.BUILD]}?`);
+    createToken("LOOSE", `^${src[t2.LOOSEPLAIN]}$`);
+    createToken("GTLT", "((?:<|>)?=?)");
+    createToken("XRANGEIDENTIFIERLOOSE", `${src[t2.NUMERICIDENTIFIERLOOSE]}|x|X|\\*`);
+    createToken("XRANGEIDENTIFIER", `${src[t2.NUMERICIDENTIFIER]}|x|X|\\*`);
+    createToken("XRANGEPLAIN", `[v=\\s]*(${src[t2.XRANGEIDENTIFIER]})(?:\\.(${src[t2.XRANGEIDENTIFIER]})(?:\\.(${src[t2.XRANGEIDENTIFIER]})(?:${src[t2.PRERELEASE]})?${src[t2.BUILD]}?)?)?`);
+    createToken("XRANGEPLAINLOOSE", `[v=\\s]*(${src[t2.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t2.XRANGEIDENTIFIERLOOSE]})(?:\\.(${src[t2.XRANGEIDENTIFIERLOOSE]})(?:${src[t2.PRERELEASELOOSE]})?${src[t2.BUILD]}?)?)?`);
+    createToken("XRANGE", `^${src[t2.GTLT]}\\s*${src[t2.XRANGEPLAIN]}$`);
+    createToken("XRANGELOOSE", `^${src[t2.GTLT]}\\s*${src[t2.XRANGEPLAINLOOSE]}$`);
+    createToken("COERCEPLAIN", `${"(^|[^\\d])(\\d{1,"}${MAX_SAFE_COMPONENT_LENGTH}})(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?(?:\\.(\\d{1,${MAX_SAFE_COMPONENT_LENGTH}}))?`);
+    createToken("COERCE", `${src[t2.COERCEPLAIN]}(?:$|[^\\d])`);
+    createToken("COERCEFULL", src[t2.COERCEPLAIN] + `(?:${src[t2.PRERELEASE]})?(?:${src[t2.BUILD]})?(?:$|[^\\d])`);
+    createToken("COERCERTL", src[t2.COERCE], true);
+    createToken("COERCERTLFULL", src[t2.COERCEFULL], true);
+    createToken("LONETILDE", "(?:~>?)");
+    createToken("TILDETRIM", `(\\s*)${src[t2.LONETILDE]}\\s+`, true);
+    exports.tildeTrimReplace = "$1~";
+    createToken("TILDE", `^${src[t2.LONETILDE]}${src[t2.XRANGEPLAIN]}$`);
+    createToken("TILDELOOSE", `^${src[t2.LONETILDE]}${src[t2.XRANGEPLAINLOOSE]}$`);
+    createToken("LONECARET", "(?:\\^)");
+    createToken("CARETTRIM", `(\\s*)${src[t2.LONECARET]}\\s+`, true);
+    exports.caretTrimReplace = "$1^";
+    createToken("CARET", `^${src[t2.LONECARET]}${src[t2.XRANGEPLAIN]}$`);
+    createToken("CARETLOOSE", `^${src[t2.LONECARET]}${src[t2.XRANGEPLAINLOOSE]}$`);
+    createToken("COMPARATORLOOSE", `^${src[t2.GTLT]}\\s*(${src[t2.LOOSEPLAIN]})$|^$`);
+    createToken("COMPARATOR", `^${src[t2.GTLT]}\\s*(${src[t2.FULLPLAIN]})$|^$`);
+    createToken("COMPARATORTRIM", `(\\s*)${src[t2.GTLT]}\\s*(${src[t2.LOOSEPLAIN]}|${src[t2.XRANGEPLAIN]})`, true);
+    exports.comparatorTrimReplace = "$1$2$3";
+    createToken("HYPHENRANGE", `^\\s*(${src[t2.XRANGEPLAIN]})\\s+-\\s+(${src[t2.XRANGEPLAIN]})\\s*$`);
+    createToken("HYPHENRANGELOOSE", `^\\s*(${src[t2.XRANGEPLAINLOOSE]})\\s+-\\s+(${src[t2.XRANGEPLAINLOOSE]})\\s*$`);
+    createToken("STAR", "(<|>)?=?\\s*\\*");
+    createToken("GTE0", "^\\s*>=\\s*0\\.0\\.0\\s*$");
+    createToken("GTE0PRE", "^\\s*>=\\s*0\\.0\\.0-0\\s*$");
+  }
+});
+
+// node_modules/semver/internal/parse-options.js
+var require_parse_options = __commonJS({
+  "node_modules/semver/internal/parse-options.js"(exports, module) {
+    "use strict";
+    var looseOption = Object.freeze({ loose: true });
+    var emptyOpts = Object.freeze({});
+    var parseOptions = (options) => {
+      if (!options) {
+        return emptyOpts;
+      }
+      if (typeof options !== "object") {
+        return looseOption;
+      }
+      return options;
+    };
+    module.exports = parseOptions;
+  }
+});
+
+// node_modules/semver/internal/identifiers.js
+var require_identifiers = __commonJS({
+  "node_modules/semver/internal/identifiers.js"(exports, module) {
+    "use strict";
+    var numeric = /^[0-9]+$/;
+    var compareIdentifiers = (a, b) => {
+      if (typeof a === "number" && typeof b === "number") {
+        return a === b ? 0 : a < b ? -1 : 1;
+      }
+      const anum = numeric.test(a);
+      const bnum = numeric.test(b);
+      if (anum && bnum) {
+        a = +a;
+        b = +b;
+      }
+      return a === b ? 0 : anum && !bnum ? -1 : bnum && !anum ? 1 : a < b ? -1 : 1;
+    };
+    var rcompareIdentifiers = (a, b) => compareIdentifiers(b, a);
+    module.exports = {
+      compareIdentifiers,
+      rcompareIdentifiers
+    };
+  }
+});
+
+// node_modules/semver/classes/semver.js
+var require_semver = __commonJS({
+  "node_modules/semver/classes/semver.js"(exports, module) {
+    "use strict";
+    var debug = require_debug();
+    var { MAX_LENGTH, MAX_SAFE_INTEGER } = require_constants3();
+    var { safeRe: re, t: t2 } = require_re();
+    var parseOptions = require_parse_options();
+    var { compareIdentifiers } = require_identifiers();
+    var isPrereleaseIdentifier = (prerelease, identifier) => {
+      const identifiers = identifier.split(".");
+      if (identifiers.length > prerelease.length) {
+        return false;
+      }
+      for (let i = 0; i < identifiers.length; i++) {
+        if (compareIdentifiers(prerelease[i], identifiers[i]) !== 0) {
+          return false;
+        }
+      }
+      return true;
+    };
+    var SemVer = class _SemVer {
+      constructor(version2, options) {
+        options = parseOptions(options);
+        if (version2 instanceof _SemVer) {
+          if (version2.loose === !!options.loose && version2.includePrerelease === !!options.includePrerelease) {
+            return version2;
+          } else {
+            version2 = version2.version;
+          }
+        } else if (typeof version2 !== "string") {
+          throw new TypeError(`Invalid version. Must be a string. Got type "${typeof version2}".`);
+        }
+        if (version2.length > MAX_LENGTH) {
+          throw new TypeError(
+            `version is longer than ${MAX_LENGTH} characters`
+          );
+        }
+        debug("SemVer", version2, options);
+        this.options = options;
+        this.loose = !!options.loose;
+        this.includePrerelease = !!options.includePrerelease;
+        const m = version2.trim().match(options.loose ? re[t2.LOOSE] : re[t2.FULL]);
+        if (!m) {
+          throw new TypeError(`Invalid Version: ${version2}`);
+        }
+        this.raw = version2;
+        this.major = +m[1];
+        this.minor = +m[2];
+        this.patch = +m[3];
+        if (this.major > MAX_SAFE_INTEGER || this.major < 0) {
+          throw new TypeError("Invalid major version");
+        }
+        if (this.minor > MAX_SAFE_INTEGER || this.minor < 0) {
+          throw new TypeError("Invalid minor version");
+        }
+        if (this.patch > MAX_SAFE_INTEGER || this.patch < 0) {
+          throw new TypeError("Invalid patch version");
+        }
+        if (!m[4]) {
+          this.prerelease = [];
+        } else {
+          this.prerelease = m[4].split(".").map((id2) => {
+            if (/^[0-9]+$/.test(id2)) {
+              const num = +id2;
+              if (num >= 0 && num < MAX_SAFE_INTEGER) {
+                return num;
+              }
+            }
+            return id2;
+          });
+        }
+        this.build = m[5] ? m[5].split(".") : [];
+        this.format();
+      }
+      format() {
+        this.version = `${this.major}.${this.minor}.${this.patch}`;
+        if (this.prerelease.length) {
+          this.version += `-${this.prerelease.join(".")}`;
+        }
+        return this.version;
+      }
+      toString() {
+        return this.version;
+      }
+      compare(other) {
+        debug("SemVer.compare", this.version, this.options, other);
+        if (!(other instanceof _SemVer)) {
+          if (typeof other === "string" && other === this.version) {
+            return 0;
+          }
+          other = new _SemVer(other, this.options);
+        }
+        if (other.version === this.version) {
+          return 0;
+        }
+        return this.compareMain(other) || this.comparePre(other);
+      }
+      compareMain(other) {
+        if (!(other instanceof _SemVer)) {
+          other = new _SemVer(other, this.options);
+        }
+        if (this.major < other.major) {
+          return -1;
+        }
+        if (this.major > other.major) {
+          return 1;
+        }
+        if (this.minor < other.minor) {
+          return -1;
+        }
+        if (this.minor > other.minor) {
+          return 1;
+        }
+        if (this.patch < other.patch) {
+          return -1;
+        }
+        if (this.patch > other.patch) {
+          return 1;
+        }
+        return 0;
+      }
+      comparePre(other) {
+        if (!(other instanceof _SemVer)) {
+          other = new _SemVer(other, this.options);
+        }
+        if (this.prerelease.length && !other.prerelease.length) {
+          return -1;
+        } else if (!this.prerelease.length && other.prerelease.length) {
+          return 1;
+        } else if (!this.prerelease.length && !other.prerelease.length) {
+          return 0;
+        }
+        let i = 0;
+        do {
+          const a = this.prerelease[i];
+          const b = other.prerelease[i];
+          debug("prerelease compare", i, a, b);
+          if (a === void 0 && b === void 0) {
+            return 0;
+          } else if (b === void 0) {
+            return 1;
+          } else if (a === void 0) {
+            return -1;
+          } else if (a === b) {
+            continue;
+          } else {
+            return compareIdentifiers(a, b);
+          }
+        } while (++i);
+      }
+      compareBuild(other) {
+        if (!(other instanceof _SemVer)) {
+          other = new _SemVer(other, this.options);
+        }
+        let i = 0;
+        do {
+          const a = this.build[i];
+          const b = other.build[i];
+          debug("build compare", i, a, b);
+          if (a === void 0 && b === void 0) {
+            return 0;
+          } else if (b === void 0) {
+            return 1;
+          } else if (a === void 0) {
+            return -1;
+          } else if (a === b) {
+            continue;
+          } else {
+            return compareIdentifiers(a, b);
+          }
+        } while (++i);
+      }
+      // preminor will bump the version up to the next minor release, and immediately
+      // down to pre-release. premajor and prepatch work the same way.
+      inc(release, identifier, identifierBase) {
+        if (release.startsWith("pre")) {
+          if (!identifier && identifierBase === false) {
+            throw new Error("invalid increment argument: identifier is empty");
+          }
+          if (identifier) {
+            const match = `-${identifier}`.match(this.options.loose ? re[t2.PRERELEASELOOSE] : re[t2.PRERELEASE]);
+            if (!match || match[1] !== identifier) {
+              throw new Error(`invalid identifier: ${identifier}`);
+            }
+          }
+        }
+        switch (release) {
+          case "premajor":
+            this.prerelease.length = 0;
+            this.patch = 0;
+            this.minor = 0;
+            this.major++;
+            this.inc("pre", identifier, identifierBase);
+            break;
+          case "preminor":
+            this.prerelease.length = 0;
+            this.patch = 0;
+            this.minor++;
+            this.inc("pre", identifier, identifierBase);
+            break;
+          case "prepatch":
+            this.prerelease.length = 0;
+            this.inc("patch", identifier, identifierBase);
+            this.inc("pre", identifier, identifierBase);
+            break;
+          // If the input is a non-prerelease version, this acts the same as
+          // prepatch.
+          case "prerelease":
+            if (this.prerelease.length === 0) {
+              this.inc("patch", identifier, identifierBase);
+            }
+            this.inc("pre", identifier, identifierBase);
+            break;
+          case "release":
+            if (this.prerelease.length === 0) {
+              throw new Error(`version ${this.raw} is not a prerelease`);
+            }
+            this.prerelease.length = 0;
+            break;
+          case "major":
+            if (this.minor !== 0 || this.patch !== 0 || this.prerelease.length === 0) {
+              this.major++;
+            }
+            this.minor = 0;
+            this.patch = 0;
+            this.prerelease = [];
+            break;
+          case "minor":
+            if (this.patch !== 0 || this.prerelease.length === 0) {
+              this.minor++;
+            }
+            this.patch = 0;
+            this.prerelease = [];
+            break;
+          case "patch":
+            if (this.prerelease.length === 0) {
+              this.patch++;
+            }
+            this.prerelease = [];
+            break;
+          // This probably shouldn't be used publicly.
+          // 1.0.0 'pre' would become 1.0.0-0 which is the wrong direction.
+          case "pre": {
+            const base = Number(identifierBase) ? 1 : 0;
+            if (this.prerelease.length === 0) {
+              this.prerelease = [base];
+            } else {
+              let i = this.prerelease.length;
+              while (--i >= 0) {
+                if (typeof this.prerelease[i] === "number") {
+                  this.prerelease[i]++;
+                  i = -2;
+                }
+              }
+              if (i === -1) {
+                if (identifier === this.prerelease.join(".") && identifierBase === false) {
+                  throw new Error("invalid increment argument: identifier already exists");
+                }
+                this.prerelease.push(base);
+              }
+            }
+            if (identifier) {
+              let prerelease = [identifier, base];
+              if (identifierBase === false) {
+                prerelease = [identifier];
+              }
+              if (isPrereleaseIdentifier(this.prerelease, identifier)) {
+                const prereleaseBase = this.prerelease[identifier.split(".").length];
+                if (isNaN(prereleaseBase)) {
+                  this.prerelease = prerelease;
+                }
+              } else {
+                this.prerelease = prerelease;
+              }
+            }
+            break;
+          }
+          default:
+            throw new Error(`invalid increment argument: ${release}`);
+        }
+        this.raw = this.format();
+        if (this.build.length) {
+          this.raw += `+${this.build.join(".")}`;
+        }
+        return this;
+      }
+    };
+    module.exports = SemVer;
+  }
+});
+
+// node_modules/semver/functions/parse.js
+var require_parse = __commonJS({
+  "node_modules/semver/functions/parse.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var parse = (version2, options, throwErrors = false) => {
+      if (version2 instanceof SemVer) {
+        return version2;
+      }
+      try {
+        return new SemVer(version2, options);
+      } catch (er) {
+        if (!throwErrors) {
+          return null;
+        }
+        throw er;
+      }
+    };
+    module.exports = parse;
+  }
+});
+
+// node_modules/semver/functions/valid.js
+var require_valid = __commonJS({
+  "node_modules/semver/functions/valid.js"(exports, module) {
+    "use strict";
+    var parse = require_parse();
+    var valid = (version2, options) => {
+      const v = parse(version2, options);
+      return v ? v.version : null;
+    };
+    module.exports = valid;
+  }
+});
+
+// node_modules/semver/functions/clean.js
+var require_clean = __commonJS({
+  "node_modules/semver/functions/clean.js"(exports, module) {
+    "use strict";
+    var parse = require_parse();
+    var clean = (version2, options) => {
+      const s = parse(version2.trim().replace(/^[=v]+/, ""), options);
+      return s ? s.version : null;
+    };
+    module.exports = clean;
+  }
+});
+
+// node_modules/semver/functions/inc.js
+var require_inc = __commonJS({
+  "node_modules/semver/functions/inc.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var inc = (version2, release, options, identifier, identifierBase) => {
+      if (typeof options === "string") {
+        identifierBase = identifier;
+        identifier = options;
+        options = void 0;
+      }
+      try {
+        return new SemVer(
+          version2 instanceof SemVer ? version2.version : version2,
+          options
+        ).inc(release, identifier, identifierBase).version;
+      } catch (er) {
+        return null;
+      }
+    };
+    module.exports = inc;
+  }
+});
+
+// node_modules/semver/functions/diff.js
+var require_diff = __commonJS({
+  "node_modules/semver/functions/diff.js"(exports, module) {
+    "use strict";
+    var parse = require_parse();
+    var diff2 = (version1, version2) => {
+      const v1 = parse(version1, null, true);
+      const v2 = parse(version2, null, true);
+      const comparison = v1.compare(v2);
+      if (comparison === 0) {
+        return null;
+      }
+      const v1Higher = comparison > 0;
+      const highVersion = v1Higher ? v1 : v2;
+      const lowVersion = v1Higher ? v2 : v1;
+      const highHasPre = !!highVersion.prerelease.length;
+      const lowHasPre = !!lowVersion.prerelease.length;
+      if (lowHasPre && !highHasPre) {
+        if (!lowVersion.patch && !lowVersion.minor) {
+          return "major";
+        }
+        if (lowVersion.compareMain(highVersion) === 0) {
+          if (lowVersion.minor && !lowVersion.patch) {
+            return "minor";
+          }
+          return "patch";
+        }
+      }
+      const prefix = highHasPre ? "pre" : "";
+      if (v1.major !== v2.major) {
+        return prefix + "major";
+      }
+      if (v1.minor !== v2.minor) {
+        return prefix + "minor";
+      }
+      if (v1.patch !== v2.patch) {
+        return prefix + "patch";
+      }
+      return "prerelease";
+    };
+    module.exports = diff2;
+  }
+});
+
+// node_modules/semver/functions/major.js
+var require_major = __commonJS({
+  "node_modules/semver/functions/major.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var major = (a, loose) => new SemVer(a, loose).major;
+    module.exports = major;
+  }
+});
+
+// node_modules/semver/functions/minor.js
+var require_minor = __commonJS({
+  "node_modules/semver/functions/minor.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var minor = (a, loose) => new SemVer(a, loose).minor;
+    module.exports = minor;
+  }
+});
+
+// node_modules/semver/functions/patch.js
+var require_patch = __commonJS({
+  "node_modules/semver/functions/patch.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var patch = (a, loose) => new SemVer(a, loose).patch;
+    module.exports = patch;
+  }
+});
+
+// node_modules/semver/functions/prerelease.js
+var require_prerelease = __commonJS({
+  "node_modules/semver/functions/prerelease.js"(exports, module) {
+    "use strict";
+    var parse = require_parse();
+    var prerelease = (version2, options) => {
+      const parsed = parse(version2, options);
+      return parsed && parsed.prerelease.length ? parsed.prerelease : null;
+    };
+    module.exports = prerelease;
+  }
+});
+
+// node_modules/semver/functions/compare.js
+var require_compare = __commonJS({
+  "node_modules/semver/functions/compare.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var compare = (a, b, loose) => new SemVer(a, loose).compare(new SemVer(b, loose));
+    module.exports = compare;
+  }
+});
+
+// node_modules/semver/functions/rcompare.js
+var require_rcompare = __commonJS({
+  "node_modules/semver/functions/rcompare.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var rcompare = (a, b, loose) => compare(b, a, loose);
+    module.exports = rcompare;
+  }
+});
+
+// node_modules/semver/functions/compare-loose.js
+var require_compare_loose = __commonJS({
+  "node_modules/semver/functions/compare-loose.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var compareLoose = (a, b) => compare(a, b, true);
+    module.exports = compareLoose;
+  }
+});
+
+// node_modules/semver/functions/compare-build.js
+var require_compare_build = __commonJS({
+  "node_modules/semver/functions/compare-build.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var compareBuild = (a, b, loose) => {
+      const versionA = new SemVer(a, loose);
+      const versionB = new SemVer(b, loose);
+      return versionA.compare(versionB) || versionA.compareBuild(versionB);
+    };
+    module.exports = compareBuild;
+  }
+});
+
+// node_modules/semver/functions/sort.js
+var require_sort = __commonJS({
+  "node_modules/semver/functions/sort.js"(exports, module) {
+    "use strict";
+    var compareBuild = require_compare_build();
+    var sort = (list, loose) => list.sort((a, b) => compareBuild(a, b, loose));
+    module.exports = sort;
+  }
+});
+
+// node_modules/semver/functions/rsort.js
+var require_rsort = __commonJS({
+  "node_modules/semver/functions/rsort.js"(exports, module) {
+    "use strict";
+    var compareBuild = require_compare_build();
+    var rsort = (list, loose) => list.sort((a, b) => compareBuild(b, a, loose));
+    module.exports = rsort;
+  }
+});
+
+// node_modules/semver/functions/gt.js
+var require_gt = __commonJS({
+  "node_modules/semver/functions/gt.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var gt = (a, b, loose) => compare(a, b, loose) > 0;
+    module.exports = gt;
+  }
+});
+
+// node_modules/semver/functions/lt.js
+var require_lt = __commonJS({
+  "node_modules/semver/functions/lt.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var lt = (a, b, loose) => compare(a, b, loose) < 0;
+    module.exports = lt;
+  }
+});
+
+// node_modules/semver/functions/eq.js
+var require_eq = __commonJS({
+  "node_modules/semver/functions/eq.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var eq = (a, b, loose) => compare(a, b, loose) === 0;
+    module.exports = eq;
+  }
+});
+
+// node_modules/semver/functions/neq.js
+var require_neq = __commonJS({
+  "node_modules/semver/functions/neq.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var neq = (a, b, loose) => compare(a, b, loose) !== 0;
+    module.exports = neq;
+  }
+});
+
+// node_modules/semver/functions/gte.js
+var require_gte = __commonJS({
+  "node_modules/semver/functions/gte.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var gte = (a, b, loose) => compare(a, b, loose) >= 0;
+    module.exports = gte;
+  }
+});
+
+// node_modules/semver/functions/lte.js
+var require_lte = __commonJS({
+  "node_modules/semver/functions/lte.js"(exports, module) {
+    "use strict";
+    var compare = require_compare();
+    var lte = (a, b, loose) => compare(a, b, loose) <= 0;
+    module.exports = lte;
+  }
+});
+
+// node_modules/semver/functions/cmp.js
+var require_cmp = __commonJS({
+  "node_modules/semver/functions/cmp.js"(exports, module) {
+    "use strict";
+    var eq = require_eq();
+    var neq = require_neq();
+    var gt = require_gt();
+    var gte = require_gte();
+    var lt = require_lt();
+    var lte = require_lte();
+    var cmp = (a, op, b, loose) => {
+      switch (op) {
+        case "===":
+          if (typeof a === "object") {
+            a = a.version;
+          }
+          if (typeof b === "object") {
+            b = b.version;
+          }
+          return a === b;
+        case "!==":
+          if (typeof a === "object") {
+            a = a.version;
+          }
+          if (typeof b === "object") {
+            b = b.version;
+          }
+          return a !== b;
+        case "":
+        case "=":
+        case "==":
+          return eq(a, b, loose);
+        case "!=":
+          return neq(a, b, loose);
+        case ">":
+          return gt(a, b, loose);
+        case ">=":
+          return gte(a, b, loose);
+        case "<":
+          return lt(a, b, loose);
+        case "<=":
+          return lte(a, b, loose);
+        default:
+          throw new TypeError(`Invalid operator: ${op}`);
+      }
+    };
+    module.exports = cmp;
+  }
+});
+
+// node_modules/semver/functions/coerce.js
+var require_coerce = __commonJS({
+  "node_modules/semver/functions/coerce.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var parse = require_parse();
+    var { safeRe: re, t: t2 } = require_re();
+    var coerce = (version2, options) => {
+      if (version2 instanceof SemVer) {
+        return version2;
+      }
+      if (typeof version2 === "number") {
+        version2 = String(version2);
+      }
+      if (typeof version2 !== "string") {
+        return null;
+      }
+      options = options || {};
+      let match = null;
+      if (!options.rtl) {
+        match = version2.match(options.includePrerelease ? re[t2.COERCEFULL] : re[t2.COERCE]);
+      } else {
+        const coerceRtlRegex = options.includePrerelease ? re[t2.COERCERTLFULL] : re[t2.COERCERTL];
+        let next;
+        while ((next = coerceRtlRegex.exec(version2)) && (!match || match.index + match[0].length !== version2.length)) {
+          if (!match || next.index + next[0].length !== match.index + match[0].length) {
+            match = next;
+          }
+          coerceRtlRegex.lastIndex = next.index + next[1].length + next[2].length;
+        }
+        coerceRtlRegex.lastIndex = -1;
+      }
+      if (match === null) {
+        return null;
+      }
+      const major = match[2];
+      const minor = match[3] || "0";
+      const patch = match[4] || "0";
+      const prerelease = options.includePrerelease && match[5] ? `-${match[5]}` : "";
+      const build = options.includePrerelease && match[6] ? `+${match[6]}` : "";
+      return parse(`${major}.${minor}.${patch}${prerelease}${build}`, options);
+    };
+    module.exports = coerce;
+  }
+});
+
+// node_modules/semver/functions/truncate.js
+var require_truncate = __commonJS({
+  "node_modules/semver/functions/truncate.js"(exports, module) {
+    "use strict";
+    var parse = require_parse();
+    var constants2 = require_constants3();
+    var SemVer = require_semver();
+    var truncate2 = (version2, truncation, options) => {
+      if (!constants2.RELEASE_TYPES.includes(truncation)) {
+        return null;
+      }
+      const clonedVersion = cloneInputVersion(version2, options);
+      return clonedVersion && doTruncation(clonedVersion, truncation);
+    };
+    var cloneInputVersion = (version2, options) => {
+      const versionStringToParse = version2 instanceof SemVer ? version2.version : version2;
+      return parse(versionStringToParse, options);
+    };
+    var doTruncation = (version2, truncation) => {
+      if (isPrerelease(truncation)) {
+        return version2.version;
+      }
+      version2.prerelease = [];
+      switch (truncation) {
+        case "major":
+          version2.minor = 0;
+          version2.patch = 0;
+          break;
+        case "minor":
+          version2.patch = 0;
+          break;
+      }
+      return version2.format();
+    };
+    var isPrerelease = (type) => {
+      return type.startsWith("pre");
+    };
+    module.exports = truncate2;
+  }
+});
+
+// node_modules/semver/internal/lrucache.js
+var require_lrucache = __commonJS({
+  "node_modules/semver/internal/lrucache.js"(exports, module) {
+    "use strict";
+    var LRUCache = class {
+      constructor() {
+        this.max = 1e3;
+        this.map = /* @__PURE__ */ new Map();
+      }
+      get(key) {
+        const value = this.map.get(key);
+        if (value === void 0) {
+          return void 0;
+        } else {
+          this.map.delete(key);
+          this.map.set(key, value);
+          return value;
+        }
+      }
+      delete(key) {
+        return this.map.delete(key);
+      }
+      set(key, value) {
+        const deleted = this.delete(key);
+        if (!deleted && value !== void 0) {
+          if (this.map.size >= this.max) {
+            const firstKey = this.map.keys().next().value;
+            this.delete(firstKey);
+          }
+          this.map.set(key, value);
+        }
+        return this;
+      }
+    };
+    module.exports = LRUCache;
+  }
+});
+
+// node_modules/semver/classes/range.js
+var require_range = __commonJS({
+  "node_modules/semver/classes/range.js"(exports, module) {
+    "use strict";
+    var SPACE_CHARACTERS = /\s+/g;
+    var Range = class _Range {
+      constructor(range, options) {
+        options = parseOptions(options);
+        if (range instanceof _Range) {
+          if (range.loose === !!options.loose && range.includePrerelease === !!options.includePrerelease) {
+            return range;
+          } else {
+            return new _Range(range.raw, options);
+          }
+        }
+        if (range instanceof Comparator) {
+          this.raw = range.value;
+          this.set = [[range]];
+          this.formatted = void 0;
+          return this;
+        }
+        this.options = options;
+        this.loose = !!options.loose;
+        this.includePrerelease = !!options.includePrerelease;
+        this.raw = range.trim().replace(SPACE_CHARACTERS, " ");
+        this.set = this.raw.split("||").map((r) => this.parseRange(r.trim())).filter((c) => c.length);
+        if (!this.set.length) {
+          throw new TypeError(`Invalid SemVer Range: ${this.raw}`);
+        }
+        if (this.set.length > 1) {
+          const first = this.set[0];
+          this.set = this.set.filter((c) => !isNullSet(c[0]));
+          if (this.set.length === 0) {
+            this.set = [first];
+          } else if (this.set.length > 1) {
+            for (const c of this.set) {
+              if (c.length === 1 && isAny(c[0])) {
+                this.set = [c];
+                break;
+              }
+            }
+          }
+        }
+        this.formatted = void 0;
+      }
+      get range() {
+        if (this.formatted === void 0) {
+          this.formatted = "";
+          for (let i = 0; i < this.set.length; i++) {
+            if (i > 0) {
+              this.formatted += "||";
+            }
+            const comps = this.set[i];
+            for (let k = 0; k < comps.length; k++) {
+              if (k > 0) {
+                this.formatted += " ";
+              }
+              this.formatted += comps[k].toString().trim();
+            }
+          }
+        }
+        return this.formatted;
+      }
+      format() {
+        return this.range;
+      }
+      toString() {
+        return this.range;
+      }
+      parseRange(range) {
+        range = range.replace(BUILDSTRIPRE, "");
+        const memoOpts = (this.options.includePrerelease && FLAG_INCLUDE_PRERELEASE) | (this.options.loose && FLAG_LOOSE);
+        const memoKey = memoOpts + ":" + range;
+        const cached = cache4.get(memoKey);
+        if (cached) {
+          return cached;
+        }
+        const loose = this.options.loose;
+        const hr = loose ? re[t2.HYPHENRANGELOOSE] : re[t2.HYPHENRANGE];
+        range = range.replace(hr, hyphenReplace(this.options.includePrerelease));
+        debug("hyphen replace", range);
+        range = range.replace(re[t2.COMPARATORTRIM], comparatorTrimReplace);
+        debug("comparator trim", range);
+        range = range.replace(re[t2.TILDETRIM], tildeTrimReplace);
+        debug("tilde trim", range);
+        range = range.replace(re[t2.CARETTRIM], caretTrimReplace);
+        debug("caret trim", range);
+        let rangeList = range.split(" ").map((comp) => parseComparator(comp, this.options)).join(" ").split(/\s+/).map((comp) => replaceGTE0(comp, this.options));
+        if (loose) {
+          rangeList = rangeList.filter((comp) => {
+            debug("loose invalid filter", comp, this.options);
+            return !!comp.match(re[t2.COMPARATORLOOSE]);
+          });
+        }
+        debug("range list", rangeList);
+        const rangeMap = /* @__PURE__ */ new Map();
+        const comparators = rangeList.map((comp) => new Comparator(comp, this.options));
+        for (const comp of comparators) {
+          if (isNullSet(comp)) {
+            return [comp];
+          }
+          rangeMap.set(comp.value, comp);
+        }
+        if (rangeMap.size > 1 && rangeMap.has("")) {
+          rangeMap.delete("");
+        }
+        const result = [...rangeMap.values()];
+        cache4.set(memoKey, result);
+        return result;
+      }
+      intersects(range, options) {
+        if (!(range instanceof _Range)) {
+          throw new TypeError("a Range is required");
+        }
+        return this.set.some((thisComparators) => {
+          return isSatisfiable(thisComparators, options) && range.set.some((rangeComparators) => {
+            return isSatisfiable(rangeComparators, options) && thisComparators.every((thisComparator) => {
+              return rangeComparators.every((rangeComparator) => {
+                return thisComparator.intersects(rangeComparator, options);
+              });
+            });
+          });
+        });
+      }
+      // if ANY of the sets match ALL of its comparators, then pass
+      test(version2) {
+        if (!version2) {
+          return false;
+        }
+        if (typeof version2 === "string") {
+          try {
+            version2 = new SemVer(version2, this.options);
+          } catch (er) {
+            return false;
+          }
+        }
+        for (let i = 0; i < this.set.length; i++) {
+          if (testSet(this.set[i], version2, this.options)) {
+            return true;
+          }
+        }
+        return false;
+      }
+    };
+    module.exports = Range;
+    var LRU = require_lrucache();
+    var cache4 = new LRU();
+    var parseOptions = require_parse_options();
+    var Comparator = require_comparator();
+    var debug = require_debug();
+    var SemVer = require_semver();
+    var {
+      safeRe: re,
+      src,
+      t: t2,
+      comparatorTrimReplace,
+      tildeTrimReplace,
+      caretTrimReplace
+    } = require_re();
+    var { FLAG_INCLUDE_PRERELEASE, FLAG_LOOSE } = require_constants3();
+    var BUILDSTRIPRE = new RegExp(src[t2.BUILD], "g");
+    var isNullSet = (c) => c.value === "<0.0.0-0";
+    var isAny = (c) => c.value === "";
+    var isSatisfiable = (comparators, options) => {
+      let result = true;
+      const remainingComparators = comparators.slice();
+      let testComparator = remainingComparators.pop();
+      while (result && remainingComparators.length) {
+        result = remainingComparators.every((otherComparator) => {
+          return testComparator.intersects(otherComparator, options);
+        });
+        testComparator = remainingComparators.pop();
+      }
+      return result;
+    };
+    var parseComparator = (comp, options) => {
+      comp = comp.replace(re[t2.BUILD], "");
+      debug("comp", comp, options);
+      comp = replaceCarets(comp, options);
+      debug("caret", comp);
+      comp = replaceTildes(comp, options);
+      debug("tildes", comp);
+      comp = replaceXRanges(comp, options);
+      debug("xrange", comp);
+      comp = replaceStars(comp, options);
+      debug("stars", comp);
+      return comp;
+    };
+    var isX = (id2) => !id2 || id2.toLowerCase() === "x" || id2 === "*";
+    var invalidXRangeOrder = (M, m, p) => isX(M) && !isX(m) || isX(m) && p && !isX(p);
+    var replaceTildes = (comp, options) => {
+      return comp.trim().split(/\s+/).map((c) => replaceTilde(c, options)).join(" ");
+    };
+    var replaceTilde = (comp, options) => {
+      const r = options.loose ? re[t2.TILDELOOSE] : re[t2.TILDE];
+      const z = options.includePrerelease ? "-0" : "";
+      return comp.replace(r, (_, M, m, p, pr) => {
+        debug("tilde", comp, _, M, m, p, pr);
+        let ret;
+        if (isX(M)) {
+          ret = "";
+        } else if (isX(m)) {
+          ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
+        } else if (isX(p)) {
+          ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
+        } else if (pr) {
+          debug("replaceTilde pr", pr);
+          ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+        } else {
+          ret = `>=${M}.${m}.${p} <${M}.${+m + 1}.0-0`;
+        }
+        debug("tilde return", ret);
+        return ret;
+      });
+    };
+    var replaceCarets = (comp, options) => {
+      return comp.trim().split(/\s+/).map((c) => replaceCaret(c, options)).join(" ");
+    };
+    var replaceCaret = (comp, options) => {
+      debug("caret", comp, options);
+      const r = options.loose ? re[t2.CARETLOOSE] : re[t2.CARET];
+      const z = options.includePrerelease ? "-0" : "";
+      return comp.replace(r, (_, M, m, p, pr) => {
+        debug("caret", comp, _, M, m, p, pr);
+        let ret;
+        if (isX(M)) {
+          ret = "";
+        } else if (isX(m)) {
+          ret = `>=${M}.0.0${z} <${+M + 1}.0.0-0`;
+        } else if (isX(p)) {
+          if (M === "0") {
+            ret = `>=${M}.${m}.0${z} <${M}.${+m + 1}.0-0`;
+          } else {
+            ret = `>=${M}.${m}.0${z} <${+M + 1}.0.0-0`;
+          }
+        } else if (pr) {
+          debug("replaceCaret pr", pr);
+          if (M === "0") {
+            if (m === "0") {
+              ret = `>=${M}.${m}.${p}-${pr} <${M}.${m}.${+p + 1}-0`;
+            } else {
+              ret = `>=${M}.${m}.${p}-${pr} <${M}.${+m + 1}.0-0`;
+            }
+          } else {
+            ret = `>=${M}.${m}.${p}-${pr} <${+M + 1}.0.0-0`;
+          }
+        } else {
+          debug("no pr");
+          if (M === "0") {
+            if (m === "0") {
+              ret = `>=${M}.${m}.${p} <${M}.${m}.${+p + 1}-0`;
+            } else {
+              ret = `>=${M}.${m}.${p} <${M}.${+m + 1}.0-0`;
+            }
+          } else {
+            ret = `>=${M}.${m}.${p} <${+M + 1}.0.0-0`;
+          }
+        }
+        debug("caret return", ret);
+        return ret;
+      });
+    };
+    var replaceXRanges = (comp, options) => {
+      debug("replaceXRanges", comp, options);
+      return comp.split(/\s+/).map((c) => replaceXRange(c, options)).join(" ");
+    };
+    var replaceXRange = (comp, options) => {
+      comp = comp.trim();
+      const r = options.loose ? re[t2.XRANGELOOSE] : re[t2.XRANGE];
+      return comp.replace(r, (ret, gtlt, M, m, p, pr) => {
+        debug("xRange", comp, ret, gtlt, M, m, p, pr);
+        if (invalidXRangeOrder(M, m, p)) {
+          return comp;
+        }
+        const xM = isX(M);
+        const xm = xM || isX(m);
+        const xp = xm || isX(p);
+        const anyX = xp;
+        if (gtlt === "=" && anyX) {
+          gtlt = "";
+        }
+        pr = options.includePrerelease ? "-0" : "";
+        if (xM) {
+          if (gtlt === ">" || gtlt === "<") {
+            ret = "<0.0.0-0";
+          } else {
+            ret = "*";
+          }
+        } else if (gtlt && anyX) {
+          if (xm) {
+            m = 0;
+          }
+          p = 0;
+          if (gtlt === ">") {
+            gtlt = ">=";
+            if (xm) {
+              M = +M + 1;
+              m = 0;
+              p = 0;
+            } else {
+              m = +m + 1;
+              p = 0;
+            }
+          } else if (gtlt === "<=") {
+            gtlt = "<";
+            if (xm) {
+              M = +M + 1;
+            } else {
+              m = +m + 1;
+            }
+          }
+          if (gtlt === "<") {
+            pr = "-0";
+          }
+          ret = `${gtlt + M}.${m}.${p}${pr}`;
+        } else if (xm) {
+          ret = `>=${M}.0.0${pr} <${+M + 1}.0.0-0`;
+        } else if (xp) {
+          ret = `>=${M}.${m}.0${pr} <${M}.${+m + 1}.0-0`;
+        }
+        debug("xRange return", ret);
+        return ret;
+      });
+    };
+    var replaceStars = (comp, options) => {
+      debug("replaceStars", comp, options);
+      return comp.trim().replace(re[t2.STAR], "");
+    };
+    var replaceGTE0 = (comp, options) => {
+      debug("replaceGTE0", comp, options);
+      return comp.trim().replace(re[options.includePrerelease ? t2.GTE0PRE : t2.GTE0], "");
+    };
+    var hyphenReplace = (incPr) => ($0, from, fM, fm, fp, fpr, fb, to, tM, tm, tp, tpr) => {
+      if (isX(fM)) {
+        from = "";
+      } else if (isX(fm)) {
+        from = `>=${fM}.0.0${incPr ? "-0" : ""}`;
+      } else if (isX(fp)) {
+        from = `>=${fM}.${fm}.0${incPr ? "-0" : ""}`;
+      } else if (fpr) {
+        from = `>=${from}`;
+      } else {
+        from = `>=${from}${incPr ? "-0" : ""}`;
+      }
+      if (isX(tM)) {
+        to = "";
+      } else if (isX(tm)) {
+        to = `<${+tM + 1}.0.0-0`;
+      } else if (isX(tp)) {
+        to = `<${tM}.${+tm + 1}.0-0`;
+      } else if (tpr) {
+        to = `<=${tM}.${tm}.${tp}-${tpr}`;
+      } else if (incPr) {
+        to = `<${tM}.${tm}.${+tp + 1}-0`;
+      } else {
+        to = `<=${to}`;
+      }
+      return `${from} ${to}`.trim();
+    };
+    var testSet = (set, version2, options) => {
+      for (let i = 0; i < set.length; i++) {
+        if (!set[i].test(version2)) {
+          return false;
+        }
+      }
+      if (version2.prerelease.length && !options.includePrerelease) {
+        for (let i = 0; i < set.length; i++) {
+          debug(set[i].semver);
+          if (set[i].semver === Comparator.ANY) {
+            continue;
+          }
+          if (set[i].semver.prerelease.length > 0) {
+            const allowed = set[i].semver;
+            if (allowed.major === version2.major && allowed.minor === version2.minor && allowed.patch === version2.patch) {
+              return true;
+            }
+          }
+        }
+        return false;
+      }
+      return true;
+    };
+  }
+});
+
+// node_modules/semver/classes/comparator.js
+var require_comparator = __commonJS({
+  "node_modules/semver/classes/comparator.js"(exports, module) {
+    "use strict";
+    var ANY = /* @__PURE__ */ Symbol("SemVer ANY");
+    var Comparator = class _Comparator {
+      static get ANY() {
+        return ANY;
+      }
+      constructor(comp, options) {
+        options = parseOptions(options);
+        if (comp instanceof _Comparator) {
+          if (comp.loose === !!options.loose) {
+            return comp;
+          } else {
+            comp = comp.value;
+          }
+        }
+        comp = comp.trim().split(/\s+/).join(" ");
+        debug("comparator", comp, options);
+        this.options = options;
+        this.loose = !!options.loose;
+        this.parse(comp);
+        if (this.semver === ANY) {
+          this.value = "";
+        } else {
+          this.value = this.operator + this.semver.version;
+        }
+        debug("comp", this);
+      }
+      parse(comp) {
+        const r = this.options.loose ? re[t2.COMPARATORLOOSE] : re[t2.COMPARATOR];
+        const m = comp.match(r);
+        if (!m) {
+          throw new TypeError(`Invalid comparator: ${comp}`);
+        }
+        this.operator = m[1] !== void 0 ? m[1] : "";
+        if (this.operator === "=") {
+          this.operator = "";
+        }
+        if (!m[2]) {
+          this.semver = ANY;
+        } else {
+          this.semver = new SemVer(m[2], this.options.loose);
+        }
+      }
+      toString() {
+        return this.value;
+      }
+      test(version2) {
+        debug("Comparator.test", version2, this.options.loose);
+        if (this.semver === ANY || version2 === ANY) {
+          return true;
+        }
+        if (typeof version2 === "string") {
+          try {
+            version2 = new SemVer(version2, this.options);
+          } catch (er) {
+            return false;
+          }
+        }
+        return cmp(version2, this.operator, this.semver, this.options);
+      }
+      intersects(comp, options) {
+        if (!(comp instanceof _Comparator)) {
+          throw new TypeError("a Comparator is required");
+        }
+        if (this.operator === "") {
+          if (this.value === "") {
+            return true;
+          }
+          return new Range(comp.value, options).test(this.value);
+        } else if (comp.operator === "") {
+          if (comp.value === "") {
+            return true;
+          }
+          return new Range(this.value, options).test(comp.semver);
+        }
+        options = parseOptions(options);
+        if (options.includePrerelease && (this.value === "<0.0.0-0" || comp.value === "<0.0.0-0")) {
+          return false;
+        }
+        if (!options.includePrerelease && (this.value.startsWith("<0.0.0") || comp.value.startsWith("<0.0.0"))) {
+          return false;
+        }
+        if (this.operator.startsWith(">") && comp.operator.startsWith(">")) {
+          return true;
+        }
+        if (this.operator.startsWith("<") && comp.operator.startsWith("<")) {
+          return true;
+        }
+        if (this.semver.version === comp.semver.version && this.operator.includes("=") && comp.operator.includes("=")) {
+          return true;
+        }
+        if (cmp(this.semver, "<", comp.semver, options) && this.operator.startsWith(">") && comp.operator.startsWith("<")) {
+          return true;
+        }
+        if (cmp(this.semver, ">", comp.semver, options) && this.operator.startsWith("<") && comp.operator.startsWith(">")) {
+          return true;
+        }
+        return false;
+      }
+    };
+    module.exports = Comparator;
+    var parseOptions = require_parse_options();
+    var { safeRe: re, t: t2 } = require_re();
+    var cmp = require_cmp();
+    var debug = require_debug();
+    var SemVer = require_semver();
+    var Range = require_range();
+  }
+});
+
+// node_modules/semver/functions/satisfies.js
+var require_satisfies = __commonJS({
+  "node_modules/semver/functions/satisfies.js"(exports, module) {
+    "use strict";
+    var Range = require_range();
+    var satisfies = (version2, range, options) => {
+      try {
+        range = new Range(range, options);
+      } catch (er) {
+        return false;
+      }
+      return range.test(version2);
+    };
+    module.exports = satisfies;
+  }
+});
+
+// node_modules/semver/ranges/to-comparators.js
+var require_to_comparators = __commonJS({
+  "node_modules/semver/ranges/to-comparators.js"(exports, module) {
+    "use strict";
+    var Range = require_range();
+    var toComparators = (range, options) => new Range(range, options).set.map((comp) => comp.map((c) => c.value).join(" ").trim().split(" "));
+    module.exports = toComparators;
+  }
+});
+
+// node_modules/semver/ranges/max-satisfying.js
+var require_max_satisfying = __commonJS({
+  "node_modules/semver/ranges/max-satisfying.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var Range = require_range();
+    var maxSatisfying = (versions2, range, options) => {
+      let max = null;
+      let maxSV = null;
+      let rangeObj = null;
+      try {
+        rangeObj = new Range(range, options);
+      } catch (er) {
+        return null;
+      }
+      versions2.forEach((v) => {
+        if (rangeObj.test(v)) {
+          if (!max || maxSV.compare(v) === -1) {
+            max = v;
+            maxSV = new SemVer(max, options);
+          }
+        }
+      });
+      return max;
+    };
+    module.exports = maxSatisfying;
+  }
+});
+
+// node_modules/semver/ranges/min-satisfying.js
+var require_min_satisfying = __commonJS({
+  "node_modules/semver/ranges/min-satisfying.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var Range = require_range();
+    var minSatisfying = (versions2, range, options) => {
+      let min = null;
+      let minSV = null;
+      let rangeObj = null;
+      try {
+        rangeObj = new Range(range, options);
+      } catch (er) {
+        return null;
+      }
+      versions2.forEach((v) => {
+        if (rangeObj.test(v)) {
+          if (!min || minSV.compare(v) === 1) {
+            min = v;
+            minSV = new SemVer(min, options);
+          }
+        }
+      });
+      return min;
+    };
+    module.exports = minSatisfying;
+  }
+});
+
+// node_modules/semver/ranges/min-version.js
+var require_min_version = __commonJS({
+  "node_modules/semver/ranges/min-version.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var Range = require_range();
+    var gt = require_gt();
+    var minVersion = (range, loose) => {
+      range = new Range(range, loose);
+      let minver = new SemVer("0.0.0");
+      if (range.test(minver)) {
+        return minver;
+      }
+      minver = new SemVer("0.0.0-0");
+      if (range.test(minver)) {
+        return minver;
+      }
+      minver = null;
+      for (let i = 0; i < range.set.length; ++i) {
+        const comparators = range.set[i];
+        let setMin = null;
+        comparators.forEach((comparator) => {
+          const compver = new SemVer(comparator.semver.version);
+          switch (comparator.operator) {
+            case ">":
+              if (compver.prerelease.length === 0) {
+                compver.patch++;
+              } else {
+                compver.prerelease.push(0);
+              }
+              compver.raw = compver.format();
+            /* fallthrough */
+            case "":
+            case ">=":
+              if (!setMin || gt(compver, setMin)) {
+                setMin = compver;
+              }
+              break;
+            case "<":
+            case "<=":
+              break;
+            /* istanbul ignore next */
+            default:
+              throw new Error(`Unexpected operation: ${comparator.operator}`);
+          }
+        });
+        if (setMin && (!minver || gt(minver, setMin))) {
+          minver = setMin;
+        }
+      }
+      if (minver && range.test(minver)) {
+        return minver;
+      }
+      return null;
+    };
+    module.exports = minVersion;
+  }
+});
+
+// node_modules/semver/ranges/valid.js
+var require_valid2 = __commonJS({
+  "node_modules/semver/ranges/valid.js"(exports, module) {
+    "use strict";
+    var Range = require_range();
+    var validRange = (range, options) => {
+      try {
+        return new Range(range, options).range || "*";
+      } catch (er) {
+        return null;
+      }
+    };
+    module.exports = validRange;
+  }
+});
+
+// node_modules/semver/ranges/outside.js
+var require_outside = __commonJS({
+  "node_modules/semver/ranges/outside.js"(exports, module) {
+    "use strict";
+    var SemVer = require_semver();
+    var Comparator = require_comparator();
+    var { ANY } = Comparator;
+    var Range = require_range();
+    var satisfies = require_satisfies();
+    var gt = require_gt();
+    var lt = require_lt();
+    var lte = require_lte();
+    var gte = require_gte();
+    var outside = (version2, range, hilo, options) => {
+      version2 = new SemVer(version2, options);
+      range = new Range(range, options);
+      let gtfn, ltefn, ltfn, comp, ecomp;
+      switch (hilo) {
+        case ">":
+          gtfn = gt;
+          ltefn = lte;
+          ltfn = lt;
+          comp = ">";
+          ecomp = ">=";
+          break;
+        case "<":
+          gtfn = lt;
+          ltefn = gte;
+          ltfn = gt;
+          comp = "<";
+          ecomp = "<=";
+          break;
+        default:
+          throw new TypeError('Must provide a hilo val of "<" or ">"');
+      }
+      if (satisfies(version2, range, options)) {
+        return false;
+      }
+      for (let i = 0; i < range.set.length; ++i) {
+        const comparators = range.set[i];
+        let high = null;
+        let low = null;
+        comparators.forEach((comparator) => {
+          if (comparator.semver === ANY) {
+            comparator = new Comparator(">=0.0.0");
+          }
+          high = high || comparator;
+          low = low || comparator;
+          if (gtfn(comparator.semver, high.semver, options)) {
+            high = comparator;
+          } else if (ltfn(comparator.semver, low.semver, options)) {
+            low = comparator;
+          }
+        });
+        if (high.operator === comp || high.operator === ecomp) {
+          return false;
+        }
+        if ((!low.operator || low.operator === comp) && ltefn(version2, low.semver)) {
+          return false;
+        } else if (low.operator === ecomp && ltfn(version2, low.semver)) {
+          return false;
+        }
+      }
+      return true;
+    };
+    module.exports = outside;
+  }
+});
+
+// node_modules/semver/ranges/gtr.js
+var require_gtr = __commonJS({
+  "node_modules/semver/ranges/gtr.js"(exports, module) {
+    "use strict";
+    var outside = require_outside();
+    var gtr = (version2, range, options) => outside(version2, range, ">", options);
+    module.exports = gtr;
+  }
+});
+
+// node_modules/semver/ranges/ltr.js
+var require_ltr = __commonJS({
+  "node_modules/semver/ranges/ltr.js"(exports, module) {
+    "use strict";
+    var outside = require_outside();
+    var ltr = (version2, range, options) => outside(version2, range, "<", options);
+    module.exports = ltr;
+  }
+});
+
+// node_modules/semver/ranges/intersects.js
+var require_intersects = __commonJS({
+  "node_modules/semver/ranges/intersects.js"(exports, module) {
+    "use strict";
+    var Range = require_range();
+    var intersects = (r1, r2, options) => {
+      r1 = new Range(r1, options);
+      r2 = new Range(r2, options);
+      return r1.intersects(r2, options);
+    };
+    module.exports = intersects;
+  }
+});
+
+// node_modules/semver/ranges/simplify.js
+var require_simplify = __commonJS({
+  "node_modules/semver/ranges/simplify.js"(exports, module) {
+    "use strict";
+    var satisfies = require_satisfies();
+    var compare = require_compare();
+    module.exports = (versions2, range, options) => {
+      const set = [];
+      let first = null;
+      let prev = null;
+      const v = versions2.sort((a, b) => compare(a, b, options));
+      for (const version2 of v) {
+        const included = satisfies(version2, range, options);
+        if (included) {
+          prev = version2;
+          if (!first) {
+            first = version2;
+          }
+        } else {
+          if (prev) {
+            set.push([first, prev]);
+          }
+          prev = null;
+          first = null;
+        }
+      }
+      if (first) {
+        set.push([first, null]);
+      }
+      const ranges = [];
+      for (const [min, max] of set) {
+        if (min === max) {
+          ranges.push(min);
+        } else if (!max && min === v[0]) {
+          ranges.push("*");
+        } else if (!max) {
+          ranges.push(`>=${min}`);
+        } else if (min === v[0]) {
+          ranges.push(`<=${max}`);
+        } else {
+          ranges.push(`${min} - ${max}`);
+        }
+      }
+      const simplified = ranges.join(" || ");
+      const original = typeof range.raw === "string" ? range.raw : String(range);
+      return simplified.length < original.length ? simplified : range;
+    };
+  }
+});
+
+// node_modules/semver/ranges/subset.js
+var require_subset = __commonJS({
+  "node_modules/semver/ranges/subset.js"(exports, module) {
+    "use strict";
+    var Range = require_range();
+    var Comparator = require_comparator();
+    var { ANY } = Comparator;
+    var satisfies = require_satisfies();
+    var compare = require_compare();
+    var subset = (sub, dom, options = {}) => {
+      if (sub === dom) {
+        return true;
+      }
+      sub = new Range(sub, options);
+      dom = new Range(dom, options);
+      let sawNonNull = false;
+      OUTER: for (const simpleSub of sub.set) {
+        for (const simpleDom of dom.set) {
+          const isSub = simpleSubset(simpleSub, simpleDom, options);
+          sawNonNull = sawNonNull || isSub !== null;
+          if (isSub) {
+            continue OUTER;
+          }
+        }
+        if (sawNonNull) {
+          return false;
+        }
+      }
+      return true;
+    };
+    var minimumVersionWithPreRelease = [new Comparator(">=0.0.0-0")];
+    var minimumVersion = [new Comparator(">=0.0.0")];
+    var simpleSubset = (sub, dom, options) => {
+      if (sub === dom) {
+        return true;
+      }
+      if (sub.length === 1 && sub[0].semver === ANY) {
+        if (dom.length === 1 && dom[0].semver === ANY) {
+          return true;
+        } else if (options.includePrerelease) {
+          sub = minimumVersionWithPreRelease;
+        } else {
+          sub = minimumVersion;
+        }
+      }
+      if (dom.length === 1 && dom[0].semver === ANY) {
+        if (options.includePrerelease) {
+          return true;
+        } else {
+          dom = minimumVersion;
+        }
+      }
+      const eqSet = /* @__PURE__ */ new Set();
+      let gt, lt;
+      for (const c of sub) {
+        if (c.operator === ">" || c.operator === ">=") {
+          gt = higherGT(gt, c, options);
+        } else if (c.operator === "<" || c.operator === "<=") {
+          lt = lowerLT(lt, c, options);
+        } else {
+          eqSet.add(c.semver);
+        }
+      }
+      if (eqSet.size > 1) {
+        return null;
+      }
+      let gtltComp;
+      if (gt && lt) {
+        gtltComp = compare(gt.semver, lt.semver, options);
+        if (gtltComp > 0) {
+          return null;
+        } else if (gtltComp === 0 && (gt.operator !== ">=" || lt.operator !== "<=")) {
+          return null;
+        }
+      }
+      for (const eq of eqSet) {
+        if (gt && !satisfies(eq, String(gt), options)) {
+          return null;
+        }
+        if (lt && !satisfies(eq, String(lt), options)) {
+          return null;
+        }
+        for (const c of dom) {
+          if (!satisfies(eq, String(c), options)) {
+            return false;
+          }
+        }
+        return true;
+      }
+      let higher, lower;
+      let hasDomLT, hasDomGT;
+      let needDomLTPre = lt && !options.includePrerelease && lt.semver.prerelease.length ? lt.semver : false;
+      let needDomGTPre = gt && !options.includePrerelease && gt.semver.prerelease.length ? gt.semver : false;
+      if (needDomLTPre && needDomLTPre.prerelease.length === 1 && lt.operator === "<" && needDomLTPre.prerelease[0] === 0) {
+        needDomLTPre = false;
+      }
+      for (const c of dom) {
+        hasDomGT = hasDomGT || c.operator === ">" || c.operator === ">=";
+        hasDomLT = hasDomLT || c.operator === "<" || c.operator === "<=";
+        if (gt) {
+          if (needDomGTPre) {
+            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomGTPre.major && c.semver.minor === needDomGTPre.minor && c.semver.patch === needDomGTPre.patch) {
+              needDomGTPre = false;
+            }
+          }
+          if (c.operator === ">" || c.operator === ">=") {
+            higher = higherGT(gt, c, options);
+            if (higher === c && higher !== gt) {
+              return false;
+            }
+          } else if (gt.operator === ">=" && !c.test(gt.semver)) {
+            return false;
+          }
+        }
+        if (lt) {
+          if (needDomLTPre) {
+            if (c.semver.prerelease && c.semver.prerelease.length && c.semver.major === needDomLTPre.major && c.semver.minor === needDomLTPre.minor && c.semver.patch === needDomLTPre.patch) {
+              needDomLTPre = false;
+            }
+          }
+          if (c.operator === "<" || c.operator === "<=") {
+            lower = lowerLT(lt, c, options);
+            if (lower === c && lower !== lt) {
+              return false;
+            }
+          } else if (lt.operator === "<=" && !c.test(lt.semver)) {
+            return false;
+          }
+        }
+        if (!c.operator && (lt || gt) && gtltComp !== 0) {
+          return false;
+        }
+      }
+      if (gt && hasDomLT && !lt && gtltComp !== 0) {
+        return false;
+      }
+      if (lt && hasDomGT && !gt && gtltComp !== 0) {
+        return false;
+      }
+      if (needDomGTPre || needDomLTPre) {
+        return false;
+      }
+      return true;
+    };
+    var higherGT = (a, b, options) => {
+      if (!a) {
+        return b;
+      }
+      const comp = compare(a.semver, b.semver, options);
+      return comp > 0 ? a : comp < 0 ? b : b.operator === ">" && a.operator === ">=" ? b : a;
+    };
+    var lowerLT = (a, b, options) => {
+      if (!a) {
+        return b;
+      }
+      const comp = compare(a.semver, b.semver, options);
+      return comp < 0 ? a : comp > 0 ? b : b.operator === "<" && a.operator === "<=" ? b : a;
+    };
+    module.exports = subset;
+  }
+});
+
+// node_modules/semver/index.js
+var require_semver2 = __commonJS({
+  "node_modules/semver/index.js"(exports, module) {
+    "use strict";
+    var internalRe = require_re();
+    var constants2 = require_constants3();
+    var SemVer = require_semver();
+    var identifiers = require_identifiers();
+    var parse = require_parse();
+    var valid = require_valid();
+    var clean = require_clean();
+    var inc = require_inc();
+    var diff2 = require_diff();
+    var major = require_major();
+    var minor = require_minor();
+    var patch = require_patch();
+    var prerelease = require_prerelease();
+    var compare = require_compare();
+    var rcompare = require_rcompare();
+    var compareLoose = require_compare_loose();
+    var compareBuild = require_compare_build();
+    var sort = require_sort();
+    var rsort = require_rsort();
+    var gt = require_gt();
+    var lt = require_lt();
+    var eq = require_eq();
+    var neq = require_neq();
+    var gte = require_gte();
+    var lte = require_lte();
+    var cmp = require_cmp();
+    var coerce = require_coerce();
+    var truncate2 = require_truncate();
+    var Comparator = require_comparator();
+    var Range = require_range();
+    var satisfies = require_satisfies();
+    var toComparators = require_to_comparators();
+    var maxSatisfying = require_max_satisfying();
+    var minSatisfying = require_min_satisfying();
+    var minVersion = require_min_version();
+    var validRange = require_valid2();
+    var outside = require_outside();
+    var gtr = require_gtr();
+    var ltr = require_ltr();
+    var intersects = require_intersects();
+    var simplifyRange = require_simplify();
+    var subset = require_subset();
+    module.exports = {
+      parse,
+      valid,
+      clean,
+      inc,
+      diff: diff2,
+      major,
+      minor,
+      patch,
+      prerelease,
+      compare,
+      rcompare,
+      compareLoose,
+      compareBuild,
+      sort,
+      rsort,
+      gt,
+      lt,
+      eq,
+      neq,
+      gte,
+      lte,
+      cmp,
+      coerce,
+      truncate: truncate2,
+      Comparator,
+      Range,
+      satisfies,
+      toComparators,
+      maxSatisfying,
+      minSatisfying,
+      minVersion,
+      validRange,
+      outside,
+      gtr,
+      ltr,
+      intersects,
+      simplifyRange,
+      subset,
+      SemVer,
+      re: internalRe.re,
+      src: internalRe.src,
+      tokens: internalRe.t,
+      SEMVER_SPEC_VERSION: constants2.SEMVER_SPEC_VERSION,
+      RELEASE_TYPES: constants2.RELEASE_TYPES,
+      compareIdentifiers: identifiers.compareIdentifiers,
+      rcompareIdentifiers: identifiers.rcompareIdentifiers
+    };
+  }
+});
+
+// node_modules/sharp/package.json
+var package_default;
+var init_package = __esm({
+  "node_modules/sharp/package.json"() {
+    package_default = {
+      name: "sharp",
+      description: "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
+      version: "0.35.3",
+      author: "Lovell Fuller <npm@lovell.info>",
+      homepage: "https://sharp.pixelplumbing.com",
+      contributors: [
+        "Pierre Inglebert <pierre.inglebert@gmail.com>",
+        "Jonathan Ong <jonathanrichardong@gmail.com>",
+        "Chanon Sajjamanochai <chanon.s@gmail.com>",
+        "Juliano Julio <julianojulio@gmail.com>",
+        "Daniel Gasienica <daniel@gasienica.ch>",
+        "Julian Walker <julian@fiftythree.com>",
+        "Amit Pitaru <pitaru.amit@gmail.com>",
+        "Brandon Aaron <hello.brandon@aaron.sh>",
+        "Andreas Lind <andreas@one.com>",
+        "Maurus Cuelenaere <mcuelenaere@gmail.com>",
+        "Linus Unneb\xE4ck <linus@folkdatorn.se>",
+        "Victor Mateevitsi <mvictoras@gmail.com>",
+        "Alaric Holloway <alaric.holloway@gmail.com>",
+        "Bernhard K. Weisshuhn <bkw@codingforce.com>",
+        "Chris Riley <criley@primedia.com>",
+        "David Carley <dacarley@gmail.com>",
+        "John Tobin <john@limelightmobileinc.com>",
+        "Kenton Gray <kentongray@gmail.com>",
+        "Felix B\xFCnemann <Felix.Buenemann@gmail.com>",
+        "Samy Al Zahrani <samyalzahrany@gmail.com>",
+        "Chintan Thakkar <lemnisk8@gmail.com>",
+        "F. Orlando Galashan <frulo@gmx.de>",
+        "Kleis Auke Wolthuizen <info@kleisauke.nl>",
+        "Matt Hirsch <mhirsch@media.mit.edu>",
+        "Matthias Thoemmes <thoemmes@gmail.com>",
+        "Patrick Paskaris <patrick@paskaris.gr>",
+        "J\xE9r\xE9my Lal <kapouer@melix.org>",
+        "Rahul Nanwani <r.nanwani@gmail.com>",
+        "Alice Monday <alice0meta@gmail.com>",
+        "Kristo Jorgenson <kristo.jorgenson@gmail.com>",
+        "YvesBos <yves_bos@outlook.com>",
+        "Guy Maliar <guy@tailorbrands.com>",
+        "Nicolas Coden <nicolas@ncoden.fr>",
+        "Matt Parrish <matt.r.parrish@gmail.com>",
+        "Marcel Bretschneider <marcel.bretschneider@gmail.com>",
+        "Matthew McEachen <matthew+github@mceachen.org>",
+        "Jarda Kot\u011B\u0161ovec <jarda.kotesovec@gmail.com>",
+        "Kenric D'Souza <kenric.dsouza@gmail.com>",
+        "Oleh Aleinyk <oleg.aleynik@gmail.com>",
+        "Marcel Bretschneider <marcel.bretschneider@gmail.com>",
+        "Andrea Bianco <andrea.bianco@unibas.ch>",
+        "Rik Heywood <rik@rik.org>",
+        "Thomas Parisot <hi@oncletom.io>",
+        "Nathan Graves <nathanrgraves+github@gmail.com>",
+        "Tom Lokhorst <tom@lokhorst.eu>",
+        "Espen Hovlandsdal <espen@hovlandsdal.com>",
+        "Sylvain Dumont <sylvain.dumont35@gmail.com>",
+        "Alun Davies <alun.owain.davies@googlemail.com>",
+        "Aidan Hoolachan <ajhoolachan21@gmail.com>",
+        "Axel Eirola <axel.eirola@iki.fi>",
+        "Freezy <freezy@xbmc.org>",
+        "Daiz <taneli.vatanen@gmail.com>",
+        "Julian Aubourg <j@ubourg.net>",
+        "Keith Belovay <keith@picthrive.com>",
+        "Michael B. Klein <mbklein@gmail.com>",
+        "Jordan Prudhomme <jordan@raboland.fr>",
+        "Ilya Ovdin <iovdin@gmail.com>",
+        "Andargor <andargor@yahoo.com>",
+        "Paul Neave <paul.neave@gmail.com>",
+        "Brendan Kennedy <brenwken@gmail.com>",
+        "Brychan Bennett-Odlum <git@brychan.io>",
+        "Edward Silverton <e.silverton@gmail.com>",
+        "Roman Malieiev <aromaleev@gmail.com>",
+        "Tomas Szabo <tomas.szabo@deftomat.com>",
+        "Robert O'Rourke <robert@o-rourke.org>",
+        "Guillermo Alfonso Varela Chouci\xF1o <guillevch@gmail.com>",
+        "Christian Flintrup <chr@gigahost.dk>",
+        "Manan Jadhav <manan@motionden.com>",
+        "Leon Radley <leon@radley.se>",
+        "alza54 <alza54@thiocod.in>",
+        "Jacob Smith <jacob@frende.me>",
+        "Michael Nutt <michael@nutt.im>",
+        "Brad Parham <baparham@gmail.com>",
+        "Taneli Vatanen <taneli.vatanen@gmail.com>",
+        "Joris Dugu\xE9 <zaruike10@gmail.com>",
+        "Chris Banks <christopher.bradley.banks@gmail.com>",
+        "Ompal Singh <ompal.hitm09@gmail.com>",
+        "Brodan <christopher.hranj@gmail.com>",
+        "Ankur Parihar <ankur.github@gmail.com>",
+        "Brahim Ait elhaj <brahima@gmail.com>",
+        "Mart Jansink <m.jansink@gmail.com>",
+        "Lachlan Newman <lachnewman007@gmail.com>",
+        "Dennis Beatty <dennis@dcbeatty.com>",
+        "Ingvar Stepanyan <me@rreverser.com>",
+        "Don Denton <don@happycollision.com>",
+        "Dmytro Tiapukhin <cool.gegeg@gmail.com>",
+        "Florian Lefebvre <contact@florian-lefebvre.dev>"
+      ],
+      scripts: {
+        build: "node install/build.js",
+        "build:dist": "node scripts/build.mjs",
+        clean: "rm -rf src/build/ test/fixtures/output.*",
+        test: "npm run lint && npm run test-unit",
+        lint: "npm run lint-cpp && npm run lint-js && npm run lint-types && npm run lint-publish",
+        "lint-cpp": "cpplint --quiet src/*.h src/*.cc",
+        "lint-js": "biome lint",
+        "lint-publish": "publint --strict",
+        "lint-types": "tsd --files ./test/types/sharp.test-d.{cts,mts}",
+        "test-leak": "./test/leak/leak.sh",
+        "test-unit": "node --experimental-test-coverage test/unit.mjs",
+        "package-from-local-build": "node npm/from-local-build.js",
+        "package-wasm-wrappers": "node npm/wasm-wrappers.js",
+        "package-release-notes": "node npm/release-notes.js",
+        "docs-build": "node docs/build.mjs",
+        "docs-serve": "cd docs && npm start",
+        "docs-publish": "cd docs && npm run build && npx firebase-tools deploy --project pixelplumbing --only hosting:pixelplumbing-sharp"
+      },
+      type: "commonjs",
+      files: [
+        "dist",
+        "install",
+        "lib/index.d.ts",
+        "src/*.{cc,h,gyp}"
+      ],
+      main: "./dist/index.cjs",
+      module: "./dist/index.mjs",
+      types: "./dist/index.d.mts",
+      exports: {
+        ".": {
+          import: {
+            types: "./dist/index.d.mts",
+            default: "./dist/index.mjs"
+          },
+          require: {
+            types: "./dist/index.d.cts",
+            default: "./dist/index.cjs"
+          }
+        }
+      },
+      sideEffects: true,
+      repository: {
+        type: "git",
+        url: "git+https://github.com/lovell/sharp.git"
+      },
+      keywords: [
+        "jpeg",
+        "png",
+        "webp",
+        "avif",
+        "tiff",
+        "gif",
+        "svg",
+        "jp2",
+        "dzi",
+        "image",
+        "resize",
+        "thumbnail",
+        "crop",
+        "embed",
+        "libvips",
+        "vips"
+      ],
+      dependencies: {
+        "@img/colour": "^1.1.0",
+        "detect-libc": "^2.1.2",
+        semver: "^7.8.5"
+      },
+      optionalDependencies: {
+        "@img/sharp-darwin-arm64": "0.35.3",
+        "@img/sharp-darwin-x64": "0.35.3",
+        "@img/sharp-freebsd-wasm32": "0.35.3",
+        "@img/sharp-libvips-darwin-arm64": "1.3.2",
+        "@img/sharp-libvips-darwin-x64": "1.3.2",
+        "@img/sharp-libvips-linux-arm": "1.3.2",
+        "@img/sharp-libvips-linux-arm64": "1.3.2",
+        "@img/sharp-libvips-linux-ppc64": "1.3.2",
+        "@img/sharp-libvips-linux-riscv64": "1.3.2",
+        "@img/sharp-libvips-linux-s390x": "1.3.2",
+        "@img/sharp-libvips-linux-x64": "1.3.2",
+        "@img/sharp-libvips-linuxmusl-arm64": "1.3.2",
+        "@img/sharp-libvips-linuxmusl-x64": "1.3.2",
+        "@img/sharp-linux-arm": "0.35.3",
+        "@img/sharp-linux-arm64": "0.35.3",
+        "@img/sharp-linux-ppc64": "0.35.3",
+        "@img/sharp-linux-riscv64": "0.35.3",
+        "@img/sharp-linux-s390x": "0.35.3",
+        "@img/sharp-linux-x64": "0.35.3",
+        "@img/sharp-linuxmusl-arm64": "0.35.3",
+        "@img/sharp-linuxmusl-x64": "0.35.3",
+        "@img/sharp-webcontainers-wasm32": "0.35.3",
+        "@img/sharp-win32-arm64": "0.35.3",
+        "@img/sharp-win32-ia32": "0.35.3",
+        "@img/sharp-win32-x64": "0.35.3"
+      },
+      peerDependenciesMeta: {
+        "@types/node": {
+          optional: true
+        }
+      },
+      devDependencies: {
+        "@biomejs/biome": "^2.5.1",
+        "@cpplint/cli": "^0.1.0",
+        "@emnapi/runtime": "^1.11.1",
+        "@img/sharp-libvips-dev": "1.3.2",
+        "@img/sharp-libvips-dev-wasm32": "1.3.2",
+        "@img/sharp-libvips-win32-arm64": "1.3.2",
+        "@img/sharp-libvips-win32-ia32": "1.3.2",
+        "@img/sharp-libvips-win32-x64": "1.3.2",
+        "@types/node": "*",
+        emnapi: "^1.11.1",
+        "exif-reader": "^2.0.3",
+        "extract-zip": "^2.0.1",
+        icc: "^4.0.0",
+        "node-addon-api": "^8.9.0",
+        "node-gyp": "^12.4.0",
+        publint: "^0.3.21",
+        "tar-fs": "^3.1.3",
+        tsd: "^0.33.0"
+      },
+      license: "Apache-2.0",
+      engines: {
+        node: ">=20.9.0"
+      },
+      config: {
+        libvips: ">=8.18.3"
+      },
+      funding: {
+        url: "https://opencollective.com/libvips"
+      }
+    };
+  }
+});
+
+// node_modules/sharp/dist/libvips.mjs
+import { spawnSync } from "child_process";
+import { createHash } from "crypto";
+var import_semver, import_detect_libc, minimumLibvipsVersionLabelled, minimumLibvipsVersion, prebuiltPlatforms, spawnSyncOptions, log, runtimeLibc, runtimePlatformArch, buildPlatformArch, buildSharpLibvipsIncludeDir, buildSharpLibvipsCPlusPlusDir, buildSharpLibvipsLibDir, isUnsupportedNodeRuntime, isEmscripten, isRosetta, sha512, yarnLocator, spawnRebuild, globalLibvipsVersion, getBrewPkgConfigPath, getPkgConfigPath, pkgConfigPath, skipSearch, useGlobalLibvips, libvips_default;
+var init_libvips = __esm({
+  "node_modules/sharp/dist/libvips.mjs"() {
+    "use strict";
+    import_semver = __toESM(require_semver2(), 1);
+    import_detect_libc = __toESM(require_detect_libc(), 1);
+    init_package();
+    minimumLibvipsVersionLabelled = process.env.npm_package_config_libvips || package_default.config.libvips;
+    minimumLibvipsVersion = import_semver.default.coerce(minimumLibvipsVersionLabelled).version;
+    prebuiltPlatforms = [
+      "darwin-arm64",
+      "darwin-x64",
+      "freebsd-arm64",
+      "freebsd-x64",
+      "linux-arm",
+      "linux-arm64",
+      "linux-ppc64",
+      "linux-riscv64",
+      "linux-s390x",
+      "linux-wasm32",
+      "linux-x64",
+      "linuxmusl-arm64",
+      "linuxmusl-x64",
+      "win32-arm64",
+      "win32-ia32",
+      "win32-x64"
+    ];
+    spawnSyncOptions = {
+      encoding: "utf8",
+      shell: true
+    };
+    log = (item) => {
+      if (item instanceof Error) {
+        console.error(`sharp: Installation error: ${item.message}`);
+      } else {
+        console.log(`sharp: ${item}`);
+      }
+    };
+    runtimeLibc = () => import_detect_libc.default.isNonGlibcLinuxSync() ? import_detect_libc.default.familySync() : "";
+    runtimePlatformArch = () => `${process.platform}${runtimeLibc()}-${process.arch}`;
+    buildPlatformArch = () => {
+      if (isEmscripten()) {
+        return "wasm32";
+      }
+      const { npm_config_arch, npm_config_platform, npm_config_libc } = process.env;
+      const libc = typeof npm_config_libc === "string" ? npm_config_libc : runtimeLibc();
+      return `${npm_config_platform || process.platform}${libc}-${npm_config_arch || process.arch}`;
+    };
+    buildSharpLibvipsIncludeDir = () => {
+      try {
+        return __require(`@img/sharp-libvips-dev-${buildPlatformArch()}/include`);
+      } catch {
+        try {
+          return __require("@img/sharp-libvips-dev/include");
+        } catch {
+        }
+      }
+      return "";
+    };
+    buildSharpLibvipsCPlusPlusDir = () => {
+      try {
+        return __require("@img/sharp-libvips-dev/cplusplus");
+      } catch {
+      }
+      return "";
+    };
+    buildSharpLibvipsLibDir = () => {
+      try {
+        return __require(`@img/sharp-libvips-dev-${buildPlatformArch()}/lib`);
+      } catch {
+        try {
+          return __require(`@img/sharp-libvips-${buildPlatformArch()}/lib`);
+        } catch {
+        }
+      }
+      return "";
+    };
+    isUnsupportedNodeRuntime = () => {
+      if (process.release?.name === "node" && process.versions) {
+        if (!import_semver.default.satisfies(process.versions.node, package_default.engines.node)) {
+          return { found: process.versions.node, expected: package_default.engines.node };
+        }
+      }
+    };
+    isEmscripten = () => {
+      const { CC } = process.env;
+      return Boolean(CC?.endsWith("/emcc"));
+    };
+    isRosetta = () => {
+      if (process.platform === "darwin" && process.arch === "x64") {
+        const translated = spawnSync("sysctl sysctl.proc_translated", spawnSyncOptions).stdout;
+        return (translated || "").trim() === "sysctl.proc_translated: 1";
+      }
+      return false;
+    };
+    sha512 = (s) => createHash("sha512").update(s).digest("hex");
+    yarnLocator = () => {
+      try {
+        const identHash = sha512(`imgsharp-libvips-${buildPlatformArch()}`);
+        const npmVersion = import_semver.default.coerce(package_default.optionalDependencies[`@img/sharp-libvips-${buildPlatformArch()}`], {
+          includePrerelease: true
+        }).version;
+        return sha512(`${identHash}npm:${npmVersion}`).slice(0, 10);
+      } catch {
+      }
+      return "";
+    };
+    spawnRebuild = () => spawnSync(`node-gyp rebuild --directory=src ${isEmscripten() ? "--nodedir=emscripten" : ""}`, {
+      ...spawnSyncOptions,
+      stdio: "inherit"
+    }).status;
+    globalLibvipsVersion = () => {
+      if (process.platform !== "win32") {
+        const globalLibvipsVersion2 = spawnSync("pkg-config --modversion vips-cpp", {
+          ...spawnSyncOptions,
+          env: {
+            ...process.env,
+            PKG_CONFIG_PATH: pkgConfigPath()
+          }
+        }).stdout;
+        return (globalLibvipsVersion2 || "").trim();
+      } else {
+        return "";
+      }
+    };
+    getBrewPkgConfigPath = () => {
+      try {
+        const brewPrefix = (spawnSync("brew", ["--prefix"], { encoding: "utf8" }).stdout || "").trim();
+        if (brewPrefix) {
+          return `${brewPrefix}/lib/pkgconfig`;
+        }
+      } catch (_err) {
+      }
+      return void 0;
+    };
+    getPkgConfigPath = () => {
+      try {
+        const pkgConfigPath2 = (spawnSync("pkg-config", ["--variable", "pc_path", "pkg-config"], { encoding: "utf8" }).stdout || "").trim();
+        if (pkgConfigPath2) {
+          return pkgConfigPath2;
+        }
+      } catch (_err) {
+      }
+      return void 0;
+    };
+    pkgConfigPath = () => {
+      if (process.platform !== "win32") {
+        return [
+          getBrewPkgConfigPath(),
+          getPkgConfigPath(),
+          process.env.PKG_CONFIG_PATH
+        ].filter(Boolean).join(":");
+      } else {
+        return "";
+      }
+    };
+    skipSearch = (status, reason, logger) => {
+      if (logger) {
+        logger(`Detected ${reason}, skipping search for globally-installed libvips`);
+      }
+      return status;
+    };
+    useGlobalLibvips = (logger) => {
+      if (Boolean(process.env.SHARP_IGNORE_GLOBAL_LIBVIPS) === true) {
+        return skipSearch(false, "SHARP_IGNORE_GLOBAL_LIBVIPS", logger);
+      }
+      if (Boolean(process.env.SHARP_FORCE_GLOBAL_LIBVIPS) === true) {
+        return skipSearch(true, "SHARP_FORCE_GLOBAL_LIBVIPS", logger);
+      }
+      if (isRosetta()) {
+        return skipSearch(false, "Rosetta", logger);
+      }
+      const globalVipsVersion = globalLibvipsVersion();
+      return !!globalVipsVersion && import_semver.default.gte(globalVipsVersion, minimumLibvipsVersion);
+    };
+    libvips_default = {
+      minimumLibvipsVersion,
+      prebuiltPlatforms,
+      buildPlatformArch,
+      buildSharpLibvipsIncludeDir,
+      buildSharpLibvipsCPlusPlusDir,
+      buildSharpLibvipsLibDir,
+      isUnsupportedNodeRuntime,
+      runtimePlatformArch,
+      log,
+      yarnLocator,
+      spawnRebuild,
+      globalLibvipsVersion,
+      pkgConfigPath,
+      useGlobalLibvips
+    };
+  }
+});
+
+// node_modules/sharp/dist/sharp.mjs
+import { createRequire } from "module";
+var import_detect_libc2, require2, version, runtimePlatformArch2, isUnsupportedNodeRuntime2, prebuiltPlatforms2, minimumLibvipsVersion2, runtimePlatform, sharp, errors, sharp_default;
+var init_sharp = __esm({
+  "node_modules/sharp/dist/sharp.mjs"() {
+    "use strict";
+    import_detect_libc2 = __toESM(require_detect_libc(), 1);
+    init_libvips();
+    init_package();
+    require2 = createRequire(import.meta.url);
+    ({ version } = package_default);
+    ({ runtimePlatformArch: runtimePlatformArch2, isUnsupportedNodeRuntime: isUnsupportedNodeRuntime2, prebuiltPlatforms: prebuiltPlatforms2, minimumLibvipsVersion: minimumLibvipsVersion2 } = libvips_default);
+    runtimePlatform = runtimePlatformArch2();
+    errors = [];
+    try {
+      sharp = require2(`../src/build/Release/sharp-${runtimePlatform}-${version}.node`);
+    } catch (err) {
+      errors.push(err);
+    }
+    if (!sharp) {
+      try {
+        sharp = require2(`../src/build/Release/sharp-wasm32-${version}.node`);
+      } catch (err) {
+        errors.push(err);
+      }
+    }
+    if (!sharp) {
+      try {
+        switch (runtimePlatform) {
+          case "darwin-arm64":
+            sharp = require2("@img/sharp-darwin-arm64/sharp.node");
+            break;
+          case "darwin-x64":
+            sharp = require2("@img/sharp-darwin-x64/sharp.node");
+            break;
+          case "linux-arm":
+            sharp = require2("@img/sharp-linux-arm/sharp.node");
+            break;
+          case "linux-arm64":
+            sharp = require2("@img/sharp-linux-arm64/sharp.node");
+            break;
+          case "linux-ppc64":
+            sharp = require2("@img/sharp-linux-ppc64/sharp.node");
+            break;
+          case "linux-riscv64":
+            sharp = require2("@img/sharp-linux-riscv64/sharp.node");
+            break;
+          case "linux-s390x":
+            sharp = require2("@img/sharp-linux-s390x/sharp.node");
+            break;
+          case "linux-x64":
+            sharp = require2("@img/sharp-linux-x64/sharp.node");
+            break;
+          case "linuxmusl-arm64":
+            sharp = require2("@img/sharp-linuxmusl-arm64/sharp.node");
+            break;
+          case "linuxmusl-x64":
+            sharp = require2("@img/sharp-linuxmusl-x64/sharp.node");
+            break;
+          case "win32-arm64":
+            sharp = require2("@img/sharp-win32-arm64/sharp.node");
+            break;
+          case "win32-ia32":
+            sharp = require2("@img/sharp-win32-ia32/sharp.node");
+            break;
+          case "win32-x64":
+            sharp = require2("@img/sharp-win32-x64/sharp.node");
+            break;
+          case "freebsd-arm64":
+          case "freebsd-x64":
+            sharp = require2("@img/sharp-freebsd-wasm32/sharp.node");
+            break;
+          case "linux-wasm32":
+            sharp = require2("@img/sharp-webcontainers-wasm32/sharp.node");
+            break;
+        }
+        if (sharp && ["linux-x64", "linuxmusl-x64"].includes(runtimePlatform) && !sharp._isUsingX64V2()) {
+          const err = new Error("Prebuilt binaries for Linux x64 require v2 microarchitecture");
+          err.code = "Unsupported CPU";
+          errors.push(err);
+          sharp = null;
+        }
+        if (sharp && process.versions.electron && runtimePlatform.startsWith("linux")) {
+          process.emitWarning(
+            "Binaries provided by Electron for use on Linux may be incompatible with sharp - see https://sharp.pixelplumbing.com/install#electron-and-linux",
+            { code: "SharpElectronLinux" }
+          );
+        }
+      } catch (err) {
+        errors.push(err);
+      }
+    }
+    if (!sharp) {
+      try {
+        sharp = require2("@img/sharp-wasm32/sharp.node");
+      } catch (err) {
+        errors.push(err);
+      }
+    }
+    if (!sharp) {
+      const [isLinux2, isMacOs2, isWindows3] = ["linux", "darwin", "win32"].map((os6) => runtimePlatform.startsWith(os6));
+      const help = [`Could not load the "sharp" module using the ${runtimePlatform} runtime`];
+      errors.forEach((err) => {
+        if (!err.code.endsWith("MODULE_NOT_FOUND")) {
+          help.push(`${err.code}: ${err.message}`);
+        }
+      });
+      const messages = errors.map((err) => err.message).join(" ");
+      help.push("Possible solutions:");
+      if (isUnsupportedNodeRuntime2()) {
+        const { found, expected } = isUnsupportedNodeRuntime2();
+        help.push("- Please upgrade Node.js:", `    Found ${found}`, `    Requires ${expected}`);
+      } else if (prebuiltPlatforms2.includes(runtimePlatform)) {
+        const [os6, cpu] = runtimePlatform.split("-");
+        const libc = os6.endsWith("musl") ? " --libc=musl" : "";
+        help.push(
+          "- Ensure optional dependencies can be installed:",
+          "    npm install --include=optional sharp",
+          "- Ensure your package manager supports multi-platform installation:",
+          "    See https://sharp.pixelplumbing.com/install#cross-platform",
+          "- Add platform-specific dependencies:",
+          `    npm install --os=${os6.replace("musl", "")}${libc} --cpu=${cpu} sharp`
+        );
+      } else {
+        help.push(
+          `- Manually install libvips >= ${minimumLibvipsVersion2}`,
+          "    See https://sharp.pixelplumbing.com/install#building-from-source",
+          "- Add WebAssembly-based dependencies:",
+          "    npm install sharp @img/sharp-wasm32"
+        );
+      }
+      if (isLinux2 && /(symbol not found|CXXABI_)/i.test(messages)) {
+        try {
+          const { config } = require2(`@img/sharp-libvips-${runtimePlatform}/package`);
+          const libcFound = `${(0, import_detect_libc2.familySync)()} ${(0, import_detect_libc2.versionSync)()}`;
+          const libcRequires = `${config.musl ? "musl" : "glibc"} ${config.musl || config.glibc}`;
+          help.push("- Update your OS:", `    Found ${libcFound}`, `    Requires ${libcRequires}`);
+        } catch (_errEngines) {
+        }
+      }
+      if (isLinux2 && /\/snap\/core[0-9]{2}/.test(messages)) {
+        help.push("- Remove the Node.js Snap, which does not support native modules", "    snap remove node");
+      }
+      if (isMacOs2 && /Incompatible library version/.test(messages)) {
+        help.push("- Update Homebrew:", "    brew update && brew upgrade vips");
+      }
+      if (errors.some((err) => err.code === "ERR_DLOPEN_DISABLED")) {
+        help.push("- Run Node.js without using the --no-addons flag");
+      }
+      if (isWindows3 && /The specified procedure could not be found/.test(messages)) {
+        help.push(
+          "- Using the canvas package on Windows?",
+          "    See https://sharp.pixelplumbing.com/install#canvas-and-windows",
+          "- Check for outdated versions of sharp in the dependency tree:",
+          "    npm ls sharp"
+        );
+      }
+      help.push("- Consult the installation documentation:", "    See https://sharp.pixelplumbing.com/install");
+      throw new Error(help.join("\n"));
+    }
+    sharp_default = sharp;
+  }
+});
+
+// node_modules/sharp/dist/constructor.mjs
+import util from "util";
+import stream from "stream";
+function clone() {
+  const clone2 = this.constructor.call();
+  const { debuglog: debuglog2, queueListener: queueListener2, ...options } = this.options;
+  clone2.options = structuredClone(options);
+  clone2.options.debuglog = debuglog2;
+  clone2.options.queueListener = queueListener2;
+  if (this._isStreamInput()) {
+    this.on("finish", () => {
+      this._flattenBufferIn();
+      clone2.options.input.buffer = this.options.input.buffer;
+      clone2.emit("finish");
+    });
+  }
+  return clone2;
+}
+var debuglog, queueListener, Sharp, constructor_default;
+var init_constructor = __esm({
+  "node_modules/sharp/dist/constructor.mjs"() {
+    "use strict";
+    init_is();
+    init_sharp();
+    debuglog = util.debuglog("sharp");
+    queueListener = (queueLength) => {
+      Sharp.queue.emit("change", queueLength);
+    };
+    Sharp = function(input, options) {
+      if (arguments.length === 1 && !is_default.defined(input)) {
+        throw new Error("Invalid input");
+      }
+      if (!(this instanceof Sharp)) {
+        return new Sharp(input, options);
+      }
+      stream.Duplex.call(this);
+      this.options = {
+        // resize options
+        topOffsetPre: -1,
+        leftOffsetPre: -1,
+        widthPre: -1,
+        heightPre: -1,
+        topOffsetPost: -1,
+        leftOffsetPost: -1,
+        widthPost: -1,
+        heightPost: -1,
+        width: -1,
+        height: -1,
+        canvas: "crop",
+        position: 0,
+        resizeBackground: [0, 0, 0, 255],
+        angle: 0,
+        rotationAngle: 0,
+        rotationBackground: [0, 0, 0, 255],
+        rotateBefore: false,
+        orientBefore: false,
+        flip: false,
+        flop: false,
+        extendTop: 0,
+        extendBottom: 0,
+        extendLeft: 0,
+        extendRight: 0,
+        extendBackground: [0, 0, 0, 255],
+        extendWith: "background",
+        withoutEnlargement: false,
+        withoutReduction: false,
+        affineMatrix: [],
+        affineBackground: [0, 0, 0, 255],
+        affineIdx: 0,
+        affineIdy: 0,
+        affineOdx: 0,
+        affineOdy: 0,
+        affineInterpolator: this.constructor.interpolators.bilinear,
+        kernel: "lanczos3",
+        fastShrinkOnLoad: true,
+        // operations
+        tint: [-1, 0, 0, 0],
+        flatten: false,
+        flattenBackground: [0, 0, 0],
+        unflatten: false,
+        negate: false,
+        negateAlpha: true,
+        medianSize: 0,
+        blurSigma: 0,
+        precision: "integer",
+        minAmpl: 0.2,
+        sharpenSigma: 0,
+        sharpenM1: 1,
+        sharpenM2: 2,
+        sharpenX1: 2,
+        sharpenY2: 10,
+        sharpenY3: 20,
+        threshold: 0,
+        thresholdGrayscale: true,
+        trimBackground: [],
+        trimThreshold: -1,
+        trimLineArt: false,
+        trimMargin: 0,
+        dilateWidth: 0,
+        erodeWidth: 0,
+        gamma: 0,
+        gammaOut: 0,
+        greyscale: false,
+        normalise: false,
+        normaliseLower: 1,
+        normaliseUpper: 99,
+        claheWidth: 0,
+        claheHeight: 0,
+        claheMaxSlope: 3,
+        brightness: 1,
+        saturation: 1,
+        hue: 0,
+        lightness: 0,
+        booleanBufferIn: null,
+        booleanFileIn: "",
+        joinChannelIn: [],
+        extractChannel: -1,
+        removeAlpha: false,
+        ensureAlpha: -1,
+        colourspace: "srgb",
+        colourspacePipeline: "last",
+        composite: [],
+        // output
+        fileOut: "",
+        formatOut: "input",
+        streamOut: false,
+        typedArrayOut: false,
+        keepMetadata: 0,
+        withMetadataOrientation: -1,
+        withMetadataDensity: 0,
+        withIccProfile: "",
+        withExif: {},
+        withExifMerge: true,
+        withXmp: "",
+        keepGainMap: false,
+        withGainMap: false,
+        resolveWithObject: false,
+        loop: -1,
+        delay: [],
+        // output format
+        jpegQuality: 80,
+        jpegProgressive: false,
+        jpegChromaSubsampling: "4:2:0",
+        jpegTrellisQuantisation: false,
+        jpegOvershootDeringing: false,
+        jpegOptimiseScans: false,
+        jpegOptimiseCoding: true,
+        jpegQuantisationTable: 0,
+        pngProgressive: false,
+        pngCompressionLevel: 6,
+        pngAdaptiveFiltering: false,
+        pngPalette: false,
+        pngQuality: 100,
+        pngEffort: 7,
+        pngBitdepth: 8,
+        pngDither: 1,
+        jp2Quality: 80,
+        jp2TileHeight: 512,
+        jp2TileWidth: 512,
+        jp2Lossless: false,
+        jp2ChromaSubsampling: "4:4:4",
+        webpQuality: 80,
+        webpAlphaQuality: 100,
+        webpLossless: false,
+        webpNearLossless: false,
+        webpSmartSubsample: false,
+        webpSmartDeblock: false,
+        webpPreset: "default",
+        webpEffort: 4,
+        webpMinSize: false,
+        webpMixed: false,
+        webpExact: false,
+        gifBitdepth: 8,
+        gifEffort: 7,
+        gifDither: 1,
+        gifInterFrameMaxError: 0,
+        gifInterPaletteMaxError: 3,
+        gifKeepDuplicateFrames: false,
+        gifReuse: true,
+        gifProgressive: false,
+        tiffQuality: 80,
+        tiffCompression: "jpeg",
+        tiffBigtiff: false,
+        tiffPredictor: "horizontal",
+        tiffPyramid: false,
+        tiffMiniswhite: false,
+        tiffBitdepth: 0,
+        tiffTile: false,
+        tiffTileHeight: 256,
+        tiffTileWidth: 256,
+        tiffXres: 1,
+        tiffYres: 1,
+        tiffResolutionUnit: "inch",
+        heifQuality: 50,
+        heifLossless: false,
+        heifCompression: "av1",
+        heifEffort: 4,
+        heifChromaSubsampling: "4:4:4",
+        heifBitdepth: 8,
+        heifTune: "auto",
+        jxlDistance: 1,
+        jxlDecodingTier: 0,
+        jxlEffort: 7,
+        jxlLossless: false,
+        rawDepth: "uchar",
+        tileSize: 256,
+        tileOverlap: 0,
+        tileContainer: "fs",
+        tileLayout: "dz",
+        tileFormat: "last",
+        tileDepth: "last",
+        tileAngle: 0,
+        tileSkipBlanks: -1,
+        tileBackground: [255, 255, 255, 255],
+        tileCentre: false,
+        tileId: "https://example.com/iiif",
+        tileBasename: "",
+        timeoutSeconds: 0,
+        linearA: [],
+        linearB: [],
+        pdfBackground: [255, 255, 255, 255],
+        // Function to notify of libvips warnings
+        debuglog: (warning) => {
+          this.emit("warning", warning);
+          debuglog(warning);
+        },
+        // Function to notify of queue length changes
+        queueListener
+      };
+      this.options.input = this._createInputDescriptor(input, options, { allowStream: true });
+      return this;
+    };
+    Object.setPrototypeOf(Sharp.prototype, stream.Duplex.prototype);
+    Object.setPrototypeOf(Sharp, stream.Duplex);
+    Object.assign(Sharp.prototype, { clone });
+    constructor_default = Sharp;
+  }
+});
+
+// node_modules/sharp/dist/input.mjs
+function _inputOptionsFromObject(obj) {
+  const params = inputStreamParameters.filter((p) => is_default.defined(obj[p])).map((p) => [p, obj[p]]);
+  return params.length ? Object.fromEntries(params) : void 0;
+}
+function _createInputDescriptor(input, inputOptions, containerOptions) {
+  const inputDescriptor = {
+    autoOrient: false,
+    failOn: "warning",
+    limitInputPixels: 16383 ** 2,
+    limitInputChannels: 5,
+    ignoreIcc: false,
+    unlimited: false,
+    sequentialRead: true
+  };
+  if (is_default.string(input)) {
+    inputDescriptor.file = input;
+  } else if (is_default.buffer(input)) {
+    if (input.length === 0) {
+      throw Error("Input Buffer is empty");
+    }
+    inputDescriptor.buffer = input;
+  } else if (is_default.arrayBuffer(input)) {
+    if (input.byteLength === 0) {
+      throw Error("Input bit Array is empty");
+    }
+    inputDescriptor.buffer = Buffer.from(input, 0, input.byteLength);
+  } else if (is_default.typedArray(input)) {
+    if (input.length === 0) {
+      throw Error("Input Bit Array is empty");
+    }
+    inputDescriptor.buffer = Buffer.from(input.buffer, input.byteOffset, input.byteLength);
+  } else if (is_default.plainObject(input) && !is_default.defined(inputOptions)) {
+    inputOptions = input;
+    if (_inputOptionsFromObject(inputOptions)) {
+      inputDescriptor.buffer = [];
+    }
+  } else if (!is_default.defined(input) && !is_default.defined(inputOptions) && is_default.object(containerOptions) && containerOptions.allowStream) {
+    inputDescriptor.buffer = [];
+  } else if (Array.isArray(input)) {
+    if (input.length > 1) {
+      if (!this.options.joining) {
+        this.options.joining = true;
+        this.options.join = input.map((i) => this._createInputDescriptor(i));
+      } else {
+        throw new Error("Recursive join is unsupported");
+      }
+    } else {
+      throw new Error("Expected at least two images to join");
+    }
+  } else {
+    throw new Error(`Unsupported input '${input}' of type ${typeof input}${is_default.defined(inputOptions) ? ` when also providing options of type ${typeof inputOptions}` : ""}`);
+  }
+  if (is_default.object(inputOptions)) {
+    if (is_default.defined(inputOptions.failOn)) {
+      if (is_default.string(inputOptions.failOn) && is_default.inArray(inputOptions.failOn, ["none", "truncated", "error", "warning"])) {
+        inputDescriptor.failOn = inputOptions.failOn;
+      } else {
+        throw is_default.invalidParameterError("failOn", "one of: none, truncated, error, warning", inputOptions.failOn);
+      }
+    }
+    if (is_default.defined(inputOptions.autoOrient)) {
+      if (is_default.bool(inputOptions.autoOrient)) {
+        inputDescriptor.autoOrient = inputOptions.autoOrient;
+      } else {
+        throw is_default.invalidParameterError("autoOrient", "boolean", inputOptions.autoOrient);
+      }
+    }
+    if (is_default.defined(inputOptions.density)) {
+      if (is_default.number(inputOptions.density) && is_default.inRange(inputOptions.density, 1, 1e5)) {
+        inputDescriptor.density = inputOptions.density;
+      } else {
+        throw is_default.invalidParameterError("density", "number between 1 and 100000", inputOptions.density);
+      }
+    }
+    if (is_default.defined(inputOptions.ignoreIcc)) {
+      if (is_default.bool(inputOptions.ignoreIcc)) {
+        inputDescriptor.ignoreIcc = inputOptions.ignoreIcc;
+      } else {
+        throw is_default.invalidParameterError("ignoreIcc", "boolean", inputOptions.ignoreIcc);
+      }
+    }
+    if (is_default.defined(inputOptions.limitInputPixels)) {
+      if (is_default.bool(inputOptions.limitInputPixels)) {
+        inputDescriptor.limitInputPixels = inputOptions.limitInputPixels ? 16383 ** 2 : 0;
+      } else if (is_default.integer(inputOptions.limitInputPixels) && is_default.inRange(inputOptions.limitInputPixels, 0, Number.MAX_SAFE_INTEGER)) {
+        inputDescriptor.limitInputPixels = inputOptions.limitInputPixels;
+      } else {
+        throw is_default.invalidParameterError("limitInputPixels", "positive integer", inputOptions.limitInputPixels);
+      }
+    }
+    if (is_default.defined(inputOptions.limitInputChannels)) {
+      if (is_default.bool(inputOptions.limitInputChannels)) {
+        inputDescriptor.limitInputChannels = inputOptions.limitInputChannels ? 5 : 0;
+      } else if (is_default.integer(inputOptions.limitInputChannels) && is_default.inRange(inputOptions.limitInputChannels, 0, Number.MAX_SAFE_INTEGER)) {
+        inputDescriptor.limitInputChannels = inputOptions.limitInputChannels;
+      } else {
+        throw is_default.invalidParameterError("limitInputChannels", "positive integer", inputOptions.limitInputChannels);
+      }
+    }
+    if (is_default.defined(inputOptions.unlimited)) {
+      if (is_default.bool(inputOptions.unlimited)) {
+        inputDescriptor.unlimited = inputOptions.unlimited;
+      } else {
+        throw is_default.invalidParameterError("unlimited", "boolean", inputOptions.unlimited);
+      }
+    }
+    if (is_default.defined(inputOptions.sequentialRead)) {
+      if (is_default.bool(inputOptions.sequentialRead)) {
+        inputDescriptor.sequentialRead = inputOptions.sequentialRead;
+      } else {
+        throw is_default.invalidParameterError("sequentialRead", "boolean", inputOptions.sequentialRead);
+      }
+    }
+    if (is_default.defined(inputOptions.raw)) {
+      if (is_default.object(inputOptions.raw) && is_default.integer(inputOptions.raw.width) && is_default.inRange(inputOptions.raw.width, 1, 1e8) && is_default.integer(inputOptions.raw.height) && is_default.inRange(inputOptions.raw.height, 1, 1e8) && is_default.integer(inputOptions.raw.channels) && is_default.inRange(inputOptions.raw.channels, 1, 4)) {
+        inputDescriptor.rawWidth = inputOptions.raw.width;
+        inputDescriptor.rawHeight = inputOptions.raw.height;
+        inputDescriptor.rawChannels = inputOptions.raw.channels;
+        switch (input.constructor) {
+          case Uint8Array:
+          case Uint8ClampedArray:
+            inputDescriptor.rawDepth = "uchar";
+            break;
+          case Int8Array:
+            inputDescriptor.rawDepth = "char";
+            break;
+          case Uint16Array:
+            inputDescriptor.rawDepth = "ushort";
+            break;
+          case Int16Array:
+            inputDescriptor.rawDepth = "short";
+            break;
+          case Uint32Array:
+            inputDescriptor.rawDepth = "uint";
+            break;
+          case Int32Array:
+            inputDescriptor.rawDepth = "int";
+            break;
+          case Float32Array:
+            inputDescriptor.rawDepth = "float";
+            break;
+          case Float64Array:
+            inputDescriptor.rawDepth = "double";
+            break;
+          default:
+            inputDescriptor.rawDepth = "uchar";
+            break;
+        }
+      } else {
+        throw new Error("Expected width, height and channels for raw pixel input");
+      }
+      inputDescriptor.rawPremultiplied = false;
+      if (is_default.defined(inputOptions.raw.premultiplied)) {
+        if (is_default.bool(inputOptions.raw.premultiplied)) {
+          inputDescriptor.rawPremultiplied = inputOptions.raw.premultiplied;
+        } else {
+          throw is_default.invalidParameterError("raw.premultiplied", "boolean", inputOptions.raw.premultiplied);
+        }
+      }
+      inputDescriptor.rawPageHeight = 0;
+      if (is_default.defined(inputOptions.raw.pageHeight)) {
+        if (is_default.integer(inputOptions.raw.pageHeight) && inputOptions.raw.pageHeight > 0 && inputOptions.raw.pageHeight <= inputOptions.raw.height) {
+          if (inputOptions.raw.height % inputOptions.raw.pageHeight !== 0) {
+            throw new Error(`Expected raw.height ${inputOptions.raw.height} to be a multiple of raw.pageHeight ${inputOptions.raw.pageHeight}`);
+          }
+          inputDescriptor.rawPageHeight = inputOptions.raw.pageHeight;
+        } else {
+          throw is_default.invalidParameterError("raw.pageHeight", "positive integer", inputOptions.raw.pageHeight);
+        }
+      }
+    }
+    if (is_default.defined(inputOptions.animated)) {
+      if (is_default.bool(inputOptions.animated)) {
+        inputDescriptor.pages = inputOptions.animated ? -1 : 1;
+      } else {
+        throw is_default.invalidParameterError("animated", "boolean", inputOptions.animated);
+      }
+    }
+    if (is_default.defined(inputOptions.pages)) {
+      if (is_default.integer(inputOptions.pages) && is_default.inRange(inputOptions.pages, -1, 1e5)) {
+        inputDescriptor.pages = inputOptions.pages;
+      } else {
+        throw is_default.invalidParameterError("pages", "integer between -1 and 100000", inputOptions.pages);
+      }
+    }
+    if (is_default.defined(inputOptions.page)) {
+      if (is_default.integer(inputOptions.page) && is_default.inRange(inputOptions.page, 0, 1e5)) {
+        inputDescriptor.page = inputOptions.page;
+      } else {
+        throw is_default.invalidParameterError("page", "integer between 0 and 100000", inputOptions.page);
+      }
+    }
+    if (is_default.object(inputOptions.openSlide) && is_default.defined(inputOptions.openSlide.level)) {
+      if (is_default.integer(inputOptions.openSlide.level) && is_default.inRange(inputOptions.openSlide.level, 0, 256)) {
+        inputDescriptor.openSlideLevel = inputOptions.openSlide.level;
+      } else {
+        throw is_default.invalidParameterError("openSlide.level", "integer between 0 and 256", inputOptions.openSlide.level);
+      }
+    } else if (is_default.defined(inputOptions.level)) {
+      if (is_default.integer(inputOptions.level) && is_default.inRange(inputOptions.level, 0, 256)) {
+        inputDescriptor.openSlideLevel = inputOptions.level;
+      } else {
+        throw is_default.invalidParameterError("level", "integer between 0 and 256", inputOptions.level);
+      }
+    }
+    if (is_default.object(inputOptions.tiff) && is_default.defined(inputOptions.tiff.subifd)) {
+      if (is_default.integer(inputOptions.tiff.subifd) && is_default.inRange(inputOptions.tiff.subifd, -1, 1e5)) {
+        inputDescriptor.tiffSubifd = inputOptions.tiff.subifd;
+      } else {
+        throw is_default.invalidParameterError("tiff.subifd", "integer between -1 and 100000", inputOptions.tiff.subifd);
+      }
+    } else if (is_default.defined(inputOptions.subifd)) {
+      if (is_default.integer(inputOptions.subifd) && is_default.inRange(inputOptions.subifd, -1, 1e5)) {
+        inputDescriptor.tiffSubifd = inputOptions.subifd;
+      } else {
+        throw is_default.invalidParameterError("subifd", "integer between -1 and 100000", inputOptions.subifd);
+      }
+    }
+    if (is_default.object(inputOptions.svg)) {
+      if (is_default.defined(inputOptions.svg.stylesheet)) {
+        if (is_default.string(inputOptions.svg.stylesheet)) {
+          inputDescriptor.svgStylesheet = inputOptions.svg.stylesheet;
+        } else {
+          throw is_default.invalidParameterError("svg.stylesheet", "string", inputOptions.svg.stylesheet);
+        }
+      }
+      if (is_default.defined(inputOptions.svg.highBitdepth)) {
+        if (is_default.bool(inputOptions.svg.highBitdepth)) {
+          inputDescriptor.svgHighBitdepth = inputOptions.svg.highBitdepth;
+        } else {
+          throw is_default.invalidParameterError("svg.highBitdepth", "boolean", inputOptions.svg.highBitdepth);
+        }
+      }
+    }
+    if (is_default.object(inputOptions.pdf) && is_default.defined(inputOptions.pdf.background)) {
+      inputDescriptor.pdfBackground = this._getBackgroundColourOption(inputOptions.pdf.background);
+    } else if (is_default.defined(inputOptions.pdfBackground)) {
+      inputDescriptor.pdfBackground = this._getBackgroundColourOption(inputOptions.pdfBackground);
+    }
+    if (is_default.object(inputOptions.jp2) && is_default.defined(inputOptions.jp2.oneshot)) {
+      if (is_default.bool(inputOptions.jp2.oneshot)) {
+        inputDescriptor.jp2Oneshot = inputOptions.jp2.oneshot;
+      } else {
+        throw is_default.invalidParameterError("jp2.oneshot", "boolean", inputOptions.jp2.oneshot);
+      }
+    }
+    if (is_default.defined(inputOptions.create)) {
+      if (is_default.object(inputOptions.create) && is_default.integer(inputOptions.create.width) && is_default.inRange(inputOptions.create.width, 1, 1e8) && is_default.integer(inputOptions.create.height) && is_default.inRange(inputOptions.create.height, 1, 1e8) && is_default.integer(inputOptions.create.channels)) {
+        inputDescriptor.createWidth = inputOptions.create.width;
+        inputDescriptor.createHeight = inputOptions.create.height;
+        inputDescriptor.createChannels = inputOptions.create.channels;
+        inputDescriptor.createPageHeight = 0;
+        if (is_default.defined(inputOptions.create.pageHeight)) {
+          if (is_default.integer(inputOptions.create.pageHeight) && inputOptions.create.pageHeight > 0 && inputOptions.create.pageHeight <= inputOptions.create.height) {
+            if (inputOptions.create.height % inputOptions.create.pageHeight !== 0) {
+              throw new Error(`Expected create.height ${inputOptions.create.height} to be a multiple of create.pageHeight ${inputOptions.create.pageHeight}`);
+            }
+            inputDescriptor.createPageHeight = inputOptions.create.pageHeight;
+          } else {
+            throw is_default.invalidParameterError("create.pageHeight", "positive integer", inputOptions.create.pageHeight);
+          }
+        }
+        if (is_default.defined(inputOptions.create.noise)) {
+          if (!is_default.object(inputOptions.create.noise)) {
+            throw new Error("Expected noise to be an object");
+          }
+          if (inputOptions.create.noise.type !== "gaussian") {
+            throw new Error("Only gaussian noise is supported at the moment");
+          }
+          inputDescriptor.createNoiseType = inputOptions.create.noise.type;
+          if (!is_default.inRange(inputOptions.create.channels, 1, 4)) {
+            throw is_default.invalidParameterError("create.channels", "number between 1 and 4", inputOptions.create.channels);
+          }
+          inputDescriptor.createNoiseMean = 128;
+          if (is_default.defined(inputOptions.create.noise.mean)) {
+            if (is_default.number(inputOptions.create.noise.mean) && is_default.inRange(inputOptions.create.noise.mean, 0, 1e4)) {
+              inputDescriptor.createNoiseMean = inputOptions.create.noise.mean;
+            } else {
+              throw is_default.invalidParameterError("create.noise.mean", "number between 0 and 10000", inputOptions.create.noise.mean);
+            }
+          }
+          inputDescriptor.createNoiseSigma = 30;
+          if (is_default.defined(inputOptions.create.noise.sigma)) {
+            if (is_default.number(inputOptions.create.noise.sigma) && is_default.inRange(inputOptions.create.noise.sigma, 0, 1e4)) {
+              inputDescriptor.createNoiseSigma = inputOptions.create.noise.sigma;
+            } else {
+              throw is_default.invalidParameterError("create.noise.sigma", "number between 0 and 10000", inputOptions.create.noise.sigma);
+            }
+          }
+        } else if (is_default.defined(inputOptions.create.background)) {
+          if (!is_default.inRange(inputOptions.create.channels, 3, 4)) {
+            throw is_default.invalidParameterError("create.channels", "number between 3 and 4", inputOptions.create.channels);
+          }
+          inputDescriptor.createBackground = this._getBackgroundColourOption(inputOptions.create.background);
+        } else {
+          throw new Error("Expected valid noise or background to create a new input image");
+        }
+        delete inputDescriptor.buffer;
+      } else {
+        throw new Error("Expected valid width, height and channels to create a new input image");
+      }
+    }
+    if (is_default.defined(inputOptions.text)) {
+      if (is_default.object(inputOptions.text) && is_default.string(inputOptions.text.text)) {
+        inputDescriptor.textValue = inputOptions.text.text;
+        if (is_default.defined(inputOptions.text.height) && is_default.defined(inputOptions.text.dpi)) {
+          throw new Error("Expected only one of dpi or height");
+        }
+        if (is_default.defined(inputOptions.text.font)) {
+          if (is_default.string(inputOptions.text.font)) {
+            inputDescriptor.textFont = inputOptions.text.font;
+          } else {
+            throw is_default.invalidParameterError("text.font", "string", inputOptions.text.font);
+          }
+        }
+        if (is_default.defined(inputOptions.text.fontfile)) {
+          if (is_default.string(inputOptions.text.fontfile)) {
+            inputDescriptor.textFontfile = inputOptions.text.fontfile;
+          } else {
+            throw is_default.invalidParameterError("text.fontfile", "string", inputOptions.text.fontfile);
+          }
+        }
+        if (is_default.defined(inputOptions.text.width)) {
+          if (is_default.integer(inputOptions.text.width) && is_default.inRange(inputOptions.text.width, 1, 1e6)) {
+            inputDescriptor.textWidth = inputOptions.text.width;
+          } else {
+            throw is_default.invalidParameterError("text.width", "integer between 1 and 1000000", inputOptions.text.width);
+          }
+        }
+        if (is_default.defined(inputOptions.text.height)) {
+          if (is_default.integer(inputOptions.text.height) && is_default.inRange(inputOptions.text.height, 1, 1e6)) {
+            inputDescriptor.textHeight = inputOptions.text.height;
+          } else {
+            throw is_default.invalidParameterError("text.height", "integer between 1 and 1000000", inputOptions.text.height);
+          }
+        }
+        if (is_default.defined(inputOptions.text.align)) {
+          if (is_default.string(inputOptions.text.align) && is_default.string(this.constructor.align[inputOptions.text.align])) {
+            inputDescriptor.textAlign = this.constructor.align[inputOptions.text.align];
+          } else {
+            throw is_default.invalidParameterError("text.align", "valid alignment", inputOptions.text.align);
+          }
+        }
+        if (is_default.defined(inputOptions.text.justify)) {
+          if (is_default.bool(inputOptions.text.justify)) {
+            inputDescriptor.textJustify = inputOptions.text.justify;
+          } else {
+            throw is_default.invalidParameterError("text.justify", "boolean", inputOptions.text.justify);
+          }
+        }
+        if (is_default.defined(inputOptions.text.dpi)) {
+          if (is_default.integer(inputOptions.text.dpi) && is_default.inRange(inputOptions.text.dpi, 1, 1e6)) {
+            inputDescriptor.textDpi = inputOptions.text.dpi;
+          } else {
+            throw is_default.invalidParameterError("text.dpi", "integer between 1 and 1000000", inputOptions.text.dpi);
+          }
+        }
+        if (is_default.defined(inputOptions.text.rgba)) {
+          if (is_default.bool(inputOptions.text.rgba)) {
+            inputDescriptor.textRgba = inputOptions.text.rgba;
+          } else {
+            throw is_default.invalidParameterError("text.rgba", "bool", inputOptions.text.rgba);
+          }
+        }
+        if (is_default.defined(inputOptions.text.spacing)) {
+          if (is_default.integer(inputOptions.text.spacing) && is_default.inRange(inputOptions.text.spacing, -1e6, 1e6)) {
+            inputDescriptor.textSpacing = inputOptions.text.spacing;
+          } else {
+            throw is_default.invalidParameterError("text.spacing", "integer between -1000000 and 1000000", inputOptions.text.spacing);
+          }
+        }
+        if (is_default.defined(inputOptions.text.wrap)) {
+          if (is_default.string(inputOptions.text.wrap) && is_default.inArray(inputOptions.text.wrap, ["word", "char", "word-char", "none"])) {
+            inputDescriptor.textWrap = inputOptions.text.wrap;
+          } else {
+            throw is_default.invalidParameterError("text.wrap", "one of: word, char, word-char, none", inputOptions.text.wrap);
+          }
+        }
+        delete inputDescriptor.buffer;
+      } else {
+        throw new Error("Expected a valid string to create an image with text.");
+      }
+    }
+    if (is_default.defined(inputOptions.join)) {
+      if (is_default.defined(this.options.join)) {
+        if (is_default.defined(inputOptions.join.animated)) {
+          if (is_default.bool(inputOptions.join.animated)) {
+            inputDescriptor.joinAnimated = inputOptions.join.animated;
+          } else {
+            throw is_default.invalidParameterError("join.animated", "boolean", inputOptions.join.animated);
+          }
+        }
+        if (is_default.defined(inputOptions.join.across)) {
+          if (is_default.integer(inputOptions.join.across) && is_default.inRange(inputOptions.join.across, 1, 1e6)) {
+            inputDescriptor.joinAcross = inputOptions.join.across;
+          } else {
+            throw is_default.invalidParameterError("join.across", "integer between 1 and 100000", inputOptions.join.across);
+          }
+        }
+        if (is_default.defined(inputOptions.join.shim)) {
+          if (is_default.integer(inputOptions.join.shim) && is_default.inRange(inputOptions.join.shim, 0, 1e6)) {
+            inputDescriptor.joinShim = inputOptions.join.shim;
+          } else {
+            throw is_default.invalidParameterError("join.shim", "integer between 0 and 100000", inputOptions.join.shim);
+          }
+        }
+        if (is_default.defined(inputOptions.join.background)) {
+          inputDescriptor.joinBackground = this._getBackgroundColourOption(inputOptions.join.background);
+        }
+        if (is_default.defined(inputOptions.join.halign)) {
+          if (is_default.string(inputOptions.join.halign) && is_default.string(this.constructor.align[inputOptions.join.halign])) {
+            inputDescriptor.joinHalign = this.constructor.align[inputOptions.join.halign];
+          } else {
+            throw is_default.invalidParameterError("join.halign", "valid alignment", inputOptions.join.halign);
+          }
+        }
+        if (is_default.defined(inputOptions.join.valign)) {
+          if (is_default.string(inputOptions.join.valign) && is_default.string(this.constructor.align[inputOptions.join.valign])) {
+            inputDescriptor.joinValign = this.constructor.align[inputOptions.join.valign];
+          } else {
+            throw is_default.invalidParameterError("join.valign", "valid alignment", inputOptions.join.valign);
+          }
+        }
+      } else {
+        throw new Error("Expected input to be an array of images to join");
+      }
+    }
+  } else if (is_default.defined(inputOptions)) {
+    throw new Error(`Invalid input options ${inputOptions}`);
+  }
+  return inputDescriptor;
+}
+function _write(chunk, _encoding, callback) {
+  if (Array.isArray(this.options.input.buffer)) {
+    if (is_default.buffer(chunk)) {
+      if (this.options.input.buffer.length === 0) {
+        this.on("finish", () => {
+          this.streamInFinished = true;
+        });
+      }
+      this.options.input.buffer.push(chunk);
+      callback();
+    } else {
+      callback(new Error("Non-Buffer data on Writable Stream"));
+    }
+  } else {
+    callback(new Error("Unexpected data on Writable Stream"));
+  }
+}
+function _flattenBufferIn() {
+  if (this._isStreamInput()) {
+    this.options.input.buffer = Buffer.concat(this.options.input.buffer);
+  }
+}
+function _isStreamInput() {
+  return Array.isArray(this.options.input.buffer);
+}
+function metadata(callback) {
+  const stack = Error();
+  if (is_default.fn(callback)) {
+    if (this._isStreamInput()) {
+      this.on("finish", () => {
+        this._flattenBufferIn();
+        sharp_default.metadata(this.options, (err, metadata2) => {
+          if (err) {
+            callback(is_default.nativeError(err, stack));
+          } else {
+            callback(null, metadata2);
+          }
+        });
+      });
+    } else {
+      sharp_default.metadata(this.options, (err, metadata2) => {
+        if (err) {
+          callback(is_default.nativeError(err, stack));
+        } else {
+          callback(null, metadata2);
+        }
+      });
+    }
+    return this;
+  } else {
+    if (this._isStreamInput()) {
+      return new Promise((resolve, reject) => {
+        const finished = () => {
+          this._flattenBufferIn();
+          sharp_default.metadata(this.options, (err, metadata2) => {
+            if (err) {
+              reject(is_default.nativeError(err, stack));
+            } else {
+              resolve(metadata2);
+            }
+          });
+        };
+        if (this.writableFinished) {
+          finished();
+        } else {
+          this.once("finish", finished);
+        }
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        sharp_default.metadata(this.options, (err, metadata2) => {
+          if (err) {
+            reject(is_default.nativeError(err, stack));
+          } else {
+            resolve(metadata2);
+          }
+        });
+      });
+    }
+  }
+}
+function stats(callback) {
+  const stack = Error();
+  if (is_default.fn(callback)) {
+    if (this._isStreamInput()) {
+      this.on("finish", () => {
+        this._flattenBufferIn();
+        sharp_default.stats(this.options, (err, stats2) => {
+          if (err) {
+            callback(is_default.nativeError(err, stack));
+          } else {
+            callback(null, stats2);
+          }
+        });
+      });
+    } else {
+      sharp_default.stats(this.options, (err, stats2) => {
+        if (err) {
+          callback(is_default.nativeError(err, stack));
+        } else {
+          callback(null, stats2);
+        }
+      });
+    }
+    return this;
+  } else {
+    if (this._isStreamInput()) {
+      return new Promise((resolve, reject) => {
+        this.on("finish", function() {
+          this._flattenBufferIn();
+          sharp_default.stats(this.options, (err, stats2) => {
+            if (err) {
+              reject(is_default.nativeError(err, stack));
+            } else {
+              resolve(stats2);
+            }
+          });
+        });
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        sharp_default.stats(this.options, (err, stats2) => {
+          if (err) {
+            reject(is_default.nativeError(err, stack));
+          } else {
+            resolve(stats2);
+          }
+        });
+      });
+    }
+  }
+}
+var align, inputStreamParameters, input_default;
+var init_input = __esm({
+  "node_modules/sharp/dist/input.mjs"() {
+    "use strict";
+    init_is();
+    init_sharp();
+    align = {
+      left: "low",
+      top: "low",
+      low: "low",
+      center: "centre",
+      centre: "centre",
+      right: "high",
+      bottom: "high",
+      high: "high"
+    };
+    inputStreamParameters = [
+      // Limits and error handling
+      "failOn",
+      "limitInputPixels",
+      "limitInputChannels",
+      "unlimited",
+      // Format-generic
+      "animated",
+      "autoOrient",
+      "density",
+      "ignoreIcc",
+      "page",
+      "pages",
+      "sequentialRead",
+      // Format-specific
+      "jp2",
+      "openSlide",
+      "pdf",
+      "raw",
+      "svg",
+      "tiff",
+      // Deprecated
+      "openSlideLevel",
+      "pdfBackground",
+      "tiffSubifd"
+    ];
+    input_default = (Sharp2) => {
+      Object.assign(Sharp2.prototype, {
+        // Private
+        _inputOptionsFromObject,
+        _createInputDescriptor,
+        _write,
+        _flattenBufferIn,
+        _isStreamInput,
+        // Public
+        metadata,
+        stats
+      });
+      Sharp2.align = align;
+    };
+  }
+});
+
+// node_modules/sharp/dist/resize.mjs
+function isRotationExpected(options) {
+  return options.angle % 360 !== 0 || options.rotationAngle !== 0;
+}
+function isResizeExpected(options) {
+  return options.width !== -1 || options.height !== -1;
+}
+function resize2(widthOrOptions, height, options) {
+  if (isResizeExpected(this.options)) {
+    this.options.debuglog("ignoring previous resize options");
+  }
+  if (this.options.widthPost !== -1) {
+    this.options.debuglog("operation order will be: extract, resize, extract");
+  }
+  if (is_default.defined(widthOrOptions)) {
+    if (is_default.object(widthOrOptions) && !is_default.defined(options)) {
+      options = widthOrOptions;
+    } else if (is_default.integer(widthOrOptions) && widthOrOptions > 0) {
+      this.options.width = widthOrOptions;
+    } else {
+      throw is_default.invalidParameterError("width", "positive integer", widthOrOptions);
+    }
+  } else {
+    this.options.width = -1;
+  }
+  if (is_default.defined(height)) {
+    if (is_default.integer(height) && height > 0) {
+      this.options.height = height;
+    } else {
+      throw is_default.invalidParameterError("height", "positive integer", height);
+    }
+  } else {
+    this.options.height = -1;
+  }
+  if (is_default.object(options)) {
+    if (is_default.defined(options.width)) {
+      if (is_default.integer(options.width) && options.width > 0) {
+        this.options.width = options.width;
+      } else {
+        throw is_default.invalidParameterError("width", "positive integer", options.width);
+      }
+    }
+    if (is_default.defined(options.height)) {
+      if (is_default.integer(options.height) && options.height > 0) {
+        this.options.height = options.height;
+      } else {
+        throw is_default.invalidParameterError("height", "positive integer", options.height);
+      }
+    }
+    if (is_default.defined(options.fit)) {
+      const canvas = mapFitToCanvas[options.fit];
+      if (is_default.string(canvas)) {
+        this.options.canvas = canvas;
+      } else {
+        throw is_default.invalidParameterError("fit", "valid fit", options.fit);
+      }
+    }
+    if (is_default.defined(options.position)) {
+      const pos = is_default.integer(options.position) ? options.position : strategy[options.position] || position[options.position] || gravity[options.position];
+      if (is_default.integer(pos) && (is_default.inRange(pos, 0, 8) || is_default.inRange(pos, 16, 17))) {
+        this.options.position = pos;
+      } else {
+        throw is_default.invalidParameterError("position", "valid position/gravity/strategy", options.position);
+      }
+    }
+    this._setBackgroundColourOption("resizeBackground", options.background);
+    if (is_default.defined(options.kernel)) {
+      if (is_default.string(kernel[options.kernel])) {
+        this.options.kernel = kernel[options.kernel];
+      } else {
+        throw is_default.invalidParameterError("kernel", "valid kernel name", options.kernel);
+      }
+    }
+    if (is_default.defined(options.withoutEnlargement)) {
+      this._setBooleanOption("withoutEnlargement", options.withoutEnlargement);
+    }
+    if (is_default.defined(options.withoutReduction)) {
+      this._setBooleanOption("withoutReduction", options.withoutReduction);
+    }
+    if (is_default.defined(options.fastShrinkOnLoad)) {
+      this._setBooleanOption("fastShrinkOnLoad", options.fastShrinkOnLoad);
+    }
+  }
+  if (isRotationExpected(this.options) && isResizeExpected(this.options)) {
+    this.options.rotateBefore = true;
+  }
+  return this;
+}
+function extend(extend2) {
+  if (is_default.integer(extend2)) {
+    if (is_default.inRange(extend2, 1, 1e4)) {
+      this.options.extendTop = extend2;
+      this.options.extendBottom = extend2;
+      this.options.extendLeft = extend2;
+      this.options.extendRight = extend2;
+    } else {
+      throw is_default.invalidParameterError("extend", "integer between 1 and 10000", extend2);
+    }
+  } else if (is_default.object(extend2)) {
+    if (is_default.defined(extend2.top)) {
+      if (is_default.integer(extend2.top) && is_default.inRange(extend2.top, 0, 1e4)) {
+        this.options.extendTop = extend2.top;
+      } else {
+        throw is_default.invalidParameterError("top", "integer between 0 and 10000", extend2.top);
+      }
+    }
+    if (is_default.defined(extend2.bottom)) {
+      if (is_default.integer(extend2.bottom) && is_default.inRange(extend2.bottom, 0, 1e4)) {
+        this.options.extendBottom = extend2.bottom;
+      } else {
+        throw is_default.invalidParameterError("bottom", "integer between 0 and 10000", extend2.bottom);
+      }
+    }
+    if (is_default.defined(extend2.left)) {
+      if (is_default.integer(extend2.left) && is_default.inRange(extend2.left, 0, 1e4)) {
+        this.options.extendLeft = extend2.left;
+      } else {
+        throw is_default.invalidParameterError("left", "integer between 0 and 10000", extend2.left);
+      }
+    }
+    if (is_default.defined(extend2.right)) {
+      if (is_default.integer(extend2.right) && is_default.inRange(extend2.right, 0, 1e4)) {
+        this.options.extendRight = extend2.right;
+      } else {
+        throw is_default.invalidParameterError("right", "integer between 0 and 10000", extend2.right);
+      }
+    }
+    this._setBackgroundColourOption("extendBackground", extend2.background);
+    if (is_default.defined(extend2.extendWith)) {
+      if (is_default.string(extendWith[extend2.extendWith])) {
+        this.options.extendWith = extendWith[extend2.extendWith];
+      } else {
+        throw is_default.invalidParameterError("extendWith", "one of: background, copy, repeat, mirror", extend2.extendWith);
+      }
+    }
+  } else {
+    throw is_default.invalidParameterError("extend", "integer or object", extend2);
+  }
+  return this;
+}
+function extract(options) {
+  const suffix = isResizeExpected(this.options) || this.options.widthPre !== -1 ? "Post" : "Pre";
+  if (this.options[`width${suffix}`] !== -1) {
+    this.options.debuglog("ignoring previous extract options");
+  }
+  ["left", "top", "width", "height"].forEach(function(name) {
+    const value = options[name];
+    if (is_default.integer(value) && is_default.inRange(value, 0, 1e8)) {
+      this.options[name + (name === "left" || name === "top" ? "Offset" : "") + suffix] = value;
+    } else {
+      throw is_default.invalidParameterError(name, "integer between 0 and 100000000", value);
+    }
+  }, this);
+  if (isRotationExpected(this.options) && !isResizeExpected(this.options)) {
+    if (this.options.widthPre === -1 || this.options.widthPost === -1) {
+      this.options.rotateBefore = true;
+    }
+  }
+  if (this.options.input.autoOrient) {
+    this.options.orientBefore = true;
+  }
+  return this;
+}
+function trim(options) {
+  this.options.trimThreshold = 10;
+  if (is_default.defined(options)) {
+    if (is_default.object(options)) {
+      if (is_default.defined(options.background)) {
+        this._setBackgroundColourOption("trimBackground", options.background);
+      }
+      if (is_default.defined(options.threshold)) {
+        if (is_default.number(options.threshold) && options.threshold >= 0) {
+          this.options.trimThreshold = options.threshold;
+        } else {
+          throw is_default.invalidParameterError("threshold", "positive number", options.threshold);
+        }
+      }
+      if (is_default.defined(options.lineArt)) {
+        this._setBooleanOption("trimLineArt", options.lineArt);
+      }
+      if (is_default.defined(options.margin)) {
+        if (is_default.integer(options.margin) && is_default.inRange(options.margin, 0, 1e7)) {
+          this.options.trimMargin = options.margin;
+        } else {
+          throw is_default.invalidParameterError("margin", "integer between 0 and 10000000", options.margin);
+        }
+      }
+    } else {
+      throw is_default.invalidParameterError("trim", "object", options);
+    }
+  }
+  if (isRotationExpected(this.options)) {
+    this.options.rotateBefore = true;
+  }
+  return this;
+}
+var gravity, position, extendWith, strategy, kernel, fit, mapFitToCanvas, resize_default;
+var init_resize = __esm({
+  "node_modules/sharp/dist/resize.mjs"() {
+    "use strict";
+    init_is();
+    gravity = {
+      center: 0,
+      centre: 0,
+      north: 1,
+      east: 2,
+      south: 3,
+      west: 4,
+      northeast: 5,
+      southeast: 6,
+      southwest: 7,
+      northwest: 8
+    };
+    position = {
+      top: 1,
+      right: 2,
+      bottom: 3,
+      left: 4,
+      "right top": 5,
+      "right bottom": 6,
+      "left bottom": 7,
+      "left top": 8
+    };
+    extendWith = {
+      background: "background",
+      copy: "copy",
+      repeat: "repeat",
+      mirror: "mirror"
+    };
+    strategy = {
+      entropy: 16,
+      attention: 17
+    };
+    kernel = {
+      nearest: "nearest",
+      linear: "linear",
+      cubic: "cubic",
+      mitchell: "mitchell",
+      lanczos2: "lanczos2",
+      lanczos3: "lanczos3",
+      mks2013: "mks2013",
+      mks2021: "mks2021"
+    };
+    fit = {
+      contain: "contain",
+      cover: "cover",
+      fill: "fill",
+      inside: "inside",
+      outside: "outside"
+    };
+    mapFitToCanvas = {
+      contain: "embed",
+      cover: "crop",
+      fill: "ignore_aspect",
+      inside: "max",
+      outside: "min"
+    };
+    resize_default = (Sharp2) => {
+      Object.assign(Sharp2.prototype, {
+        resize: resize2,
+        extend,
+        extract,
+        trim
+      });
+      Sharp2.gravity = gravity;
+      Sharp2.strategy = strategy;
+      Sharp2.kernel = kernel;
+      Sharp2.fit = fit;
+      Sharp2.position = position;
+    };
+  }
+});
+
+// node_modules/sharp/dist/composite.mjs
+function composite(images) {
+  if (!Array.isArray(images)) {
+    throw is_default.invalidParameterError("images to composite", "array", images);
+  }
+  this.options.composite = images.map((image2) => {
+    if (!is_default.object(image2)) {
+      throw is_default.invalidParameterError("image to composite", "object", image2);
+    }
+    const inputOptions = this._inputOptionsFromObject(image2);
+    const composite2 = {
+      input: this._createInputDescriptor(image2.input, inputOptions, { allowStream: false }),
+      blend: "over",
+      tile: false,
+      left: 0,
+      top: 0,
+      hasOffset: false,
+      gravity: 0,
+      premultiplied: false
+    };
+    if (is_default.defined(image2.blend)) {
+      if (is_default.string(blend[image2.blend])) {
+        composite2.blend = blend[image2.blend];
+      } else {
+        throw is_default.invalidParameterError("blend", "valid blend name", image2.blend);
+      }
+    }
+    if (is_default.defined(image2.tile)) {
+      if (is_default.bool(image2.tile)) {
+        composite2.tile = image2.tile;
+      } else {
+        throw is_default.invalidParameterError("tile", "boolean", image2.tile);
+      }
+    }
+    if (is_default.defined(image2.left)) {
+      if (is_default.integer(image2.left)) {
+        composite2.left = image2.left;
+      } else {
+        throw is_default.invalidParameterError("left", "integer", image2.left);
+      }
+    }
+    if (is_default.defined(image2.top)) {
+      if (is_default.integer(image2.top)) {
+        composite2.top = image2.top;
+      } else {
+        throw is_default.invalidParameterError("top", "integer", image2.top);
+      }
+    }
+    if (is_default.defined(image2.top) !== is_default.defined(image2.left)) {
+      throw new Error("Expected both left and top to be set");
+    } else {
+      composite2.hasOffset = is_default.integer(image2.top) && is_default.integer(image2.left);
+    }
+    if (is_default.defined(image2.gravity)) {
+      if (is_default.integer(image2.gravity) && is_default.inRange(image2.gravity, 0, 8)) {
+        composite2.gravity = image2.gravity;
+      } else if (is_default.string(image2.gravity) && is_default.integer(this.constructor.gravity[image2.gravity])) {
+        composite2.gravity = this.constructor.gravity[image2.gravity];
+      } else {
+        throw is_default.invalidParameterError("gravity", "valid gravity", image2.gravity);
+      }
+    }
+    if (is_default.defined(image2.premultiplied)) {
+      if (is_default.bool(image2.premultiplied)) {
+        composite2.premultiplied = image2.premultiplied;
+      } else {
+        throw is_default.invalidParameterError("premultiplied", "boolean", image2.premultiplied);
+      }
+    }
+    return composite2;
+  });
+  return this;
+}
+var blend, composite_default;
+var init_composite = __esm({
+  "node_modules/sharp/dist/composite.mjs"() {
+    "use strict";
+    init_is();
+    blend = {
+      clear: "clear",
+      source: "source",
+      over: "over",
+      in: "in",
+      out: "out",
+      atop: "atop",
+      dest: "dest",
+      "dest-over": "dest-over",
+      "dest-in": "dest-in",
+      "dest-out": "dest-out",
+      "dest-atop": "dest-atop",
+      xor: "xor",
+      add: "add",
+      saturate: "saturate",
+      multiply: "multiply",
+      screen: "screen",
+      overlay: "overlay",
+      darken: "darken",
+      lighten: "lighten",
+      "colour-dodge": "colour-dodge",
+      "color-dodge": "colour-dodge",
+      "colour-burn": "colour-burn",
+      "color-burn": "colour-burn",
+      "hard-light": "hard-light",
+      "soft-light": "soft-light",
+      difference: "difference",
+      exclusion: "exclusion"
+    };
+    composite_default = (Sharp2) => {
+      Sharp2.prototype.composite = composite;
+      Sharp2.blend = blend;
+    };
+  }
+});
+
+// node_modules/sharp/dist/operation.mjs
+function rotate(angle, options) {
+  if (!is_default.defined(angle)) {
+    return this.autoOrient();
+  }
+  if (this.options.angle || this.options.rotationAngle) {
+    this.options.debuglog("ignoring previous rotate options");
+    this.options.angle = 0;
+    this.options.rotationAngle = 0;
+  }
+  if (is_default.integer(angle) && !(angle % 90)) {
+    this.options.angle = angle;
+  } else if (is_default.number(angle)) {
+    this.options.rotationAngle = angle;
+    if (is_default.object(options) && options.background) {
+      this._setBackgroundColourOption("rotationBackground", options.background);
+    }
+  } else {
+    throw is_default.invalidParameterError("angle", "numeric", angle);
+  }
+  return this;
+}
+function autoOrient() {
+  this.options.input.autoOrient = true;
+  return this;
+}
+function flip(flip2) {
+  this.options.flip = is_default.bool(flip2) ? flip2 : true;
+  return this;
+}
+function flop(flop2) {
+  this.options.flop = is_default.bool(flop2) ? flop2 : true;
+  return this;
+}
+function affine(matrix, options) {
+  const isValidShape = Array.isArray(matrix) && // 1x4 array of numbers
+  (matrix.length === 4 && matrix.every(is_default.number) || // 2x2 array of arrays of numbers
+  matrix.length === 2 && matrix.every((row) => Array.isArray(row) && row.length === 2));
+  const flatMatrix = isValidShape ? matrix.flat() : [];
+  if (flatMatrix.length === 4 && flatMatrix.every(is_default.number)) {
+    this.options.affineMatrix = flatMatrix;
+  } else {
+    throw is_default.invalidParameterError("matrix", "1x4 or 2x2 array", matrix);
+  }
+  if (is_default.defined(options)) {
+    if (is_default.object(options)) {
+      this._setBackgroundColourOption("affineBackground", options.background);
+      if (is_default.defined(options.idx)) {
+        if (is_default.number(options.idx)) {
+          this.options.affineIdx = options.idx;
+        } else {
+          throw is_default.invalidParameterError("options.idx", "number", options.idx);
+        }
+      }
+      if (is_default.defined(options.idy)) {
+        if (is_default.number(options.idy)) {
+          this.options.affineIdy = options.idy;
+        } else {
+          throw is_default.invalidParameterError("options.idy", "number", options.idy);
+        }
+      }
+      if (is_default.defined(options.odx)) {
+        if (is_default.number(options.odx)) {
+          this.options.affineOdx = options.odx;
+        } else {
+          throw is_default.invalidParameterError("options.odx", "number", options.odx);
+        }
+      }
+      if (is_default.defined(options.ody)) {
+        if (is_default.number(options.ody)) {
+          this.options.affineOdy = options.ody;
+        } else {
+          throw is_default.invalidParameterError("options.ody", "number", options.ody);
+        }
+      }
+      if (is_default.defined(options.interpolator)) {
+        if (is_default.inArray(options.interpolator, Object.values(this.constructor.interpolators))) {
+          this.options.affineInterpolator = options.interpolator;
+        } else {
+          throw is_default.invalidParameterError("options.interpolator", "valid interpolator name", options.interpolator);
+        }
+      }
+    } else {
+      throw is_default.invalidParameterError("options", "object", options);
+    }
+  }
+  return this;
+}
+function sharpen(options) {
+  if (is_default.plainObject(options)) {
+    if (is_default.number(options.sigma) && is_default.inRange(options.sigma, 1e-6, 10)) {
+      this.options.sharpenSigma = options.sigma;
+    } else {
+      throw is_default.invalidParameterError("options.sigma", "number between 0.000001 and 10", options.sigma);
+    }
+    if (is_default.defined(options.m1)) {
+      if (is_default.number(options.m1) && is_default.inRange(options.m1, 0, 1e6)) {
+        this.options.sharpenM1 = options.m1;
+      } else {
+        throw is_default.invalidParameterError("options.m1", "number between 0 and 1000000", options.m1);
+      }
+    }
+    if (is_default.defined(options.m2)) {
+      if (is_default.number(options.m2) && is_default.inRange(options.m2, 0, 1e6)) {
+        this.options.sharpenM2 = options.m2;
+      } else {
+        throw is_default.invalidParameterError("options.m2", "number between 0 and 1000000", options.m2);
+      }
+    }
+    if (is_default.defined(options.x1)) {
+      if (is_default.number(options.x1) && is_default.inRange(options.x1, 0, 1e6)) {
+        this.options.sharpenX1 = options.x1;
+      } else {
+        throw is_default.invalidParameterError("options.x1", "number between 0 and 1000000", options.x1);
+      }
+    }
+    if (is_default.defined(options.y2)) {
+      if (is_default.number(options.y2) && is_default.inRange(options.y2, 0, 1e6)) {
+        this.options.sharpenY2 = options.y2;
+      } else {
+        throw is_default.invalidParameterError("options.y2", "number between 0 and 1000000", options.y2);
+      }
+    }
+    if (is_default.defined(options.y3)) {
+      if (is_default.number(options.y3) && is_default.inRange(options.y3, 0, 1e6)) {
+        this.options.sharpenY3 = options.y3;
+      } else {
+        throw is_default.invalidParameterError("options.y3", "number between 0 and 1000000", options.y3);
+      }
+    }
+  } else {
+    this.options.sharpenSigma = -1;
+  }
+  return this;
+}
+function median(size) {
+  if (!is_default.defined(size)) {
+    this.options.medianSize = 3;
+  } else if (is_default.integer(size) && is_default.inRange(size, 1, 1e3)) {
+    this.options.medianSize = size;
+  } else {
+    throw is_default.invalidParameterError("size", "integer between 1 and 1000", size);
+  }
+  return this;
+}
+function blur(options) {
+  let sigma;
+  if (is_default.number(options)) {
+    sigma = options;
+  } else if (is_default.plainObject(options)) {
+    if (!is_default.number(options.sigma)) {
+      throw is_default.invalidParameterError("options.sigma", "number between 0.3 and 1000", sigma);
+    }
+    sigma = options.sigma;
+    if ("precision" in options) {
+      if (is_default.string(vipsPrecision[options.precision])) {
+        this.options.precision = vipsPrecision[options.precision];
+      } else {
+        throw is_default.invalidParameterError("precision", "one of: integer, float, approximate", options.precision);
+      }
+    }
+    if ("minAmplitude" in options) {
+      if (is_default.number(options.minAmplitude) && is_default.inRange(options.minAmplitude, 1e-3, 1)) {
+        this.options.minAmpl = options.minAmplitude;
+      } else {
+        throw is_default.invalidParameterError("minAmplitude", "number between 0.001 and 1", options.minAmplitude);
+      }
+    }
+  }
+  if (!is_default.defined(options)) {
+    this.options.blurSigma = -1;
+  } else if (is_default.bool(options)) {
+    this.options.blurSigma = options ? -1 : 0;
+  } else if (is_default.number(sigma) && is_default.inRange(sigma, 0.3, 1e3)) {
+    this.options.blurSigma = sigma;
+  } else {
+    throw is_default.invalidParameterError("sigma", "number between 0.3 and 1000", sigma);
+  }
+  return this;
+}
+function dilate(width) {
+  if (!is_default.defined(width)) {
+    this.options.dilateWidth = 1;
+  } else if (is_default.integer(width) && is_default.inRange(width, 1, 65536)) {
+    this.options.dilateWidth = width;
+  } else {
+    throw is_default.invalidParameterError("width", "integer between 1 and 65536", width);
+  }
+  return this;
+}
+function erode(width) {
+  if (!is_default.defined(width)) {
+    this.options.erodeWidth = 1;
+  } else if (is_default.integer(width) && is_default.inRange(width, 1, 65536)) {
+    this.options.erodeWidth = width;
+  } else {
+    throw is_default.invalidParameterError("width", "integer between 1 and 65536", width);
+  }
+  return this;
+}
+function flatten(options) {
+  this.options.flatten = is_default.bool(options) ? options : true;
+  if (is_default.object(options)) {
+    this._setBackgroundColourOption("flattenBackground", options.background);
+  }
+  return this;
+}
+function unflatten() {
+  this.options.unflatten = true;
+  return this;
+}
+function gamma(gamma2, gammaOut) {
+  if (!is_default.defined(gamma2)) {
+    this.options.gamma = 2.2;
+  } else if (is_default.number(gamma2) && is_default.inRange(gamma2, 1, 3)) {
+    this.options.gamma = gamma2;
+  } else {
+    throw is_default.invalidParameterError("gamma", "number between 1.0 and 3.0", gamma2);
+  }
+  if (!is_default.defined(gammaOut)) {
+    this.options.gammaOut = this.options.gamma;
+  } else if (is_default.number(gammaOut) && is_default.inRange(gammaOut, 1, 3)) {
+    this.options.gammaOut = gammaOut;
+  } else {
+    throw is_default.invalidParameterError("gammaOut", "number between 1.0 and 3.0", gammaOut);
+  }
+  return this;
+}
+function negate(options) {
+  this.options.negate = is_default.bool(options) ? options : true;
+  if (is_default.plainObject(options) && "alpha" in options) {
+    if (!is_default.bool(options.alpha)) {
+      throw is_default.invalidParameterError("alpha", "should be boolean value", options.alpha);
+    } else {
+      this.options.negateAlpha = options.alpha;
+    }
+  }
+  return this;
+}
+function normalise(options) {
+  if (is_default.plainObject(options)) {
+    if (is_default.defined(options.lower)) {
+      if (is_default.number(options.lower) && is_default.inRange(options.lower, 0, 99)) {
+        this.options.normaliseLower = options.lower;
+      } else {
+        throw is_default.invalidParameterError("lower", "number between 0 and 99", options.lower);
+      }
+    }
+    if (is_default.defined(options.upper)) {
+      if (is_default.number(options.upper) && is_default.inRange(options.upper, 1, 100)) {
+        this.options.normaliseUpper = options.upper;
+      } else {
+        throw is_default.invalidParameterError("upper", "number between 1 and 100", options.upper);
+      }
+    }
+  }
+  if (this.options.normaliseLower >= this.options.normaliseUpper) {
+    throw is_default.invalidParameterError(
+      "range",
+      "lower to be less than upper",
+      `${this.options.normaliseLower} >= ${this.options.normaliseUpper}`
+    );
+  }
+  this.options.normalise = true;
+  return this;
+}
+function normalize(options) {
+  return this.normalise(options);
+}
+function clahe(options) {
+  if (is_default.plainObject(options)) {
+    if (is_default.integer(options.width) && is_default.inRange(options.width, 1, 65536)) {
+      this.options.claheWidth = options.width;
+    } else {
+      throw is_default.invalidParameterError("width", "integer between 1 and 65536", options.width);
+    }
+    if (is_default.integer(options.height) && is_default.inRange(options.height, 1, 65536)) {
+      this.options.claheHeight = options.height;
+    } else {
+      throw is_default.invalidParameterError("height", "integer between 1 and 65536", options.height);
+    }
+    if (is_default.defined(options.maxSlope)) {
+      if (is_default.integer(options.maxSlope) && is_default.inRange(options.maxSlope, 0, 100)) {
+        this.options.claheMaxSlope = options.maxSlope;
+      } else {
+        throw is_default.invalidParameterError("maxSlope", "integer between 0 and 100", options.maxSlope);
+      }
+    }
+  } else {
+    throw is_default.invalidParameterError("options", "plain object", options);
+  }
+  return this;
+}
+function convolve(kernel2) {
+  if (!is_default.object(kernel2) || !Array.isArray(kernel2.kernel) || !is_default.integer(kernel2.width) || !is_default.integer(kernel2.height) || !is_default.inRange(kernel2.width, 3, 1001) || !is_default.inRange(kernel2.height, 3, 1001) || kernel2.height * kernel2.width !== kernel2.kernel.length || !kernel2.kernel.every(is_default.number)) {
+    throw new Error("Invalid convolution kernel");
+  }
+  if (!is_default.integer(kernel2.scale)) {
+    kernel2.scale = kernel2.kernel.reduce((a, b) => a + b, 0);
+  }
+  if (kernel2.scale < 1) {
+    kernel2.scale = 1;
+  }
+  if (!is_default.integer(kernel2.offset)) {
+    kernel2.offset = 0;
+  }
+  this.options.convKernel = kernel2;
+  return this;
+}
+function threshold(threshold2, options) {
+  if (!is_default.defined(threshold2)) {
+    this.options.threshold = 128;
+  } else if (is_default.bool(threshold2)) {
+    this.options.threshold = threshold2 ? 128 : 0;
+  } else if (is_default.integer(threshold2) && is_default.inRange(threshold2, 0, 255)) {
+    this.options.threshold = threshold2;
+  } else {
+    throw is_default.invalidParameterError("threshold", "integer between 0 and 255", threshold2);
+  }
+  if (!is_default.object(options) || options.greyscale === true || options.grayscale === true) {
+    this.options.thresholdGrayscale = true;
+  } else {
+    this.options.thresholdGrayscale = false;
+  }
+  return this;
+}
+function boolean(operand, operator, options) {
+  this.options.boolean = this._createInputDescriptor(operand, options);
+  if (is_default.string(operator) && is_default.inArray(operator, ["and", "or", "eor"])) {
+    this.options.booleanOp = operator;
+  } else {
+    throw is_default.invalidParameterError("operator", "one of: and, or, eor", operator);
+  }
+  return this;
+}
+function linear(a, b) {
+  if (!is_default.defined(a) && is_default.number(b)) {
+    a = 1;
+  } else if (is_default.number(a) && !is_default.defined(b)) {
+    b = 0;
+  }
+  if (!is_default.defined(a)) {
+    this.options.linearA = [];
+  } else if (is_default.number(a)) {
+    this.options.linearA = [a];
+  } else if (Array.isArray(a) && a.length && a.every(is_default.number)) {
+    this.options.linearA = a;
+  } else {
+    throw is_default.invalidParameterError("a", "number or array of numbers", a);
+  }
+  if (!is_default.defined(b)) {
+    this.options.linearB = [];
+  } else if (is_default.number(b)) {
+    this.options.linearB = [b];
+  } else if (Array.isArray(b) && b.length && b.every(is_default.number)) {
+    this.options.linearB = b;
+  } else {
+    throw is_default.invalidParameterError("b", "number or array of numbers", b);
+  }
+  if (this.options.linearA.length !== this.options.linearB.length) {
+    throw new Error("Expected a and b to be arrays of the same length");
+  }
+  return this;
+}
+function recomb(inputMatrix) {
+  if (!Array.isArray(inputMatrix)) {
+    throw is_default.invalidParameterError("inputMatrix", "array", inputMatrix);
+  }
+  const dimensions = inputMatrix.length;
+  if (dimensions !== 3 && dimensions !== 4) {
+    throw is_default.invalidParameterError("inputMatrix", "3x3 or 4x4 array", dimensions);
+  }
+  if (!inputMatrix.every((row) => Array.isArray(row) && row.length === dimensions)) {
+    throw is_default.invalidParameterError("inputMatrix", `array of ${dimensions} arrays of length ${dimensions}`, inputMatrix);
+  }
+  const recombMatrix = inputMatrix.flat();
+  if (!recombMatrix.every(is_default.number)) {
+    throw is_default.invalidParameterError("inputMatrix", "array of numbers", recombMatrix);
+  }
+  this.options.recombMatrix = recombMatrix;
+  return this;
+}
+function modulate(options) {
+  if (!is_default.plainObject(options)) {
+    throw is_default.invalidParameterError("options", "plain object", options);
+  }
+  if ("brightness" in options) {
+    if (is_default.number(options.brightness) && options.brightness >= 0) {
+      this.options.brightness = options.brightness;
+    } else {
+      throw is_default.invalidParameterError("brightness", "number above zero", options.brightness);
+    }
+  }
+  if ("saturation" in options) {
+    if (is_default.number(options.saturation) && options.saturation >= 0) {
+      this.options.saturation = options.saturation;
+    } else {
+      throw is_default.invalidParameterError("saturation", "number above zero", options.saturation);
+    }
+  }
+  if ("hue" in options) {
+    if (is_default.integer(options.hue)) {
+      this.options.hue = options.hue % 360;
+    } else {
+      throw is_default.invalidParameterError("hue", "number", options.hue);
+    }
+  }
+  if ("lightness" in options) {
+    if (is_default.number(options.lightness)) {
+      this.options.lightness = options.lightness;
+    } else {
+      throw is_default.invalidParameterError("lightness", "number", options.lightness);
+    }
+  }
+  return this;
+}
+var vipsPrecision, operation_default;
+var init_operation = __esm({
+  "node_modules/sharp/dist/operation.mjs"() {
+    "use strict";
+    init_is();
+    vipsPrecision = {
+      integer: "integer",
+      float: "float",
+      approximate: "approximate"
+    };
+    operation_default = (Sharp2) => {
+      Object.assign(Sharp2.prototype, {
+        autoOrient,
+        rotate,
+        flip,
+        flop,
+        affine,
+        sharpen,
+        erode,
+        dilate,
+        median,
+        blur,
+        flatten,
+        unflatten,
+        gamma,
+        negate,
+        normalise,
+        normalize,
+        clahe,
+        convolve,
+        threshold,
+        boolean,
+        linear,
+        recomb,
+        modulate
+      });
+    };
+  }
+});
+
+// node_modules/@img/colour/color.cjs
+var require_color = __commonJS({
+  "node_modules/@img/colour/color.cjs"(exports, module) {
+    "use strict";
+    var __defProp2 = Object.defineProperty;
+    var __getOwnPropDesc2 = Object.getOwnPropertyDescriptor;
+    var __getOwnPropNames2 = Object.getOwnPropertyNames;
+    var __hasOwnProp2 = Object.prototype.hasOwnProperty;
+    var __export2 = (target, all) => {
+      for (var name in all)
+        __defProp2(target, name, { get: all[name], enumerable: true });
+    };
+    var __copyProps2 = (to, from, except, desc) => {
+      if (from && typeof from === "object" || typeof from === "function") {
+        for (let key of __getOwnPropNames2(from))
+          if (!__hasOwnProp2.call(to, key) && key !== except)
+            __defProp2(to, key, { get: () => from[key], enumerable: !(desc = __getOwnPropDesc2(from, key)) || desc.enumerable });
+      }
+      return to;
+    };
+    var __toCommonJS = (mod) => __copyProps2(__defProp2({}, "__esModule", { value: true }), mod);
+    var index_exports = {};
+    __export2(index_exports, {
+      default: () => index_default
+    });
+    module.exports = __toCommonJS(index_exports);
+    var colors = {
+      aliceblue: [240, 248, 255],
+      antiquewhite: [250, 235, 215],
+      aqua: [0, 255, 255],
+      aquamarine: [127, 255, 212],
+      azure: [240, 255, 255],
+      beige: [245, 245, 220],
+      bisque: [255, 228, 196],
+      black: [0, 0, 0],
+      blanchedalmond: [255, 235, 205],
+      blue: [0, 0, 255],
+      blueviolet: [138, 43, 226],
+      brown: [165, 42, 42],
+      burlywood: [222, 184, 135],
+      cadetblue: [95, 158, 160],
+      chartreuse: [127, 255, 0],
+      chocolate: [210, 105, 30],
+      coral: [255, 127, 80],
+      cornflowerblue: [100, 149, 237],
+      cornsilk: [255, 248, 220],
+      crimson: [220, 20, 60],
+      cyan: [0, 255, 255],
+      darkblue: [0, 0, 139],
+      darkcyan: [0, 139, 139],
+      darkgoldenrod: [184, 134, 11],
+      darkgray: [169, 169, 169],
+      darkgreen: [0, 100, 0],
+      darkgrey: [169, 169, 169],
+      darkkhaki: [189, 183, 107],
+      darkmagenta: [139, 0, 139],
+      darkolivegreen: [85, 107, 47],
+      darkorange: [255, 140, 0],
+      darkorchid: [153, 50, 204],
+      darkred: [139, 0, 0],
+      darksalmon: [233, 150, 122],
+      darkseagreen: [143, 188, 143],
+      darkslateblue: [72, 61, 139],
+      darkslategray: [47, 79, 79],
+      darkslategrey: [47, 79, 79],
+      darkturquoise: [0, 206, 209],
+      darkviolet: [148, 0, 211],
+      deeppink: [255, 20, 147],
+      deepskyblue: [0, 191, 255],
+      dimgray: [105, 105, 105],
+      dimgrey: [105, 105, 105],
+      dodgerblue: [30, 144, 255],
+      firebrick: [178, 34, 34],
+      floralwhite: [255, 250, 240],
+      forestgreen: [34, 139, 34],
+      fuchsia: [255, 0, 255],
+      gainsboro: [220, 220, 220],
+      ghostwhite: [248, 248, 255],
+      gold: [255, 215, 0],
+      goldenrod: [218, 165, 32],
+      gray: [128, 128, 128],
+      green: [0, 128, 0],
+      greenyellow: [173, 255, 47],
+      grey: [128, 128, 128],
+      honeydew: [240, 255, 240],
+      hotpink: [255, 105, 180],
+      indianred: [205, 92, 92],
+      indigo: [75, 0, 130],
+      ivory: [255, 255, 240],
+      khaki: [240, 230, 140],
+      lavender: [230, 230, 250],
+      lavenderblush: [255, 240, 245],
+      lawngreen: [124, 252, 0],
+      lemonchiffon: [255, 250, 205],
+      lightblue: [173, 216, 230],
+      lightcoral: [240, 128, 128],
+      lightcyan: [224, 255, 255],
+      lightgoldenrodyellow: [250, 250, 210],
+      lightgray: [211, 211, 211],
+      lightgreen: [144, 238, 144],
+      lightgrey: [211, 211, 211],
+      lightpink: [255, 182, 193],
+      lightsalmon: [255, 160, 122],
+      lightseagreen: [32, 178, 170],
+      lightskyblue: [135, 206, 250],
+      lightslategray: [119, 136, 153],
+      lightslategrey: [119, 136, 153],
+      lightsteelblue: [176, 196, 222],
+      lightyellow: [255, 255, 224],
+      lime: [0, 255, 0],
+      limegreen: [50, 205, 50],
+      linen: [250, 240, 230],
+      magenta: [255, 0, 255],
+      maroon: [128, 0, 0],
+      mediumaquamarine: [102, 205, 170],
+      mediumblue: [0, 0, 205],
+      mediumorchid: [186, 85, 211],
+      mediumpurple: [147, 112, 219],
+      mediumseagreen: [60, 179, 113],
+      mediumslateblue: [123, 104, 238],
+      mediumspringgreen: [0, 250, 154],
+      mediumturquoise: [72, 209, 204],
+      mediumvioletred: [199, 21, 133],
+      midnightblue: [25, 25, 112],
+      mintcream: [245, 255, 250],
+      mistyrose: [255, 228, 225],
+      moccasin: [255, 228, 181],
+      navajowhite: [255, 222, 173],
+      navy: [0, 0, 128],
+      oldlace: [253, 245, 230],
+      olive: [128, 128, 0],
+      olivedrab: [107, 142, 35],
+      orange: [255, 165, 0],
+      orangered: [255, 69, 0],
+      orchid: [218, 112, 214],
+      palegoldenrod: [238, 232, 170],
+      palegreen: [152, 251, 152],
+      paleturquoise: [175, 238, 238],
+      palevioletred: [219, 112, 147],
+      papayawhip: [255, 239, 213],
+      peachpuff: [255, 218, 185],
+      peru: [205, 133, 63],
+      pink: [255, 192, 203],
+      plum: [221, 160, 221],
+      powderblue: [176, 224, 230],
+      purple: [128, 0, 128],
+      rebeccapurple: [102, 51, 153],
+      red: [255, 0, 0],
+      rosybrown: [188, 143, 143],
+      royalblue: [65, 105, 225],
+      saddlebrown: [139, 69, 19],
+      salmon: [250, 128, 114],
+      sandybrown: [244, 164, 96],
+      seagreen: [46, 139, 87],
+      seashell: [255, 245, 238],
+      sienna: [160, 82, 45],
+      silver: [192, 192, 192],
+      skyblue: [135, 206, 235],
+      slateblue: [106, 90, 205],
+      slategray: [112, 128, 144],
+      slategrey: [112, 128, 144],
+      snow: [255, 250, 250],
+      springgreen: [0, 255, 127],
+      steelblue: [70, 130, 180],
+      tan: [210, 180, 140],
+      teal: [0, 128, 128],
+      thistle: [216, 191, 216],
+      tomato: [255, 99, 71],
+      turquoise: [64, 224, 208],
+      violet: [238, 130, 238],
+      wheat: [245, 222, 179],
+      white: [255, 255, 255],
+      whitesmoke: [245, 245, 245],
+      yellow: [255, 255, 0],
+      yellowgreen: [154, 205, 50]
+    };
+    for (const key in colors) Object.freeze(colors[key]);
+    var color_name_default = Object.freeze(colors);
+    var reverseNames = /* @__PURE__ */ Object.create(null);
+    for (const name in color_name_default) {
+      if (Object.hasOwn(color_name_default, name)) {
+        reverseNames[color_name_default[name]] = name;
+      }
+    }
+    var cs = {
+      to: {},
+      get: {}
+    };
+    cs.get = function(string2) {
+      const prefix = string2.slice(0, 3).toLowerCase();
+      let value;
+      let model;
+      switch (prefix) {
+        case "hsl": {
+          value = cs.get.hsl(string2);
+          model = "hsl";
+          break;
+        }
+        case "hwb": {
+          value = cs.get.hwb(string2);
+          model = "hwb";
+          break;
+        }
+        default: {
+          value = cs.get.rgb(string2);
+          model = "rgb";
+          break;
+        }
+      }
+      if (!value) {
+        return null;
+      }
+      return { model, value };
+    };
+    cs.get.rgb = function(string2) {
+      if (!string2) {
+        return null;
+      }
+      const abbr = /^#([a-f\d]{3,4})$/i;
+      const hex = /^#([a-f\d]{6})([a-f\d]{2})?$/i;
+      const rgba = /^rgba?\(\s*([+-]?(?:\d*\.)?\d+(?:e\d+)?)(?=[\s,])\s*(?:,\s*)?([+-]?(?:\d*\.)?\d+(?:e\d+)?)(?=[\s,])\s*(?:,\s*)?([+-]?(?:\d*\.)?\d+(?:e\d+)?)\s*(?:[\s,|/]\s*([+-]?(?:\d*\.)?\d+(?:e\d+)?)(%?)\s*)?\)$/i;
+      const per = /^rgba?\(\s*([+-]?[\d.]+)%\s*,?\s*([+-]?[\d.]+)%\s*,?\s*([+-]?[\d.]+)%\s*(?:[\s,|/]\s*([+-]?[\d.]+)(%?)\s*)?\)$/i;
+      const keyword = /^(\w+)$/;
+      let rgb = [0, 0, 0, 1];
+      let match;
+      let i;
+      let hexAlpha;
+      if (match = string2.match(hex)) {
+        hexAlpha = match[2];
+        match = match[1];
+        for (i = 0; i < 3; i++) {
+          const i2 = i * 2;
+          rgb[i] = Number.parseInt(match.slice(i2, i2 + 2), 16);
+        }
+        if (hexAlpha) {
+          rgb[3] = Number.parseInt(hexAlpha, 16) / 255;
+        }
+      } else if (match = string2.match(abbr)) {
+        match = match[1];
+        hexAlpha = match[3];
+        for (i = 0; i < 3; i++) {
+          rgb[i] = Number.parseInt(match[i] + match[i], 16);
+        }
+        if (hexAlpha) {
+          rgb[3] = Number.parseInt(hexAlpha + hexAlpha, 16) / 255;
+        }
+      } else if (match = string2.match(rgba)) {
+        for (i = 0; i < 3; i++) {
+          rgb[i] = Number.parseFloat(match[i + 1]);
+        }
+        if (match[4]) {
+          rgb[3] = match[5] ? Number.parseFloat(match[4]) * 0.01 : Number.parseFloat(match[4]);
+        }
+      } else if (match = string2.match(per)) {
+        for (i = 0; i < 3; i++) {
+          rgb[i] = Math.round(Number.parseFloat(match[i + 1]) * 2.55);
+        }
+        if (match[4]) {
+          rgb[3] = match[5] ? Number.parseFloat(match[4]) * 0.01 : Number.parseFloat(match[4]);
+        }
+      } else if (match = string2.toLowerCase().match(keyword)) {
+        if (match[1] === "transparent") {
+          return [0, 0, 0, 0];
+        }
+        if (!Object.hasOwn(color_name_default, match[1])) {
+          return null;
+        }
+        rgb = color_name_default[match[1]].slice();
+        rgb[3] = 1;
+        return rgb;
+      } else {
+        return null;
+      }
+      for (i = 0; i < 3; i++) {
+        rgb[i] = clamp(rgb[i], 0, 255);
+      }
+      rgb[3] = clamp(rgb[3], 0, 1);
+      return rgb;
+    };
+    cs.get.hsl = function(string2) {
+      if (!string2) {
+        return null;
+      }
+      const hsl = /^hsla?\(\s*([+-]?(?:\d{0,3}\.)?\d+)(?:deg)?\s*,?\s*([+-]?[\d.]+)%\s*,?\s*([+-]?[\d.]+)%\s*(?:[,|/]\s*([+-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d*)?(?:e[+-]?\d+)?)\s*)?\)$/i;
+      const match = string2.match(hsl);
+      if (match) {
+        const alpha = Number.parseFloat(match[4]);
+        const h = (Number.parseFloat(match[1]) % 360 + 360) % 360;
+        const s = clamp(Number.parseFloat(match[2]), 0, 100);
+        const l = clamp(Number.parseFloat(match[3]), 0, 100);
+        const a = clamp(Number.isNaN(alpha) ? 1 : alpha, 0, 1);
+        return [h, s, l, a];
+      }
+      return null;
+    };
+    cs.get.hwb = function(string2) {
+      if (!string2) {
+        return null;
+      }
+      const hwb = /^hwb\(\s*([+-]?\d{0,3}(?:\.\d+)?)(?:deg)?\s*[\s,]\s*([+-]?[\d.]+)%\s*[\s,]\s*([+-]?[\d.]+)%\s*(?:[\s,]\s*([+-]?(?=\.\d|\d)(?:0|[1-9]\d*)?(?:\.\d*)?(?:e[+-]?\d+)?)\s*)?\)$/i;
+      const match = string2.match(hwb);
+      if (match) {
+        const alpha = Number.parseFloat(match[4]);
+        const h = (Number.parseFloat(match[1]) % 360 + 360) % 360;
+        const w = clamp(Number.parseFloat(match[2]), 0, 100);
+        const b = clamp(Number.parseFloat(match[3]), 0, 100);
+        const a = clamp(Number.isNaN(alpha) ? 1 : alpha, 0, 1);
+        return [h, w, b, a];
+      }
+      return null;
+    };
+    cs.to.hex = function(...rgba) {
+      return "#" + hexDouble(rgba[0]) + hexDouble(rgba[1]) + hexDouble(rgba[2]) + (rgba[3] < 1 ? hexDouble(Math.round(rgba[3] * 255)) : "");
+    };
+    cs.to.rgb = function(...rgba) {
+      return rgba.length < 4 || rgba[3] === 1 ? "rgb(" + Math.round(rgba[0]) + ", " + Math.round(rgba[1]) + ", " + Math.round(rgba[2]) + ")" : "rgba(" + Math.round(rgba[0]) + ", " + Math.round(rgba[1]) + ", " + Math.round(rgba[2]) + ", " + rgba[3] + ")";
+    };
+    cs.to.rgb.percent = function(...rgba) {
+      const r = Math.round(rgba[0] / 255 * 100);
+      const g = Math.round(rgba[1] / 255 * 100);
+      const b = Math.round(rgba[2] / 255 * 100);
+      return rgba.length < 4 || rgba[3] === 1 ? "rgb(" + r + "%, " + g + "%, " + b + "%)" : "rgba(" + r + "%, " + g + "%, " + b + "%, " + rgba[3] + ")";
+    };
+    cs.to.hsl = function(...hsla) {
+      return hsla.length < 4 || hsla[3] === 1 ? "hsl(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%)" : "hsla(" + hsla[0] + ", " + hsla[1] + "%, " + hsla[2] + "%, " + hsla[3] + ")";
+    };
+    cs.to.hwb = function(...hwba) {
+      let a = "";
+      if (hwba.length >= 4 && hwba[3] !== 1) {
+        a = ", " + hwba[3];
+      }
+      return "hwb(" + hwba[0] + ", " + hwba[1] + "%, " + hwba[2] + "%" + a + ")";
+    };
+    cs.to.keyword = function(...rgb) {
+      return reverseNames[rgb.slice(0, 3)];
+    };
+    function clamp(number_, min, max) {
+      return Math.min(Math.max(min, number_), max);
+    }
+    function hexDouble(number_) {
+      const string_ = Math.round(number_).toString(16).toUpperCase();
+      return string_.length < 2 ? "0" + string_ : string_;
+    }
+    var color_string_default = cs;
+    var reverseKeywords = {};
+    for (const key of Object.keys(color_name_default)) {
+      reverseKeywords[color_name_default[key]] = key;
+    }
+    var convert = {
+      rgb: { channels: 3, labels: "rgb" },
+      hsl: { channels: 3, labels: "hsl" },
+      hsv: { channels: 3, labels: "hsv" },
+      hwb: { channels: 3, labels: "hwb" },
+      cmyk: { channels: 4, labels: "cmyk" },
+      xyz: { channels: 3, labels: "xyz" },
+      lab: { channels: 3, labels: "lab" },
+      oklab: { channels: 3, labels: ["okl", "oka", "okb"] },
+      lch: { channels: 3, labels: "lch" },
+      oklch: { channels: 3, labels: ["okl", "okc", "okh"] },
+      hex: { channels: 1, labels: ["hex"] },
+      keyword: { channels: 1, labels: ["keyword"] },
+      ansi16: { channels: 1, labels: ["ansi16"] },
+      ansi256: { channels: 1, labels: ["ansi256"] },
+      hcg: { channels: 3, labels: ["h", "c", "g"] },
+      apple: { channels: 3, labels: ["r16", "g16", "b16"] },
+      gray: { channels: 1, labels: ["gray"] }
+    };
+    var conversions_default = convert;
+    var LAB_FT = (6 / 29) ** 3;
+    function srgbNonlinearTransform(c) {
+      const cc = c > 31308e-7 ? 1.055 * c ** (1 / 2.4) - 0.055 : c * 12.92;
+      return Math.min(Math.max(0, cc), 1);
+    }
+    function srgbNonlinearTransformInv(c) {
+      return c > 0.04045 ? ((c + 0.055) / 1.055) ** 2.4 : c / 12.92;
+    }
+    for (const model of Object.keys(convert)) {
+      if (!("channels" in convert[model])) {
+        throw new Error("missing channels property: " + model);
+      }
+      if (!("labels" in convert[model])) {
+        throw new Error("missing channel labels property: " + model);
+      }
+      if (convert[model].labels.length !== convert[model].channels) {
+        throw new Error("channel and label counts mismatch: " + model);
+      }
+      const { channels, labels } = convert[model];
+      delete convert[model].channels;
+      delete convert[model].labels;
+      Object.defineProperty(convert[model], "channels", { value: channels });
+      Object.defineProperty(convert[model], "labels", { value: labels });
+    }
+    convert.rgb.hsl = function(rgb) {
+      const r = rgb[0] / 255;
+      const g = rgb[1] / 255;
+      const b = rgb[2] / 255;
+      const min = Math.min(r, g, b);
+      const max = Math.max(r, g, b);
+      const delta = max - min;
+      let h;
+      let s;
+      switch (max) {
+        case min: {
+          h = 0;
+          break;
+        }
+        case r: {
+          h = (g - b) / delta;
+          break;
+        }
+        case g: {
+          h = 2 + (b - r) / delta;
+          break;
+        }
+        case b: {
+          h = 4 + (r - g) / delta;
+          break;
+        }
+      }
+      h = Math.min(h * 60, 360);
+      if (h < 0) {
+        h += 360;
+      }
+      const l = (min + max) / 2;
+      if (max === min) {
+        s = 0;
+      } else if (l <= 0.5) {
+        s = delta / (max + min);
+      } else {
+        s = delta / (2 - max - min);
+      }
+      return [h, s * 100, l * 100];
+    };
+    convert.rgb.hsv = function(rgb) {
+      let rdif;
+      let gdif;
+      let bdif;
+      let h;
+      let s;
+      const r = rgb[0] / 255;
+      const g = rgb[1] / 255;
+      const b = rgb[2] / 255;
+      const v = Math.max(r, g, b);
+      const diff2 = v - Math.min(r, g, b);
+      const diffc = function(c) {
+        return (v - c) / 6 / diff2 + 1 / 2;
+      };
+      if (diff2 === 0) {
+        h = 0;
+        s = 0;
+      } else {
+        s = diff2 / v;
+        rdif = diffc(r);
+        gdif = diffc(g);
+        bdif = diffc(b);
+        switch (v) {
+          case r: {
+            h = bdif - gdif;
+            break;
+          }
+          case g: {
+            h = 1 / 3 + rdif - bdif;
+            break;
+          }
+          case b: {
+            h = 2 / 3 + gdif - rdif;
+            break;
+          }
+        }
+        if (h < 0) {
+          h += 1;
+        } else if (h > 1) {
+          h -= 1;
+        }
+      }
+      return [
+        h * 360,
+        s * 100,
+        v * 100
+      ];
+    };
+    convert.rgb.hwb = function(rgb) {
+      const r = rgb[0];
+      const g = rgb[1];
+      let b = rgb[2];
+      const h = convert.rgb.hsl(rgb)[0];
+      const w = 1 / 255 * Math.min(r, Math.min(g, b));
+      b = 1 - 1 / 255 * Math.max(r, Math.max(g, b));
+      return [h, w * 100, b * 100];
+    };
+    convert.rgb.oklab = function(rgb) {
+      const r = srgbNonlinearTransformInv(rgb[0] / 255);
+      const g = srgbNonlinearTransformInv(rgb[1] / 255);
+      const b = srgbNonlinearTransformInv(rgb[2] / 255);
+      const lp = Math.cbrt(0.4122214708 * r + 0.5363325363 * g + 0.0514459929 * b);
+      const mp = Math.cbrt(0.2119034982 * r + 0.6806995451 * g + 0.1073969566 * b);
+      const sp = Math.cbrt(0.0883024619 * r + 0.2817188376 * g + 0.6299787005 * b);
+      const l = 0.2104542553 * lp + 0.793617785 * mp - 0.0040720468 * sp;
+      const aa = 1.9779984951 * lp - 2.428592205 * mp + 0.4505937099 * sp;
+      const bb = 0.0259040371 * lp + 0.7827717662 * mp - 0.808675766 * sp;
+      return [l * 100, aa * 100, bb * 100];
+    };
+    convert.rgb.cmyk = function(rgb) {
+      const r = rgb[0] / 255;
+      const g = rgb[1] / 255;
+      const b = rgb[2] / 255;
+      const k = Math.min(1 - r, 1 - g, 1 - b);
+      const c = (1 - r - k) / (1 - k) || 0;
+      const m = (1 - g - k) / (1 - k) || 0;
+      const y = (1 - b - k) / (1 - k) || 0;
+      return [c * 100, m * 100, y * 100, k * 100];
+    };
+    function comparativeDistance(x, y) {
+      return (x[0] - y[0]) ** 2 + (x[1] - y[1]) ** 2 + (x[2] - y[2]) ** 2;
+    }
+    convert.rgb.keyword = function(rgb) {
+      const reversed = reverseKeywords[rgb];
+      if (reversed) {
+        return reversed;
+      }
+      let currentClosestDistance = Number.POSITIVE_INFINITY;
+      let currentClosestKeyword;
+      for (const keyword of Object.keys(color_name_default)) {
+        const value = color_name_default[keyword];
+        const distance = comparativeDistance(rgb, value);
+        if (distance < currentClosestDistance) {
+          currentClosestDistance = distance;
+          currentClosestKeyword = keyword;
+        }
+      }
+      return currentClosestKeyword;
+    };
+    convert.keyword.rgb = function(keyword) {
+      return [...color_name_default[keyword]];
+    };
+    convert.rgb.xyz = function(rgb) {
+      const r = srgbNonlinearTransformInv(rgb[0] / 255);
+      const g = srgbNonlinearTransformInv(rgb[1] / 255);
+      const b = srgbNonlinearTransformInv(rgb[2] / 255);
+      const x = r * 0.4124564 + g * 0.3575761 + b * 0.1804375;
+      const y = r * 0.2126729 + g * 0.7151522 + b * 0.072175;
+      const z = r * 0.0193339 + g * 0.119192 + b * 0.9503041;
+      return [x * 100, y * 100, z * 100];
+    };
+    convert.rgb.lab = function(rgb) {
+      const xyz = convert.rgb.xyz(rgb);
+      let x = xyz[0];
+      let y = xyz[1];
+      let z = xyz[2];
+      x /= 95.047;
+      y /= 100;
+      z /= 108.883;
+      x = x > LAB_FT ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+      y = y > LAB_FT ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+      z = z > LAB_FT ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+      const l = 116 * y - 16;
+      const a = 500 * (x - y);
+      const b = 200 * (y - z);
+      return [l, a, b];
+    };
+    convert.hsl.rgb = function(hsl) {
+      const h = hsl[0] / 360;
+      const s = hsl[1] / 100;
+      const l = hsl[2] / 100;
+      let t3;
+      let value;
+      if (s === 0) {
+        value = l * 255;
+        return [value, value, value];
+      }
+      const t2 = l < 0.5 ? l * (1 + s) : l + s - l * s;
+      const t1 = 2 * l - t2;
+      const rgb = [0, 0, 0];
+      for (let i = 0; i < 3; i++) {
+        t3 = h + 1 / 3 * -(i - 1);
+        if (t3 < 0) {
+          t3++;
+        }
+        if (t3 > 1) {
+          t3--;
+        }
+        if (6 * t3 < 1) {
+          value = t1 + (t2 - t1) * 6 * t3;
+        } else if (2 * t3 < 1) {
+          value = t2;
+        } else if (3 * t3 < 2) {
+          value = t1 + (t2 - t1) * (2 / 3 - t3) * 6;
+        } else {
+          value = t1;
+        }
+        rgb[i] = value * 255;
+      }
+      return rgb;
+    };
+    convert.hsl.hsv = function(hsl) {
+      const h = hsl[0];
+      let s = hsl[1] / 100;
+      let l = hsl[2] / 100;
+      let smin = s;
+      const lmin = Math.max(l, 0.01);
+      l *= 2;
+      s *= l <= 1 ? l : 2 - l;
+      smin *= lmin <= 1 ? lmin : 2 - lmin;
+      const v = (l + s) / 2;
+      const sv = l === 0 ? 2 * smin / (lmin + smin) : 2 * s / (l + s);
+      return [h, sv * 100, v * 100];
+    };
+    convert.hsv.rgb = function(hsv) {
+      const h = hsv[0] / 60;
+      const s = hsv[1] / 100;
+      let v = hsv[2] / 100;
+      const hi2 = Math.floor(h) % 6;
+      const f = h - Math.floor(h);
+      const p = 255 * v * (1 - s);
+      const q = 255 * v * (1 - s * f);
+      const t2 = 255 * v * (1 - s * (1 - f));
+      v *= 255;
+      switch (hi2) {
+        case 0: {
+          return [v, t2, p];
+        }
+        case 1: {
+          return [q, v, p];
+        }
+        case 2: {
+          return [p, v, t2];
+        }
+        case 3: {
+          return [p, q, v];
+        }
+        case 4: {
+          return [t2, p, v];
+        }
+        case 5: {
+          return [v, p, q];
+        }
+      }
+    };
+    convert.hsv.hsl = function(hsv) {
+      const h = hsv[0];
+      const s = hsv[1] / 100;
+      const v = hsv[2] / 100;
+      const vmin = Math.max(v, 0.01);
+      let sl;
+      let l;
+      l = (2 - s) * v;
+      const lmin = (2 - s) * vmin;
+      sl = s * vmin;
+      sl /= lmin <= 1 ? lmin : 2 - lmin;
+      sl = sl || 0;
+      l /= 2;
+      return [h, sl * 100, l * 100];
+    };
+    convert.hwb.rgb = function(hwb) {
+      const h = hwb[0] / 360;
+      let wh = hwb[1] / 100;
+      let bl = hwb[2] / 100;
+      const ratio = wh + bl;
+      let f;
+      if (ratio > 1) {
+        wh /= ratio;
+        bl /= ratio;
+      }
+      const i = Math.floor(6 * h);
+      const v = 1 - bl;
+      f = 6 * h - i;
+      if ((i & 1) !== 0) {
+        f = 1 - f;
+      }
+      const n = wh + f * (v - wh);
+      let r;
+      let g;
+      let b;
+      switch (i) {
+        default:
+        case 6:
+        case 0: {
+          r = v;
+          g = n;
+          b = wh;
+          break;
+        }
+        case 1: {
+          r = n;
+          g = v;
+          b = wh;
+          break;
+        }
+        case 2: {
+          r = wh;
+          g = v;
+          b = n;
+          break;
+        }
+        case 3: {
+          r = wh;
+          g = n;
+          b = v;
+          break;
+        }
+        case 4: {
+          r = n;
+          g = wh;
+          b = v;
+          break;
+        }
+        case 5: {
+          r = v;
+          g = wh;
+          b = n;
+          break;
+        }
+      }
+      return [r * 255, g * 255, b * 255];
+    };
+    convert.cmyk.rgb = function(cmyk) {
+      const c = cmyk[0] / 100;
+      const m = cmyk[1] / 100;
+      const y = cmyk[2] / 100;
+      const k = cmyk[3] / 100;
+      const r = 1 - Math.min(1, c * (1 - k) + k);
+      const g = 1 - Math.min(1, m * (1 - k) + k);
+      const b = 1 - Math.min(1, y * (1 - k) + k);
+      return [r * 255, g * 255, b * 255];
+    };
+    convert.xyz.rgb = function(xyz) {
+      const x = xyz[0] / 100;
+      const y = xyz[1] / 100;
+      const z = xyz[2] / 100;
+      let r;
+      let g;
+      let b;
+      r = x * 3.2404542 + y * -1.5371385 + z * -0.4985314;
+      g = x * -0.969266 + y * 1.8760108 + z * 0.041556;
+      b = x * 0.0556434 + y * -0.2040259 + z * 1.0572252;
+      r = srgbNonlinearTransform(r);
+      g = srgbNonlinearTransform(g);
+      b = srgbNonlinearTransform(b);
+      return [r * 255, g * 255, b * 255];
+    };
+    convert.xyz.lab = function(xyz) {
+      let x = xyz[0];
+      let y = xyz[1];
+      let z = xyz[2];
+      x /= 95.047;
+      y /= 100;
+      z /= 108.883;
+      x = x > LAB_FT ? x ** (1 / 3) : 7.787 * x + 16 / 116;
+      y = y > LAB_FT ? y ** (1 / 3) : 7.787 * y + 16 / 116;
+      z = z > LAB_FT ? z ** (1 / 3) : 7.787 * z + 16 / 116;
+      const l = 116 * y - 16;
+      const a = 500 * (x - y);
+      const b = 200 * (y - z);
+      return [l, a, b];
+    };
+    convert.xyz.oklab = function(xyz) {
+      const x = xyz[0] / 100;
+      const y = xyz[1] / 100;
+      const z = xyz[2] / 100;
+      const lp = Math.cbrt(0.8189330101 * x + 0.3618667424 * y - 0.1288597137 * z);
+      const mp = Math.cbrt(0.0329845436 * x + 0.9293118715 * y + 0.0361456387 * z);
+      const sp = Math.cbrt(0.0482003018 * x + 0.2643662691 * y + 0.633851707 * z);
+      const l = 0.2104542553 * lp + 0.793617785 * mp - 0.0040720468 * sp;
+      const a = 1.9779984951 * lp - 2.428592205 * mp + 0.4505937099 * sp;
+      const b = 0.0259040371 * lp + 0.7827717662 * mp - 0.808675766 * sp;
+      return [l * 100, a * 100, b * 100];
+    };
+    convert.oklab.oklch = function(oklab) {
+      return convert.lab.lch(oklab);
+    };
+    convert.oklab.xyz = function(oklab) {
+      const ll = oklab[0] / 100;
+      const a = oklab[1] / 100;
+      const b = oklab[2] / 100;
+      const l = (0.999999998 * ll + 0.396337792 * a + 0.215803758 * b) ** 3;
+      const m = (1.000000008 * ll - 0.105561342 * a - 0.063854175 * b) ** 3;
+      const s = (1.000000055 * ll - 0.089484182 * a - 1.291485538 * b) ** 3;
+      const x = 1.227013851 * l - 0.55779998 * m + 0.281256149 * s;
+      const y = -0.040580178 * l + 1.11225687 * m - 0.071676679 * s;
+      const z = -0.076381285 * l - 0.421481978 * m + 1.58616322 * s;
+      return [x * 100, y * 100, z * 100];
+    };
+    convert.oklab.rgb = function(oklab) {
+      const ll = oklab[0] / 100;
+      const aa = oklab[1] / 100;
+      const bb = oklab[2] / 100;
+      const l = (ll + 0.3963377774 * aa + 0.2158037573 * bb) ** 3;
+      const m = (ll - 0.1055613458 * aa - 0.0638541728 * bb) ** 3;
+      const s = (ll - 0.0894841775 * aa - 1.291485548 * bb) ** 3;
+      const r = srgbNonlinearTransform(4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s);
+      const g = srgbNonlinearTransform(-1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s);
+      const b = srgbNonlinearTransform(-0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s);
+      return [r * 255, g * 255, b * 255];
+    };
+    convert.oklch.oklab = function(oklch) {
+      return convert.lch.lab(oklch);
+    };
+    convert.lab.xyz = function(lab) {
+      const l = lab[0];
+      const a = lab[1];
+      const b = lab[2];
+      let x;
+      let y;
+      let z;
+      y = (l + 16) / 116;
+      x = a / 500 + y;
+      z = y - b / 200;
+      const y2 = y ** 3;
+      const x2 = x ** 3;
+      const z2 = z ** 3;
+      y = y2 > LAB_FT ? y2 : (y - 16 / 116) / 7.787;
+      x = x2 > LAB_FT ? x2 : (x - 16 / 116) / 7.787;
+      z = z2 > LAB_FT ? z2 : (z - 16 / 116) / 7.787;
+      x *= 95.047;
+      y *= 100;
+      z *= 108.883;
+      return [x, y, z];
+    };
+    convert.lab.lch = function(lab) {
+      const l = lab[0];
+      const a = lab[1];
+      const b = lab[2];
+      let h;
+      const hr = Math.atan2(b, a);
+      h = hr * 360 / 2 / Math.PI;
+      if (h < 0) {
+        h += 360;
+      }
+      const c = Math.sqrt(a * a + b * b);
+      return [l, c, h];
+    };
+    convert.lch.lab = function(lch) {
+      const l = lch[0];
+      const c = lch[1];
+      const h = lch[2];
+      const hr = h / 360 * 2 * Math.PI;
+      const a = c * Math.cos(hr);
+      const b = c * Math.sin(hr);
+      return [l, a, b];
+    };
+    convert.rgb.ansi16 = function(args2, saturation = null) {
+      const [r, g, b] = args2;
+      let value = saturation === null ? convert.rgb.hsv(args2)[2] : saturation;
+      value = Math.round(value / 50);
+      if (value === 0) {
+        return 30;
+      }
+      let ansi = 30 + (Math.round(b / 255) << 2 | Math.round(g / 255) << 1 | Math.round(r / 255));
+      if (value === 2) {
+        ansi += 60;
+      }
+      return ansi;
+    };
+    convert.hsv.ansi16 = function(args2) {
+      return convert.rgb.ansi16(convert.hsv.rgb(args2), args2[2]);
+    };
+    convert.rgb.ansi256 = function(args2) {
+      const r = args2[0];
+      const g = args2[1];
+      const b = args2[2];
+      if (r >> 4 === g >> 4 && g >> 4 === b >> 4) {
+        if (r < 8) {
+          return 16;
+        }
+        if (r > 248) {
+          return 231;
+        }
+        return Math.round((r - 8) / 247 * 24) + 232;
+      }
+      const ansi = 16 + 36 * Math.round(r / 255 * 5) + 6 * Math.round(g / 255 * 5) + Math.round(b / 255 * 5);
+      return ansi;
+    };
+    convert.ansi16.rgb = function(args2) {
+      args2 = args2[0];
+      let color2 = args2 % 10;
+      if (color2 === 0 || color2 === 7) {
+        if (args2 > 50) {
+          color2 += 3.5;
+        }
+        color2 = color2 / 10.5 * 255;
+        return [color2, color2, color2];
+      }
+      const mult = (Math.trunc(args2 > 50) + 1) * 0.5;
+      const r = (color2 & 1) * mult * 255;
+      const g = (color2 >> 1 & 1) * mult * 255;
+      const b = (color2 >> 2 & 1) * mult * 255;
+      return [r, g, b];
+    };
+    convert.ansi256.rgb = function(args2) {
+      args2 = args2[0];
+      if (args2 >= 232) {
+        const c = (args2 - 232) * 10 + 8;
+        return [c, c, c];
+      }
+      args2 -= 16;
+      let rem;
+      const r = Math.floor(args2 / 36) / 5 * 255;
+      const g = Math.floor((rem = args2 % 36) / 6) / 5 * 255;
+      const b = rem % 6 / 5 * 255;
+      return [r, g, b];
+    };
+    convert.rgb.hex = function(args2) {
+      const integer2 = ((Math.round(args2[0]) & 255) << 16) + ((Math.round(args2[1]) & 255) << 8) + (Math.round(args2[2]) & 255);
+      const string2 = integer2.toString(16).toUpperCase();
+      return "000000".slice(string2.length) + string2;
+    };
+    convert.hex.rgb = function(args2) {
+      const match = args2.toString(16).match(/[a-f\d]{6}|[a-f\d]{3}/i);
+      if (!match) {
+        return [0, 0, 0];
+      }
+      let colorString = match[0];
+      if (match[0].length === 3) {
+        colorString = [...colorString].map((char) => char + char).join("");
+      }
+      const integer2 = Number.parseInt(colorString, 16);
+      const r = integer2 >> 16 & 255;
+      const g = integer2 >> 8 & 255;
+      const b = integer2 & 255;
+      return [r, g, b];
+    };
+    convert.rgb.hcg = function(rgb) {
+      const r = rgb[0] / 255;
+      const g = rgb[1] / 255;
+      const b = rgb[2] / 255;
+      const max = Math.max(Math.max(r, g), b);
+      const min = Math.min(Math.min(r, g), b);
+      const chroma = max - min;
+      let hue;
+      const grayscale2 = chroma < 1 ? min / (1 - chroma) : 0;
+      if (chroma <= 0) {
+        hue = 0;
+      } else if (max === r) {
+        hue = (g - b) / chroma % 6;
+      } else if (max === g) {
+        hue = 2 + (b - r) / chroma;
+      } else {
+        hue = 4 + (r - g) / chroma;
+      }
+      hue /= 6;
+      hue %= 1;
+      return [hue * 360, chroma * 100, grayscale2 * 100];
+    };
+    convert.hsl.hcg = function(hsl) {
+      const s = hsl[1] / 100;
+      const l = hsl[2] / 100;
+      const c = l < 0.5 ? 2 * s * l : 2 * s * (1 - l);
+      let f = 0;
+      if (c < 1) {
+        f = (l - 0.5 * c) / (1 - c);
+      }
+      return [hsl[0], c * 100, f * 100];
+    };
+    convert.hsv.hcg = function(hsv) {
+      const s = hsv[1] / 100;
+      const v = hsv[2] / 100;
+      const c = s * v;
+      let f = 0;
+      if (c < 1) {
+        f = (v - c) / (1 - c);
+      }
+      return [hsv[0], c * 100, f * 100];
+    };
+    convert.hcg.rgb = function(hcg) {
+      const h = hcg[0] / 360;
+      const c = hcg[1] / 100;
+      const g = hcg[2] / 100;
+      if (c === 0) {
+        return [g * 255, g * 255, g * 255];
+      }
+      const pure = [0, 0, 0];
+      const hi2 = h % 1 * 6;
+      const v = hi2 % 1;
+      const w = 1 - v;
+      let mg = 0;
+      switch (Math.floor(hi2)) {
+        case 0: {
+          pure[0] = 1;
+          pure[1] = v;
+          pure[2] = 0;
+          break;
+        }
+        case 1: {
+          pure[0] = w;
+          pure[1] = 1;
+          pure[2] = 0;
+          break;
+        }
+        case 2: {
+          pure[0] = 0;
+          pure[1] = 1;
+          pure[2] = v;
+          break;
+        }
+        case 3: {
+          pure[0] = 0;
+          pure[1] = w;
+          pure[2] = 1;
+          break;
+        }
+        case 4: {
+          pure[0] = v;
+          pure[1] = 0;
+          pure[2] = 1;
+          break;
+        }
+        default: {
+          pure[0] = 1;
+          pure[1] = 0;
+          pure[2] = w;
+        }
+      }
+      mg = (1 - c) * g;
+      return [
+        (c * pure[0] + mg) * 255,
+        (c * pure[1] + mg) * 255,
+        (c * pure[2] + mg) * 255
+      ];
+    };
+    convert.hcg.hsv = function(hcg) {
+      const c = hcg[1] / 100;
+      const g = hcg[2] / 100;
+      const v = c + g * (1 - c);
+      let f = 0;
+      if (v > 0) {
+        f = c / v;
+      }
+      return [hcg[0], f * 100, v * 100];
+    };
+    convert.hcg.hsl = function(hcg) {
+      const c = hcg[1] / 100;
+      const g = hcg[2] / 100;
+      const l = g * (1 - c) + 0.5 * c;
+      let s = 0;
+      if (l > 0 && l < 0.5) {
+        s = c / (2 * l);
+      } else if (l >= 0.5 && l < 1) {
+        s = c / (2 * (1 - l));
+      }
+      return [hcg[0], s * 100, l * 100];
+    };
+    convert.hcg.hwb = function(hcg) {
+      const c = hcg[1] / 100;
+      const g = hcg[2] / 100;
+      const v = c + g * (1 - c);
+      return [hcg[0], (v - c) * 100, (1 - v) * 100];
+    };
+    convert.hwb.hcg = function(hwb) {
+      const w = hwb[1] / 100;
+      const b = hwb[2] / 100;
+      const v = 1 - b;
+      const c = v - w;
+      let g = 0;
+      if (c < 1) {
+        g = (v - c) / (1 - c);
+      }
+      return [hwb[0], c * 100, g * 100];
+    };
+    convert.apple.rgb = function(apple) {
+      return [apple[0] / 65535 * 255, apple[1] / 65535 * 255, apple[2] / 65535 * 255];
+    };
+    convert.rgb.apple = function(rgb) {
+      return [rgb[0] / 255 * 65535, rgb[1] / 255 * 65535, rgb[2] / 255 * 65535];
+    };
+    convert.gray.rgb = function(args2) {
+      return [args2[0] / 100 * 255, args2[0] / 100 * 255, args2[0] / 100 * 255];
+    };
+    convert.gray.hsl = function(args2) {
+      return [0, 0, args2[0]];
+    };
+    convert.gray.hsv = convert.gray.hsl;
+    convert.gray.hwb = function(gray) {
+      return [0, 100, gray[0]];
+    };
+    convert.gray.cmyk = function(gray) {
+      return [0, 0, 0, gray[0]];
+    };
+    convert.gray.lab = function(gray) {
+      return [gray[0], 0, 0];
+    };
+    convert.gray.hex = function(gray) {
+      const value = Math.round(gray[0] / 100 * 255) & 255;
+      const integer2 = (value << 16) + (value << 8) + value;
+      const string2 = integer2.toString(16).toUpperCase();
+      return "000000".slice(string2.length) + string2;
+    };
+    convert.rgb.gray = function(rgb) {
+      const value = (rgb[0] + rgb[1] + rgb[2]) / 3;
+      return [value / 255 * 100];
+    };
+    function buildGraph() {
+      const graph = {};
+      const models2 = Object.keys(conversions_default);
+      for (let { length } = models2, i = 0; i < length; i++) {
+        graph[models2[i]] = {
+          // http://jsperf.com/1-vs-infinity
+          // micro-opt, but this is simple.
+          distance: -1,
+          parent: null
+        };
+      }
+      return graph;
+    }
+    function deriveBFS(fromModel) {
+      const graph = buildGraph();
+      const queue2 = [fromModel];
+      graph[fromModel].distance = 0;
+      while (queue2.length > 0) {
+        const current = queue2.pop();
+        const adjacents = Object.keys(conversions_default[current]);
+        for (let { length } = adjacents, i = 0; i < length; i++) {
+          const adjacent = adjacents[i];
+          const node = graph[adjacent];
+          if (node.distance === -1) {
+            node.distance = graph[current].distance + 1;
+            node.parent = current;
+            queue2.unshift(adjacent);
+          }
+        }
+      }
+      return graph;
+    }
+    function link2(from, to) {
+      return function(args2) {
+        return to(from(args2));
+      };
+    }
+    function wrapConversion(toModel, graph) {
+      const path5 = [graph[toModel].parent, toModel];
+      let fn2 = conversions_default[graph[toModel].parent][toModel];
+      let cur = graph[toModel].parent;
+      while (graph[cur].parent) {
+        path5.unshift(graph[cur].parent);
+        fn2 = link2(conversions_default[graph[cur].parent][cur], fn2);
+        cur = graph[cur].parent;
+      }
+      fn2.conversion = path5;
+      return fn2;
+    }
+    function route(fromModel) {
+      const graph = deriveBFS(fromModel);
+      const conversion = {};
+      const models2 = Object.keys(graph);
+      for (let { length } = models2, i = 0; i < length; i++) {
+        const toModel = models2[i];
+        const node = graph[toModel];
+        if (node.parent === null) {
+          continue;
+        }
+        conversion[toModel] = wrapConversion(toModel, graph);
+      }
+      return conversion;
+    }
+    var route_default = route;
+    var convert2 = {};
+    var models = Object.keys(conversions_default);
+    function wrapRaw(fn2) {
+      const wrappedFn = function(...args2) {
+        const arg0 = args2[0];
+        if (arg0 === void 0 || arg0 === null) {
+          return arg0;
+        }
+        if (arg0.length > 1) {
+          args2 = arg0;
+        }
+        return fn2(args2);
+      };
+      if ("conversion" in fn2) {
+        wrappedFn.conversion = fn2.conversion;
+      }
+      return wrappedFn;
+    }
+    function wrapRounded(fn2) {
+      const wrappedFn = function(...args2) {
+        const arg0 = args2[0];
+        if (arg0 === void 0 || arg0 === null) {
+          return arg0;
+        }
+        if (arg0.length > 1) {
+          args2 = arg0;
+        }
+        const result = fn2(args2);
+        if (typeof result === "object") {
+          for (let { length } = result, i = 0; i < length; i++) {
+            result[i] = Math.round(result[i]);
+          }
+        }
+        return result;
+      };
+      if ("conversion" in fn2) {
+        wrappedFn.conversion = fn2.conversion;
+      }
+      return wrappedFn;
+    }
+    for (const fromModel of models) {
+      convert2[fromModel] = {};
+      Object.defineProperty(convert2[fromModel], "channels", { value: conversions_default[fromModel].channels });
+      Object.defineProperty(convert2[fromModel], "labels", { value: conversions_default[fromModel].labels });
+      const routes = route_default(fromModel);
+      const routeModels = Object.keys(routes);
+      for (const toModel of routeModels) {
+        const fn2 = routes[toModel];
+        convert2[fromModel][toModel] = wrapRounded(fn2);
+        convert2[fromModel][toModel].raw = wrapRaw(fn2);
+      }
+    }
+    var color_convert_default = convert2;
+    var skippedModels = [
+      // To be honest, I don't really feel like keyword belongs in color convert, but eh.
+      "keyword",
+      // Gray conflicts with some method names, and has its own method defined.
+      "gray",
+      // Shouldn't really be in color-convert either...
+      "hex"
+    ];
+    var hashedModelKeys = {};
+    for (const model of Object.keys(color_convert_default)) {
+      hashedModelKeys[[...color_convert_default[model].labels].sort().join("")] = model;
+    }
+    var limiters = {};
+    function Color(object2, model) {
+      if (!(this instanceof Color)) {
+        return new Color(object2, model);
+      }
+      if (model && model in skippedModels) {
+        model = null;
+      }
+      if (model && !(model in color_convert_default)) {
+        throw new Error("Unknown model: " + model);
+      }
+      let i;
+      let channels;
+      if (object2 == null) {
+        this.model = "rgb";
+        this.color = [0, 0, 0];
+        this.valpha = 1;
+      } else if (object2 instanceof Color) {
+        this.model = object2.model;
+        this.color = [...object2.color];
+        this.valpha = object2.valpha;
+      } else if (typeof object2 === "string") {
+        const result = color_string_default.get(object2);
+        if (result === null) {
+          throw new Error("Unable to parse color from string: " + object2);
+        }
+        this.model = result.model;
+        channels = color_convert_default[this.model].channels;
+        this.color = result.value.slice(0, channels);
+        this.valpha = typeof result.value[channels] === "number" ? result.value[channels] : 1;
+      } else if (object2.length > 0) {
+        this.model = model || "rgb";
+        channels = color_convert_default[this.model].channels;
+        const newArray = Array.prototype.slice.call(object2, 0, channels);
+        this.color = zeroArray(newArray, channels);
+        this.valpha = typeof object2[channels] === "number" ? object2[channels] : 1;
+      } else if (typeof object2 === "number") {
+        this.model = "rgb";
+        this.color = [
+          object2 >> 16 & 255,
+          object2 >> 8 & 255,
+          object2 & 255
+        ];
+        this.valpha = 1;
+      } else {
+        this.valpha = 1;
+        const keys = Object.keys(object2);
+        if ("alpha" in object2) {
+          keys.splice(keys.indexOf("alpha"), 1);
+          this.valpha = typeof object2.alpha === "number" ? object2.alpha : 0;
+        }
+        const hashedKeys = keys.sort().join("");
+        if (!(hashedKeys in hashedModelKeys)) {
+          throw new Error("Unable to parse color from object: " + JSON.stringify(object2));
+        }
+        this.model = hashedModelKeys[hashedKeys];
+        const { labels } = color_convert_default[this.model];
+        const color2 = [];
+        for (i = 0; i < labels.length; i++) {
+          color2.push(object2[labels[i]]);
+        }
+        this.color = zeroArray(color2);
+      }
+      if (limiters[this.model]) {
+        channels = color_convert_default[this.model].channels;
+        for (i = 0; i < channels; i++) {
+          const limit = limiters[this.model][i];
+          if (limit) {
+            this.color[i] = limit(this.color[i]);
+          }
+        }
+      }
+      this.valpha = Math.max(0, Math.min(1, this.valpha));
+      if (Object.freeze) {
+        Object.freeze(this);
+      }
+    }
+    Color.prototype = {
+      toString() {
+        return this.string();
+      },
+      toJSON() {
+        return this[this.model]();
+      },
+      string(places) {
+        let self = this.model in color_string_default.to ? this : this.rgb();
+        self = self.round(typeof places === "number" ? places : 1);
+        const arguments_ = self.valpha === 1 ? self.color : [...self.color, this.valpha];
+        return color_string_default.to[self.model](...arguments_);
+      },
+      percentString(places) {
+        const self = this.rgb().round(typeof places === "number" ? places : 1);
+        const arguments_ = self.valpha === 1 ? self.color : [...self.color, this.valpha];
+        return color_string_default.to.rgb.percent(...arguments_);
+      },
+      array() {
+        return this.valpha === 1 ? [...this.color] : [...this.color, this.valpha];
+      },
+      object() {
+        const result = {};
+        const { channels } = color_convert_default[this.model];
+        const { labels } = color_convert_default[this.model];
+        for (let i = 0; i < channels; i++) {
+          result[labels[i]] = this.color[i];
+        }
+        if (this.valpha !== 1) {
+          result.alpha = this.valpha;
+        }
+        return result;
+      },
+      unitArray() {
+        const rgb = this.rgb().color;
+        rgb[0] /= 255;
+        rgb[1] /= 255;
+        rgb[2] /= 255;
+        if (this.valpha !== 1) {
+          rgb.push(this.valpha);
+        }
+        return rgb;
+      },
+      unitObject() {
+        const rgb = this.rgb().object();
+        rgb.r /= 255;
+        rgb.g /= 255;
+        rgb.b /= 255;
+        if (this.valpha !== 1) {
+          rgb.alpha = this.valpha;
+        }
+        return rgb;
+      },
+      round(places) {
+        places = Math.max(places || 0, 0);
+        return new Color([...this.color.map(roundToPlace(places)), this.valpha], this.model);
+      },
+      alpha(value) {
+        if (value !== void 0) {
+          return new Color([...this.color, Math.max(0, Math.min(1, value))], this.model);
+        }
+        return this.valpha;
+      },
+      // Rgb
+      red: getset("rgb", 0, maxfn(255)),
+      green: getset("rgb", 1, maxfn(255)),
+      blue: getset("rgb", 2, maxfn(255)),
+      hue: getset(["hsl", "hsv", "hsl", "hwb", "hcg"], 0, (value) => (value % 360 + 360) % 360),
+      saturationl: getset("hsl", 1, maxfn(100)),
+      lightness: getset("hsl", 2, maxfn(100)),
+      saturationv: getset("hsv", 1, maxfn(100)),
+      value: getset("hsv", 2, maxfn(100)),
+      chroma: getset("hcg", 1, maxfn(100)),
+      gray: getset("hcg", 2, maxfn(100)),
+      white: getset("hwb", 1, maxfn(100)),
+      wblack: getset("hwb", 2, maxfn(100)),
+      cyan: getset("cmyk", 0, maxfn(100)),
+      magenta: getset("cmyk", 1, maxfn(100)),
+      yellow: getset("cmyk", 2, maxfn(100)),
+      black: getset("cmyk", 3, maxfn(100)),
+      x: getset("xyz", 0, maxfn(95.047)),
+      y: getset("xyz", 1, maxfn(100)),
+      z: getset("xyz", 2, maxfn(108.833)),
+      l: getset("lab", 0, maxfn(100)),
+      a: getset("lab", 1),
+      b: getset("lab", 2),
+      keyword(value) {
+        if (value !== void 0) {
+          return new Color(value);
+        }
+        return color_convert_default[this.model].keyword(this.color);
+      },
+      hex(value) {
+        if (value !== void 0) {
+          return new Color(value);
+        }
+        return color_string_default.to.hex(...this.rgb().round().color);
+      },
+      hexa(value) {
+        if (value !== void 0) {
+          return new Color(value);
+        }
+        const rgbArray = this.rgb().round().color;
+        let alphaHex = Math.round(this.valpha * 255).toString(16).toUpperCase();
+        if (alphaHex.length === 1) {
+          alphaHex = "0" + alphaHex;
+        }
+        return color_string_default.to.hex(...rgbArray) + alphaHex;
+      },
+      rgbNumber() {
+        const rgb = this.rgb().color;
+        return (rgb[0] & 255) << 16 | (rgb[1] & 255) << 8 | rgb[2] & 255;
+      },
+      luminosity() {
+        const rgb = this.rgb().color;
+        const lum = [];
+        for (const [i, element] of rgb.entries()) {
+          const chan = element / 255;
+          lum[i] = chan <= 0.04045 ? chan / 12.92 : ((chan + 0.055) / 1.055) ** 2.4;
+        }
+        return 0.2126 * lum[0] + 0.7152 * lum[1] + 0.0722 * lum[2];
+      },
+      contrast(color2) {
+        const lum1 = this.luminosity();
+        const lum2 = color2.luminosity();
+        if (lum1 > lum2) {
+          return (lum1 + 0.05) / (lum2 + 0.05);
+        }
+        return (lum2 + 0.05) / (lum1 + 0.05);
+      },
+      level(color2) {
+        const contrastRatio = this.contrast(color2);
+        if (contrastRatio >= 7) {
+          return "AAA";
+        }
+        return contrastRatio >= 4.5 ? "AA" : "";
+      },
+      isDark() {
+        const rgb = this.rgb().color;
+        const yiq = (rgb[0] * 2126 + rgb[1] * 7152 + rgb[2] * 722) / 1e4;
+        return yiq < 128;
+      },
+      isLight() {
+        return !this.isDark();
+      },
+      negate() {
+        const rgb = this.rgb();
+        for (let i = 0; i < 3; i++) {
+          rgb.color[i] = 255 - rgb.color[i];
+        }
+        return rgb;
+      },
+      lighten(ratio) {
+        const hsl = this.hsl();
+        hsl.color[2] += hsl.color[2] * ratio;
+        return hsl;
+      },
+      darken(ratio) {
+        const hsl = this.hsl();
+        hsl.color[2] -= hsl.color[2] * ratio;
+        return hsl;
+      },
+      saturate(ratio) {
+        const hsl = this.hsl();
+        hsl.color[1] += hsl.color[1] * ratio;
+        return hsl;
+      },
+      desaturate(ratio) {
+        const hsl = this.hsl();
+        hsl.color[1] -= hsl.color[1] * ratio;
+        return hsl;
+      },
+      whiten(ratio) {
+        const hwb = this.hwb();
+        hwb.color[1] += hwb.color[1] * ratio;
+        return hwb;
+      },
+      blacken(ratio) {
+        const hwb = this.hwb();
+        hwb.color[2] += hwb.color[2] * ratio;
+        return hwb;
+      },
+      grayscale() {
+        const rgb = this.rgb().color;
+        const value = rgb[0] * 0.3 + rgb[1] * 0.59 + rgb[2] * 0.11;
+        return Color.rgb(value, value, value);
+      },
+      fade(ratio) {
+        return this.alpha(this.valpha - this.valpha * ratio);
+      },
+      opaquer(ratio) {
+        return this.alpha(this.valpha + this.valpha * ratio);
+      },
+      rotate(degrees) {
+        const hsl = this.hsl();
+        let hue = hsl.color[0];
+        hue = (hue + degrees) % 360;
+        hue = hue < 0 ? 360 + hue : hue;
+        hsl.color[0] = hue;
+        return hsl;
+      },
+      mix(mixinColor, weight) {
+        if (!mixinColor || !mixinColor.rgb) {
+          throw new Error('Argument to "mix" was not a Color instance, but rather an instance of ' + typeof mixinColor);
+        }
+        const color1 = mixinColor.rgb();
+        const color2 = this.rgb();
+        const p = weight === void 0 ? 0.5 : weight;
+        const w = 2 * p - 1;
+        const a = color1.alpha() - color2.alpha();
+        const w1 = ((w * a === -1 ? w : (w + a) / (1 + w * a)) + 1) / 2;
+        const w2 = 1 - w1;
+        return Color.rgb(
+          w1 * color1.red() + w2 * color2.red(),
+          w1 * color1.green() + w2 * color2.green(),
+          w1 * color1.blue() + w2 * color2.blue(),
+          color1.alpha() * p + color2.alpha() * (1 - p)
+        );
+      }
+    };
+    for (const model of Object.keys(color_convert_default)) {
+      if (skippedModels.includes(model)) {
+        continue;
+      }
+      const { channels } = color_convert_default[model];
+      Color.prototype[model] = function(...arguments_) {
+        if (this.model === model) {
+          return new Color(this);
+        }
+        if (arguments_.length > 0) {
+          return new Color(arguments_, model);
+        }
+        return new Color([...assertArray(color_convert_default[this.model][model].raw(this.color)), this.valpha], model);
+      };
+      Color[model] = function(...arguments_) {
+        let color2 = arguments_[0];
+        if (typeof color2 === "number") {
+          color2 = zeroArray(arguments_, channels);
+        }
+        return new Color(color2, model);
+      };
+    }
+    function roundTo(number2, places) {
+      return Number(number2.toFixed(places));
+    }
+    function roundToPlace(places) {
+      return function(number2) {
+        return roundTo(number2, places);
+      };
+    }
+    function getset(model, channel, modifier) {
+      model = Array.isArray(model) ? model : [model];
+      for (const m of model) {
+        (limiters[m] ||= [])[channel] = modifier;
+      }
+      model = model[0];
+      return function(value) {
+        let result;
+        if (value !== void 0) {
+          if (modifier) {
+            value = modifier(value);
+          }
+          result = this[model]();
+          result.color[channel] = value;
+          return result;
+        }
+        result = this[model]().color[channel];
+        if (modifier) {
+          result = modifier(result);
+        }
+        return result;
+      };
+    }
+    function maxfn(max) {
+      return function(v) {
+        return Math.max(0, Math.min(max, v));
+      };
+    }
+    function assertArray(value) {
+      return Array.isArray(value) ? value : [value];
+    }
+    function zeroArray(array, length) {
+      for (let i = 0; i < length; i++) {
+        if (typeof array[i] !== "number") {
+          array[i] = 0;
+        }
+      }
+      return array;
+    }
+    var index_default = Color;
+  }
+});
+
+// node_modules/@img/colour/index.cjs
+var require_colour = __commonJS({
+  "node_modules/@img/colour/index.cjs"(exports, module) {
+    "use strict";
+    module.exports = require_color().default;
+  }
+});
+
+// node_modules/sharp/dist/colour.mjs
+function tint(tint2) {
+  this._setBackgroundColourOption("tint", tint2);
+  return this;
+}
+function greyscale(greyscale2) {
+  this.options.greyscale = is_default.bool(greyscale2) ? greyscale2 : true;
+  return this;
+}
+function grayscale(grayscale2) {
+  return this.greyscale(grayscale2);
+}
+function pipelineColourspace(colourspace2) {
+  if (!is_default.string(colourspace2)) {
+    throw is_default.invalidParameterError("colourspace", "string", colourspace2);
+  }
+  this.options.colourspacePipeline = colourspace2;
+  return this;
+}
+function pipelineColorspace(colorspace) {
+  return this.pipelineColourspace(colorspace);
+}
+function toColourspace(colourspace2) {
+  if (!is_default.string(colourspace2)) {
+    throw is_default.invalidParameterError("colourspace", "string", colourspace2);
+  }
+  this.options.colourspace = colourspace2;
+  return this;
+}
+function toColorspace(colorspace) {
+  return this.toColourspace(colorspace);
+}
+function _getBackgroundColourOption(value) {
+  if (is_default.object(value) || is_default.string(value) && value.length >= 3 && value.length <= 200) {
+    const colour = (0, import_colour.default)(value);
+    const red = colour.red();
+    const green = colour.green();
+    const blue = colour.blue();
+    const alpha = Math.round(colour.alpha() * 255);
+    for (const [channel, component] of [["red", red], ["green", green], ["blue", blue], ["alpha", alpha]]) {
+      if (!is_default.number(component)) {
+        throw is_default.invalidParameterError(`background.${channel}`, "number", component);
+      }
+    }
+    return [red, green, blue, alpha];
+  } else {
+    throw is_default.invalidParameterError("background", "object or string", value);
+  }
+}
+function _setBackgroundColourOption(key, value) {
+  if (is_default.defined(value)) {
+    this.options[key] = _getBackgroundColourOption(value);
+  }
+}
+var import_colour, colourspace, colour_default;
+var init_colour = __esm({
+  "node_modules/sharp/dist/colour.mjs"() {
+    "use strict";
+    import_colour = __toESM(require_colour(), 1);
+    init_is();
+    colourspace = {
+      multiband: "multiband",
+      "b-w": "b-w",
+      bw: "b-w",
+      cmyk: "cmyk",
+      srgb: "srgb"
+    };
+    colour_default = (Sharp2) => {
+      Object.assign(Sharp2.prototype, {
+        // Public
+        tint,
+        greyscale,
+        grayscale,
+        pipelineColourspace,
+        pipelineColorspace,
+        toColourspace,
+        toColorspace,
+        // Private
+        _getBackgroundColourOption,
+        _setBackgroundColourOption
+      });
+      Sharp2.colourspace = colourspace;
+      Sharp2.colorspace = colourspace;
+    };
+  }
+});
+
+// node_modules/sharp/dist/channel.mjs
+function removeAlpha() {
+  this.options.removeAlpha = true;
+  return this;
+}
+function ensureAlpha(alpha) {
+  if (is_default.defined(alpha)) {
+    if (is_default.number(alpha) && is_default.inRange(alpha, 0, 1)) {
+      this.options.ensureAlpha = alpha;
+    } else {
+      throw is_default.invalidParameterError("alpha", "number between 0 and 1", alpha);
+    }
+  } else {
+    this.options.ensureAlpha = 1;
+  }
+  return this;
+}
+function extractChannel(channel) {
+  const channelMap = { red: 0, green: 1, blue: 2, alpha: 3 };
+  if (Object.keys(channelMap).includes(channel)) {
+    channel = channelMap[channel];
+  }
+  if (is_default.integer(channel) && is_default.inRange(channel, 0, 4)) {
+    this.options.extractChannel = channel;
+  } else {
+    throw is_default.invalidParameterError("channel", "integer or one of: red, green, blue, alpha", channel);
+  }
+  return this;
+}
+function joinChannel(images, options) {
+  if (Array.isArray(images)) {
+    images.forEach(function(image2) {
+      this.options.joinChannelIn.push(this._createInputDescriptor(image2, options));
+    }, this);
+  } else {
+    this.options.joinChannelIn.push(this._createInputDescriptor(images, options));
+  }
+  return this;
+}
+function bandbool(boolOp) {
+  if (is_default.string(boolOp) && is_default.inArray(boolOp, ["and", "or", "eor"])) {
+    this.options.bandBoolOp = boolOp;
+  } else {
+    throw is_default.invalidParameterError("boolOp", "one of: and, or, eor", boolOp);
+  }
+  return this;
+}
+var bool2, channel_default;
+var init_channel = __esm({
+  "node_modules/sharp/dist/channel.mjs"() {
+    "use strict";
+    init_is();
+    bool2 = {
+      and: "and",
+      or: "or",
+      eor: "eor"
+    };
+    channel_default = (Sharp2) => {
+      Object.assign(Sharp2.prototype, {
+        // Public instance functions
+        removeAlpha,
+        ensureAlpha,
+        extractChannel,
+        joinChannel,
+        bandbool
+      });
+      Sharp2.bool = bool2;
+    };
+  }
+});
+
+// node_modules/sharp/dist/output.mjs
+import path3 from "path";
+function toFile(fileOut, callback) {
+  let err;
+  if (!is_default.string(fileOut)) {
+    err = new Error("Missing output file path");
+  } else if (is_default.string(this.options.input.file) && path3.resolve(this.options.input.file) === path3.resolve(fileOut)) {
+    err = new Error("Cannot use same file for input and output");
+  } else if (jp2Regex.test(path3.extname(fileOut)) && !this.constructor.format.jp2.output.file) {
+    err = errJp2Save();
+  }
+  if (err) {
+    if (is_default.fn(callback)) {
+      callback(err);
+    } else {
+      return Promise.reject(err);
+    }
+  } else {
+    this.options.fileOut = fileOut;
+    const stack = Error();
+    return this._pipeline(callback, stack);
+  }
+  return this;
+}
+function toBuffer(options, callback) {
+  if (is_default.object(options)) {
+    this._setBooleanOption("resolveWithObject", options.resolveWithObject);
+  } else if (this.options.resolveWithObject) {
+    this.options.resolveWithObject = false;
+  }
+  this.options.fileOut = "";
+  const stack = Error();
+  return this._pipeline(is_default.fn(options) ? options : callback, stack);
+}
+function toUint8Array() {
+  this.options.resolveWithObject = true;
+  this.options.typedArrayOut = true;
+  const stack = Error();
+  return this._pipeline(null, stack);
+}
+function withDensity(density) {
+  if (is_default.number(density) && density > 0) {
+    this.options.withMetadataDensity = density;
+  } else {
+    throw is_default.invalidParameterError("density", "positive number", density);
+  }
+  return this.keepExif();
+}
+function keepExif() {
+  this.options.keepMetadata |= 1;
+  return this;
+}
+function withExif(exif) {
+  if (is_default.object(exif)) {
+    for (const [ifd, entries] of Object.entries(exif)) {
+      if (is_default.object(entries)) {
+        for (const [k, v] of Object.entries(entries)) {
+          if (is_default.string(v)) {
+            this.options.withExif[`exif-${ifd.toLowerCase()}-${k}`] = v;
+          } else {
+            throw is_default.invalidParameterError(`${ifd}.${k}`, "string", v);
+          }
+        }
+      } else {
+        throw is_default.invalidParameterError(ifd, "object", entries);
+      }
+    }
+  } else {
+    throw is_default.invalidParameterError("exif", "object", exif);
+  }
+  this.options.withExifMerge = false;
+  return this.keepExif();
+}
+function withExifMerge(exif) {
+  this.withExif(exif);
+  this.options.withExifMerge = true;
+  return this;
+}
+function keepIccProfile() {
+  this.options.keepMetadata |= 8;
+  return this;
+}
+function withIccProfile(icc, options) {
+  if (is_default.string(icc)) {
+    this.options.withIccProfile = icc;
+  } else {
+    throw is_default.invalidParameterError("icc", "string", icc);
+  }
+  this.keepIccProfile();
+  if (is_default.object(options)) {
+    if (is_default.defined(options.attach)) {
+      if (is_default.bool(options.attach)) {
+        if (!options.attach) {
+          this.options.keepMetadata &= ~8;
+        }
+      } else {
+        throw is_default.invalidParameterError("attach", "boolean", options.attach);
+      }
+    }
+  }
+  return this;
+}
+function keepGainMap() {
+  this.options.keepGainMap = true;
+  this.options.withGainMap = false;
+  this.options.keepMetadata |= 32;
+  return this;
+}
+function withGainMap() {
+  this.options.withGainMap = true;
+  this.options.keepGainMap = false;
+  this.options.colourspace = "scrgb";
+  return this;
+}
+function keepXmp() {
+  this.options.keepMetadata |= 2;
+  return this;
+}
+function withXmp(xmp) {
+  if (is_default.string(xmp) && xmp.length > 0) {
+    this.options.withXmp = xmp;
+    this.options.keepMetadata |= 2;
+  } else {
+    throw is_default.invalidParameterError("xmp", "non-empty string", xmp);
+  }
+  return this;
+}
+function keepMetadata() {
+  this.options.keepMetadata |= 31;
+  return this;
+}
+function withMetadata(options) {
+  this.keepMetadata();
+  this.withIccProfile("srgb");
+  if (is_default.object(options)) {
+    if (is_default.defined(options.orientation)) {
+      if (is_default.integer(options.orientation) && is_default.inRange(options.orientation, 1, 8)) {
+        this.options.withMetadataOrientation = options.orientation;
+      } else {
+        throw is_default.invalidParameterError("orientation", "integer between 1 and 8", options.orientation);
+      }
+    }
+    if (is_default.defined(options.density)) {
+      if (is_default.number(options.density) && options.density > 0) {
+        this.options.withMetadataDensity = options.density;
+      } else {
+        throw is_default.invalidParameterError("density", "positive number", options.density);
+      }
+    }
+    if (is_default.defined(options.icc)) {
+      this.withIccProfile(options.icc);
+    }
+    if (is_default.defined(options.exif)) {
+      this.withExifMerge(options.exif);
+    }
+  }
+  return this;
+}
+function toFormat(format2, options) {
+  const actualFormat = formats.get((is_default.object(format2) && is_default.string(format2.id) ? format2.id : format2).toLowerCase());
+  if (!actualFormat) {
+    throw is_default.invalidParameterError("format", `one of: ${[...formats.keys()].join(", ")}`, format2);
+  }
+  return this[actualFormat](options);
+}
+function jpeg(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.quality)) {
+      if (is_default.integer(options.quality) && is_default.inRange(options.quality, 1, 100)) {
+        this.options.jpegQuality = options.quality;
+      } else {
+        throw is_default.invalidParameterError("quality", "integer between 1 and 100", options.quality);
+      }
+    }
+    if (is_default.defined(options.progressive)) {
+      this._setBooleanOption("jpegProgressive", options.progressive);
+    }
+    if (is_default.defined(options.chromaSubsampling)) {
+      if (is_default.string(options.chromaSubsampling) && is_default.inArray(options.chromaSubsampling, ["4:2:0", "4:4:4"])) {
+        this.options.jpegChromaSubsampling = options.chromaSubsampling;
+      } else {
+        throw is_default.invalidParameterError("chromaSubsampling", "one of: 4:2:0, 4:4:4", options.chromaSubsampling);
+      }
+    }
+    const optimiseCoding = is_default.bool(options.optimizeCoding) ? options.optimizeCoding : options.optimiseCoding;
+    if (is_default.defined(optimiseCoding)) {
+      this._setBooleanOption("jpegOptimiseCoding", optimiseCoding);
+    }
+    if (is_default.defined(options.mozjpeg)) {
+      if (is_default.bool(options.mozjpeg)) {
+        if (options.mozjpeg) {
+          this.options.jpegTrellisQuantisation = true;
+          this.options.jpegOvershootDeringing = true;
+          this.options.jpegOptimiseScans = true;
+          this.options.jpegProgressive = true;
+          this.options.jpegQuantisationTable = 3;
+        }
+      } else {
+        throw is_default.invalidParameterError("mozjpeg", "boolean", options.mozjpeg);
+      }
+    }
+    const trellisQuantisation = is_default.bool(options.trellisQuantization) ? options.trellisQuantization : options.trellisQuantisation;
+    if (is_default.defined(trellisQuantisation)) {
+      this._setBooleanOption("jpegTrellisQuantisation", trellisQuantisation);
+    }
+    if (is_default.defined(options.overshootDeringing)) {
+      this._setBooleanOption("jpegOvershootDeringing", options.overshootDeringing);
+    }
+    const optimiseScans = is_default.bool(options.optimizeScans) ? options.optimizeScans : options.optimiseScans;
+    if (is_default.defined(optimiseScans)) {
+      this._setBooleanOption("jpegOptimiseScans", optimiseScans);
+      if (optimiseScans) {
+        this.options.jpegProgressive = true;
+      }
+    }
+    const quantisationTable = is_default.number(options.quantizationTable) ? options.quantizationTable : options.quantisationTable;
+    if (is_default.defined(quantisationTable)) {
+      if (is_default.integer(quantisationTable) && is_default.inRange(quantisationTable, 0, 8)) {
+        this.options.jpegQuantisationTable = quantisationTable;
+      } else {
+        throw is_default.invalidParameterError("quantisationTable", "integer between 0 and 8", quantisationTable);
+      }
+    }
+  }
+  return this._updateFormatOut("jpeg", options);
+}
+function png(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.progressive)) {
+      this._setBooleanOption("pngProgressive", options.progressive);
+    }
+    if (is_default.defined(options.compressionLevel)) {
+      if (is_default.integer(options.compressionLevel) && is_default.inRange(options.compressionLevel, 0, 9)) {
+        this.options.pngCompressionLevel = options.compressionLevel;
+      } else {
+        throw is_default.invalidParameterError("compressionLevel", "integer between 0 and 9", options.compressionLevel);
+      }
+    }
+    if (is_default.defined(options.adaptiveFiltering)) {
+      this._setBooleanOption("pngAdaptiveFiltering", options.adaptiveFiltering);
+    }
+    const colours = options.colours || options.colors;
+    if (is_default.defined(colours)) {
+      if (is_default.integer(colours) && is_default.inRange(colours, 2, 256)) {
+        this.options.pngBitdepth = bitdepthFromColourCount(colours);
+      } else {
+        throw is_default.invalidParameterError("colours", "integer between 2 and 256", colours);
+      }
+    }
+    if (is_default.defined(options.palette)) {
+      this._setBooleanOption("pngPalette", options.palette);
+    } else if ([options.quality, options.effort, options.colours, options.colors, options.dither].some(is_default.defined)) {
+      this._setBooleanOption("pngPalette", true);
+    }
+    if (this.options.pngPalette) {
+      if (is_default.defined(options.quality)) {
+        if (is_default.integer(options.quality) && is_default.inRange(options.quality, 0, 100)) {
+          this.options.pngQuality = options.quality;
+        } else {
+          throw is_default.invalidParameterError("quality", "integer between 0 and 100", options.quality);
+        }
+      }
+      if (is_default.defined(options.effort)) {
+        if (is_default.integer(options.effort) && is_default.inRange(options.effort, 1, 10)) {
+          this.options.pngEffort = options.effort;
+        } else {
+          throw is_default.invalidParameterError("effort", "integer between 1 and 10", options.effort);
+        }
+      }
+      if (is_default.defined(options.dither)) {
+        if (is_default.number(options.dither) && is_default.inRange(options.dither, 0, 1)) {
+          this.options.pngDither = options.dither;
+        } else {
+          throw is_default.invalidParameterError("dither", "number between 0.0 and 1.0", options.dither);
+        }
+      }
+    }
+  }
+  return this._updateFormatOut("png", options);
+}
+function webp(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.quality)) {
+      if (is_default.integer(options.quality) && is_default.inRange(options.quality, 1, 100)) {
+        this.options.webpQuality = options.quality;
+      } else {
+        throw is_default.invalidParameterError("quality", "integer between 1 and 100", options.quality);
+      }
+    }
+    if (is_default.defined(options.alphaQuality)) {
+      if (is_default.integer(options.alphaQuality) && is_default.inRange(options.alphaQuality, 0, 100)) {
+        this.options.webpAlphaQuality = options.alphaQuality;
+      } else {
+        throw is_default.invalidParameterError("alphaQuality", "integer between 0 and 100", options.alphaQuality);
+      }
+    }
+    if (is_default.defined(options.lossless)) {
+      this._setBooleanOption("webpLossless", options.lossless);
+    }
+    if (is_default.defined(options.nearLossless)) {
+      this._setBooleanOption("webpNearLossless", options.nearLossless);
+    }
+    if (is_default.defined(options.smartSubsample)) {
+      this._setBooleanOption("webpSmartSubsample", options.smartSubsample);
+    }
+    if (is_default.defined(options.smartDeblock)) {
+      this._setBooleanOption("webpSmartDeblock", options.smartDeblock);
+    }
+    if (is_default.defined(options.preset)) {
+      if (is_default.string(options.preset) && is_default.inArray(options.preset, ["default", "photo", "picture", "drawing", "icon", "text"])) {
+        this.options.webpPreset = options.preset;
+      } else {
+        throw is_default.invalidParameterError("preset", "one of: default, photo, picture, drawing, icon, text", options.preset);
+      }
+    }
+    if (is_default.defined(options.effort)) {
+      if (is_default.integer(options.effort) && is_default.inRange(options.effort, 0, 6)) {
+        this.options.webpEffort = options.effort;
+      } else {
+        throw is_default.invalidParameterError("effort", "integer between 0 and 6", options.effort);
+      }
+    }
+    if (is_default.defined(options.minSize)) {
+      this._setBooleanOption("webpMinSize", options.minSize);
+    }
+    if (is_default.defined(options.mixed)) {
+      this._setBooleanOption("webpMixed", options.mixed);
+    }
+    if (is_default.defined(options.exact)) {
+      this._setBooleanOption("webpExact", options.exact);
+    }
+  }
+  trySetAnimationOptions(options, this.options);
+  return this._updateFormatOut("webp", options);
+}
+function gif(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.reuse)) {
+      this._setBooleanOption("gifReuse", options.reuse);
+    }
+    if (is_default.defined(options.progressive)) {
+      this._setBooleanOption("gifProgressive", options.progressive);
+    }
+    const colours = options.colours || options.colors;
+    if (is_default.defined(colours)) {
+      if (is_default.integer(colours) && is_default.inRange(colours, 2, 256)) {
+        this.options.gifBitdepth = bitdepthFromColourCount(colours);
+      } else {
+        throw is_default.invalidParameterError("colours", "integer between 2 and 256", colours);
+      }
+    }
+    if (is_default.defined(options.effort)) {
+      if (is_default.integer(options.effort) && is_default.inRange(options.effort, 1, 10)) {
+        this.options.gifEffort = options.effort;
+      } else {
+        throw is_default.invalidParameterError("effort", "integer between 1 and 10", options.effort);
+      }
+    }
+    if (is_default.defined(options.dither)) {
+      if (is_default.number(options.dither) && is_default.inRange(options.dither, 0, 1)) {
+        this.options.gifDither = options.dither;
+      } else {
+        throw is_default.invalidParameterError("dither", "number between 0.0 and 1.0", options.dither);
+      }
+    }
+    if (is_default.defined(options.interFrameMaxError)) {
+      if (is_default.number(options.interFrameMaxError) && is_default.inRange(options.interFrameMaxError, 0, 32)) {
+        this.options.gifInterFrameMaxError = options.interFrameMaxError;
+      } else {
+        throw is_default.invalidParameterError("interFrameMaxError", "number between 0.0 and 32.0", options.interFrameMaxError);
+      }
+    }
+    if (is_default.defined(options.interPaletteMaxError)) {
+      if (is_default.number(options.interPaletteMaxError) && is_default.inRange(options.interPaletteMaxError, 0, 256)) {
+        this.options.gifInterPaletteMaxError = options.interPaletteMaxError;
+      } else {
+        throw is_default.invalidParameterError("interPaletteMaxError", "number between 0.0 and 256.0", options.interPaletteMaxError);
+      }
+    }
+    if (is_default.defined(options.keepDuplicateFrames)) {
+      if (is_default.bool(options.keepDuplicateFrames)) {
+        this._setBooleanOption("gifKeepDuplicateFrames", options.keepDuplicateFrames);
+      } else {
+        throw is_default.invalidParameterError("keepDuplicateFrames", "boolean", options.keepDuplicateFrames);
+      }
+    }
+  }
+  trySetAnimationOptions(options, this.options);
+  return this._updateFormatOut("gif", options);
+}
+function jp2(options) {
+  if (!this.constructor.format.jp2.output.buffer) {
+    throw errJp2Save();
+  }
+  if (is_default.object(options)) {
+    if (is_default.defined(options.quality)) {
+      if (is_default.integer(options.quality) && is_default.inRange(options.quality, 1, 100)) {
+        this.options.jp2Quality = options.quality;
+      } else {
+        throw is_default.invalidParameterError("quality", "integer between 1 and 100", options.quality);
+      }
+    }
+    if (is_default.defined(options.lossless)) {
+      if (is_default.bool(options.lossless)) {
+        this.options.jp2Lossless = options.lossless;
+      } else {
+        throw is_default.invalidParameterError("lossless", "boolean", options.lossless);
+      }
+    }
+    if (is_default.defined(options.tileWidth)) {
+      if (is_default.integer(options.tileWidth) && is_default.inRange(options.tileWidth, 1, 32768)) {
+        this.options.jp2TileWidth = options.tileWidth;
+      } else {
+        throw is_default.invalidParameterError("tileWidth", "integer between 1 and 32768", options.tileWidth);
+      }
+    }
+    if (is_default.defined(options.tileHeight)) {
+      if (is_default.integer(options.tileHeight) && is_default.inRange(options.tileHeight, 1, 32768)) {
+        this.options.jp2TileHeight = options.tileHeight;
+      } else {
+        throw is_default.invalidParameterError("tileHeight", "integer between 1 and 32768", options.tileHeight);
+      }
+    }
+    if (is_default.defined(options.chromaSubsampling)) {
+      if (is_default.string(options.chromaSubsampling) && is_default.inArray(options.chromaSubsampling, ["4:2:0", "4:4:4"])) {
+        this.options.jp2ChromaSubsampling = options.chromaSubsampling;
+      } else {
+        throw is_default.invalidParameterError("chromaSubsampling", "one of: 4:2:0, 4:4:4", options.chromaSubsampling);
+      }
+    }
+  }
+  return this._updateFormatOut("jp2", options);
+}
+function trySetAnimationOptions(source, target) {
+  if (is_default.object(source) && is_default.defined(source.loop)) {
+    if (is_default.integer(source.loop) && is_default.inRange(source.loop, 0, 65535)) {
+      target.loop = source.loop;
+    } else {
+      throw is_default.invalidParameterError("loop", "integer between 0 and 65535", source.loop);
+    }
+  }
+  if (is_default.object(source) && is_default.defined(source.delay)) {
+    if (is_default.integer(source.delay) && is_default.inRange(source.delay, 0, 65535)) {
+      target.delay = [source.delay];
+    } else if (Array.isArray(source.delay) && source.delay.every(is_default.integer) && source.delay.every((v) => is_default.inRange(v, 0, 65535))) {
+      target.delay = source.delay;
+    } else {
+      throw is_default.invalidParameterError("delay", "integer or an array of integers between 0 and 65535", source.delay);
+    }
+  }
+}
+function tiff(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.quality)) {
+      if (is_default.integer(options.quality) && is_default.inRange(options.quality, 1, 100)) {
+        this.options.tiffQuality = options.quality;
+      } else {
+        throw is_default.invalidParameterError("quality", "integer between 1 and 100", options.quality);
+      }
+    }
+    if (is_default.defined(options.bitdepth)) {
+      if (is_default.integer(options.bitdepth) && is_default.inArray(options.bitdepth, [1, 2, 4])) {
+        this.options.tiffBitdepth = options.bitdepth;
+      } else {
+        throw is_default.invalidParameterError("bitdepth", "1, 2 or 4", options.bitdepth);
+      }
+    }
+    if (is_default.defined(options.tile)) {
+      this._setBooleanOption("tiffTile", options.tile);
+    }
+    if (is_default.defined(options.tileWidth)) {
+      if (is_default.integer(options.tileWidth) && is_default.inRange(options.tileWidth, 1, 32768)) {
+        this.options.tiffTileWidth = options.tileWidth;
+      } else {
+        throw is_default.invalidParameterError("tileWidth", "integer between 1 and 32768", options.tileWidth);
+      }
+    }
+    if (is_default.defined(options.tileHeight)) {
+      if (is_default.integer(options.tileHeight) && is_default.inRange(options.tileHeight, 1, 32768)) {
+        this.options.tiffTileHeight = options.tileHeight;
+      } else {
+        throw is_default.invalidParameterError("tileHeight", "integer between 1 and 32768", options.tileHeight);
+      }
+    }
+    if (is_default.defined(options.miniswhite)) {
+      this._setBooleanOption("tiffMiniswhite", options.miniswhite);
+    }
+    if (is_default.defined(options.pyramid)) {
+      this._setBooleanOption("tiffPyramid", options.pyramid);
+    }
+    if (is_default.defined(options.xres)) {
+      if (is_default.number(options.xres) && is_default.inRange(options.xres, 1e-3, 1e6)) {
+        this.options.tiffXres = options.xres;
+      } else {
+        throw is_default.invalidParameterError("xres", "number between 0.001 and 1000000", options.xres);
+      }
+    }
+    if (is_default.defined(options.yres)) {
+      if (is_default.number(options.yres) && is_default.inRange(options.yres, 1e-3, 1e6)) {
+        this.options.tiffYres = options.yres;
+      } else {
+        throw is_default.invalidParameterError("yres", "number between 0.001 and 1000000", options.yres);
+      }
+    }
+    if (is_default.defined(options.compression)) {
+      if (is_default.string(options.compression) && is_default.inArray(options.compression, ["none", "jpeg", "deflate", "packbits", "ccittfax4", "lzw", "webp", "zstd", "jp2k"])) {
+        this.options.tiffCompression = options.compression;
+      } else {
+        throw is_default.invalidParameterError("compression", "one of: none, jpeg, deflate, packbits, ccittfax4, lzw, webp, zstd, jp2k", options.compression);
+      }
+    }
+    if (is_default.defined(options.bigtiff)) {
+      this._setBooleanOption("tiffBigtiff", options.bigtiff);
+    }
+    if (is_default.defined(options.predictor)) {
+      if (is_default.string(options.predictor) && is_default.inArray(options.predictor, ["none", "horizontal", "float"])) {
+        this.options.tiffPredictor = options.predictor;
+      } else {
+        throw is_default.invalidParameterError("predictor", "one of: none, horizontal, float", options.predictor);
+      }
+    }
+    if (is_default.defined(options.resolutionUnit)) {
+      if (is_default.string(options.resolutionUnit) && is_default.inArray(options.resolutionUnit, ["inch", "cm"])) {
+        this.options.tiffResolutionUnit = options.resolutionUnit;
+      } else {
+        throw is_default.invalidParameterError("resolutionUnit", "one of: inch, cm", options.resolutionUnit);
+      }
+    }
+  }
+  return this._updateFormatOut("tiff", options);
+}
+function avif(options) {
+  return this.heif({ ...options, compression: "av1" });
+}
+function heif(options) {
+  if (is_default.object(options)) {
+    if (is_default.string(options.compression) && is_default.inArray(options.compression, ["av1", "hevc"])) {
+      this.options.heifCompression = options.compression;
+    } else {
+      throw is_default.invalidParameterError("compression", "one of: av1, hevc", options.compression);
+    }
+    if (is_default.defined(options.quality)) {
+      if (is_default.integer(options.quality) && is_default.inRange(options.quality, 1, 100)) {
+        this.options.heifQuality = options.quality;
+      } else {
+        throw is_default.invalidParameterError("quality", "integer between 1 and 100", options.quality);
+      }
+    }
+    if (is_default.defined(options.lossless)) {
+      if (is_default.bool(options.lossless)) {
+        this.options.heifLossless = options.lossless;
+      } else {
+        throw is_default.invalidParameterError("lossless", "boolean", options.lossless);
+      }
+    }
+    if (is_default.defined(options.effort)) {
+      if (is_default.integer(options.effort) && is_default.inRange(options.effort, 0, 9)) {
+        this.options.heifEffort = options.effort;
+      } else {
+        throw is_default.invalidParameterError("effort", "integer between 0 and 9", options.effort);
+      }
+    }
+    if (is_default.defined(options.chromaSubsampling)) {
+      if (is_default.string(options.chromaSubsampling) && is_default.inArray(options.chromaSubsampling, ["4:2:0", "4:4:4"])) {
+        this.options.heifChromaSubsampling = options.chromaSubsampling;
+      } else {
+        throw is_default.invalidParameterError("chromaSubsampling", "one of: 4:2:0, 4:4:4", options.chromaSubsampling);
+      }
+    }
+    if (is_default.defined(options.bitdepth)) {
+      if (is_default.integer(options.bitdepth) && is_default.inArray(options.bitdepth, [8, 10, 12])) {
+        this.options.heifBitdepth = options.bitdepth;
+      } else {
+        throw is_default.invalidParameterError("bitdepth", "8, 10 or 12", options.bitdepth);
+      }
+    }
+    if (is_default.defined(options.tune)) {
+      if (is_default.string(options.tune) && is_default.inArray(options.tune, ["auto", "iq", "psnr", "ssim"])) {
+        if (this.options.heifLossless && options.tune === "iq") {
+          this.options.heifTune = "ssim";
+        } else {
+          this.options.heifTune = options.tune;
+        }
+      } else {
+        throw is_default.invalidParameterError("tune", "one of: auto, iq, psnr, ssim", options.tune);
+      }
+    }
+  } else {
+    throw is_default.invalidParameterError("options", "Object", options);
+  }
+  return this._updateFormatOut("heif", options);
+}
+function jxl(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.quality)) {
+      if (is_default.integer(options.quality) && is_default.inRange(options.quality, 1, 100)) {
+        this.options.jxlDistance = options.quality >= 30 ? 0.1 + (100 - options.quality) * 0.09 : 53 / 3e3 * options.quality * options.quality - 23 / 20 * options.quality + 25;
+      } else {
+        throw is_default.invalidParameterError("quality", "integer between 1 and 100", options.quality);
+      }
+    } else if (is_default.defined(options.distance)) {
+      if (is_default.number(options.distance) && is_default.inRange(options.distance, 0, 15)) {
+        this.options.jxlDistance = options.distance;
+      } else {
+        throw is_default.invalidParameterError("distance", "number between 0.0 and 15.0", options.distance);
+      }
+    }
+    if (is_default.defined(options.decodingTier)) {
+      if (is_default.integer(options.decodingTier) && is_default.inRange(options.decodingTier, 0, 4)) {
+        this.options.jxlDecodingTier = options.decodingTier;
+      } else {
+        throw is_default.invalidParameterError("decodingTier", "integer between 0 and 4", options.decodingTier);
+      }
+    }
+    if (is_default.defined(options.lossless)) {
+      if (is_default.bool(options.lossless)) {
+        this.options.jxlLossless = options.lossless;
+      } else {
+        throw is_default.invalidParameterError("lossless", "boolean", options.lossless);
+      }
+    }
+    if (is_default.defined(options.effort)) {
+      if (is_default.integer(options.effort) && is_default.inRange(options.effort, 1, 9)) {
+        this.options.jxlEffort = options.effort;
+      } else {
+        throw is_default.invalidParameterError("effort", "integer between 1 and 9", options.effort);
+      }
+    }
+  }
+  trySetAnimationOptions(options, this.options);
+  return this._updateFormatOut("jxl", options);
+}
+function raw(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.depth)) {
+      if (is_default.string(options.depth) && is_default.inArray(
+        options.depth,
+        ["char", "uchar", "short", "ushort", "int", "uint", "float", "complex", "double", "dpcomplex"]
+      )) {
+        this.options.rawDepth = options.depth;
+      } else {
+        throw is_default.invalidParameterError("depth", "one of: char, uchar, short, ushort, int, uint, float, complex, double, dpcomplex", options.depth);
+      }
+    }
+  }
+  return this._updateFormatOut("raw");
+}
+function tile(options) {
+  if (is_default.object(options)) {
+    if (is_default.defined(options.size)) {
+      if (is_default.integer(options.size) && is_default.inRange(options.size, 1, 8192)) {
+        this.options.tileSize = options.size;
+      } else {
+        throw is_default.invalidParameterError("size", "integer between 1 and 8192", options.size);
+      }
+    }
+    if (is_default.defined(options.overlap)) {
+      if (is_default.integer(options.overlap) && is_default.inRange(options.overlap, 0, 8192)) {
+        if (options.overlap > this.options.tileSize) {
+          throw is_default.invalidParameterError("overlap", `<= size (${this.options.tileSize})`, options.overlap);
+        }
+        this.options.tileOverlap = options.overlap;
+      } else {
+        throw is_default.invalidParameterError("overlap", "integer between 0 and 8192", options.overlap);
+      }
+    }
+    if (is_default.defined(options.container)) {
+      if (is_default.string(options.container) && is_default.inArray(options.container, ["fs", "zip"])) {
+        this.options.tileContainer = options.container;
+      } else {
+        throw is_default.invalidParameterError("container", "one of: fs, zip", options.container);
+      }
+    }
+    if (is_default.defined(options.layout)) {
+      if (is_default.string(options.layout) && is_default.inArray(options.layout, ["dz", "google", "iiif", "iiif3", "zoomify"])) {
+        this.options.tileLayout = options.layout;
+      } else {
+        throw is_default.invalidParameterError("layout", "one of: dz, google, iiif, iiif3, zoomify", options.layout);
+      }
+    }
+    if (is_default.defined(options.angle)) {
+      if (is_default.integer(options.angle) && !(options.angle % 90)) {
+        this.options.tileAngle = options.angle;
+      } else {
+        throw is_default.invalidParameterError("angle", "positive/negative multiple of 90", options.angle);
+      }
+    }
+    this._setBackgroundColourOption("tileBackground", options.background);
+    if (is_default.defined(options.depth)) {
+      if (is_default.string(options.depth) && is_default.inArray(options.depth, ["onepixel", "onetile", "one"])) {
+        this.options.tileDepth = options.depth;
+      } else {
+        throw is_default.invalidParameterError("depth", "one of: onepixel, onetile, one", options.depth);
+      }
+    }
+    if (is_default.defined(options.skipBlanks)) {
+      if (is_default.integer(options.skipBlanks) && is_default.inRange(options.skipBlanks, -1, 65535)) {
+        this.options.tileSkipBlanks = options.skipBlanks;
+      } else {
+        throw is_default.invalidParameterError("skipBlanks", "integer between -1 and 255/65535", options.skipBlanks);
+      }
+    } else if (is_default.defined(options.layout) && options.layout === "google") {
+      this.options.tileSkipBlanks = 5;
+    }
+    const centre = is_default.bool(options.center) ? options.center : options.centre;
+    if (is_default.defined(centre)) {
+      this._setBooleanOption("tileCentre", centre);
+    }
+    if (is_default.defined(options.id)) {
+      if (is_default.string(options.id)) {
+        this.options.tileId = options.id;
+      } else {
+        throw is_default.invalidParameterError("id", "string", options.id);
+      }
+    }
+    if (is_default.defined(options.basename)) {
+      if (is_default.string(options.basename)) {
+        this.options.tileBasename = options.basename;
+      } else {
+        throw is_default.invalidParameterError("basename", "string", options.basename);
+      }
+    }
+  }
+  if (is_default.inArray(this.options.formatOut, ["jpeg", "png", "webp"])) {
+    this.options.tileFormat = this.options.formatOut;
+  } else if (this.options.formatOut !== "input") {
+    throw is_default.invalidParameterError("format", "one of: jpeg, png, webp", this.options.formatOut);
+  }
+  return this._updateFormatOut("dz");
+}
+function timeout(options) {
+  if (!is_default.plainObject(options)) {
+    throw is_default.invalidParameterError("options", "object", options);
+  }
+  if (is_default.integer(options.seconds) && is_default.inRange(options.seconds, 0, 3600)) {
+    this.options.timeoutSeconds = options.seconds;
+  } else {
+    throw is_default.invalidParameterError("seconds", "integer between 0 and 3600", options.seconds);
+  }
+  return this;
+}
+function _updateFormatOut(formatOut, options) {
+  if (!(is_default.object(options) && options.force === false)) {
+    this.options.formatOut = formatOut;
+  }
+  return this;
+}
+function _setBooleanOption(key, val) {
+  if (is_default.bool(val)) {
+    this.options[key] = val;
+  } else {
+    throw is_default.invalidParameterError(key, "boolean", val);
+  }
+}
+function _read() {
+  if (!this.options.streamOut) {
+    this.options.streamOut = true;
+    const stack = Error();
+    this._pipeline(void 0, stack);
+  }
+}
+function _pipeline(callback, stack) {
+  if (typeof callback === "function") {
+    if (this._isStreamInput()) {
+      this.on("finish", () => {
+        this._flattenBufferIn();
+        sharp_default.pipeline(this.options, (err, data, info) => {
+          if (err) {
+            callback(is_default.nativeError(err, stack));
+          } else {
+            callback(null, data, info);
+          }
+        });
+      });
+    } else {
+      sharp_default.pipeline(this.options, (err, data, info) => {
+        if (err) {
+          callback(is_default.nativeError(err, stack));
+        } else {
+          callback(null, data, info);
+        }
+      });
+    }
+    return this;
+  } else if (this.options.streamOut) {
+    if (this._isStreamInput()) {
+      this.once("finish", () => {
+        this._flattenBufferIn();
+        sharp_default.pipeline(this.options, (err, data, info) => {
+          if (err) {
+            this.emit("error", is_default.nativeError(err, stack));
+          } else {
+            this.emit("info", info);
+            this.push(data);
+          }
+          this.push(null);
+          this.on("end", () => this.emit("close"));
+        });
+      });
+      if (this.streamInFinished) {
+        this.emit("finish");
+      }
+    } else {
+      sharp_default.pipeline(this.options, (err, data, info) => {
+        if (err) {
+          this.emit("error", is_default.nativeError(err, stack));
+        } else {
+          this.emit("info", info);
+          this.push(data);
+        }
+        this.push(null);
+        this.on("end", () => this.emit("close"));
+      });
+    }
+    return this;
+  } else {
+    if (this._isStreamInput()) {
+      return new Promise((resolve, reject) => {
+        this.once("finish", () => {
+          this._flattenBufferIn();
+          sharp_default.pipeline(this.options, (err, data, info) => {
+            if (err) {
+              reject(is_default.nativeError(err, stack));
+            } else {
+              if (this.options.resolveWithObject) {
+                resolve({ data, info });
+              } else {
+                resolve(data);
+              }
+            }
+          });
+        });
+      });
+    } else {
+      return new Promise((resolve, reject) => {
+        sharp_default.pipeline(this.options, (err, data, info) => {
+          if (err) {
+            reject(is_default.nativeError(err, stack));
+          } else {
+            if (this.options.resolveWithObject) {
+              resolve({ data, info });
+            } else {
+              resolve(data);
+            }
+          }
+        });
+      });
+    }
+  }
+}
+var formats, jp2Regex, errJp2Save, bitdepthFromColourCount, output_default;
+var init_output = __esm({
+  "node_modules/sharp/dist/output.mjs"() {
+    "use strict";
+    init_is();
+    init_sharp();
+    formats = /* @__PURE__ */ new Map([
+      ["heic", "heif"],
+      ["heif", "heif"],
+      ["avif", "avif"],
+      ["jpeg", "jpeg"],
+      ["jpg", "jpeg"],
+      ["jpe", "jpeg"],
+      ["tile", "tile"],
+      ["dz", "tile"],
+      ["png", "png"],
+      ["raw", "raw"],
+      ["tiff", "tiff"],
+      ["tif", "tiff"],
+      ["webp", "webp"],
+      ["gif", "gif"],
+      ["jp2", "jp2"],
+      ["jpx", "jp2"],
+      ["j2k", "jp2"],
+      ["j2c", "jp2"],
+      ["jxl", "jxl"]
+    ]);
+    jp2Regex = /\.(jp[2x]|j2[kc])$/i;
+    errJp2Save = () => new Error("JP2 output requires libvips with support for OpenJPEG");
+    bitdepthFromColourCount = (colours) => 1 << 31 - Math.clz32(Math.ceil(Math.log2(colours)));
+    output_default = (Sharp2) => {
+      Object.assign(Sharp2.prototype, {
+        // Public
+        toFile,
+        toBuffer,
+        toUint8Array,
+        withDensity,
+        keepExif,
+        withExif,
+        withExifMerge,
+        keepIccProfile,
+        withIccProfile,
+        keepGainMap,
+        withGainMap,
+        keepXmp,
+        withXmp,
+        keepMetadata,
+        withMetadata,
+        toFormat,
+        jpeg,
+        jp2,
+        png,
+        webp,
+        tiff,
+        avif,
+        heif,
+        jxl,
+        gif,
+        raw,
+        tile,
+        timeout,
+        // Private
+        _updateFormatOut,
+        _setBooleanOption,
+        _read,
+        _pipeline
+      });
+    };
+  }
+});
+
+// node_modules/sharp/dist/utility.mjs
+import events from "events";
+import { createRequire as createRequire2 } from "module";
+import { availableParallelism } from "os";
+function cache3(options) {
+  if (is_default.bool(options)) {
+    if (options) {
+      return sharp_default.cache(50, 20, 100);
+    } else {
+      return sharp_default.cache(0, 0, 0);
+    }
+  } else if (is_default.object(options)) {
+    for (const property of ["memory", "files", "items"]) {
+      const value = options[property];
+      if (is_default.defined(value) && !(is_default.integer(value) && value >= 0)) {
+        throw is_default.invalidParameterError(property, "a positive integer", value);
+      }
+    }
+    return sharp_default.cache(options.memory, options.files, options.items);
+  } else {
+    return sharp_default.cache();
+  }
+}
+function concurrency(concurrency2) {
+  return sharp_default.concurrency(is_default.integer(concurrency2) ? concurrency2 : null);
+}
+function counters() {
+  return sharp_default.counters();
+}
+function simd(simd2) {
+  return sharp_default.simd(is_default.bool(simd2) ? simd2 : null);
+}
+function block(options) {
+  if (is_default.object(options)) {
+    if (Array.isArray(options.operation) && options.operation.every(is_default.string)) {
+      sharp_default.block(options.operation, true);
+    } else {
+      throw is_default.invalidParameterError("operation", "Array<string>", options.operation);
+    }
+  } else {
+    throw is_default.invalidParameterError("options", "object", options);
+  }
+}
+function unblock(options) {
+  if (is_default.object(options)) {
+    if (Array.isArray(options.operation) && options.operation.every(is_default.string)) {
+      sharp_default.block(options.operation, false);
+    } else {
+      throw is_default.invalidParameterError("operation", "Array<string>", options.operation);
+    }
+  } else {
+    throw is_default.invalidParameterError("options", "object", options);
+  }
+}
+var import_detect_libc3, require3, runtimePlatform2, libvipsVersion, format, interpolators, versions, queue, utility_default;
+var init_utility = __esm({
+  "node_modules/sharp/dist/utility.mjs"() {
+    "use strict";
+    import_detect_libc3 = __toESM(require_detect_libc(), 1);
+    init_is();
+    init_libvips();
+    init_sharp();
+    init_package();
+    require3 = createRequire2(import.meta.url);
+    runtimePlatform2 = libvips_default.runtimePlatformArch();
+    libvipsVersion = sharp_default.libvipsVersion();
+    format = sharp_default.format();
+    format.heif.output.alias = ["avif", "heic"];
+    format.jpeg.output.alias = ["jpe", "jpg"];
+    format.tiff.output.alias = ["tif"];
+    format.jp2.output.alias = ["j2c", "j2k", "jp2", "jpx"];
+    interpolators = {
+      /** [Nearest neighbour interpolation](http://en.wikipedia.org/wiki/Nearest-neighbor_interpolation). Suitable for image enlargement only. */
+      nearest: "nearest",
+      /** [Bilinear interpolation](http://en.wikipedia.org/wiki/Bilinear_interpolation). Faster than bicubic but with less smooth results. */
+      bilinear: "bilinear",
+      /** [Bicubic interpolation](http://en.wikipedia.org/wiki/Bicubic_interpolation) (the default). */
+      bicubic: "bicubic",
+      /** [LBB interpolation](https://github.com/libvips/libvips/blob/master/libvips/resample/lbb.cpp#L100). Prevents some "[acutance](http://en.wikipedia.org/wiki/Acutance)" but typically reduces performance by a factor of 2. */
+      locallyBoundedBicubic: "lbb",
+      /** [Nohalo interpolation](http://eprints.soton.ac.uk/268086/). Prevents acutance but typically reduces performance by a factor of 3. */
+      nohalo: "nohalo",
+      /** [VSQBS interpolation](https://github.com/libvips/libvips/blob/master/libvips/resample/vsqbs.cpp#L48). Prevents "staircasing" when enlarging. */
+      vertexSplitQuadraticBasisSpline: "vsqbs"
+    };
+    versions = {
+      vips: libvipsVersion.semver
+    };
+    if (!libvipsVersion.isGlobal) {
+      if (!libvipsVersion.isWasm) {
+        try {
+          versions = require3(`@img/sharp-${runtimePlatform2}/versions`);
+        } catch (_) {
+          try {
+            versions = require3(`@img/sharp-libvips-${runtimePlatform2}/versions`);
+          } catch (_2) {
+          }
+        }
+      } else {
+        try {
+          versions = require3("@img/sharp-wasm32/versions");
+        } catch (_) {
+        }
+      }
+    }
+    versions.sharp = package_default.version;
+    if (versions.heif && format.heif) {
+      format.heif.input.fileSuffix = [".avif"];
+      format.heif.output.alias = ["avif"];
+    }
+    cache3(true);
+    if (!process.env.MALLOC_ARENA_MAX && import_detect_libc3.default.familySync() === import_detect_libc3.default.GLIBC && !sharp_default._isUsingJemalloc()) {
+      sharp_default.concurrency(1);
+    } else if (import_detect_libc3.default.familySync() === import_detect_libc3.default.MUSL && sharp_default.concurrency() === 1024) {
+      sharp_default.concurrency(availableParallelism());
+    }
+    queue = new events.EventEmitter();
+    utility_default = (Sharp2) => {
+      Sharp2.cache = cache3;
+      Sharp2.concurrency = concurrency;
+      Sharp2.counters = counters;
+      Sharp2.simd = simd;
+      Sharp2.format = format;
+      Sharp2.interpolators = interpolators;
+      Sharp2.versions = versions;
+      Sharp2.queue = queue;
+      Sharp2.block = block;
+      Sharp2.unblock = unblock;
+    };
+  }
+});
+
+// node_modules/sharp/dist/index.mjs
+var dist_exports = {};
+__export(dist_exports, {
+  default: () => dist_default4
+});
+var dist_default4;
+var init_dist = __esm({
+  "node_modules/sharp/dist/index.mjs"() {
+    "use strict";
+    init_constructor();
+    init_input();
+    init_resize();
+    init_composite();
+    init_operation();
+    init_colour();
+    init_channel();
+    init_output();
+    init_utility();
+    input_default(constructor_default);
+    resize_default(constructor_default);
+    composite_default(constructor_default);
+    operation_default(constructor_default);
+    colour_default(constructor_default);
+    channel_default(constructor_default);
+    output_default(constructor_default);
+    utility_default(constructor_default);
+    dist_default4 = constructor_default;
   }
 });
 
@@ -30582,13 +40516,13 @@ var isInCi = check("CI") || check("CONTINUOUS_INTEGRATION");
 var is_in_ci_default = isInCi;
 
 // node_modules/auto-bind/index.js
-var getAllProperties = (object) => {
+var getAllProperties = (object2) => {
   const properties = /* @__PURE__ */ new Set();
   do {
-    for (const key of Reflect.ownKeys(object)) {
-      properties.add([object, key]);
+    for (const key of Reflect.ownKeys(object2)) {
+      properties.add([object2, key]);
     }
-  } while ((object = Reflect.getPrototypeOf(object)) && object !== Object.prototype);
+  } while ((object2 = Reflect.getPrototypeOf(object2)) && object2 !== Object.prototype);
   return properties;
 };
 function autoBind(self, { include, exclude } = {}) {
@@ -30602,11 +40536,11 @@ function autoBind(self, { include, exclude } = {}) {
     }
     return true;
   };
-  for (const [object, key] of getAllProperties(self.constructor.prototype)) {
+  for (const [object2, key] of getAllProperties(self.constructor.prototype)) {
     if (key === "constructor" || !filter(key)) {
       continue;
     }
-    const descriptor = Reflect.getOwnPropertyDescriptor(object, key);
+    const descriptor = Reflect.getOwnPropertyDescriptor(object2, key);
     if (descriptor && typeof descriptor.value === "function") {
       self[key] = self[key].bind(self);
     }
@@ -32102,13 +42036,13 @@ var YGEnums_default = constants;
 
 // node_modules/yoga-layout/dist/src/wrapAssembly.js
 function wrapAssembly(lib) {
-  function patch(prototype, name, fn) {
+  function patch(prototype, name, fn2) {
     const original = prototype[name];
     prototype[name] = function() {
       for (var _len = arguments.length, args2 = new Array(_len), _key = 0; _key < _len; _key++) {
         args2[_key] = arguments[_key];
       }
-      return fn.call(this, original, ...args2);
+      return fn2.call(this, original, ...args2);
     };
   }
   for (const fnName of ["setPosition", "setMargin", "setFlexBasis", "setWidth", "setHeight", "setMinWidth", "setMinHeight", "setMaxWidth", "setMaxHeight", "setPadding", "setGap"]) {
@@ -32216,14 +42150,14 @@ function ansiRegex({ onlyFirst = false } = {}) {
 
 // node_modules/strip-ansi/index.js
 var regex = ansiRegex();
-function stripAnsi(string) {
-  if (typeof string !== "string") {
-    throw new TypeError(`Expected a \`string\`, got \`${typeof string}\``);
+function stripAnsi(string2) {
+  if (typeof string2 !== "string") {
+    throw new TypeError(`Expected a \`string\`, got \`${typeof string2}\``);
   }
-  if (!string.includes("\x1B") && !string.includes("\x9B")) {
-    return string;
+  if (!string2.includes("\x1B") && !string2.includes("\x9B")) {
+    return string2;
   }
-  return string.replace(regex, "");
+  return string2.replace(regex, "");
 }
 
 // node_modules/get-east-asian-width/lookup-data.js
@@ -32403,19 +42337,19 @@ function stringWidth(input, options = {}) {
     ambiguousIsNarrow = true,
     countAnsiEscapeCodes = false
   } = options;
-  let string = input;
-  if (!countAnsiEscapeCodes && (string.includes("\x1B") || string.includes("\x9B"))) {
-    string = stripAnsi(string);
+  let string2 = input;
+  if (!countAnsiEscapeCodes && (string2.includes("\x1B") || string2.includes("\x9B"))) {
+    string2 = stripAnsi(string2);
   }
-  if (string.length === 0) {
+  if (string2.length === 0) {
     return 0;
   }
-  if (/^[\u0020-\u007E]*$/.test(string)) {
-    return string.length;
+  if (/^[\u0020-\u007E]*$/.test(string2)) {
+    return string2.length;
   }
   let width = 0;
   const eastAsianWidthOptions = { ambiguousAsWide: !ambiguousIsNarrow };
-  for (const { segment } of segmenter.segment(string)) {
+  for (const { segment } of segmenter.segment(string2)) {
     if (isZeroWidthCluster(segment)) {
       continue;
     }
@@ -32559,12 +42493,12 @@ function assembleStyles() {
         if (colorString.length === 3) {
           colorString = [...colorString].map((character) => character + character).join("");
         }
-        const integer = Number.parseInt(colorString, 16);
+        const integer2 = Number.parseInt(colorString, 16);
         return [
           /* eslint-disable no-bitwise */
-          integer >> 16 & 255,
-          integer >> 8 & 255,
-          integer & 255
+          integer2 >> 16 & 255,
+          integer2 >> 8 & 255,
+          integer2 & 255
           /* eslint-enable no-bitwise */
         ];
       },
@@ -32658,56 +42592,56 @@ var ANSI_ESCAPE_REGEX = new RegExp(
 var ANSI_SGR_MODIFIER_CLOSE_CODES = new Set(ansi_styles_default.codes.values());
 ANSI_SGR_MODIFIER_CLOSE_CODES.delete(ANSI_SGR_RESET);
 var segmenter2 = new Intl.Segmenter();
-var getStringWidth = (string) => stringWidth(string, { countAnsiEscapeCodes: true });
+var getStringWidth = (string2) => stringWidth(string2, { countAnsiEscapeCodes: true });
 var TAB_SIZE = 8;
 var ESCAPE_INTRODUCER_REGEX = new RegExp(`[${ESCAPE_CHARACTERS}]`, "g");
 var ROW_BOUNDARY_REGEX = new RegExp(`[\\n${ESCAPE_CHARACTERS}]`, "g");
 var ASCII_PRINTABLE_REGEX = /^[ -~]*$/;
 var wrapAnsiCode = (code) => `${ANSI_ESCAPE}${ANSI_CSI}${code}${ANSI_SGR_TERMINATOR}`;
 var wrapAnsiHyperlink = (url, parameters = "") => `${ANSI_ESCAPE}${ANSI_ESCAPE_LINK}${parameters};${url}${ANSI_ESCAPE_BELL}`;
-var matchAnsiEscape = (string, index2) => {
-  if (!ESCAPES.has(string[index2])) {
+var matchAnsiEscape = (string2, index2) => {
+  if (!ESCAPES.has(string2[index2])) {
     return;
   }
   ANSI_ESCAPE_REGEX.lastIndex = index2;
-  return ANSI_ESCAPE_REGEX.exec(string) ?? void 0;
+  return ANSI_ESCAPE_REGEX.exec(string2) ?? void 0;
 };
-var forEachSegment = (string, onPlainText, onEscape = () => {
+var forEachSegment = (string2, onPlainText, onEscape = () => {
 }) => {
   let plainStart = 0;
   let index2 = 0;
-  while (index2 < string.length) {
+  while (index2 < string2.length) {
     ESCAPE_INTRODUCER_REGEX.lastIndex = index2;
-    const introducer = ESCAPE_INTRODUCER_REGEX.exec(string);
+    const introducer = ESCAPE_INTRODUCER_REGEX.exec(string2);
     if (!introducer) {
       break;
     }
-    const escape3 = matchAnsiEscape(string, introducer.index);
+    const escape3 = matchAnsiEscape(string2, introducer.index);
     if (!escape3) {
       index2 = introducer.index + 1;
       continue;
     }
     if (introducer.index > plainStart) {
-      onPlainText(string.slice(plainStart, introducer.index));
+      onPlainText(string2.slice(plainStart, introducer.index));
     }
     onEscape(escape3[0]);
     index2 = introducer.index + escape3[0].length;
     plainStart = index2;
   }
-  if (plainStart < string.length) {
-    onPlainText(string.slice(plainStart));
+  if (plainStart < string2.length) {
+    onPlainText(string2.slice(plainStart));
   }
 };
-var getWidth = (string) => {
+var getWidth = (string2) => {
   let plainText = "";
-  forEachSegment(string, (part) => {
+  forEachSegment(string2, (part) => {
     plainText += part;
   });
   return getStringWidth(plainText);
 };
-var getTokens = (string) => {
+var getTokens = (string2) => {
   const tokens = [];
-  forEachSegment(string, (plainText) => {
+  forEachSegment(string2, (plainText) => {
     if (ASCII_PRINTABLE_REGEX.test(plainText)) {
       for (const character of plainText) {
         tokens.push({ value: character, width: 1 });
@@ -32722,10 +42656,10 @@ var getTokens = (string) => {
   });
   return tokens;
 };
-var splitWords = (string) => {
+var splitWords = (string2) => {
   let currentWord = { value: "", plainText: "" };
   const words = [currentWord];
-  forEachSegment(string, (plainText) => {
+  forEachSegment(string2, (plainText) => {
     const parts = plainText.split(" ");
     currentWord.value += parts[0];
     currentWord.plainText += parts[0];
@@ -32895,10 +42829,10 @@ var applySgrResets = (sgrParameters, activeStyles) => {
     applySgrResetCode(code, activeStyles);
   }
 };
-var applyLeadingSgrResets = (string, startIndex, activeStyles) => {
+var applyLeadingSgrResets = (string2, startIndex, activeStyles) => {
   let index2 = startIndex;
-  while (index2 < string.length) {
-    const match = matchAnsiEscape(string, index2);
+  while (index2 < string2.length) {
+    const match = matchAnsiEscape(string2, index2);
     if (!match) {
       break;
     }
@@ -32931,12 +42865,12 @@ var wrapWord = (rows, word, columns, rowWidth) => {
   }
   return getWidth(rows.at(-1));
 };
-var stringVisibleTrimSpacesRight = (string) => {
-  if (!string.includes(" ")) {
-    return string;
+var stringVisibleTrimSpacesRight = (string2) => {
+  if (!string2.includes(" ")) {
+    return string2;
   }
   const segments = [];
-  forEachSegment(string, (plainText) => {
+  forEachSegment(string2, (plainText) => {
     segments.push({ value: plainText, isEscape: false });
   }, (escape3) => {
     segments.push({ value: escape3, isEscape: true });
@@ -33032,11 +42966,11 @@ var restoreStylesAcrossRows = (preString) => {
   }
   return returnValue + preString.slice(copiedIndex);
 };
-var exec = (string, columns, options = {}) => {
-  if (options.trim !== false && string.trim() === "") {
+var exec = (string2, columns, options = {}) => {
+  if (options.trim !== false && string2.trim() === "") {
     return "";
   }
-  const words = splitWords(string);
+  const words = splitWords(string2);
   let rows = [""];
   let rowLength = 0;
   let trimmedRowIndex = -1;
@@ -33097,8 +43031,8 @@ var exec = (string, columns, options = {}) => {
   }
   return restoreStylesAcrossRows(rows.join("\n"));
 };
-function wrapAnsi(string, columns, options) {
-  return String(string).normalize().replaceAll("\r\n", "\n").split("\n").map((line) => exec(expandTabs(line), columns, options)).join("\n");
+function wrapAnsi(string2, columns, options) {
+  return String(string2).normalize().replaceAll("\r\n", "\n").split("\n").map((line) => exec(expandTabs(line), columns, options)).join("\n");
 }
 
 // node_modules/terminal-size/index.js
@@ -33228,9 +43162,9 @@ import process4 from "process";
 var import_react = __toESM(require_react(), 1);
 
 // node_modules/widest-line/index.js
-function widestLine(string) {
+function widestLine(string2) {
   let lineWidth = 0;
-  for (const line of string.split("\n")) {
+  for (const line of string2.split("\n")) {
     lineWidth = Math.max(lineWidth, stringWidth(line));
   }
   return lineWidth;
@@ -33483,11 +43417,11 @@ function getSgrFragments(code) {
   }
   return fragments;
 }
-function parseCsiCode(string, index2) {
-  const escapeCodePoint = string.codePointAt(index2);
+function parseCsiCode(string2, index2) {
+  const escapeCodePoint = string2.codePointAt(index2);
   let sequenceStartIndex;
   if (escapeCodePoint === ESCAPE_CODE_POINT) {
-    if (string[index2 + 1] !== ANSI_CSI2) {
+    if (string2[index2 + 1] !== ANSI_CSI2) {
       return;
     }
     sequenceStartIndex = index2 + 2;
@@ -33497,11 +43431,11 @@ function parseCsiCode(string, index2) {
     return;
   }
   let hasCanonicalSgrParameters = true;
-  for (let sequenceIndex = sequenceStartIndex; sequenceIndex < string.length; sequenceIndex++) {
-    const codePoint = string.codePointAt(sequenceIndex);
+  for (let sequenceIndex = sequenceStartIndex; sequenceIndex < string2.length; sequenceIndex++) {
+    const codePoint = string2.codePointAt(sequenceIndex);
     if (isCsiFinalCharacter(codePoint)) {
-      const code = string.slice(index2, sequenceIndex + 1);
-      if (string[sequenceIndex] !== ANSI_SGR_TERMINATOR2 || !hasCanonicalSgrParameters) {
+      const code = string2.slice(index2, sequenceIndex + 1);
+      if (string2[sequenceIndex] !== ANSI_SGR_TERMINATOR2 || !hasCanonicalSgrParameters) {
         return createControlParseResult(code, sequenceIndex + 1);
       }
       return {
@@ -33524,31 +43458,31 @@ function parseCsiCode(string, index2) {
       continue;
     }
     const endIndex = sequenceIndex;
-    return createControlParseResult(string.slice(index2, endIndex), endIndex);
+    return createControlParseResult(string2.slice(index2, endIndex), endIndex);
   }
-  return createControlParseResult(string.slice(index2), string.length);
+  return createControlParseResult(string2.slice(index2), string2.length);
 }
-function parseHyperlinkCode(string, index2) {
+function parseHyperlinkCode(string2, index2) {
   let hyperlinkPrefix;
   let hyperlinkClose;
-  const codePoint = string.codePointAt(index2);
-  if (codePoint === ESCAPE_CODE_POINT && string.startsWith(ANSI_HYPERLINK_ESC_PREFIX, index2)) {
+  const codePoint = string2.codePointAt(index2);
+  if (codePoint === ESCAPE_CODE_POINT && string2.startsWith(ANSI_HYPERLINK_ESC_PREFIX, index2)) {
     hyperlinkPrefix = ANSI_HYPERLINK_ESC_PREFIX;
     hyperlinkClose = ANSI_HYPERLINK_ESC_CLOSE;
-  } else if (codePoint === C1_OSC_CODE_POINT && string.startsWith(ANSI_HYPERLINK_C1_PREFIX, index2)) {
+  } else if (codePoint === C1_OSC_CODE_POINT && string2.startsWith(ANSI_HYPERLINK_C1_PREFIX, index2)) {
     hyperlinkPrefix = ANSI_HYPERLINK_C1_PREFIX;
     hyperlinkClose = ANSI_HYPERLINK_C1_CLOSE;
   } else {
     return;
   }
-  const uriStart = string.indexOf(";", index2 + hyperlinkPrefix.length);
+  const uriStart = string2.indexOf(";", index2 + hyperlinkPrefix.length);
   if (uriStart === -1) {
-    return createControlParseResult(string.slice(index2), string.length);
+    return createControlParseResult(string2.slice(index2), string2.length);
   }
-  for (let sequenceIndex = uriStart + 1; sequenceIndex < string.length; sequenceIndex++) {
-    const character = string[sequenceIndex];
+  for (let sequenceIndex = uriStart + 1; sequenceIndex < string2.length; sequenceIndex++) {
+    const character = string2[sequenceIndex];
     if (character === ANSI_BELL) {
-      const code = string.slice(index2, sequenceIndex + 1);
+      const code = string2.slice(index2, sequenceIndex + 1);
       const action = sequenceIndex === uriStart + 1 ? "close" : "open";
       return {
         token: {
@@ -33561,8 +43495,8 @@ function parseHyperlinkCode(string, index2) {
         endIndex: sequenceIndex + 1
       };
     }
-    if (character === ESCAPE && string[sequenceIndex + 1] === ANSI_OSC_TERMINATOR) {
-      const code = string.slice(index2, sequenceIndex + 2);
+    if (character === ESCAPE && string2[sequenceIndex + 1] === ANSI_OSC_TERMINATOR) {
+      const code = string2.slice(index2, sequenceIndex + 2);
       const action = sequenceIndex === uriStart + 1 ? "close" : "open";
       return {
         token: {
@@ -33576,7 +43510,7 @@ function parseHyperlinkCode(string, index2) {
       };
     }
     if (character === C1_STRING_TERMINATOR) {
-      const code = string.slice(index2, sequenceIndex + 1);
+      const code = string2.slice(index2, sequenceIndex + 1);
       const action = sequenceIndex === uriStart + 1 ? "close" : "open";
       return {
         token: {
@@ -33590,15 +43524,15 @@ function parseHyperlinkCode(string, index2) {
       };
     }
   }
-  return createControlParseResult(string.slice(index2), string.length);
+  return createControlParseResult(string2.slice(index2), string2.length);
 }
-function parseControlStringCode(string, index2) {
-  const codePoint = string.codePointAt(index2);
+function parseControlStringCode(string2, index2) {
+  const codePoint = string2.codePointAt(index2);
   let sequenceStartIndex;
   let supportsBellTerminator = false;
   switch (codePoint) {
     case ESCAPE_CODE_POINT: {
-      const command = string[index2 + 1];
+      const command = string2[index2 + 1];
       switch (command) {
         case ANSI_OSC2: {
           sequenceStartIndex = index2 + 2;
@@ -33640,40 +43574,40 @@ function parseControlStringCode(string, index2) {
       return;
     }
   }
-  for (let sequenceIndex = sequenceStartIndex; sequenceIndex < string.length; sequenceIndex++) {
-    if (supportsBellTerminator && string[sequenceIndex] === ANSI_BELL) {
-      return createControlParseResult(string.slice(index2, sequenceIndex + 1), sequenceIndex + 1);
+  for (let sequenceIndex = sequenceStartIndex; sequenceIndex < string2.length; sequenceIndex++) {
+    if (supportsBellTerminator && string2[sequenceIndex] === ANSI_BELL) {
+      return createControlParseResult(string2.slice(index2, sequenceIndex + 1), sequenceIndex + 1);
     }
-    if (string[sequenceIndex] === ESCAPE && string[sequenceIndex + 1] === ANSI_OSC_TERMINATOR) {
-      return createControlParseResult(string.slice(index2, sequenceIndex + 2), sequenceIndex + 2);
+    if (string2[sequenceIndex] === ESCAPE && string2[sequenceIndex + 1] === ANSI_OSC_TERMINATOR) {
+      return createControlParseResult(string2.slice(index2, sequenceIndex + 2), sequenceIndex + 2);
     }
-    if (string[sequenceIndex] === C1_STRING_TERMINATOR) {
-      return createControlParseResult(string.slice(index2, sequenceIndex + 1), sequenceIndex + 1);
+    if (string2[sequenceIndex] === C1_STRING_TERMINATOR) {
+      return createControlParseResult(string2.slice(index2, sequenceIndex + 1), sequenceIndex + 1);
     }
   }
-  return createControlParseResult(string.slice(index2), string.length);
+  return createControlParseResult(string2.slice(index2), string2.length);
 }
-function parseAnsiCode(string, index2) {
-  const codePoint = string.codePointAt(index2);
+function parseAnsiCode(string2, index2) {
+  const codePoint = string2.codePointAt(index2);
   if (codePoint === ESCAPE_CODE_POINT || codePoint === C1_OSC_CODE_POINT) {
-    const hyperlinkCode = parseHyperlinkCode(string, index2);
+    const hyperlinkCode = parseHyperlinkCode(string2, index2);
     if (hyperlinkCode) {
       return hyperlinkCode;
     }
   }
-  const controlStringCode = parseControlStringCode(string, index2);
+  const controlStringCode = parseControlStringCode(string2, index2);
   if (controlStringCode) {
     return controlStringCode;
   }
-  return parseCsiCode(string, index2);
+  return parseCsiCode(string2, index2);
 }
-function appendTrailingAnsiTokens(string, index2, tokens) {
-  while (index2 < string.length) {
-    const nextCodePoint = string.codePointAt(index2);
+function appendTrailingAnsiTokens(string2, index2, tokens) {
+  while (index2 < string2.length) {
+    const nextCodePoint = string2.codePointAt(index2);
     if (!ESCAPES2.has(nextCodePoint)) {
       break;
     }
-    const escapeCode = parseAnsiCode(string, index2);
+    const escapeCode = parseAnsiCode(string2, index2);
     if (!escapeCode) {
       break;
     }
@@ -33682,7 +43616,7 @@ function appendTrailingAnsiTokens(string, index2, tokens) {
   }
   return index2;
 }
-function parseCharacterTokenWithRawSegmentation(string, index2, graphemeSegments) {
+function parseCharacterTokenWithRawSegmentation(string2, index2, graphemeSegments) {
   const segment = graphemeSegments.containing(index2);
   if (!segment || segment.index !== index2) {
     return;
@@ -33698,13 +43632,13 @@ function parseCharacterTokenWithRawSegmentation(string, index2, graphemeSegments
     endIndex: index2 + segment.segment.length
   };
 }
-function collectVisibleCharacters(string) {
+function collectVisibleCharacters(string2) {
   const visibleCharacters = [];
   let index2 = 0;
-  while (index2 < string.length) {
-    const codePoint = string.codePointAt(index2);
+  while (index2 < string2.length) {
+    const codePoint = string2.codePointAt(index2);
     if (ESCAPES2.has(codePoint)) {
-      const code = parseAnsiCode(string, index2);
+      const code = parseAnsiCode(string2, index2);
       if (code) {
         index2 = code.endIndex;
         continue;
@@ -33747,17 +43681,17 @@ function applyGraphemeMetadata(visibleCharacters) {
     scalarIndex = graphemeIndex;
   }
 }
-function tokenizeAnsiWithVisibleSegmentation(string, { endCharacter = Number.POSITIVE_INFINITY } = {}) {
+function tokenizeAnsiWithVisibleSegmentation(string2, { endCharacter = Number.POSITIVE_INFINITY } = {}) {
   const tokens = [];
-  const visibleCharacters = collectVisibleCharacters(string);
+  const visibleCharacters = collectVisibleCharacters(string2);
   applyGraphemeMetadata(visibleCharacters);
   let index2 = 0;
   let visibleCharacterIndex = 0;
   let visibleCount = 0;
-  while (index2 < string.length) {
-    const codePoint = string.codePointAt(index2);
+  while (index2 < string2.length) {
+    const codePoint = string2.codePointAt(index2);
     if (ESCAPES2.has(codePoint)) {
-      const code = parseAnsiCode(string, index2);
+      const code = parseAnsiCode(string2, index2);
       if (code) {
         tokens.push(code.token);
         index2 = code.endIndex;
@@ -33783,7 +43717,7 @@ function tokenizeAnsiWithVisibleSegmentation(string, { endCharacter = Number.POS
     if (visibleCount >= endCharacter) {
       const nextVisibleCharacter = visibleCharacters[visibleCharacterIndex];
       if (!nextVisibleCharacter || !nextVisibleCharacter.isGraphemeContinuation) {
-        index2 = appendTrailingAnsiTokens(string, index2, tokens);
+        index2 = appendTrailingAnsiTokens(string2, index2, tokens);
         break;
       }
     }
@@ -33803,16 +43737,16 @@ function areValuesInSameGrapheme(leftValue, rightValue) {
   }
   return true;
 }
-function hasAnsiSplitContinuationAhead(string, startIndex, previousVisibleValue, graphemeSegments) {
+function hasAnsiSplitContinuationAhead(string2, startIndex, previousVisibleValue, graphemeSegments) {
   if (!previousVisibleValue) {
     return false;
   }
   let index2 = startIndex;
   let hasAnsiCode = false;
-  while (index2 < string.length) {
-    const codePoint = string.codePointAt(index2);
+  while (index2 < string2.length) {
+    const codePoint = string2.codePointAt(index2);
     if (ESCAPES2.has(codePoint)) {
-      const code = parseAnsiCode(string, index2);
+      const code = parseAnsiCode(string2, index2);
       if (code) {
         hasAnsiCode = true;
         index2 = code.endIndex;
@@ -33822,7 +43756,7 @@ function hasAnsiSplitContinuationAhead(string, startIndex, previousVisibleValue,
     if (!hasAnsiCode) {
       return false;
     }
-    const characterToken = parseCharacterTokenWithRawSegmentation(string, index2, graphemeSegments);
+    const characterToken = parseCharacterTokenWithRawSegmentation(string2, index2, graphemeSegments);
     if (!characterToken) {
       return true;
     }
@@ -33830,17 +43764,17 @@ function hasAnsiSplitContinuationAhead(string, startIndex, previousVisibleValue,
   }
   return false;
 }
-function tokenizeAnsi(string, { endCharacter = Number.POSITIVE_INFINITY } = {}) {
+function tokenizeAnsi(string2, { endCharacter = Number.POSITIVE_INFINITY } = {}) {
   const tokens = [];
-  const graphemeSegments = GRAPHEME_SEGMENTER.segment(string);
+  const graphemeSegments = GRAPHEME_SEGMENTER.segment(string2);
   let index2 = 0;
   let visibleCount = 0;
   let previousVisibleValue;
   let hasAnsiSinceLastVisible = false;
-  while (index2 < string.length) {
-    const codePoint = string.codePointAt(index2);
+  while (index2 < string2.length) {
+    const codePoint = string2.codePointAt(index2);
     if (ESCAPES2.has(codePoint)) {
-      const code = parseAnsiCode(string, index2);
+      const code = parseAnsiCode(string2, index2);
       if (code) {
         tokens.push(code.token);
         index2 = code.endIndex;
@@ -33848,12 +43782,12 @@ function tokenizeAnsi(string, { endCharacter = Number.POSITIVE_INFINITY } = {}) 
         continue;
       }
     }
-    const characterToken = parseCharacterTokenWithRawSegmentation(string, index2, graphemeSegments);
+    const characterToken = parseCharacterTokenWithRawSegmentation(string2, index2, graphemeSegments);
     if (!characterToken) {
-      return tokenizeAnsiWithVisibleSegmentation(string, { endCharacter });
+      return tokenizeAnsiWithVisibleSegmentation(string2, { endCharacter });
     }
     if (hasAnsiSinceLastVisible && previousVisibleValue && areValuesInSameGrapheme(previousVisibleValue, characterToken.token.value)) {
-      return tokenizeAnsiWithVisibleSegmentation(string, { endCharacter });
+      return tokenizeAnsiWithVisibleSegmentation(string2, { endCharacter });
     }
     tokens.push(characterToken.token);
     index2 = characterToken.endIndex;
@@ -33861,10 +43795,10 @@ function tokenizeAnsi(string, { endCharacter = Number.POSITIVE_INFINITY } = {}) 
     hasAnsiSinceLastVisible = false;
     previousVisibleValue = characterToken.token.value;
     if (visibleCount >= endCharacter) {
-      if (hasAnsiSplitContinuationAhead(string, index2, previousVisibleValue, graphemeSegments)) {
-        return tokenizeAnsiWithVisibleSegmentation(string, { endCharacter });
+      if (hasAnsiSplitContinuationAhead(string2, index2, previousVisibleValue, graphemeSegments)) {
+        return tokenizeAnsiWithVisibleSegmentation(string2, { endCharacter });
       }
-      index2 = appendTrailingAnsiTokens(string, index2, tokens);
+      index2 = appendTrailingAnsiTokens(string2, index2, tokens);
       break;
     }
   }
@@ -34024,17 +43958,17 @@ function createHasContinuationAheadMap(tokens) {
   }
   return hasContinuationAhead;
 }
-function isPastEndBoundary(token, position, end) {
+function isPastEndBoundary(token, position2, end) {
   if (end === void 0) {
     return false;
   }
-  if (position >= end) {
+  if (position2 >= end) {
     return true;
   }
-  return token.type === "character" && !token.isGraphemeContinuation && position + token.visibleWidth > end;
+  return token.type === "character" && !token.isGraphemeContinuation && position2 + token.visibleWidth > end;
 }
-function sliceAnsi(string, start, end) {
-  const tokens = tokenizeAnsi(string, { endCharacter: end });
+function sliceAnsi(string2, start, end) {
+  const tokens = tokenizeAnsi(string2, { endCharacter: end });
   const hasContinuationAhead = createHasContinuationAheadMap(tokens);
   let activeStyles = /* @__PURE__ */ new Map();
   let activeHyperlink;
@@ -34042,11 +43976,11 @@ function sliceAnsi(string, start, end) {
   let activeHyperlinkOutputIndex;
   let pendingSgrOutputIndex;
   let pendingSgrActiveStyles;
-  let position = 0;
+  let position2 = 0;
   let returnValue = "";
   let include = false;
   for (const [tokenIndex, token] of tokens.entries()) {
-    let isPastEnd = isPastEndBoundary(token, position, end);
+    let isPastEnd = isPastEndBoundary(token, position2, end);
     if (isPastEnd && token.type !== "character" && hasContinuationAhead[tokenIndex]) {
       isPastEnd = false;
     }
@@ -34076,7 +44010,7 @@ function sliceAnsi(string, start, end) {
       }
       break;
     }
-    ({ activeStyles, activeHyperlink, activeHyperlinkHasVisibleText, activeHyperlinkOutputIndex, pendingSgrOutputIndex, pendingSgrActiveStyles, position, returnValue, include } = applyToken({
+    ({ activeStyles, activeHyperlink, activeHyperlinkHasVisibleText, activeHyperlinkOutputIndex, pendingSgrOutputIndex, pendingSgrActiveStyles, position: position2, returnValue, include } = applyToken({
       token,
       isPastEnd,
       start,
@@ -34086,7 +44020,7 @@ function sliceAnsi(string, start, end) {
       activeHyperlinkOutputIndex,
       pendingSgrOutputIndex,
       pendingSgrActiveStyles,
-      position,
+      position: position2,
       returnValue,
       include
     }));
@@ -34103,20 +44037,20 @@ function sliceAnsi(string, start, end) {
 
 // node_modules/cli-truncate/index.js
 var validPositions = /* @__PURE__ */ new Set(["start", "middle", "end"]);
-function getIndexOfNearestSpace(string, wantedIndex, shouldSearchRight) {
-  if (string.charAt(wantedIndex) === " ") {
+function getIndexOfNearestSpace(string2, wantedIndex, shouldSearchRight) {
+  if (string2.charAt(wantedIndex) === " ") {
     return wantedIndex;
   }
   const direction = shouldSearchRight ? 1 : -1;
   for (let index2 = 0; index2 <= 3; index2++) {
     const finalIndex = wantedIndex + index2 * direction;
-    if (string.charAt(finalIndex) === " ") {
+    if (string2.charAt(finalIndex) === " ") {
       return finalIndex;
     }
   }
   return wantedIndex;
 }
-function validateInput(text, columns, position, truncationCharacter) {
+function validateInput(text, columns, position2, truncationCharacter) {
   if (typeof text !== "string") {
     throw new TypeError(`Expected \`input\` to be a string, got ${typeof text}`);
   }
@@ -34126,8 +44060,8 @@ function validateInput(text, columns, position, truncationCharacter) {
   if (!Number.isFinite(columns)) {
     throw new TypeError(`Expected \`columns\` to be a finite number, got ${columns}`);
   }
-  if (!validPositions.has(position)) {
-    throw new TypeError(`Expected \`options.position\` to be either \`start\`, \`middle\` or \`end\`, got ${position}`);
+  if (!validPositions.has(position2)) {
+    throw new TypeError(`Expected \`options.position\` to be either \`start\`, \`middle\` or \`end\`, got ${position2}`);
   }
   if (typeof truncationCharacter !== "string") {
     throw new TypeError(`Expected \`options.truncationCharacter\` to be a string, got ${typeof truncationCharacter}`);
@@ -34135,12 +44069,12 @@ function validateInput(text, columns, position, truncationCharacter) {
 }
 function cliTruncate(text, columns, options = {}) {
   const {
-    position = "end",
+    position: position2 = "end",
     space = false,
     preferTruncationOnSpace = false
   } = options;
   let { truncationCharacter = "\u2026" } = options;
-  validateInput(text, columns, position, truncationCharacter);
+  validateInput(text, columns, position2, truncationCharacter);
   if (columns < 1) {
     return "";
   }
@@ -34157,14 +44091,14 @@ function cliTruncate(text, columns, options = {}) {
     LETTER_M: 109
   };
   const isSgrParameter = (code) => code >= 48 && code <= 57 || code === 59;
-  function leadingSgrSpanEndIndex(string) {
+  function leadingSgrSpanEndIndex(string2) {
     let index2 = 0;
-    while (index2 + 2 < string.length && string.codePointAt(index2) === ANSI.ESC && string.codePointAt(index2 + 1) === ANSI.LEFT_BRACKET) {
+    while (index2 + 2 < string2.length && string2.codePointAt(index2) === ANSI.ESC && string2.codePointAt(index2 + 1) === ANSI.LEFT_BRACKET) {
       let j = index2 + 2;
-      while (j < string.length && isSgrParameter(string.codePointAt(j))) {
+      while (j < string2.length && isSgrParameter(string2.codePointAt(j))) {
         j++;
       }
-      if (j < string.length && string.codePointAt(j) === ANSI.LETTER_M) {
+      if (j < string2.length && string2.codePointAt(j) === ANSI.LETTER_M) {
         index2 = j + 1;
         continue;
       }
@@ -34172,14 +44106,14 @@ function cliTruncate(text, columns, options = {}) {
     }
     return index2;
   }
-  function trailingSgrSpanStartIndex(string) {
-    let start = string.length;
-    while (start > 1 && string.codePointAt(start - 1) === ANSI.LETTER_M) {
+  function trailingSgrSpanStartIndex(string2) {
+    let start = string2.length;
+    while (start > 1 && string2.codePointAt(start - 1) === ANSI.LETTER_M) {
       let j = start - 2;
-      while (j >= 0 && isSgrParameter(string.codePointAt(j))) {
+      while (j >= 0 && isSgrParameter(string2.codePointAt(j))) {
         j--;
       }
-      if (j >= 1 && string.codePointAt(j - 1) === ANSI.ESC && string.codePointAt(j) === ANSI.LEFT_BRACKET) {
+      if (j >= 1 && string2.codePointAt(j - 1) === ANSI.ESC && string2.codePointAt(j) === ANSI.LEFT_BRACKET) {
         start = j - 1;
         continue;
       }
@@ -34201,7 +44135,7 @@ function cliTruncate(text, columns, options = {}) {
     }
     return visible.slice(0, end) + prefix + visible.slice(end);
   }
-  if (position === "start") {
+  if (position2 === "start") {
     if (preferTruncationOnSpace) {
       const nearestSpace = getIndexOfNearestSpace(text, length - columns + stringWidth(truncationCharacter), true);
       const right2 = sliceAnsi(text, nearestSpace, length).trim();
@@ -34213,7 +44147,7 @@ function cliTruncate(text, columns, options = {}) {
     const right = sliceAnsi(text, length - columns + stringWidth(truncationCharacter), length);
     return prependWithInheritedStyleFromStart(truncationCharacter, right);
   }
-  if (position === "middle") {
+  if (position2 === "middle") {
     if (space) {
       truncationCharacter = ` ${truncationCharacter} `;
       if (stringWidth(truncationCharacter) >= columns) {
@@ -34229,7 +44163,7 @@ function cliTruncate(text, columns, options = {}) {
     }
     return sliceAnsi(text, 0, half) + truncationCharacter + sliceAnsi(text, length - (columns - half) + truncationWidth, length);
   }
-  if (position === "end") {
+  if (position2 === "end") {
     if (preferTruncationOnSpace) {
       const nearestSpace = getIndexOfNearestSpace(text, columns - stringWidth(truncationCharacter));
       const left2 = sliceAnsi(text, 0, nearestSpace);
@@ -34266,14 +44200,14 @@ var wrapText = (text, maxWidth, wrapType) => {
     });
   }
   if (wrapType.startsWith("truncate")) {
-    let position = "end";
+    let position2 = "end";
     if (wrapType === "truncate-middle") {
-      position = "middle";
+      position2 = "middle";
     }
     if (wrapType === "truncate-start") {
-      position = "start";
+      position2 = "start";
     }
-    wrappedText = cliTruncate(text, maxWidth, { position });
+    wrappedText = cliTruncate(text, maxWidth, { position: position2 });
   }
   cache2[cacheKey] = wrappedText;
   return wrappedText;
@@ -35331,14 +45265,14 @@ var reconciler_default = (0, import_react_reconciler.default)({
 });
 
 // node_modules/indent-string/index.js
-function indentString(string, count = 1, options = {}) {
+function indentString(string2, count = 1, options = {}) {
   const {
     indent = " ",
     includeEmptyLines = false
   } = options;
-  if (typeof string !== "string") {
+  if (typeof string2 !== "string") {
     throw new TypeError(
-      `Expected \`input\` to be a \`string\`, got \`${typeof string}\``
+      `Expected \`input\` to be a \`string\`, got \`${typeof string2}\``
     );
   }
   if (typeof count !== "number") {
@@ -35357,10 +45291,10 @@ function indentString(string, count = 1, options = {}) {
     );
   }
   if (count === 0) {
-    return string;
+    return string2;
   }
   const regex2 = includeEmptyLines ? /^/gm : /^(?!\s*$)/gm;
-  return string.replace(regex2, indent.repeat(count));
+  return string2.replace(regex2, indent.repeat(count));
 }
 
 // node_modules/ink/build/get-max-width.js
@@ -35579,12 +45513,12 @@ function assembleStyles2() {
         if (colorString.length === 3) {
           colorString = [...colorString].map((character) => character + character).join("");
         }
-        const integer = Number.parseInt(colorString, 16);
+        const integer2 = Number.parseInt(colorString, 16);
         return [
           /* eslint-disable no-bitwise */
-          integer >> 16 & 255,
-          integer >> 8 & 255,
-          integer & 255
+          integer2 >> 16 & 255,
+          integer2 >> 8 & 255,
+          integer2 & 255
           /* eslint-enable no-bitwise */
         ];
       },
@@ -35648,9 +45582,9 @@ import os2 from "os";
 import tty2 from "tty";
 function hasFlag(flag, argv = globalThis.Deno ? globalThis.Deno.args : process5.argv) {
   const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-  const position = argv.indexOf(prefix + flag);
+  const position2 = argv.indexOf(prefix + flag);
   const terminatorPosition = argv.indexOf("--");
-  return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
+  return position2 !== -1 && (terminatorPosition === -1 || position2 < terminatorPosition);
 }
 var { env: env2 } = process5;
 var flagForceColor;
@@ -35740,10 +45674,10 @@ function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
     return 3;
   }
   if ("TERM_PROGRAM" in env2) {
-    const version = Number.parseInt((env2.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
+    const version2 = Number.parseInt((env2.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
     switch (env2.TERM_PROGRAM) {
       case "iTerm.app": {
-        return version >= 3 ? 3 : 2;
+        return version2 >= 3 ? 3 : 2;
       }
       case "Apple_Terminal": {
         return 2;
@@ -35761,9 +45695,9 @@ function _supportsColor(haveStream, { streamIsTTY, sniffFlags = true } = {}) {
   }
   return min;
 }
-function createSupportsColor(stream, options = {}) {
-  const level = _supportsColor(stream, {
-    streamIsTTY: stream && stream.isTTY,
+function createSupportsColor(stream2, options = {}) {
+  const level = _supportsColor(stream2, {
+    streamIsTTY: stream2 && stream2.isTTY,
     ...options
   });
   return translateLevel(level);
@@ -35775,32 +45709,32 @@ var supportsColor = {
 var supports_color_default = supportsColor;
 
 // node_modules/chalk/source/utilities.js
-function stringReplaceAll(string, substring, replacer) {
-  let index2 = string.indexOf(substring);
+function stringReplaceAll(string2, substring, replacer) {
+  let index2 = string2.indexOf(substring);
   if (index2 === -1) {
-    return string;
+    return string2;
   }
   const substringLength = substring.length;
   let endIndex = 0;
   let returnValue = "";
   do {
-    returnValue += string.slice(endIndex, index2) + substring + replacer;
+    returnValue += string2.slice(endIndex, index2) + substring + replacer;
     endIndex = index2 + substringLength;
-    index2 = string.indexOf(substring, endIndex);
+    index2 = string2.indexOf(substring, endIndex);
   } while (index2 !== -1);
-  returnValue += string.slice(endIndex);
+  returnValue += string2.slice(endIndex);
   return returnValue;
 }
-function stringEncaseCRLFWithFirstIndex(string, prefix, postfix, index2) {
+function stringEncaseCRLFWithFirstIndex(string2, prefix, postfix, index2) {
   let endIndex = 0;
   let returnValue = "";
   do {
-    const gotCR = string[index2 - 1] === "\r";
-    returnValue += string.slice(endIndex, gotCR ? index2 - 1 : index2) + prefix + (gotCR ? "\r\n" : "\n") + postfix;
+    const gotCR = string2[index2 - 1] === "\r";
+    returnValue += string2.slice(endIndex, gotCR ? index2 - 1 : index2) + prefix + (gotCR ? "\r\n" : "\n") + postfix;
     endIndex = index2 + 1;
-    index2 = string.indexOf("\n", endIndex);
+    index2 = string2.indexOf("\n", endIndex);
   } while (index2 !== -1);
-  returnValue += string.slice(endIndex);
+  returnValue += string2.slice(endIndex);
   return returnValue;
 }
 
@@ -35816,12 +45750,12 @@ var levelMapping = [
   "ansi16m"
 ];
 var styles4 = /* @__PURE__ */ Object.create(null);
-var applyOptions = (object, options = {}) => {
+var applyOptions = (object2, options = {}) => {
   if (options.level && !(Number.isInteger(options.level) && options.level >= 0 && options.level <= 3)) {
     throw new Error("The `level` option should be an integer from 0 to 3");
   }
   const colorLevel = stdoutColor ? stdoutColor.level : 0;
-  object.level = options.level === void 0 ? colorLevel : options.level;
+  object2.level = options.level === void 0 ? colorLevel : options.level;
 };
 var chalkFactory = (options) => {
   const chalk2 = (...strings) => strings.join(" ");
@@ -35925,26 +45859,26 @@ var createBuilder = (self, _styler, _isEmpty) => {
   builder[IS_EMPTY] = _isEmpty;
   return builder;
 };
-var applyStyle = (self, string) => {
-  if (self.level <= 0 || !string) {
-    return self[IS_EMPTY] ? "" : string;
+var applyStyle = (self, string2) => {
+  if (self.level <= 0 || !string2) {
+    return self[IS_EMPTY] ? "" : string2;
   }
   let styler = self[STYLER];
   if (styler === void 0) {
-    return string;
+    return string2;
   }
   const { openAll, closeAll } = styler;
-  if (string.includes("\x1B")) {
+  if (string2.includes("\x1B")) {
     while (styler !== void 0) {
-      string = stringReplaceAll(string, styler.close, styler.open);
+      string2 = stringReplaceAll(string2, styler.close, styler.open);
       styler = styler.parent;
     }
   }
-  const lfIndex = string.indexOf("\n");
+  const lfIndex = string2.indexOf("\n");
   if (lfIndex !== -1) {
-    string = stringEncaseCRLFWithFirstIndex(string, closeAll, openAll, lfIndex);
+    string2 = stringEncaseCRLFWithFirstIndex(string2, closeAll, openAll, lfIndex);
   }
-  return openAll + string + closeAll;
+  return openAll + string2 + closeAll;
 };
 Object.defineProperties(createChalk.prototype, styles4);
 var chalk = createChalk();
@@ -35954,33 +45888,33 @@ var source_default = chalk;
 // node_modules/ink/build/colorize.js
 var rgbRegex = /^rgb\(\s?(\d+),\s?(\d+),\s?(\d+)\s?\)$/;
 var ansiRegex2 = /^ansi256\(\s?(\d+)\s?\)$/;
-var isNamedColor = (color) => {
-  return color in source_default;
+var isNamedColor = (color2) => {
+  return color2 in source_default;
 };
-var colorize = (str, color, type) => {
-  if (!color) {
+var colorize = (str, color2, type) => {
+  if (!color2) {
     return str;
   }
-  if (isNamedColor(color)) {
+  if (isNamedColor(color2)) {
     if (type === "foreground") {
-      return source_default[color](str);
+      return source_default[color2](str);
     }
-    const methodName = `bg${color[0].toUpperCase() + color.slice(1)}`;
+    const methodName = `bg${color2[0].toUpperCase() + color2.slice(1)}`;
     return source_default[methodName](str);
   }
-  if (color.startsWith("#")) {
-    return type === "foreground" ? source_default.hex(color)(str) : source_default.bgHex(color)(str);
+  if (color2.startsWith("#")) {
+    return type === "foreground" ? source_default.hex(color2)(str) : source_default.bgHex(color2)(str);
   }
-  if (color.startsWith("ansi256")) {
-    const matches = ansiRegex2.exec(color);
+  if (color2.startsWith("ansi256")) {
+    const matches = ansiRegex2.exec(color2);
     if (!matches) {
       return str;
     }
     const value = Number(matches[1]);
     return type === "foreground" ? source_default.ansi256(value)(str) : source_default.bgAnsi256(value)(str);
   }
-  if (color.startsWith("rgb")) {
-    const matches = rgbRegex.exec(color);
+  if (color2.startsWith("rgb")) {
+    const matches = rgbRegex.exec(color2);
     if (!matches) {
       return str;
     }
@@ -36355,36 +46289,36 @@ function isFullwidthGrapheme(grapheme, baseCodePoint) {
     return true;
   return false;
 }
-function parseLinkCode(string, offset) {
-  string = string.slice(offset);
+function parseLinkCode(string2, offset) {
+  string2 = string2.slice(offset);
   for (let index2 = 1; index2 < linkCodePrefixCharCodes.length; index2++) {
-    if (string.charCodeAt(index2) !== linkCodePrefixCharCodes[index2]) {
+    if (string2.charCodeAt(index2) !== linkCodePrefixCharCodes[index2]) {
       return void 0;
     }
   }
-  const paramsEndIndex = string.indexOf(";", linkCodePrefix.length);
+  const paramsEndIndex = string2.indexOf(";", linkCodePrefix.length);
   if (paramsEndIndex === -1)
     return void 0;
-  const endIndex = findOSCTerminatorIndex(string, paramsEndIndex + 1);
+  const endIndex = findOSCTerminatorIndex(string2, paramsEndIndex + 1);
   if (endIndex === -1)
     return void 0;
-  return string.slice(0, endIndex + 1);
+  return string2.slice(0, endIndex + 1);
 }
-function parseOSCSequence(string, offset) {
-  string = string.slice(offset);
-  const endIndex = findOSCTerminatorIndex(string, 2);
+function parseOSCSequence(string2, offset) {
+  string2 = string2.slice(offset);
+  const endIndex = findOSCTerminatorIndex(string2, 2);
   if (endIndex === -1)
     return void 0;
-  return string.slice(0, endIndex + 1);
+  return string2.slice(0, endIndex + 1);
 }
-function findOSCTerminatorIndex(string, startIndex) {
-  for (let i = startIndex; i < string.length; i++) {
-    const ch = string.charCodeAt(i);
+function findOSCTerminatorIndex(string2, startIndex) {
+  for (let i = startIndex; i < string2.length; i++) {
+    const ch = string2.charCodeAt(i);
     if (ch === CC_BEL)
       return i;
     if (ch === CC_C1_ST)
       return i;
-    if (ch === CC_ESC && i + 1 < string.length && string.charCodeAt(i + 1) === CC_BACKSLASH) {
+    if (ch === CC_ESC && i + 1 < string2.length && string2.charCodeAt(i + 1) === CC_BACKSLASH) {
       return i + 1;
     }
   }
@@ -36403,12 +46337,12 @@ function findSGRSequenceEndIndex(str) {
   }
   return -1;
 }
-function parseSGRSequence(string, offset) {
-  string = string.slice(offset);
-  const endIndex = findSGRSequenceEndIndex(string);
+function parseSGRSequence(string2, offset) {
+  string2 = string2.slice(offset);
+  const endIndex = findSGRSequenceEndIndex(string2);
   if (endIndex === -1)
     return;
-  return string.slice(0, endIndex + 1);
+  return string2.slice(0, endIndex + 1);
 }
 function splitCompoundSGRSequences(code) {
   if (!code.includes(";")) {
@@ -36814,7 +46748,7 @@ var cli_cursor_default = cliCursor;
 
 // node_modules/ink/build/log-update.js
 var visibleLineCount = (lines, str) => str.endsWith("\n") ? lines.length - 1 : lines.length;
-var createStandard = (stream, { showCursor = false } = {}) => {
+var createStandard = (stream2, { showCursor = false } = {}) => {
   let previousLineCount = 0;
   let previousOutput = "";
   let hasHiddenCursor = false;
@@ -36829,7 +46763,7 @@ var createStandard = (stream, { showCursor = false } = {}) => {
   };
   const render2 = (str) => {
     if (!showCursor && !hasHiddenCursor) {
-      cli_cursor_default.hide(stream);
+      cli_cursor_default.hide(stream2);
       hasHiddenCursor = true;
     }
     const activeCursor = getActiveCursor();
@@ -36842,7 +46776,7 @@ var createStandard = (stream, { showCursor = false } = {}) => {
     const visibleCount = visibleLineCount(lines, str);
     const cursorSuffix = buildCursorSuffix(visibleCount, activeCursor);
     if (str === previousOutput && cursorChanged) {
-      stream.write(buildCursorOnlySequence({
+      stream2.write(buildCursorOnlySequence({
         cursorWasShown,
         previousLineCount,
         previousCursorPosition,
@@ -36852,7 +46786,7 @@ var createStandard = (stream, { showCursor = false } = {}) => {
     } else {
       previousOutput = str;
       const returnPrefix = buildReturnToBottomPrefix(cursorWasShown, previousLineCount, previousCursorPosition);
-      stream.write(returnPrefix + base_exports.eraseLines(previousLineCount) + str + cursorSuffix);
+      stream2.write(returnPrefix + base_exports.eraseLines(previousLineCount) + str + cursorSuffix);
       previousLineCount = lines.length;
     }
     previousCursorPosition = activeCursor ? { ...activeCursor } : void 0;
@@ -36861,7 +46795,7 @@ var createStandard = (stream, { showCursor = false } = {}) => {
   };
   render2.clear = () => {
     const prefix = buildReturnToBottomPrefix(cursorWasShown, previousLineCount, previousCursorPosition);
-    stream.write(prefix + base_exports.eraseLines(previousLineCount));
+    stream2.write(prefix + base_exports.eraseLines(previousLineCount));
     previousOutput = "";
     previousLineCount = 0;
     previousCursorPosition = void 0;
@@ -36873,7 +46807,7 @@ var createStandard = (stream, { showCursor = false } = {}) => {
     previousCursorPosition = void 0;
     cursorWasShown = false;
     if (!showCursor) {
-      cli_cursor_default.show(stream);
+      cli_cursor_default.show(stream2);
       hasHiddenCursor = false;
     }
   };
@@ -36890,23 +46824,23 @@ var createStandard = (stream, { showCursor = false } = {}) => {
     previousOutput = str;
     previousLineCount = lines.length;
     if (!activeCursor && cursorWasShown) {
-      stream.write(hideCursorEscape);
+      stream2.write(hideCursorEscape);
     }
     if (activeCursor) {
-      stream.write(buildCursorSuffix(visibleLineCount(lines, str), activeCursor));
+      stream2.write(buildCursorSuffix(visibleLineCount(lines, str), activeCursor));
     }
     previousCursorPosition = activeCursor ? { ...activeCursor } : void 0;
     cursorWasShown = activeCursor !== void 0;
   };
-  render2.setCursorPosition = (position) => {
-    cursorPosition = position;
+  render2.setCursorPosition = (position2) => {
+    cursorPosition = position2;
     cursorDirty = true;
   };
   render2.isCursorDirty = () => cursorDirty;
   render2.willRender = (str) => hasChanges(str, getActiveCursor());
   return render2;
 };
-var createIncremental = (stream, { showCursor = false } = {}) => {
+var createIncremental = (stream2, { showCursor = false } = {}) => {
   let previousLines = [];
   let previousOutput = "";
   let hasHiddenCursor = false;
@@ -36921,7 +46855,7 @@ var createIncremental = (stream, { showCursor = false } = {}) => {
   };
   const render2 = (str) => {
     if (!showCursor && !hasHiddenCursor) {
-      cli_cursor_default.hide(stream);
+      cli_cursor_default.hide(stream2);
       hasHiddenCursor = true;
     }
     const activeCursor = getActiveCursor();
@@ -36934,7 +46868,7 @@ var createIncremental = (stream, { showCursor = false } = {}) => {
     const visibleCount = visibleLineCount(nextLines, str);
     const previousVisible = visibleLineCount(previousLines, previousOutput);
     if (str === previousOutput && cursorChanged) {
-      stream.write(buildCursorOnlySequence({
+      stream2.write(buildCursorOnlySequence({
         cursorWasShown,
         previousLineCount: previousLines.length,
         previousCursorPosition,
@@ -36948,7 +46882,7 @@ var createIncremental = (stream, { showCursor = false } = {}) => {
     const returnPrefix = buildReturnToBottomPrefix(cursorWasShown, previousLines.length, previousCursorPosition);
     if (str === "\n" || previousOutput.length === 0) {
       const cursorSuffix2 = buildCursorSuffix(visibleCount, activeCursor);
-      stream.write(returnPrefix + base_exports.eraseLines(previousLines.length) + str + cursorSuffix2);
+      stream2.write(returnPrefix + base_exports.eraseLines(previousLines.length) + str + cursorSuffix2);
       cursorWasShown = activeCursor !== void 0;
       previousCursorPosition = activeCursor ? { ...activeCursor } : void 0;
       previousOutput = str;
@@ -36956,30 +46890,30 @@ var createIncremental = (stream, { showCursor = false } = {}) => {
       return true;
     }
     const hasTrailingNewline = str.endsWith("\n");
-    const buffer = [];
-    buffer.push(returnPrefix);
+    const buffer2 = [];
+    buffer2.push(returnPrefix);
     if (visibleCount < previousVisible) {
       const previousHadTrailingNewline = previousOutput.endsWith("\n");
       const extraSlot = previousHadTrailingNewline ? 1 : 0;
-      buffer.push(base_exports.eraseLines(previousVisible - visibleCount + extraSlot), base_exports.cursorUp(visibleCount));
+      buffer2.push(base_exports.eraseLines(previousVisible - visibleCount + extraSlot), base_exports.cursorUp(visibleCount));
     } else {
-      buffer.push(base_exports.cursorUp(previousLines.length - 1));
+      buffer2.push(base_exports.cursorUp(previousLines.length - 1));
     }
     for (let i = 0; i < visibleCount; i++) {
       const isLastLine = i === visibleCount - 1;
       if (nextLines[i] === previousLines[i]) {
         if (!isLastLine || hasTrailingNewline) {
-          buffer.push(base_exports.cursorNextLine);
+          buffer2.push(base_exports.cursorNextLine);
         }
         continue;
       }
-      buffer.push(base_exports.cursorTo(0) + nextLines[i] + base_exports.eraseEndLine + // Don't append newline after the last line when the input
+      buffer2.push(base_exports.cursorTo(0) + nextLines[i] + base_exports.eraseEndLine + // Don't append newline after the last line when the input
       // has no trailing newline (fullscreen mode).
       (isLastLine && !hasTrailingNewline ? "" : "\n"));
     }
     const cursorSuffix = buildCursorSuffix(visibleCount, activeCursor);
-    buffer.push(cursorSuffix);
-    stream.write(buffer.join(""));
+    buffer2.push(cursorSuffix);
+    stream2.write(buffer2.join(""));
     cursorWasShown = activeCursor !== void 0;
     previousCursorPosition = activeCursor ? { ...activeCursor } : void 0;
     previousOutput = str;
@@ -36988,7 +46922,7 @@ var createIncremental = (stream, { showCursor = false } = {}) => {
   };
   render2.clear = () => {
     const prefix = buildReturnToBottomPrefix(cursorWasShown, previousLines.length, previousCursorPosition);
-    stream.write(prefix + base_exports.eraseLines(previousLines.length));
+    stream2.write(prefix + base_exports.eraseLines(previousLines.length));
     previousOutput = "";
     previousLines = [];
     previousCursorPosition = void 0;
@@ -37000,7 +46934,7 @@ var createIncremental = (stream, { showCursor = false } = {}) => {
     previousCursorPosition = void 0;
     cursorWasShown = false;
     if (!showCursor) {
-      cli_cursor_default.show(stream);
+      cli_cursor_default.show(stream2);
       hasHiddenCursor = false;
     }
   };
@@ -37017,27 +46951,27 @@ var createIncremental = (stream, { showCursor = false } = {}) => {
     previousOutput = str;
     previousLines = lines;
     if (!activeCursor && cursorWasShown) {
-      stream.write(hideCursorEscape);
+      stream2.write(hideCursorEscape);
     }
     if (activeCursor) {
-      stream.write(buildCursorSuffix(visibleLineCount(lines, str), activeCursor));
+      stream2.write(buildCursorSuffix(visibleLineCount(lines, str), activeCursor));
     }
     previousCursorPosition = activeCursor ? { ...activeCursor } : void 0;
     cursorWasShown = activeCursor !== void 0;
   };
-  render2.setCursorPosition = (position) => {
-    cursorPosition = position;
+  render2.setCursorPosition = (position2) => {
+    cursorPosition = position2;
     cursorDirty = true;
   };
   render2.isCursorDirty = () => cursorDirty;
   render2.willRender = (str) => hasChanges(str, getActiveCursor());
   return render2;
 };
-var create2 = (stream, { showCursor = false, incremental = false } = {}) => {
+var create2 = (stream2, { showCursor = false, incremental = false } = {}) => {
   if (incremental) {
-    return createIncremental(stream, { showCursor });
+    return createIncremental(stream2, { showCursor });
   }
-  return createStandard(stream, { showCursor });
+  return createStandard(stream2, { showCursor });
 };
 var logUpdate = { create: create2 };
 var log_update_default = logUpdate;
@@ -37045,8 +46979,8 @@ var log_update_default = logUpdate;
 // node_modules/ink/build/write-synchronized.js
 var bsu = "\x1B[?2026h";
 var esu = "\x1B[?2026l";
-function shouldSynchronize(stream, interactive) {
-  return "isTTY" in stream && stream.isTTY && (interactive ?? !is_in_ci_default);
+function shouldSynchronize(stream2, interactive) {
+  return "isTTY" in stream2 && stream2.isTTY && (interactive ?? !is_in_ci_default);
 }
 
 // node_modules/ink/build/instances.js
@@ -37161,40 +47095,40 @@ var parseEscapeSequence = (input, escapeIndex) => {
   }
   return parseEscapedCodePoint(input, escapeIndex);
 };
-var splitBackspaceBytes = (text, events) => {
+var splitBackspaceBytes = (text, events2) => {
   let textSegmentStart = 0;
   for (let index2 = 0; index2 < text.length; index2++) {
     const character = text[index2];
     if (character === "\x7F" || character === "\b") {
       if (index2 > textSegmentStart) {
-        events.push(text.slice(textSegmentStart, index2));
+        events2.push(text.slice(textSegmentStart, index2));
       }
-      events.push(character);
+      events2.push(character);
       textSegmentStart = index2 + 1;
     }
   }
   if (textSegmentStart < text.length) {
-    events.push(text.slice(textSegmentStart));
+    events2.push(text.slice(textSegmentStart));
   }
 };
 var parseKeypresses = (input) => {
-  const events = [];
+  const events2 = [];
   let index2 = 0;
   const pendingFrom = (pendingStartIndex) => ({
-    events,
+    events: events2,
     pending: input.slice(pendingStartIndex)
   });
   while (index2 < input.length) {
     const escapeIndex = input.indexOf(escape, index2);
     if (escapeIndex === -1) {
-      splitBackspaceBytes(input.slice(index2), events);
+      splitBackspaceBytes(input.slice(index2), events2);
       return {
-        events,
+        events: events2,
         pending: ""
       };
     }
     if (escapeIndex > index2) {
-      splitBackspaceBytes(input.slice(index2, escapeIndex), events);
+      splitBackspaceBytes(input.slice(index2, escapeIndex), events2);
     }
     const parsedEscapeSequence = parseEscapeSequence(input, escapeIndex);
     if (parsedEscapeSequence === "pending") {
@@ -37206,15 +47140,15 @@ var parseKeypresses = (input) => {
       if (endIndex === -1) {
         return pendingFrom(escapeIndex);
       }
-      events.push({ paste: input.slice(afterStart, endIndex) });
+      events2.push({ paste: input.slice(afterStart, endIndex) });
       index2 = endIndex + pasteEnd.length;
       continue;
     }
-    events.push(parsedEscapeSequence.sequence);
+    events2.push(parsedEscapeSequence.sequence);
     index2 = parsedEscapeSequence.nextIndex;
   }
   return {
-    events,
+    events: events2,
     pending: ""
   };
 };
@@ -37443,7 +47377,7 @@ var Box_default = Box;
 
 // node_modules/ink/build/components/Text.js
 var import_react12 = __toESM(require_react(), 1);
-function Text({ color, backgroundColor, dimColor = false, bold = false, italic = false, underline = false, strikethrough = false, inverse = false, wrap = "wrap", children, "aria-label": ariaLabel, "aria-hidden": ariaHidden = false }) {
+function Text({ color: color2, backgroundColor, dimColor = false, bold = false, italic = false, underline = false, strikethrough = false, inverse = false, wrap = "wrap", children, "aria-label": ariaLabel, "aria-hidden": ariaHidden = false }) {
   const { isScreenReaderEnabled } = (0, import_react12.useContext)(accessibilityContext);
   const inheritedBackgroundColor = (0, import_react12.useContext)(backgroundContext);
   const childrenOrAriaLabel = isScreenReaderEnabled && ariaLabel ? ariaLabel : children;
@@ -37454,8 +47388,8 @@ function Text({ color, backgroundColor, dimColor = false, bold = false, italic =
     if (dimColor) {
       children2 = source_default.dim(children2);
     }
-    if (color) {
-      children2 = colorize_default(children2, color, "foreground");
+    if (color2) {
+      children2 = colorize_default(children2, color2, "foreground");
     }
     const effectiveBackgroundColor = backgroundColor ?? inheritedBackgroundColor;
     if (effectiveBackgroundColor) {
@@ -37485,8 +47419,8 @@ function Text({ color, backgroundColor, dimColor = false, bold = false, italic =
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path4) => {
-  return path4?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path5) => {
+  return path5?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -38169,40 +48103,40 @@ var kittyQueryLetterByte = 117;
 var zeroByte = 48;
 var nineByte = 57;
 var isDigitByte = (byte) => byte >= zeroByte && byte <= nineByte;
-var matchKittyQueryResponse = (buffer, startIndex) => {
-  if (buffer[startIndex] !== kittyQueryEscapeByte || buffer[startIndex + 1] !== kittyQueryOpenBracketByte || buffer[startIndex + 2] !== kittyQueryQuestionMarkByte) {
+var matchKittyQueryResponse = (buffer2, startIndex) => {
+  if (buffer2[startIndex] !== kittyQueryEscapeByte || buffer2[startIndex + 1] !== kittyQueryOpenBracketByte || buffer2[startIndex + 2] !== kittyQueryQuestionMarkByte) {
     return void 0;
   }
   let index2 = startIndex + 3;
   const digitsStartIndex = index2;
-  while (index2 < buffer.length && isDigitByte(buffer[index2])) {
+  while (index2 < buffer2.length && isDigitByte(buffer2[index2])) {
     index2++;
   }
   if (index2 === digitsStartIndex) {
     return void 0;
   }
-  if (index2 === buffer.length) {
+  if (index2 === buffer2.length) {
     return { state: "partial" };
   }
-  if (buffer[index2] === kittyQueryLetterByte) {
+  if (buffer2[index2] === kittyQueryLetterByte) {
     return { state: "complete", endIndex: index2 };
   }
   return void 0;
 };
-var hasCompleteKittyQueryResponse = (buffer) => {
-  for (let index2 = 0; index2 < buffer.length; index2++) {
-    const match = matchKittyQueryResponse(buffer, index2);
+var hasCompleteKittyQueryResponse = (buffer2) => {
+  for (let index2 = 0; index2 < buffer2.length; index2++) {
+    const match = matchKittyQueryResponse(buffer2, index2);
     if (match?.state === "complete") {
       return true;
     }
   }
   return false;
 };
-var stripKittyQueryResponsesAndTrailingPartial = (buffer) => {
+var stripKittyQueryResponsesAndTrailingPartial = (buffer2) => {
   const keptBytes = [];
   let index2 = 0;
-  while (index2 < buffer.length) {
-    const match = matchKittyQueryResponse(buffer, index2);
+  while (index2 < buffer2.length) {
+    const match = matchKittyQueryResponse(buffer2, index2);
     if (match?.state === "complete") {
       index2 = match.endIndex + 1;
       continue;
@@ -38210,7 +48144,7 @@ var stripKittyQueryResponsesAndTrailingPartial = (buffer) => {
     if (match?.state === "partial") {
       break;
     }
-    keptBytes.push(buffer[index2]);
+    keptBytes.push(buffer2[index2]);
     index2++;
   }
   return keptBytes;
@@ -38412,9 +48346,9 @@ var Ink = class {
     this.exitResult = errorOrResult;
     this.unmount();
   };
-  setCursorPosition = (position) => {
-    this.cursorPosition = position;
-    this.log.setCursorPosition(position);
+  setCursorPosition = (position2) => {
+    this.cursorPosition = position2;
+    this.log.setCursorPosition(position2);
   };
   restoreLastOutput = () => {
     if (!this.interactive) {
@@ -38708,11 +48642,11 @@ var Ink = class {
     if (this.options.debug) {
       return;
     }
-    this.restoreConsole = dist_default((stream, data) => {
-      if (stream === "stdout") {
+    this.restoreConsole = dist_default((stream2, data) => {
+      if (stream2 === "stdout") {
         this.writeToStdout(data);
       }
-      if (stream === "stderr") {
+      if (stream2 === "stderr") {
         const isReactMessage = data.startsWith("The above error occurred");
         if (!isReactMessage) {
           this.writeToStderr(data);
@@ -38756,9 +48690,9 @@ var Ink = class {
     return shouldSynchronize(this.options.stdout, this.interactive);
   }
   // Best-effort write: streams may already be destroyed during shutdown.
-  writeBestEffort(stream, data) {
+  writeBestEffort(stream2, data) {
     try {
-      stream.write(data);
+      stream2.write(data);
     } catch {
     }
   }
@@ -39341,11 +49275,11 @@ var parseKittySpecialKey = (s) => {
   const match = kittySpecialKeyRe.exec(s);
   if (!match)
     return null;
-  const number = parseInt(match[1], 10);
+  const number2 = parseInt(match[1], 10);
   const modifiers = Math.max(0, parseInt(match[2], 10) - 1);
   const eventType = parseInt(match[3], 10);
   const terminator = match[4];
-  const name = terminator === "~" ? kittySpecialNumberKeys[number] : kittySpecialLetterKeys[terminator];
+  const name = terminator === "~" ? kittySpecialNumberKeys[number2] : kittySpecialLetterKeys[terminator];
   if (!name)
     return null;
   return {
@@ -39574,9 +49508,9 @@ var import_react32 = __toESM(require_react(), 1);
 var import_react33 = __toESM(require_react(), 1);
 
 // src/app.tsx
-var import_react39 = __toESM(require_react(), 1);
+var import_react40 = __toESM(require_react(), 1);
 import os5 from "os";
-import path3 from "path";
+import path4 from "path";
 
 // node_modules/ink-select-input/build/Indicator.js
 var import_react34 = __toESM(require_react(), 1);
@@ -40089,10 +50023,6 @@ function Logo() {
   const theme = useTheme();
   return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, alignItems: "center", children: LOGO_LINES.map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: line }, i)) });
 }
-function LogoCompact() {
-  const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u25C8 CARBON" });
-}
 
 // src/components/panel.tsx
 var import_jsx_runtime2 = __toESM(require_jsx_runtime(), 1);
@@ -40149,8 +50079,8 @@ function TextInput({ value, onChange, onSubmit, placeholder = "", width = 40, hi
   const [historyPos, setHistoryPos] = (0, import_react38.useState)(null);
   const draftRef = (0, import_react38.useRef)("");
   const cursor = Math.min(cursorState, value.length);
-  const edit = (next, position) => {
-    setCursorState(Math.max(0, Math.min(next.length, position)));
+  const edit = (next, position2) => {
+    setCursorState(Math.max(0, Math.min(next.length, position2)));
     setHistoryPos(null);
     onChange(next);
   };
@@ -41379,91 +51309,91 @@ var fil = {
   lblSource: "Pinagmulan"
 };
 var partial = {
-  sv: { grab: "ladda ner", quit: "avsluta", cancel: "avbryt", tip: "Tips", lblTitle: "Titel", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Sl\xE4pp", lblTime: "L\xE4ngd", lblSource: "K\xE4lla" },
-  no: { grab: "last ned", quit: "avslutt", cancel: "avbryt", tip: "Tips", lblTitle: "Tittel", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Utgivelse", lblTime: "Varighet", lblSource: "Kilde" },
-  da: { grab: "download", quit: "afslut", cancel: "annuller", tip: "Tip", lblTitle: "Titel", lblArtist: "Kunstner", lblAlbum: "Album", lblRelease: "Udgivelse", lblTime: "Varighed", lblSource: "Kilde" },
-  fi: { grab: "lataa", quit: "poistu", cancel: "peruuta", tip: "Vinkki", lblTitle: "Otsikko", lblArtist: "Artisti", lblAlbum: "Albumi", lblRelease: "Julkaisu", lblTime: "Kesto", lblSource: "L\xE4hde" },
-  cs: { grab: "st\xE1hnout", quit: "ukon\u010Dit", cancel: "zru\u0161it", tip: "Tip", lblTitle: "N\xE1zev", lblArtist: "Um\u011Blec", lblAlbum: "Album", lblRelease: "Vyd\xE1n\xED", lblTime: "D\xE9lka", lblSource: "Zdroj" },
-  sk: { grab: "stiahnu\u0165", quit: "ukon\u010Di\u0165", cancel: "zru\u0161i\u0165", tip: "Tip", lblTitle: "N\xE1zov", lblArtist: "Umelec", lblAlbum: "Album", lblRelease: "Vydanie", lblTime: "Trvanie", lblSource: "Zdroj" },
-  hu: { grab: "let\xF6lt\xE9s", quit: "kil\xE9p\xE9s", cancel: "m\xE9gse", tip: "Tipp", lblTitle: "C\xEDm", lblArtist: "El\u0151ad\xF3", lblAlbum: "Album", lblRelease: "Kiad\xE1s", lblTime: "Hossz", lblSource: "Forr\xE1s" },
-  ro: { grab: "descarc\u0103", quit: "ie\u0219ire", cancel: "anulare", tip: "Sfat", lblTitle: "Titlu", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Lansare", lblTime: "Durat\u0103", lblSource: "Surs\u0103" },
-  bg: { grab: "\u0438\u0437\u0442\u0435\u0433\u043B\u0438", quit: "\u0438\u0437\u0445\u043E\u0434", cancel: "\u043E\u0442\u043A\u0430\u0437", tip: "\u0421\u044A\u0432\u0435\u0442", lblTitle: "\u0417\u0430\u0433\u043B\u0430\u0432\u0438\u0435", lblArtist: "\u0418\u0437\u043F\u044A\u043B\u043D\u0438\u0442\u0435\u043B", lblAlbum: "\u0410\u043B\u0431\u0443\u043C", lblRelease: "\u0418\u0437\u0434\u0430\u0432\u0430\u043D\u0435", lblTime: "\u041F\u0440\u043E\u0434\u044A\u043B\u0436\u0438\u0442\u0435\u043B\u043D\u043E\u0441\u0442", lblSource: "\u0418\u0437\u0442\u043E\u0447\u043D\u0438\u043A" },
-  el: { grab: "\u03BB\u03AE\u03C8\u03B7", quit: "\u03AD\u03BE\u03BF\u03B4\u03BF\u03C2", cancel: "\u03B1\u03BA\u03CD\u03C1\u03C9\u03C3\u03B7", tip: "\u03A3\u03C5\u03BC\u03B2\u03BF\u03C5\u03BB\u03AE", lblTitle: "\u03A4\u03AF\u03C4\u03BB\u03BF\u03C2", lblArtist: "\u039A\u03B1\u03BB\u03BB\u03B9\u03C4\u03AD\u03C7\u03BD\u03B7\u03C2", lblAlbum: "\u0386\u03BB\u03BC\u03C0\u03BF\u03C5\u03BC", lblRelease: "\u039A\u03C5\u03BA\u03BB\u03BF\u03C6\u03BF\u03C1\u03AF\u03B1", lblTime: "\u0394\u03B9\u03AC\u03C1\u03BA\u03B5\u03B9\u03B1", lblSource: "\u03A0\u03B7\u03B3\u03AE" },
-  hr: { grab: "preuzmi", quit: "izlaz", cancel: "odustani", tip: "Savjet", lblTitle: "Naslov", lblArtist: "Izvo\u0111a\u010D", lblAlbum: "Album", lblRelease: "Izdanje", lblTime: "Trajanje", lblSource: "Izvor" },
-  sr: { grab: "preuzmi", quit: "izlaz", cancel: "otka\u017Ei", tip: "Savet", lblTitle: "Naslov", lblArtist: "Izvo\u0111a\u010D", lblAlbum: "Album", lblRelease: "Izdanje", lblTime: "Trajanje", lblSource: "Izvor" },
-  sl: { grab: "prenesi", quit: "izhod", cancel: "prekli\u010Di", tip: "Nasvet", lblTitle: "Naslov", lblArtist: "Izvajalec", lblAlbum: "Album", lblRelease: "Izdaja", lblTime: "Trajanje", lblSource: "Vir" },
-  lt: { grab: "atsisi\u0173sti", quit: "i\u0161eiti", cancel: "at\u0161aukti", tip: "Patarimas", lblTitle: "Pavadinimas", lblArtist: "Atlik\u0117jas", lblAlbum: "Albumas", lblRelease: "Leidimas", lblTime: "Trukm\u0117", lblSource: "\u0160altinis" },
-  lv: { grab: "lejupiel\u0101d\u0113t", quit: "iziet", cancel: "atcelt", tip: "Padoms", lblTitle: "Nosaukums", lblArtist: "M\u0101kslinieks", lblAlbum: "Albums", lblRelease: "Izlaidums", lblTime: "Ilgums", lblSource: "Avots" },
-  et: { grab: "laadi alla", quit: "v\xE4lju", cancel: "t\xFChista", tip: "Vihje", lblTitle: "Pealkiri", lblArtist: "Esitaja", lblAlbum: "Album", lblRelease: "V\xE4ljalase", lblTime: "Kestus", lblSource: "Allikas" },
-  ca: { grab: "descarrega", quit: "surt", cancel: "cancel\xB7la", tip: "Consell", lblTitle: "T\xEDtol", lblArtist: "Artista", lblAlbum: "\xC0lbum", lblRelease: "Llan\xE7ament", lblTime: "Durada", lblSource: "Font" },
-  eu: { grab: "deskargatu", quit: "irten", cancel: "utzi", tip: "Aholkua", lblTitle: "Izenburua", lblArtist: "Artista", lblAlbum: "Albuma", lblRelease: "Argitalpena", lblTime: "Iraupena", lblSource: "Iturria" },
-  gl: { grab: "descargar", quit: "sa\xEDr", cancel: "cancelar", tip: "Consello", lblTitle: "T\xEDtulo", lblArtist: "Artista", lblAlbum: "\xC1lbum", lblRelease: "Lanzamento", lblTime: "Duraci\xF3n", lblSource: "Fonte" },
-  is: { grab: "s\xE6kja", quit: "h\xE6tta", cancel: "h\xE6tta vi\xF0", tip: "\xC1bending", lblTitle: "Titill", lblArtist: "Listama\xF0ur", lblAlbum: "Plata", lblRelease: "\xDAtg\xE1fa", lblTime: "Lengd", lblSource: "Uppruni" },
-  ga: { grab: "\xEDosl\xF3d\xE1il", quit: "scoir", cancel: "cealaigh", tip: "Leid", lblTitle: "Teideal", lblArtist: "Eala\xEDont\xF3ir", lblAlbum: "Albam", lblRelease: "Eisi\xFAint", lblTime: "Fad", lblSource: "Foinse" },
-  cy: { grab: "lawrlwytho", quit: "gadael", cancel: "canslo", tip: "Awgrym", lblTitle: "Teitl", lblArtist: "Artist", lblAlbum: "Albwm", lblRelease: "Rhyddhau", lblTime: "Hyd", lblSource: "Ffynhonnell" },
-  mt: { grab: "ni\u017C\u017Cel", quit: "o\u0127ro\u0121", cancel: "ikkan\u010Bella", tip: "Parir", lblTitle: "Titlu", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "\u0126ru\u0121", lblTime: "Tul", lblSource: "Sors" },
-  sq: { grab: "shkarko", quit: "dil", cancel: "anulo", tip: "K\xEBshill\xEB", lblTitle: "Titulli", lblArtist: "Artisti", lblAlbum: "Albumi", lblRelease: "L\xEBshimi", lblTime: "Koh\xEBzgjatja", lblSource: "Burimi" },
-  mk: { grab: "\u043F\u0440\u0435\u0437\u0435\u043C\u0438", quit: "\u0438\u0437\u043B\u0435\u0437", cancel: "\u043E\u0442\u043A\u0430\u0436\u0438", tip: "\u0421\u043E\u0432\u0435\u0442", lblTitle: "\u041D\u0430\u0441\u043B\u043E\u0432", lblArtist: "\u0418\u0437\u0432\u0435\u0434\u0443\u0432\u0430\u0447", lblAlbum: "\u0410\u043B\u0431\u0443\u043C", lblRelease: "\u0418\u0437\u0434\u0430\u0432\u0430\u045A\u0435", lblTime: "\u0412\u0440\u0435\u043C\u0435\u0442\u0440\u0430\u0435\u045A\u0435", lblSource: "\u0418\u0437\u0432\u043E\u0440" },
-  bs: { grab: "preuzmi", quit: "izlaz", cancel: "otka\u017Ei", tip: "Savjet", lblTitle: "Naslov", lblArtist: "Izvo\u0111a\u010D", lblAlbum: "Album", lblRelease: "Izdanje", lblTime: "Trajanje", lblSource: "Izvor" },
-  lb: { grab: "eroflueden", quit: "verloossen", cancel: "ofbriechen", tip: "Tipp", lblTitle: "Titel", lblArtist: "K\xEBnschtler", lblAlbum: "Album", lblRelease: "Ver\xEBffentlechung", lblTime: "Dauer", lblSource: "Quell" },
-  af: { grab: "aflaai", quit: "verlaat", cancel: "kanselleer", tip: "Wenk", lblTitle: "Titel", lblArtist: "Kunstenaar", lblAlbum: "Album", lblRelease: "Vrystelling", lblTime: "Duur", lblSource: "Bron" },
-  sw: { grab: "pakua", quit: "ondoka", cancel: "ghairi", tip: "Kidokezo", lblTitle: "Kichwa", lblArtist: "Msanii", lblAlbum: "Albamu", lblRelease: "Toleo", lblTime: "Muda", lblSource: "Chanzo" },
-  am: { grab: "\u12A0\u12CD\u122D\u12F5", quit: "\u12CD\u1323", cancel: "\u1230\u122D\u12DD", tip: "\u121D\u12AD\u122D", lblTitle: "\u122D\u12D5\u1235", lblArtist: "\u12A0\u122D\u1272\u1235\u1275", lblAlbum: "\u12A0\u120D\u1260\u121D", lblRelease: "\u120D\u1240\u1275", lblTime: "\u1246\u12ED\u1273", lblSource: "\u121D\u1295\u132D" },
-  hy: { grab: "\u0576\u0565\u0580\u0562\u0565\u057C\u0576\u0565\u056C", quit: "\u0565\u056C\u0584", cancel: "\u0579\u0565\u0572\u0561\u0580\u056F\u0565\u056C", tip: "\u053D\u0578\u0580\u0570\u0578\u0582\u0580\u0564", lblTitle: "\u054E\u0565\u0580\u0576\u0561\u0563\u056B\u0580", lblArtist: "\u0531\u0580\u057F\u056B\u057D\u057F", lblAlbum: "\u0531\u056C\u0562\u0578\u0574", lblRelease: "\u0539\u0578\u0572\u0561\u0580\u056F\u0578\u0582\u0574", lblTime: "\u054F\u0587\u0578\u0572\u0578\u0582\u0569\u0575\u0578\u0582\u0576", lblSource: "\u0531\u0572\u0562\u0575\u0578\u0582\u0580" },
-  ka: { grab: "\u10E9\u10D0\u10DB\u10DD\u10E2\u10D5\u10D8\u10E0\u10D7\u10D5\u10D0", quit: "\u10D2\u10D0\u10E1\u10D5\u10DA\u10D0", cancel: "\u10D2\u10D0\u10E3\u10E5\u10DB\u10D4\u10D1\u10D0", tip: "\u10E0\u10E9\u10D4\u10D5\u10D0", lblTitle: "\u10E1\u10D0\u10D7\u10D0\u10E3\u10E0\u10D8", lblArtist: "\u10E8\u10D4\u10DB\u10E1\u10E0\u10E3\u10DA\u10D4\u10D1\u10D4\u10DA\u10D8", lblAlbum: "\u10D0\u10DA\u10D1\u10DD\u10DB\u10D8", lblRelease: "\u10D2\u10D0\u10DB\u10DD\u10E8\u10D5\u10D4\u10D1\u10D0", lblTime: "\u10EE\u10D0\u10DC\u10D2\u10E0\u10EB\u10DA\u10D8\u10D5\u10DD\u10D1\u10D0", lblSource: "\u10EC\u10E7\u10D0\u10E0\u10DD" },
-  az: { grab: "y\xFCkl\u0259", quit: "\xE7\u0131x\u0131\u015F", cancel: "l\u0259\u011Fv et", tip: "M\u0259sl\u0259h\u0259t", lblTitle: "Ba\u015Fl\u0131q", lblArtist: "\u0130fa\xE7\u0131", lblAlbum: "Albom", lblRelease: "Burax\u0131l\u0131\u015F", lblTime: "M\xFCdd\u0259t", lblSource: "M\u0259nb\u0259" },
-  kk: { grab: "\u0436\u04AF\u043A\u0442\u0435\u0443", quit: "\u0448\u044B\u0493\u0443", cancel: "\u0431\u043E\u043B\u0434\u044B\u0440\u043C\u0430\u0443", tip: "\u041A\u0435\u04A3\u0435\u0441", lblTitle: "\u0410\u0442\u0430\u0443\u044B", lblArtist: "\u04D8\u0440\u0442\u0456\u0441", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0428\u044B\u0493\u0430\u0440\u044B\u043B\u044B\u043C", lblTime: "\u04B0\u0437\u0430\u049B\u0442\u044B\u0493\u044B", lblSource: "\u0414\u0435\u0440\u0435\u043A\u043A\u04E9\u0437" },
-  ky: { grab: "\u0436\u04AF\u043A\u0442\u04E9\u04E9", quit: "\u0447\u044B\u0433\u0443\u0443", cancel: "\u0436\u043E\u043A\u043A\u043E \u0447\u044B\u0433\u0430\u0440\u0443\u0443", tip: "\u041A\u0435\u04A3\u0435\u0448", lblTitle: "\u0410\u0442\u0430\u043B\u044B\u0448\u044B", lblArtist: "\u0410\u0440\u0442\u0438\u0441\u0442", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0427\u044B\u0433\u0430\u0440\u044B\u043B\u044B\u0448", lblTime: "\u0423\u0437\u0430\u043A\u0442\u044B\u0433\u044B", lblSource: "\u0411\u0443\u043B\u0430\u043A" },
-  uz: { grab: "yuklab olish", quit: "chiqish", cancel: "bekor qilish", tip: "Maslahat", lblTitle: "Sarlavha", lblArtist: "Ijrochi", lblAlbum: "Albom", lblRelease: "Reliz", lblTime: "Davomiyligi", lblSource: "Manba" },
-  tg: { grab: "\u0431\u043E\u0440\u0433\u0438\u0440\u04E3", quit: "\u0431\u0430\u0440\u043E\u043C\u0430\u0434", cancel: "\u0431\u0435\u043A\u043E\u0440", tip: "\u041C\u0430\u0441\u043B\u0438\u04B3\u0430\u0442", lblTitle: "\u0421\u0430\u0440\u043B\u0430\u0432\u04B3\u0430", lblArtist: "\u04B2\u0443\u043D\u0430\u0440\u043C\u0430\u043D\u0434", lblAlbum: "\u0410\u043B\u0431\u043E\u043C", lblRelease: "\u041D\u0430\u0448\u0440", lblTime: "\u0414\u0430\u0432\u043E\u043C\u043D\u043E\u043A\u04E3", lblSource: "\u041C\u0430\u043D\u0431\u0430\u044A" },
-  tk: { grab: "\xFD\xFCkle", quit: "\xE7yk", cancel: "\xFDatyr", tip: "Maslahat", lblTitle: "Ady", lblArtist: "Artist", lblAlbum: "Albom", lblRelease: "\xC7yky\u015F", lblTime: "Dowamlylygy", lblSource: "\xC7e\u015Fme" },
-  mn: { grab: "\u0442\u0430\u0442\u0430\u0445", quit: "\u0433\u0430\u0440\u0430\u0445", cancel: "\u0446\u0443\u0446\u043B\u0430\u0445", tip: "\u0417\u04E9\u0432\u043B\u04E9\u0433\u04E9\u04E9", lblTitle: "\u0413\u0430\u0440\u0447\u0438\u0433", lblArtist: "\u0423\u0440\u0430\u043D \u0431\u04AF\u0442\u044D\u044D\u043B\u0447", lblAlbum: "\u0426\u043E\u043C\u043E\u0433", lblRelease: "\u0425\u044D\u0432\u043B\u044D\u043B\u0442", lblTime: "\u04AE\u0440\u0433\u044D\u043B\u0436\u043B\u044D\u0445 \u0445\u0443\u0433\u0430\u0446\u0430\u0430", lblSource: "\u042D\u0445 \u0441\u0443\u0440\u0432\u0430\u043B\u0436" },
-  ne: { grab: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921", quit: "\u092C\u093E\u0939\u093F\u0930", cancel: "\u0930\u0926\u094D\u0926", tip: "\u0938\u0941\u091D\u093E\u0935", lblTitle: "\u0936\u0940\u0930\u094D\u0937\u0915", lblArtist: "\u0915\u0932\u093E\u0915\u093E\u0930", lblAlbum: "\u090F\u0932\u094D\u092C\u092E", lblRelease: "\u0930\u093F\u0932\u093F\u091C", lblTime: "\u0905\u0935\u0927\u093F", lblSource: "\u0938\u094D\u0930\u094B\u0924" },
-  bn: { grab: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1", quit: "\u09AA\u09CD\u09B0\u09B8\u09CD\u09A5\u09BE\u09A8", cancel: "\u09AC\u09BE\u09A4\u09BF\u09B2", tip: "\u09AA\u09B0\u09BE\u09AE\u09B0\u09CD\u09B6", lblTitle: "\u09B6\u09BF\u09B0\u09CB\u09A8\u09BE\u09AE", lblArtist: "\u09B6\u09BF\u09B2\u09CD\u09AA\u09C0", lblAlbum: "\u0985\u09CD\u09AF\u09BE\u09B2\u09AC\u09BE\u09AE", lblRelease: "\u09B0\u09BF\u09B2\u09BF\u099C", lblTime: "\u09B8\u09AE\u09AF\u09BC\u0995\u09BE\u09B2", lblSource: "\u0989\u09CE\u09B8" },
-  fa: { grab: "\u062F\u0627\u0646\u0644\u0648\u062F", quit: "\u062E\u0631\u0648\u062C", cancel: "\u0644\u063A\u0648", tip: "\u0646\u06A9\u062A\u0647", lblTitle: "\u0639\u0646\u0648\u0627\u0646", lblArtist: "\u0647\u0646\u0631\u0645\u0646\u062F", lblAlbum: "\u0622\u0644\u0628\u0648\u0645", lblRelease: "\u0627\u0646\u062A\u0634\u0627\u0631", lblTime: "\u0645\u062F\u062A", lblSource: "\u0645\u0646\u0628\u0639" },
-  he: { grab: "\u05D4\u05D5\u05E8\u05D3", quit: "\u05D9\u05E6\u05D9\u05D0\u05D4", cancel: "\u05D1\u05D9\u05D8\u05D5\u05DC", tip: "\u05D8\u05D9\u05E4", lblTitle: "\u05DB\u05D5\u05EA\u05E8\u05EA", lblArtist: "\u05D0\u05DE\u05DF", lblAlbum: "\u05D0\u05DC\u05D1\u05D5\u05DD", lblRelease: "\u05E9\u05D7\u05E8\u05D5\u05E8", lblTime: "\u05DE\u05E9\u05DA", lblSource: "\u05DE\u05E7\u05D5\u05E8" },
-  ur: { grab: "\u0688\u0627\u0624\u0646 \u0644\u0648\u0688", quit: "\u0628\u0627\u06C1\u0631", cancel: "\u0645\u0646\u0633\u0648\u062E", tip: "\u0645\u0634\u0648\u0631\u06C1", lblTitle: "\u0639\u0646\u0648\u0627\u0646", lblArtist: "\u0641\u0646\u06A9\u0627\u0631", lblAlbum: "\u0627\u0644\u0628\u0645", lblRelease: "\u0627\u062C\u0631\u0627", lblTime: "\u062F\u0648\u0631\u0627\u0646\u06CC\u06C1", lblSource: "\u0645\u0627\u062E\u0630" },
-  ps: { grab: "\u0689\u0627\u0648\u0646\u0644\u0648\u0689", quit: "\u0648\u062A\u0644", cancel: "\u0644\u063A\u0648\u0647", tip: "\u0644\u0627\u0631\u069A\u0648\u0648\u0646\u0647", lblTitle: "\u0633\u0631\u0644\u06CC\u06A9", lblArtist: "\u0647\u0646\u0631\u0645\u0646\u062F", lblAlbum: "\u0627\u0644\u0628\u0648\u0645", lblRelease: "\u062E\u067E\u0631\u0648\u0644", lblTime: "\u0645\u0648\u062F\u0647", lblSource: "\u0633\u0631\u0686\u06CC\u0646\u0647" },
-  ku: { grab: "daxistin", quit: "derketin", cancel: "betal", tip: "\u015E\xEEret", lblTitle: "Sernav", lblArtist: "Hunermend", lblAlbum: "Alb\xFBm", lblRelease: "We\u015Fan", lblTime: "Dem", lblSource: "\xC7avkan\xEE" },
-  km: { grab: "\u1791\u17B6\u1789\u1799\u1780", quit: "\u1785\u17C1\u1789", cancel: "\u1794\u17C4\u17C7\u1794\u1784\u17CB", tip: "\u1782\u1793\u17D2\u179B\u17B9\u17C7", lblTitle: "\u1785\u17C6\u178E\u1784\u1787\u17BE\u1784", lblArtist: "\u179F\u17B7\u179B\u17D2\u1794\u1780\u179A", lblAlbum: "\u17A2\u17B6\u179B\u17CB\u1794\u17CA\u17BB\u1798", lblRelease: "\u1780\u17B6\u179A\u1785\u17C1\u1789\u1795\u17D2\u179F\u17B6\u1799", lblTime: "\u179A\u1799\u17C8\u1796\u17C1\u179B", lblSource: "\u1794\u17D2\u179A\u1797\u1796" },
-  lo: { grab: "\u0E94\u0EB2\u0EA7\u0EC2\u0EAB\u0EA5\u0E94", quit: "\u0EAD\u0EAD\u0E81", cancel: "\u0E8D\u0EBB\u0E81\u0EC0\u0EA5\u0EB5\u0E81", tip: "\u0E84\u0EB3\u0EC1\u0E99\u0EB0\u0E99\u0EB3", lblTitle: "\u0EAB\u0EBB\u0EA7\u0E82\u0ECD\u0EC9", lblArtist: "\u0EAA\u0EB4\u0E99\u0EA5\u0EB0\u0E9B\u0EB4\u0E99", lblAlbum: "\u0EAD\u0EB0\u0EA5\u0EB0\u0E9A\u0EB3", lblRelease: "\u0E81\u0EB2\u0E99\u0E9B\u0EC8\u0EAD\u0E8D", lblTime: "\u0EC4\u0EA5\u0E8D\u0EB0\u0EC0\u0EA7\u0EA5\u0EB2", lblSource: "\u0EC1\u0EAB\u0EBC\u0EC8\u0E87" },
-  my: { grab: "\u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A", quit: "\u1011\u103D\u1000\u103A", cancel: "\u1015\u101A\u103A\u1016\u103B\u1000\u103A", tip: "\u1021\u1000\u103C\u1036\u1015\u103C\u102F\u1001\u103B\u1000\u103A", lblTitle: "\u1001\u1031\u102B\u1004\u103A\u1038\u1005\u1009\u103A", lblArtist: "\u1021\u1014\u102F\u1015\u100A\u102C\u101B\u103E\u1004\u103A", lblAlbum: "\u1021\u101A\u103A\u101C\u103A\u1018\u1019\u103A", lblRelease: "\u1011\u102F\u1010\u103A\u101D\u1031", lblTime: "\u1000\u103C\u102C\u1001\u103B\u102D\u1014\u103A", lblSource: "\u1021\u101B\u1004\u103A\u1038\u1021\u1019\u103C\u1005\u103A" },
-  si: { grab: "\u0DB6\u0DCF\u0D9C\u0DB1\u0DCA\u0DB1", quit: "\u0DB4\u0DD2\u0DA7\u0DC0\u0DB1\u0DCA\u0DB1", cancel: "\u0D85\u0DC0\u0DBD\u0D82\u0D9C\u0DD4", tip: "\u0D89\u0D9F\u0DD2\u0DBA", lblTitle: "\u0DB8\u0DCF\u0DAD\u0DD8\u0D9A\u0DCF\u0DC0", lblArtist: "\u0D9A\u0DBD\u0DCF\u0D9A\u0DBB\u0DD4", lblAlbum: "\u0D87\u0DBD\u0DCA\u0DB6\u0DB8\u0DBA", lblRelease: "\u0DB1\u0DD2\u0D9A\u0DD4\u0DAD\u0DD4\u0DC0", lblTime: "\u0D9A\u0DCF\u0DBD\u0DBA", lblSource: "\u0DB8\u0DD6\u0DBD\u0DCF\u0DC1\u0DCA\u200D\u0DBB\u0DBA" },
-  ta: { grab: "\u0BAA\u0BA4\u0BBF\u0BB5\u0BBF\u0BB1\u0B95\u0BCD\u0B95\u0BC1", quit: "\u0BB5\u0BC6\u0BB3\u0BBF\u0BAF\u0BC7\u0BB1\u0BC1", cancel: "\u0BB0\u0BA4\u0BCD\u0BA4\u0BC1", tip: "\u0B95\u0BC1\u0BB1\u0BBF\u0BAA\u0BCD\u0BAA\u0BC1", lblTitle: "\u0BA4\u0BB2\u0BC8\u0BAA\u0BCD\u0BAA\u0BC1", lblArtist: "\u0B95\u0BB2\u0BC8\u0B9E\u0BB0\u0BCD", lblAlbum: "\u0B86\u0BB2\u0BCD\u0BAA\u0BAE\u0BCD", lblRelease: "\u0BB5\u0BC6\u0BB3\u0BBF\u0BAF\u0BC0\u0B9F\u0BC1", lblTime: "\u0BA8\u0BC7\u0BB0\u0BAE\u0BCD", lblSource: "\u0BAE\u0BC2\u0BB2\u0BAE\u0BCD" },
-  te: { grab: "\u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D", quit: "\u0C28\u0C3F\u0C37\u0C4D\u0C15\u0C4D\u0C30\u0C2E\u0C3F\u0C02\u0C1A\u0C41", cancel: "\u0C30\u0C26\u0C4D\u0C26\u0C41", tip: "\u0C1A\u0C3F\u0C1F\u0C4D\u0C15\u0C3E", lblTitle: "\u0C36\u0C40\u0C30\u0C4D\u0C37\u0C3F\u0C15", lblArtist: "\u0C15\u0C33\u0C3E\u0C15\u0C3E\u0C30\u0C41\u0C21\u0C41", lblAlbum: "\u0C06\u0C32\u0C4D\u0C2C\u0C2E\u0C4D", lblRelease: "\u0C35\u0C3F\u0C21\u0C41\u0C26\u0C32", lblTime: "\u0C35\u0C4D\u0C2F\u0C35\u0C27\u0C3F", lblSource: "\u0C2E\u0C42\u0C32\u0C02" },
-  kn: { grab: "\u0CA1\u0CCC\u0CA8\u0CCD\u200C\u0CB2\u0CCB\u0CA1\u0CCD", quit: "\u0CA8\u0CBF\u0CB0\u0CCD\u0C97\u0CAE\u0CBF\u0CB8\u0CBF", cancel: "\u0CB0\u0CA6\u0CCD\u0CA6\u0CC1", tip: "\u0CB8\u0CB2\u0CB9\u0CC6", lblTitle: "\u0CB6\u0CC0\u0CB0\u0CCD\u0CB7\u0CBF\u0C95\u0CC6", lblArtist: "\u0C95\u0CB2\u0CBE\u0CB5\u0CBF\u0CA6", lblAlbum: "\u0C86\u0CB2\u0CCD\u0CAC\u0CAE\u0CCD", lblRelease: "\u0CAC\u0CBF\u0CA1\u0CC1\u0C97\u0CA1\u0CC6", lblTime: "\u0C85\u0CB5\u0CA7\u0CBF", lblSource: "\u0CAE\u0CC2\u0CB2" },
-  ml: { grab: "\u0D21\u0D57\u0D7A\u0D32\u0D4B\u0D21\u0D4D", quit: "\u0D2A\u0D41\u0D31\u0D24\u0D4D\u0D24\u0D41\u0D15\u0D1F\u0D15\u0D4D\u0D15\u0D41\u0D15", cancel: "\u0D31\u0D26\u0D4D\u0D26\u0D3E\u0D15\u0D4D\u0D15\u0D41\u0D15", tip: "\u0D28\u0D41\u0D31\u0D41\u0D19\u0D4D\u0D19\u0D4D", lblTitle: "\u0D36\u0D40\u0D7C\u0D37\u0D15\u0D02", lblArtist: "\u0D15\u0D32\u0D3E\u0D15\u0D3E\u0D30\u0D7B", lblAlbum: "\u0D06\u0D7D\u0D2C\u0D02", lblRelease: "\u0D31\u0D3F\u0D32\u0D40\u0D38\u0D4D", lblTime: "\u0D26\u0D48\u0D7C\u0D18\u0D4D\u0D2F\u0D02", lblSource: "\u0D09\u0D31\u0D35\u0D3F\u0D1F\u0D02" },
-  mr: { grab: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921", quit: "\u092C\u093E\u0939\u0947\u0930 \u092A\u0921\u093E", cancel: "\u0930\u0926\u094D\u0926 \u0915\u0930\u093E", tip: "\u091F\u0940\u092A", lblTitle: "\u0936\u0940\u0930\u094D\u0937\u0915", lblArtist: "\u0915\u0932\u093E\u0915\u093E\u0930", lblAlbum: "\u0905\u0932\u094D\u092C\u092E", lblRelease: "\u092A\u094D\u0930\u0915\u093E\u0936\u0928", lblTime: "\u0915\u093E\u0932\u093E\u0935\u0927\u0940", lblSource: "\u0938\u094D\u0930\u094B\u0924" },
-  gu: { grab: "\u0AA1\u0ABE\u0A89\u0AA8\u0AB2\u0ACB\u0AA1", quit: "\u0AAC\u0AB9\u0ABE\u0AB0 \u0AA8\u0AC0\u0A95\u0AB3\u0ACB", cancel: "\u0AB0\u0AA6 \u0A95\u0AB0\u0ACB", tip: "\u0A9F\u0ABF\u0AAA", lblTitle: "\u0AB6\u0AC0\u0AB0\u0ACD\u0AB7\u0A95", lblArtist: "\u0A95\u0AB2\u0ABE\u0A95\u0ABE\u0AB0", lblAlbum: "\u0A86\u0AB2\u0ACD\u0AAC\u0AAE", lblRelease: "\u0AB0\u0ABF\u0AB2\u0AC0\u0A9D", lblTime: "\u0AB8\u0AAE\u0AAF\u0A97\u0ABE\u0AB3\u0ACB", lblSource: "\u0AB8\u0ACD\u0AB0\u0ACB\u0AA4" },
-  pa: { grab: "\u0A21\u0A3E\u0A0A\u0A28\u0A32\u0A4B\u0A21", quit: "\u0A2C\u0A3E\u0A39\u0A30", cancel: "\u0A30\u0A71\u0A26", tip: "\u0A38\u0A41\u0A1D\u0A3E\u0A05", lblTitle: "\u0A38\u0A3F\u0A30\u0A32\u0A47\u0A16", lblArtist: "\u0A15\u0A32\u0A3E\u0A15\u0A3E\u0A30", lblAlbum: "\u0A10\u0A32\u0A2C\u0A2E", lblRelease: "\u0A30\u0A3F\u0A32\u0A40\u0A1C\u0A3C", lblTime: "\u0A2E\u0A3F\u0A06\u0A26", lblSource: "\u0A38\u0A30\u0A4B\u0A24" },
-  or: { grab: "\u0B21\u0B3E\u0B09\u0B28\u0B32\u0B4B\u0B21\u0B4D", quit: "\u0B2C\u0B3E\u0B39\u0B3E\u0B30", cancel: "\u0B2C\u0B3E\u0B24\u0B3F\u0B32", tip: "\u0B2A\u0B30\u0B3E\u0B2E\u0B30\u0B4D\u0B36", lblTitle: "\u0B36\u0B40\u0B30\u0B4D\u0B37\u0B15", lblArtist: "\u0B15\u0B33\u0B3E\u0B15\u0B3E\u0B30", lblAlbum: "\u0B06\u0B32\u0B2C\u0B2E\u0B4D", lblRelease: "\u0B30\u0B3F\u0B32\u0B3F\u0B1C\u0B4D", lblTime: "\u0B38\u0B2E\u0B5F", lblSource: "\u0B09\u0B24\u0B4D\u0B38" },
-  as: { grab: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1", quit: "\u0993\u09B2\u09BE\u0993\u0995", cancel: "\u09AC\u09BE\u09A4\u09BF\u09B2", tip: "\u09AA\u09F0\u09BE\u09AE\u09F0\u09CD\u09B6", lblTitle: "\u09B6\u09C0\u09F0\u09CD\u09B7\u0995", lblArtist: "\u09B6\u09BF\u09B2\u09CD\u09AA\u09C0", lblAlbum: "\u098F\u09B2\u09AC\u09BE\u09AE", lblRelease: "\u09AE\u09C1\u0995\u09CD\u09A4\u09BF", lblTime: "\u09B8\u09AE\u09AF\u09BC", lblSource: "\u0989\u09CE\u09B8" },
-  ha: { grab: "sauke", quit: "fita", cancel: "soke", tip: "Shawara", lblTitle: "Take", lblArtist: "Mai fasaha", lblAlbum: "Album", lblRelease: "Saki", lblTime: "Lokaci", lblSource: "Tushe" },
-  yo: { grab: "gba sil\u1EB9", quit: "jade", cancel: "fagilee", tip: "Im\u1ECDran", lblTitle: "Ak\u1ECDle", lblArtist: "O\u1E63ere", lblAlbum: "Awo-orin", lblRelease: "Itusil\u1EB9", lblTime: "Akoko", lblSource: "Orisun" },
-  ig: { grab: "budata", quit: "p\u1EE5\u1ECD", cancel: "kagbuo", tip: "Nd\u1EE5m\u1ECDd\u1EE5", lblTitle: "Aha", lblArtist: "Onye na-ese", lblAlbum: "Album", lblRelease: "Mwep\u1EE5ta", lblTime: "Oge", lblSource: "Isi iyi" },
-  zu: { grab: "landa", quit: "phuma", cancel: "khansela", tip: "Ithiphu", lblTitle: "Isihloko", lblArtist: "Umculi", lblAlbum: "Album", lblRelease: "Ukukhishwa", lblTime: "Isikhathi", lblSource: "Umthombo" },
-  xh: { grab: "khuphela", quit: "phuma", cancel: "rhoxisa", tip: "Icebo", lblTitle: "Isihloko", lblArtist: "Umculi", lblAlbum: "Album", lblRelease: "Ukhutsho", lblTime: "Ixesha", lblSource: "Umthombo" },
-  ht: { grab: "telechaje", quit: "soti", cancel: "anile", tip: "Kons\xE8y", lblTitle: "Tit", lblArtist: "Atis", lblAlbum: "Album", lblRelease: "Lage", lblTime: "Dire", lblSource: "Sous" },
-  so: { grab: "soo deji", quit: "ka bax", cancel: "jooji", tip: "Talo", lblTitle: "Cinwaan", lblArtist: "Fanaan", lblAlbum: "Album", lblRelease: "Sii dayn", lblTime: "Muddo", lblSource: "Il" },
-  rw: { grab: "gukuramo", quit: "sohoka", cancel: "hagarika", tip: "Inama", lblTitle: "Umutwe", lblArtist: "Umukinnyi", lblAlbum: "Album", lblRelease: "Irekurwa", lblTime: "Igihe", lblSource: "Isoko" },
-  ln: { grab: "kokitisa", quit: "kobima", cancel: "kotika", tip: "Toli", lblTitle: "Mot\xF3", lblArtist: "Moyembi", lblAlbum: "Album", lblRelease: "Bimisa", lblTime: "Ntango", lblSource: "Esika" },
-  lg: { grab: "wanula", quit: "fuluma", cancel: "sazaamu", tip: "Amagezi", lblTitle: "Omutwe", lblArtist: "Omuyimbi", lblAlbum: "Album", lblRelease: "Okufulumya", lblTime: "Obudde", lblSource: "Ensibuko" },
-  sn: { grab: "dhawunirodha", quit: "buda", cancel: "kanzura", tip: "Zano", lblTitle: "Zita", lblArtist: "Muimbi", lblAlbum: "Album", lblRelease: "Kuburitswa", lblTime: "Nguva", lblSource: "Kwakabva" },
-  st: { grab: "jarolla", quit: "tsoa", cancel: "hlakola", tip: "Keletso", lblTitle: "Sehlooho", lblArtist: "Sebini", lblAlbum: "Album", lblRelease: "Tokollo", lblTime: "Nako", lblSource: "Mohloli" },
-  tn: { grab: "tsaya", quit: "tsamaya", cancel: "khansela", tip: "Kgakololo", lblTitle: "Setlhogo", lblArtist: "Moopedi", lblAlbum: "Album", lblRelease: "Kgatiso", lblTime: "Nako", lblSource: "Motswedi" },
-  ny: { grab: "tsitsa", quit: "tuluka", cancel: "lekani", tip: "Malangizo", lblTitle: "Mutu", lblArtist: "Wojambula", lblAlbum: "Album", lblRelease: "Kutuluka", lblTime: "Nthawi", lblSource: "Gwero" },
-  mg: { grab: "ampidino", quit: "hivoaka", cancel: "hanafoana", tip: "Torohevitra", lblTitle: "Lohateny", lblArtist: "Mpanakanto", lblAlbum: "Album", lblRelease: "Famoahana", lblTime: "Fotoana", lblSource: "Loharano" },
-  eo: { grab: "el\u015Duti", quit: "eliri", cancel: "nuligi", tip: "Konsilo", lblTitle: "Titolo", lblArtist: "Artisto", lblAlbum: "Albumo", lblRelease: "Eldono", lblTime: "Da\u016Dro", lblSource: "Fonto" },
-  la: { grab: "detrahere", quit: "exire", cancel: "irritum", tip: "Consilium", lblTitle: "Titulus", lblArtist: "Artifex", lblAlbum: "Album", lblRelease: "Editio", lblTime: "Tempus", lblSource: "Fons" },
-  yi: { grab: "\u05D0\u05B7\u05E8\u05D0\u05B8\u05E4\u05BC\u05DC\u05D0\u05B8\u05D3\u05DF", quit: "\u05D0\u05B7\u05E8\u05D5\u05D9\u05E1\u05D2\u05D0\u05B7\u05E0\u05D2", cancel: "\u05D0\u05B8\u05E4\u05BC\u05D6\u05D0\u05B8\u05D2\u05DF", tip: "\u05E2\u05E6\u05D4", lblTitle: "\u05D8\u05D9\u05D8\u05DC", lblArtist: "\u05E7\u05D5\u05E0\u05E1\u05D8\u05DC\u05E2\u05E8", lblAlbum: "\u05D0\u05B7\u05DC\u05D1\u05D0\u05B8\u05DD", lblRelease: "\u05D0\u05B7\u05E8\u05D5\u05D9\u05E1\u05DC\u05D0\u05B8\u05D6\u05DF", lblTime: "\u05E6\u05F2\u05B7\u05D8", lblSource: "\u05DE\u05E7\u05D5\u05E8" },
-  bo: { grab: "\u0F55\u0F56\u0F0B\u0F63\u0F7A\u0F53", quit: "\u0F55\u0FB1\u0F72\u0F62\u0F0B\u0F50\u0F7C\u0F53", cancel: "\u0F60\u0F51\u0F7C\u0F62\u0F0B\u0F56", tip: "\u0F56\u0F66\u0FB3\u0F56\u0F0B\u0F56\u0FB1", lblTitle: "\u0F41\u0F0B\u0F56\u0FB1\u0F44", lblArtist: "\u0F66\u0F92\u0FB1\u0F74\u0F0B\u0F62\u0FA9\u0F63\u0F0B\u0F54", lblAlbum: "\u0F46\u0F0B\u0F5A\u0F44", lblRelease: "\u0F60\u0F42\u0FB2\u0F7A\u0F58\u0F66\u0F0B\u0F66\u0FA4\u0F7A\u0F63", lblTime: "\u0F51\u0F74\u0F66\u0F0B\u0F5A\u0F7C\u0F51", lblSource: "\u0F41\u0F74\u0F44\u0F66" },
-  ug: { grab: "\u0686\u06C8\u0634\u06C8\u0631\u06C8\u0634", quit: "\u0686\u0649\u0642\u0649\u0634", cancel: "\u0628\u0649\u0643\u0627\u0631", tip: "\u0643\u06C6\u0631\u0633\u06D5\u062A\u0645\u06D5", lblTitle: "\u0645\u0627\u06CB\u0632\u06C7", lblArtist: "\u0633\u06D5\u0646\u0626\u06D5\u062A\u0643\u0627\u0631", lblAlbum: "\u0626\u0627\u0644\u0628\u0648\u0645", lblRelease: "\u062A\u0627\u0631\u0642\u0649\u062A\u0649\u0634", lblTime: "\u06CB\u0627\u0642\u0649\u062A", lblSource: "\u0645\u06D5\u0646\u0628\u06D5" },
-  dv: { grab: "\u0791\u07A6\u0787\u07AA\u0782\u07B0\u078D\u07AF\u0791\u07B0", quit: "\u0782\u07AA\u0786\u07AA\u0782\u07B0\u0782\u07A7", cancel: "\u0786\u07AC\u0782\u07B0\u0790\u07A6\u078D\u07B0", tip: "\u0782\u07A6\u0790\u07AD\u0780\u07A6\u078C\u07B0", lblTitle: "\u0790\u07AA\u0783\u07AA\u079A\u07A9", lblArtist: "\u078A\u07A6\u0782\u0782\u07B0\u0782\u07A7\u0782\u07B0", lblAlbum: "\u0787\u07A6\u078D\u07B0\u0784\u07A6\u0789\u07B0", lblRelease: "\u0783\u07A8\u078D\u07A9\u0790\u07B0", lblTime: "\u0788\u07A6\u078E\u07AA\u078C\u07AA", lblSource: "\u0789\u07A6\u0790\u07B0\u078B\u07A6\u0783\u07AA" },
-  haw: { grab: "ho\u02BBoiho", quit: "ha\u02BBalele", cancel: "k\u0101pae", tip: "Mana\u02BBo", lblTitle: "Po\u02BBo", lblArtist: "Mea hana", lblAlbum: "Album", lblRelease: "Ho\u02BBoku\u02BBu", lblTime: "Ka l\u014D\u02BBihi", lblSource: "Kumu" },
-  mi: { grab: "tango", quit: "puta", cancel: "whakakore", tip: "Tohutohu", lblTitle: "Taitara", lblArtist: "Kaitoi", lblAlbum: "Pukaemi", lblRelease: "Tuku", lblTime: "Roanga", lblSource: "P\u016Btake" },
-  sm: { grab: "sii mai", quit: "alu ese", cancel: "faaleaoga", tip: "Fautuaga", lblTitle: "Ulutala", lblArtist: "Tusitala", lblAlbum: "Album", lblRelease: "Lolomi", lblTime: "Umi", lblSource: "Punavai" },
-  to: { grab: "download", quit: "mavae", cancel: "kaniseli", tip: "Fale\u02BBi", lblTitle: "Ulunga", lblArtist: "Tokotaha", lblAlbum: "Album", lblRelease: "Tuku", lblTime: "Taimi", lblSource: "Ma\u02BBu\u02BBanga" },
-  fj: { grab: "lavetaka", quit: "biuta", cancel: "bokoca", tip: "iVakaro", lblTitle: "iYatukana", lblArtist: "Dauveiqaravi", lblAlbum: "Album", lblRelease: "Vakadewa", lblTime: "Gauna", lblSource: "iVurevure" }
+  sv: { tagline: "ladda ner video eller musik. v\xE4lj. ladda ner. klart.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 fler", grab: "ladda ner", quit: "avsluta", cancel: "avbryt", tip: "Tips", lblTitle: "Titel", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Sl\xE4pp", lblTime: "L\xE4ngd", lblSource: "K\xE4lla" },
+  no: { tagline: "last ned video eller musikk. velg. last ned. ferdig.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 flere", grab: "last ned", quit: "avslutt", cancel: "avbryt", tip: "Tips", lblTitle: "Tittel", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Utgivelse", lblTime: "Varighet", lblSource: "Kilde" },
+  da: { tagline: "download video eller musik. v\xE6lg. download. f\xE6rdig.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 flere", grab: "download", quit: "afslut", cancel: "annuller", tip: "Tip", lblTitle: "Titel", lblArtist: "Kunstner", lblAlbum: "Album", lblRelease: "Udgivelse", lblTime: "Varighed", lblSource: "Kilde" },
+  fi: { tagline: "lataa video tai musiikki. valitse. lataa. valmis.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 lis\xE4\xE4", grab: "lataa", quit: "poistu", cancel: "peruuta", tip: "Vinkki", lblTitle: "Otsikko", lblArtist: "Artisti", lblAlbum: "Albumi", lblRelease: "Julkaisu", lblTime: "Kesto", lblSource: "L\xE4hde" },
+  cs: { tagline: "stahujte video nebo hudbu. vyberte. st\xE1hn\u011Bte. hotovo.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 dal\u0161\xEDch", grab: "st\xE1hnout", quit: "ukon\u010Dit", cancel: "zru\u0161it", tip: "Tip", lblTitle: "N\xE1zev", lblArtist: "Um\u011Blec", lblAlbum: "Album", lblRelease: "Vyd\xE1n\xED", lblTime: "D\xE9lka", lblSource: "Zdroj" },
+  sk: { tagline: "s\u0165ahujte video alebo hudbu. vyberte. stiahnite. hotovo.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u010Fal\u0161\xEDch", grab: "stiahnu\u0165", quit: "ukon\u010Di\u0165", cancel: "zru\u0161i\u0165", tip: "Tip", lblTitle: "N\xE1zov", lblArtist: "Umelec", lblAlbum: "Album", lblRelease: "Vydanie", lblTime: "Trvanie", lblSource: "Zdroj" },
+  hu: { tagline: "t\xF6lts le a vide\xF3t vagy zen\xE9t. v\xE1lassz. t\xF6lts le. k\xE9sz.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 tov\xE1bbi", grab: "let\xF6lt\xE9s", quit: "kil\xE9p\xE9s", cancel: "m\xE9gse", tip: "Tipp", lblTitle: "C\xEDm", lblArtist: "El\u0151ad\xF3", lblAlbum: "Album", lblRelease: "Kiad\xE1s", lblTime: "Hossz", lblSource: "Forr\xE1s" },
+  ro: { tagline: "descarc\u0103 video sau muzic\u0103. alege. descarc\u0103. gata.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 altele", grab: "descarc\u0103", quit: "ie\u0219ire", cancel: "anulare", tip: "Sfat", lblTitle: "Titlu", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Lansare", lblTime: "Durat\u0103", lblSource: "Surs\u0103" },
+  bg: { tagline: "\u0438\u0437\u0442\u0435\u0433\u043B\u0435\u0442\u0435 \u0432\u0438\u0434\u0435\u043E \u0438\u043B\u0438 \u043C\u0443\u0437\u0438\u043A\u0430. \u0438\u0437\u0431\u0435\u0440\u0435\u0442\u0435. \u0438\u0437\u0442\u0435\u0433\u043B\u0435\u0442\u0435. \u0433\u043E\u0442\u043E\u0432\u043E.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0434\u0440\u0443\u0433\u0438", grab: "\u0438\u0437\u0442\u0435\u0433\u043B\u0438", quit: "\u0438\u0437\u0445\u043E\u0434", cancel: "\u043E\u0442\u043A\u0430\u0437", tip: "\u0421\u044A\u0432\u0435\u0442", lblTitle: "\u0417\u0430\u0433\u043B\u0430\u0432\u0438\u0435", lblArtist: "\u0418\u0437\u043F\u044A\u043B\u043D\u0438\u0442\u0435\u043B", lblAlbum: "\u0410\u043B\u0431\u0443\u043C", lblRelease: "\u0418\u0437\u0434\u0430\u0432\u0430\u043D\u0435", lblTime: "\u041F\u0440\u043E\u0434\u044A\u043B\u0436\u0438\u0442\u0435\u043B\u043D\u043E\u0441\u0442", lblSource: "\u0418\u0437\u0442\u043E\u0447\u043D\u0438\u043A" },
+  el: { tagline: "\u03BA\u03B1\u03C4\u03B5\u03B2\u03AC\u03C3\u03C4\u03B5 \u03B2\u03AF\u03BD\u03C4\u03B5\u03BF \u03AE \u03BC\u03BF\u03C5\u03C3\u03B9\u03BA\u03AE. \u03B5\u03C0\u03B9\u03BB\u03AD\u03BE\u03C4\u03B5. \u03BA\u03B1\u03C4\u03B5\u03B2\u03AC\u03C3\u03C4\u03B5. \u03AD\u03C4\u03BF\u03B9\u03BC\u03BF.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u03AC\u03BB\u03BB\u03B1", grab: "\u03BB\u03AE\u03C8\u03B7", quit: "\u03AD\u03BE\u03BF\u03B4\u03BF\u03C2", cancel: "\u03B1\u03BA\u03CD\u03C1\u03C9\u03C3\u03B7", tip: "\u03A3\u03C5\u03BC\u03B2\u03BF\u03C5\u03BB\u03AE", lblTitle: "\u03A4\u03AF\u03C4\u03BB\u03BF\u03C2", lblArtist: "\u039A\u03B1\u03BB\u03BB\u03B9\u03C4\u03AD\u03C7\u03BD\u03B7\u03C2", lblAlbum: "\u0386\u03BB\u03BC\u03C0\u03BF\u03C5\u03BC", lblRelease: "\u039A\u03C5\u03BA\u03BB\u03BF\u03C6\u03BF\u03C1\u03AF\u03B1", lblTime: "\u0394\u03B9\u03AC\u03C1\u03BA\u03B5\u03B9\u03B1", lblSource: "\u03A0\u03B7\u03B3\u03AE" },
+  hr: { tagline: "preuzmi video ili glazbu. odaberi. preuzmi. gotovo.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 drugih", grab: "preuzmi", quit: "izlaz", cancel: "odustani", tip: "Savjet", lblTitle: "Naslov", lblArtist: "Izvo\u0111a\u010D", lblAlbum: "Album", lblRelease: "Izdanje", lblTime: "Trajanje", lblSource: "Izvor" },
+  sr: { tagline: "preuzmi video ili muziku. odaberi. preuzmi. gotovo.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 drugih", grab: "preuzmi", quit: "izlaz", cancel: "otka\u017Ei", tip: "Savet", lblTitle: "Naslov", lblArtist: "Izvo\u0111a\u010D", lblAlbum: "Album", lblRelease: "Izdanje", lblTime: "Trajanje", lblSource: "Izvor" },
+  sl: { tagline: "prenesi video ali glasbo. izberi. prenesi. kon\u010Dano.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 drugih", grab: "prenesi", quit: "izhod", cancel: "prekli\u010Di", tip: "Nasvet", lblTitle: "Naslov", lblArtist: "Izvajalec", lblAlbum: "Album", lblRelease: "Izdaja", lblTime: "Trajanje", lblSource: "Vir" },
+  lt: { tagline: "atsisi\u0173skite vaizdo \u012Fra\u0161\u0105 ar muzik\u0105. pasirinkite. atsisi\u0173skite. baigta.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 kit\u0173", grab: "atsisi\u0173sti", quit: "i\u0161eiti", cancel: "at\u0161aukti", tip: "Patarimas", lblTitle: "Pavadinimas", lblArtist: "Atlik\u0117jas", lblAlbum: "Albumas", lblRelease: "Leidimas", lblTime: "Trukm\u0117", lblSource: "\u0160altinis" },
+  lv: { tagline: "lejupiel\u0101d\u0113 video vai m\u016Bziku. izv\u0113lies. lejupiel\u0101d\u0113. gatavs.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 citu", grab: "lejupiel\u0101d\u0113t", quit: "iziet", cancel: "atcelt", tip: "Padoms", lblTitle: "Nosaukums", lblArtist: "M\u0101kslinieks", lblAlbum: "Albums", lblRelease: "Izlaidums", lblTime: "Ilgums", lblSource: "Avots" },
+  et: { tagline: "laadi alla video v\xF5i muusika. vali. laadi alla. valmis.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 muud", grab: "laadi alla", quit: "v\xE4lju", cancel: "t\xFChista", tip: "Vihje", lblTitle: "Pealkiri", lblArtist: "Esitaja", lblAlbum: "Album", lblRelease: "V\xE4ljalase", lblTime: "Kestus", lblSource: "Allikas" },
+  ca: { tagline: "descarrega v\xEDdeo o m\xFAsica. tria. descarrega. fet.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 m\xE9s", grab: "descarrega", quit: "surt", cancel: "cancel\xB7la", tip: "Consell", lblTitle: "T\xEDtol", lblArtist: "Artista", lblAlbum: "\xC0lbum", lblRelease: "Llan\xE7ament", lblTime: "Durada", lblSource: "Font" },
+  eu: { tagline: "deskargatu bideoa edo musika. aukeratu. deskargatu. eginda.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 gehiago", grab: "deskargatu", quit: "irten", cancel: "utzi", tip: "Aholkua", lblTitle: "Izenburua", lblArtist: "Artista", lblAlbum: "Albuma", lblRelease: "Argitalpena", lblTime: "Iraupena", lblSource: "Iturria" },
+  gl: { tagline: "descarga v\xEDdeo ou m\xFAsica. escolle. descarga. feito.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 m\xE1is", grab: "descargar", quit: "sa\xEDr", cancel: "cancelar", tip: "Consello", lblTitle: "T\xEDtulo", lblArtist: "Artista", lblAlbum: "\xC1lbum", lblRelease: "Lanzamento", lblTime: "Duraci\xF3n", lblSource: "Fonte" },
+  is: { tagline: "s\xE6kja myndband e\xF0a t\xF3nlist. veldu. s\xE6kja. b\xFAi\xF0.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 fleiri", grab: "s\xE6kja", quit: "h\xE6tta", cancel: "h\xE6tta vi\xF0", tip: "\xC1bending", lblTitle: "Titill", lblArtist: "Listama\xF0ur", lblAlbum: "Plata", lblRelease: "\xDAtg\xE1fa", lblTime: "Lengd", lblSource: "Uppruni" },
+  ga: { tagline: "\xEDosl\xF3d\xE1il f\xEDse\xE1n n\xF3 ceol. roghnaigh. \xEDosl\xF3d\xE1il. d\xE9anta.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 eile", grab: "\xEDosl\xF3d\xE1il", quit: "scoir", cancel: "cealaigh", tip: "Leid", lblTitle: "Teideal", lblArtist: "Eala\xEDont\xF3ir", lblAlbum: "Albam", lblRelease: "Eisi\xFAint", lblTime: "Fad", lblSource: "Foinse" },
+  cy: { tagline: "lawrlwythwch fideo neu gerddoriaeth. dewiswch. lawrlwythwch. wedi gorffen.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 eraill", grab: "lawrlwytho", quit: "gadael", cancel: "canslo", tip: "Awgrym", lblTitle: "Teitl", lblArtist: "Artist", lblAlbum: "Albwm", lblRelease: "Rhyddhau", lblTime: "Hyd", lblSource: "Ffynhonnell" },
+  mt: { tagline: "ni\u017C\u017Cel video jew mu\u017Cika. ag\u0127\u017Cel. ni\u017C\u017Cel. lest.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 o\u0127rajn", grab: "ni\u017C\u017Cel", quit: "o\u0127ro\u0121", cancel: "ikkan\u010Bella", tip: "Parir", lblTitle: "Titlu", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "\u0126ru\u0121", lblTime: "Tul", lblSource: "Sors" },
+  sq: { tagline: "shkarko video ose muzik\xEB. zgjidh. shkarko. u krye.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 t\xEB tjera", grab: "shkarko", quit: "dil", cancel: "anulo", tip: "K\xEBshill\xEB", lblTitle: "Titulli", lblArtist: "Artisti", lblAlbum: "Albumi", lblRelease: "L\xEBshimi", lblTime: "Koh\xEBzgjatja", lblSource: "Burimi" },
+  mk: { tagline: "\u043F\u0440\u0435\u0437\u0435\u043C\u0435\u0442\u0435 \u0432\u0438\u0434\u0435\u043E \u0438\u043B\u0438 \u043C\u0443\u0437\u0438\u043A\u0430. \u0438\u0437\u0431\u0435\u0440\u0435\u0442\u0435. \u043F\u0440\u0435\u0437\u0435\u043C\u0435\u0442\u0435. \u0433\u043E\u0442\u043E\u0432\u043E.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0434\u0440\u0443\u0433\u0438", grab: "\u043F\u0440\u0435\u0437\u0435\u043C\u0438", quit: "\u0438\u0437\u043B\u0435\u0437", cancel: "\u043E\u0442\u043A\u0430\u0436\u0438", tip: "\u0421\u043E\u0432\u0435\u0442", lblTitle: "\u041D\u0430\u0441\u043B\u043E\u0432", lblArtist: "\u0418\u0437\u0432\u0435\u0434\u0443\u0432\u0430\u0447", lblAlbum: "\u0410\u043B\u0431\u0443\u043C", lblRelease: "\u0418\u0437\u0434\u0430\u0432\u0430\u045A\u0435", lblTime: "\u0412\u0440\u0435\u043C\u0435\u0442\u0440\u0430\u0435\u045A\u0435", lblSource: "\u0418\u0437\u0432\u043E\u0440" },
+  bs: { tagline: "preuzmi video ili muziku. odaberi. preuzmi. gotovo.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 drugih", grab: "preuzmi", quit: "izlaz", cancel: "otka\u017Ei", tip: "Savjet", lblTitle: "Naslov", lblArtist: "Izvo\u0111a\u010D", lblAlbum: "Album", lblRelease: "Izdanje", lblTime: "Trajanje", lblSource: "Izvor" },
+  lb: { tagline: "lued video oder musik erof. wiel. lued erof. f\xE4erdeg.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 aner", grab: "eroflueden", quit: "verloossen", cancel: "ofbriechen", tip: "Tipp", lblTitle: "Titel", lblArtist: "K\xEBnschtler", lblAlbum: "Album", lblRelease: "Ver\xEBffentlechung", lblTime: "Dauer", lblSource: "Quell" },
+  af: { tagline: "laai video of musiek af. kies. laai af. klaar.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 ander", grab: "aflaai", quit: "verlaat", cancel: "kanselleer", tip: "Wenk", lblTitle: "Titel", lblArtist: "Kunstenaar", lblAlbum: "Album", lblRelease: "Vrystelling", lblTime: "Duur", lblSource: "Bron" },
+  sw: { tagline: "pakua video au muziki. chagua. pakua. imekamilika.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 nyingine", grab: "pakua", quit: "ondoka", cancel: "ghairi", tip: "Kidokezo", lblTitle: "Kichwa", lblArtist: "Msanii", lblAlbum: "Albamu", lblRelease: "Toleo", lblTime: "Muda", lblSource: "Chanzo" },
+  am: { tagline: "\u126A\u12F2\u12EE \u12C8\u12ED\u121D \u1219\u12DA\u1243 \u12A0\u12CD\u122D\u12F5\u1362 \u121D\u1228\u1325\u1362 \u12A0\u12CD\u122D\u12F5\u1362 \u1270\u1320\u1293\u1240\u1240\u1362", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u120C\u120E\u127D", grab: "\u12A0\u12CD\u122D\u12F5", quit: "\u12CD\u1323", cancel: "\u1230\u122D\u12DD", tip: "\u121D\u12AD\u122D", lblTitle: "\u122D\u12D5\u1235", lblArtist: "\u12A0\u122D\u1272\u1235\u1275", lblAlbum: "\u12A0\u120D\u1260\u121D", lblRelease: "\u120D\u1240\u1275", lblTime: "\u1246\u12ED\u1273", lblSource: "\u121D\u1295\u132D" },
+  hy: { tagline: "\u0576\u0565\u0580\u0562\u0565\u057C\u0576\u0565\u0584 \u057F\u0565\u057D\u0561\u0570\u0578\u056C\u0578\u057E\u0561\u056F \u056F\u0561\u0574 \u0565\u0580\u0561\u056A\u0577\u057F\u0578\u0582\u0569\u0575\u0578\u0582\u0576\u0589 \u0568\u0576\u057F\u0580\u0565\u0584\u0589 \u0576\u0565\u0580\u0562\u0565\u057C\u0576\u0565\u0584\u0589 \u057A\u0561\u057F\u0580\u0561\u057D\u057F \u0567\u0589", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0561\u0575\u056C", grab: "\u0576\u0565\u0580\u0562\u0565\u057C\u0576\u0565\u056C", quit: "\u0565\u056C\u0584", cancel: "\u0579\u0565\u0572\u0561\u0580\u056F\u0565\u056C", tip: "\u053D\u0578\u0580\u0570\u0578\u0582\u0580\u0564", lblTitle: "\u054E\u0565\u0580\u0576\u0561\u0563\u056B\u0580", lblArtist: "\u0531\u0580\u057F\u056B\u057D\u057F", lblAlbum: "\u0531\u056C\u0562\u0578\u0574", lblRelease: "\u0539\u0578\u0572\u0561\u0580\u056F\u0578\u0582\u0574", lblTime: "\u054F\u0587\u0578\u0572\u0578\u0582\u0569\u0575\u0578\u0582\u0576", lblSource: "\u0531\u0572\u0562\u0575\u0578\u0582\u0580" },
+  ka: { tagline: "\u10E9\u10D0\u10DB\u10DD\u10E2\u10D5\u10D8\u10E0\u10D7\u10D4\u10D7 \u10D5\u10D8\u10D3\u10D4\u10DD \u10D0\u10DC \u10DB\u10E3\u10E1\u10D8\u10D9\u10D0. \u10D0\u10D8\u10E0\u10E9\u10D8\u10D4\u10D7. \u10E9\u10D0\u10DB\u10DD\u10E2\u10D5\u10D8\u10E0\u10D7\u10D4\u10D7. \u10DB\u10D6\u10D0\u10D3\u10D0\u10D0.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u10E1\u10EE\u10D5\u10D0", grab: "\u10E9\u10D0\u10DB\u10DD\u10E2\u10D5\u10D8\u10E0\u10D7\u10D5\u10D0", quit: "\u10D2\u10D0\u10E1\u10D5\u10DA\u10D0", cancel: "\u10D2\u10D0\u10E3\u10E5\u10DB\u10D4\u10D1\u10D0", tip: "\u10E0\u10E9\u10D4\u10D5\u10D0", lblTitle: "\u10E1\u10D0\u10D7\u10D0\u10E3\u10E0\u10D8", lblArtist: "\u10E8\u10D4\u10DB\u10E1\u10E0\u10E3\u10DA\u10D4\u10D1\u10D4\u10DA\u10D8", lblAlbum: "\u10D0\u10DA\u10D1\u10DD\u10DB\u10D8", lblRelease: "\u10D2\u10D0\u10DB\u10DD\u10E8\u10D5\u10D4\u10D1\u10D0", lblTime: "\u10EE\u10D0\u10DC\u10D2\u10E0\u10EB\u10DA\u10D8\u10D5\u10DD\u10D1\u10D0", lblSource: "\u10EC\u10E7\u10D0\u10E0\u10DD" },
+  az: { tagline: "video v\u0259 ya musiqi y\xFCkl\u0259. se\xE7. y\xFCkl\u0259. haz\u0131rd\u0131r.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 dig\u0259r", grab: "y\xFCkl\u0259", quit: "\xE7\u0131x\u0131\u015F", cancel: "l\u0259\u011Fv et", tip: "M\u0259sl\u0259h\u0259t", lblTitle: "Ba\u015Fl\u0131q", lblArtist: "\u0130fa\xE7\u0131", lblAlbum: "Albom", lblRelease: "Burax\u0131l\u0131\u015F", lblTime: "M\xFCdd\u0259t", lblSource: "M\u0259nb\u0259" },
+  kk: { tagline: "\u0431\u0435\u0439\u043D\u0435 \u043D\u0435\u043C\u0435\u0441\u0435 \u043C\u0443\u0437\u044B\u043A\u0430 \u0436\u04AF\u043A\u0442\u0435\u04A3\u0456\u0437. \u0442\u0430\u04A3\u0434\u0430\u04A3\u044B\u0437. \u0436\u04AF\u043A\u0442\u0435\u04A3\u0456\u0437. \u0434\u0430\u0439\u044B\u043D.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0431\u0430\u0441\u049B\u0430", grab: "\u0436\u04AF\u043A\u0442\u0435\u0443", quit: "\u0448\u044B\u0493\u0443", cancel: "\u0431\u043E\u043B\u0434\u044B\u0440\u043C\u0430\u0443", tip: "\u041A\u0435\u04A3\u0435\u0441", lblTitle: "\u0410\u0442\u0430\u0443\u044B", lblArtist: "\u04D8\u0440\u0442\u0456\u0441", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0428\u044B\u0493\u0430\u0440\u044B\u043B\u044B\u043C", lblTime: "\u04B0\u0437\u0430\u049B\u0442\u044B\u0493\u044B", lblSource: "\u0414\u0435\u0440\u0435\u043A\u043A\u04E9\u0437" },
+  ky: { tagline: "\u0432\u0438\u0434\u0435\u043E \u0436\u0435 \u043C\u0443\u0437\u044B\u043A\u0430 \u0436\u04AF\u043A\u0442\u04E9\u04A3\u04AF\u0437. \u0442\u0430\u043D\u0434\u0430\u04A3\u044B\u0437. \u0436\u04AF\u043A\u0442\u04E9\u04A3\u04AF\u0437. \u0434\u0430\u044F\u0440.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0431\u0430\u0448\u043A\u0430", grab: "\u0436\u04AF\u043A\u0442\u04E9\u04E9", quit: "\u0447\u044B\u0433\u0443\u0443", cancel: "\u0436\u043E\u043A\u043A\u043E \u0447\u044B\u0433\u0430\u0440\u0443\u0443", tip: "\u041A\u0435\u04A3\u0435\u0448", lblTitle: "\u0410\u0442\u0430\u043B\u044B\u0448\u044B", lblArtist: "\u0410\u0440\u0442\u0438\u0441\u0442", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0427\u044B\u0433\u0430\u0440\u044B\u043B\u044B\u0448", lblTime: "\u0423\u0437\u0430\u043A\u0442\u044B\u0433\u044B", lblSource: "\u0411\u0443\u043B\u0430\u043A" },
+  uz: { tagline: "video yoki musiika yuklab oling. tanlang. yuklab oling. tayyor.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 boshqa", grab: "yuklab olish", quit: "chiqish", cancel: "bekor qilish", tip: "Maslahat", lblTitle: "Sarlavha", lblArtist: "Ijrochi", lblAlbum: "Albom", lblRelease: "Reliz", lblTime: "Davomiyligi", lblSource: "Manba" },
+  tg: { tagline: "\u0432\u0438\u0434\u0435\u043E \u0451 \u043C\u0443\u0441\u0438\u049B\u04E3 \u0431\u043E\u0440\u0433\u0438\u0440\u04E3 \u043A\u0443\u043D\u0435\u0434. \u0438\u043D\u0442\u0438\u0445\u043E\u0431 \u043A\u0443\u043D\u0435\u0434. \u0431\u043E\u0440\u0433\u0438\u0440\u04E3 \u043A\u0443\u043D\u0435\u0434. \u0442\u0430\u0439\u0451\u0440.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0434\u0438\u0433\u0430\u0440", grab: "\u0431\u043E\u0440\u0433\u0438\u0440\u04E3", quit: "\u0431\u0430\u0440\u043E\u043C\u0430\u0434", cancel: "\u0431\u0435\u043A\u043E\u0440", tip: "\u041C\u0430\u0441\u043B\u0438\u04B3\u0430\u0442", lblTitle: "\u0421\u0430\u0440\u043B\u0430\u0432\u04B3\u0430", lblArtist: "\u04B2\u0443\u043D\u0430\u0440\u043C\u0430\u043D\u0434", lblAlbum: "\u0410\u043B\u0431\u043E\u043C", lblRelease: "\u041D\u0430\u0448\u0440", lblTime: "\u0414\u0430\u0432\u043E\u043C\u043D\u043E\u043A\u04E3", lblSource: "\u041C\u0430\u043D\u0431\u0430\u044A" },
+  tk: { tagline: "wideo \xFDa-da saz \xFD\xFCkl\xE4\u0148. sa\xFDla\u0148. \xFD\xFCkl\xE4\u0148. ta\xFD\xFDar.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 be\xFDleki", grab: "\xFD\xFCkle", quit: "\xE7yk", cancel: "\xFDatyr", tip: "Maslahat", lblTitle: "Ady", lblArtist: "Artist", lblAlbum: "Albom", lblRelease: "\xC7yky\u015F", lblTime: "Dowamlylygy", lblSource: "\xC7e\u015Fme" },
+  mn: { tagline: "\u0432\u0438\u0434\u0435\u043E \u044D\u0441\u0432\u044D\u043B \u0445\u04E9\u0433\u0436\u0438\u043C \u0442\u0430\u0442\u0430\u0430\u0440\u0430\u0439. \u0441\u043E\u043D\u0433\u043E\u043E\u0440\u043E\u0439. \u0442\u0430\u0442\u0430\u0430\u0440\u0430\u0439. \u0434\u0443\u0443\u0441\u043B\u0430\u0430.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0431\u0443\u0441\u0430\u0434", grab: "\u0442\u0430\u0442\u0430\u0445", quit: "\u0433\u0430\u0440\u0430\u0445", cancel: "\u0446\u0443\u0446\u043B\u0430\u0445", tip: "\u0417\u04E9\u0432\u043B\u04E9\u0433\u04E9\u04E9", lblTitle: "\u0413\u0430\u0440\u0447\u0438\u0433", lblArtist: "\u0423\u0440\u0430\u043D \u0431\u04AF\u0442\u044D\u044D\u043B\u0447", lblAlbum: "\u0426\u043E\u043C\u043E\u0433", lblRelease: "\u0425\u044D\u0432\u043B\u044D\u043B\u0442", lblTime: "\u04AE\u0440\u0433\u044D\u043B\u0436\u043B\u044D\u0445 \u0445\u0443\u0433\u0430\u0446\u0430\u0430", lblSource: "\u042D\u0445 \u0441\u0443\u0440\u0432\u0430\u043B\u0436" },
+  ne: { tagline: "\u092D\u0921\u093F\u092F\u094B \u0935\u093E \u0938\u0902\u0917\u0940\u0924 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0917\u0930\u094D\u0928\u0941\u0939\u094B\u0938\u094D\u0964 \u091B\u093E\u0928\u094D\u0928\u0941\u0939\u094B\u0938\u094D\u0964 \u0921\u093E\u0909\u0928\u0932\u094B\u0921\u0964 \u092D\u092F\u094B\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0905\u0928\u094D\u092F", grab: "\u0921\u093E\u0928\u0932\u0921", quit: "\u092C\u0939\u093F\u0930", cancel: "\u0930\u0926\u0926", tip: "\u0938\u091D\u0935", lblTitle: "\u0936\u0930\u0937\u0915", lblArtist: "\u0915\u0932\u0915\u0930", lblAlbum: "\u090F\u0932\u092C\u092E", lblRelease: "\u0930\u093F\u0932\u091C", lblTime: "\u0905\u0935\u0927", lblSource: "\u0938\u0924" },
+  bn: { tagline: "\u09AF\u09C7\u0995\u09CB\u09A8\u09CB \u09AD\u09BF\u09A1\u09BF\u0993 \u09AC\u09BE \u09B8\u0999\u09CD\u0997\u09C0\u09A4 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u0995\u09B0\u09C1\u09A8\u0964 \u09AC\u09BE\u099B\u09C1\u09A8\u0964 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1\u0964 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0985\u09A8\u09CD\u09AF\u09BE\u09A8\u09CD\u09AF", grab: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1", quit: "\u09AA\u09B8\u09A5\u09A8", cancel: "\u09AC\u09A4\u09B2", tip: "\u09AA\u09B0\u09AE\u09B0\u09B6", lblTitle: "\u09B6\u09B0\u09A8\u09AE", lblArtist: "\u09B6\u09B2\u09AA", lblAlbum: "\u0985\u09AF\u09B2\u09AC\u09AE", lblRelease: "\u09B0\u09B2\u099C", lblTime: "\u09B8\u09AE\u09AF\u0995\u09B2", lblSource: "\u0989\u09A4\u09B8" },
+  fa: { tagline: "\u0647\u0631 \u0648\u06CC\u062F\u06CC\u0648 \u06CC\u0627 \u0645\u0648\u0633\u06CC\u0642\u06CC \u0631\u0627 \u062F\u0627\u0646\u0644\u0648\u062F \u06A9\u0646\u06CC\u062F. \u0627\u0646\u062A\u062E\u0627\u0628 \u06A9\u0646\u06CC\u062F. \u062F\u0627\u0646\u0644\u0648\u062F. \u062A\u0645\u0627\u0645.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0633\u0627\u06CC\u062A \u062F\u06CC\u06AF\u0631", grab: "\u062F\u0627\u0646\u0644\u0648\u062F", quit: "\u062E\u0631\u0648\u062C", cancel: "\u0644\u063A\u0648", tip: "\u0646\u06A9\u062A\u0647", lblTitle: "\u0639\u0646\u0648\u0627\u0646", lblArtist: "\u0647\u0646\u0631\u0645\u0646\u062F", lblAlbum: "\u0622\u0644\u0628\u0648\u0645", lblRelease: "\u0627\u0646\u062A\u0634\u0627\u0631", lblTime: "\u0645\u062F\u062A", lblSource: "\u0645\u0646\u0628\u0639" },
+  he: { tagline: "\u05D4\u05D5\u05E8\u05D3 \u05DB\u05DC \u05E1\u05E8\u05D8\u05D5\u05DF \u05D0\u05D5 \u05DE\u05D5\u05D6\u05D9\u05E7\u05D4. \u05D1\u05D7\u05E8. \u05D4\u05D5\u05E8\u05D3. \u05D1\u05D5\u05E6\u05E2.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u05D0\u05EA\u05E8\u05D9\u05DD \u05E0\u05D5\u05E1\u05E4\u05D9\u05DD", grab: "\u05D4\u05D5\u05E8\u05D3", quit: "\u05D9\u05E6\u05D9\u05D0\u05D4", cancel: "\u05D1\u05D9\u05D8\u05D5\u05DC", tip: "\u05D8\u05D9\u05E4", lblTitle: "\u05DB\u05D5\u05EA\u05E8\u05EA", lblArtist: "\u05D0\u05DE\u05DF", lblAlbum: "\u05D0\u05DC\u05D1\u05D5\u05DD", lblRelease: "\u05E9\u05D7\u05E8\u05D5\u05E8", lblTime: "\u05DE\u05E9\u05DA", lblSource: "\u05DE\u05E7\u05D5\u05E8" },
+  ur: { tagline: "\u06A9\u0648\u0626\u06CC \u0628\u06BE\u06CC \u0648\u06CC\u0688\u06CC\u0648 \u06CC\u0627 \u0645\u0648\u0633\u06CC\u0642\u06CC \u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u06A9\u0631\u06CC\u06BA\u06D4 \u0645\u0646\u062A\u062E\u0628 \u06A9\u0631\u06CC\u06BA\u06D4 \u0688\u0627\u0624\u0646 \u0644\u0648\u0688\u06D4 \u0645\u06A9\u0645\u0644\u06D4", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u062F\u06CC\u06AF\u0631", grab: "\u0688\u0627\u0624\u0646 \u0644\u0648\u0688", quit: "\u0628\u06C1\u0631", cancel: "\u0645\u0646\u0633\u0648\u062E", tip: "\u0645\u0634\u0648\u0631\u06C1", lblTitle: "\u0639\u0646\u0648\u0627\u0646", lblArtist: "\u0641\u0646\u06A9\u0627\u0631", lblAlbum: "\u0627\u0644\u0628\u0645", lblRelease: "\u0627\u062C\u0631\u0627", lblTime: "\u062F\u0648\u0631\u0627\u0646\u06CC\u06C1", lblSource: "\u0645\u0627\u062E\u0630" },
+  ps: { tagline: "\u0647\u0631 \u0648\u064A\u0689\u064A\u0648 \u064A\u0627 \u0645\u0648\u0633\u064A\u0642\u064A \u0689\u0627\u0648\u0646\u0644\u0648\u0689 \u06A9\u0693\u0626. \u0648\u067C\u0627\u06A9\u0626. \u0689\u0627\u0648\u0646\u0644\u0648\u0689. \u0628\u0634\u067E\u0693.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0646\u0648\u0631", grab: "\u0689\u0627\u0648\u0646\u0644\u0648\u0689", quit: "\u0648\u062A\u0644", cancel: "\u0644\u063A\u0648\u0647", tip: "\u0644\u0627\u0631\u069A\u0648\u0648\u0646\u0647", lblTitle: "\u0633\u0631\u0644\u06CC\u06A9", lblArtist: "\u0647\u0646\u0631\u0645\u0646\u062F", lblAlbum: "\u0627\u0644\u0628\u0648\u0645", lblRelease: "\u062E\u067E\u0631\u0648\u0644", lblTime: "\u0645\u0648\u062F\u0647", lblSource: "\u0633\u0631\u0686\u06CC\u0646\u0647" },
+  ku: { tagline: "her v\xEEdyo an muz\xEEk\xEA dax\xEEne. hilbij\xEAre. dax\xEEne. qediya.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 din", grab: "daxistin", quit: "derketin", cancel: "betal", tip: "\u015E\xEEret", lblTitle: "Sernav", lblArtist: "Hunermend", lblAlbum: "Alb\xFBm", lblRelease: "We\u015Fan", lblTime: "Dem", lblSource: "\xC7avkan\xEE" },
+  km: { tagline: "\u1791\u17B6\u1789\u1799\u1780\u179C\u17B8\u178A\u17C1\u17A2\u17BC \u17AC\u178F\u1793\u17D2\u178F\u17D2\u179A\u17B8\u178E\u17B6\u1798\u17BD\u1799\u17D4 \u1787\u17D2\u179A\u17BE\u179F\u179A\u17BE\u179F\u17D4 \u1791\u17B6\u1789\u1799\u1780\u17D4 \u179A\u17BD\u1785\u179A\u17B6\u179B\u17CB\u17D4", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u1795\u17D2\u179F\u17C1\u1784\u1791\u17C0\u178F", grab: "\u1791\u17B6\u1789\u1799\u1780", quit: "\u1785\u17C1\u1789", cancel: "\u1794\u17C4\u17C7\u1794\u1784\u17CB", tip: "\u1782\u1793\u17D2\u179B\u17B9\u17C7", lblTitle: "\u1785\u17C6\u178E\u1784\u1787\u17BE\u1784", lblArtist: "\u179F\u17B7\u179B\u17D2\u1794\u1780\u179A", lblAlbum: "\u17A2\u17B6\u179B\u17CB\u1794\u17CA\u17BB\u1798", lblRelease: "\u1780\u17B6\u1785\u17C1\u1789\u1795\u17D2\u179F\u17B6\u1799", lblTime: "\u179A\u1799\u17C8\u1796\u17C1\u179B", lblSource: "\u1794\u17D2\u179A\u1797\u1796" },
+  lo: { tagline: "\u0E94\u0EB2\u0EA7\u0EC2\u0EAB\u0EA5\u0E94\u0EA7\u0EB4\u0E94\u0EB5\u0EC2\u0EAD \u0EAB\u0EBC\u0EB7 \u0E94\u0EBB\u0E99\u0E95\u0EB5\u0EC3\u0E94\u0E81\u0ECD\u0EC4\u0E94\u0EC9. \u0EC0\u0EA5\u0EB7\u0EAD\u0E81. \u0E94\u0EB2\u0EA7\u0EC2\u0EAB\u0EA5\u0E94. \u0EAA\u0EB3\u0EC0\u0EA5\u0EB1\u0E94.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0EAD\u0EB7\u0EC8\u0E99\u0EC6", grab: "\u0E94\u0EB2\u0EA7\u0EC2\u0EAB\u0EA5\u0E94", quit: "\u0EAD\u0EAD\u0E81", cancel: "\u0E8D\u0EBB\u0E81\u0EC0\u0EA5\u0EB5\u0E81", tip: "\u0E84\u0EB3\u0EC1\u0E99\u0EB0\u0E99\u0EB3", lblTitle: "\u0EAB\u0EBB\u0EA7\u0E82\u0ECD\u0EC9", lblArtist: "\u0EAA\u0EB4\u0E99\u0EA5\u0EB0\u0E9B\u0EB4\u0E99", lblAlbum: "\u0EAD\u0EB0\u0EA5\u0EB0\u0E9A\u0EB3", lblRelease: "\u0E81\u0EB2\u0E99\u0E9B\u0EC8\u0EAD\u0E8D", lblTime: "\u0EC4\u0EA5\u0E8D\u0EB0\u0EC0\u0EA7\u0EA5\u0EB2", lblSource: "\u0EC1\u0EAB\u0EBC\u0EC8\u0E87" },
+  my: { tagline: "\u1017\u102E\u1012\u102E\u101A\u102D\u102F \u101E\u102D\u102F\u1037\u1019\u101F\u102F\u1010\u103A \u101E\u102E\u1001\u103B\u1004\u103A\u1038 \u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A\u101C\u102F\u1015\u103A\u1015\u102B\u104B \u101B\u103D\u1031\u1038\u1015\u102B\u104B \u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A\u104B \u1015\u103C\u102E\u1038\u1015\u103C\u102E\u104B", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u1021\u1001\u103C\u102C\u1038", grab: "\u1012\u1031\u102B\u1004\u103B\u1038\u101C\u102F\u1012\u103B", quit: "\u1011\u103D\u1000\u103B", cancel: "\u1015\u101A\u103B\u1016\u103B\u1000\u103B", tip: "\u1021\u1000\u103D\u1036\u1015\u103D\u1001\u103B\u1000\u103B", lblTitle: "\u1001\u1031\u102B\u1004\u103B\u1038\u1005\u1009\u103B", lblArtist: "\u1021\u1014\u102F\u1015\u100A\u102C\u101B\u103E\u1004\u103B", lblAlbum: "\u1021\u101A\u103B\u101C\u103B\u1018\u1019\u103B", lblRelease: "\u1011\u102F\u1010\u103B\u101D\u1031", lblTime: "\u1000\u103D\u102C\u1001\u101A\u102D\u1014\u103B", lblSource: "\u1021\u101B\u1004\u103B\u1038\u1021\u1019\u103D\u1005\u103B" },
+  si: { tagline: "\u0D95\u0DB1\u0DD1\u0DB8 \u0DC0\u0DD3\u0DA9\u0DD2\u0DBA\u0DDD\u0DC0\u0D9A\u0DCA \u0DC4\u0DDD \u0DC3\u0D82\u0D9C\u0DD3\u0DAD\u0DBA\u0D9A\u0DCA \u0DB6\u0DCF\u0D9C\u0DB1\u0DCA\u0DB1. \u0DAD\u0DDD\u0DBB\u0DB1\u0DCA\u0DB1. \u0DB6\u0DCF\u0D9C\u0DB1\u0DCA\u0DB1. \u0D85\u0DC0\u0DC3\u0DB1\u0DCA.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0DC0\u0DD9\u0DB1\u0DAD\u0DCA", grab: "\u0DB6\u0DCF\u0D9C\u0DB1\u0DB1", quit: "\u0DB4\u0DD2\u0DA7\u0DC0\u0DB1\u0DB1", cancel: "\u0D85\u0DC0\u0DBD\u0D82\u0D9C\u0DD4", tip: "\u0D89\u0D9F\u0DD2\u0DBA", lblTitle: "\u0DB8\u0DCF\u0DAD\u0DD8\u0D9A\u0DCF\u0DC0", lblArtist: "\u0D9A\u0DBD\u0DCF\u0D9A\u0DBB\u0DD4", lblAlbum: "\u0D87\u0DBD\u0DB6\u0DB8\u0DBA", lblRelease: "\u0DB1\u0DD2\u0D9A\u0DD4\u0DAD\u0DD4\u0DC0", lblTime: "\u0D9A\u0DCF\u0DBD\u0DBA", lblSource: "\u0DB8\u0DD6\u0DBD\u0DCF\u0DC1\u0DCA\u200D\u0DBB\u0DBA" },
+  ta: { tagline: "\u0B8E\u0BA8\u0BCD\u0BA4 \u0BB5\u0BC0\u0B9F\u0BBF\u0BAF\u0BCB \u0B85\u0BB2\u0BCD\u0BB2\u0BA4\u0BC1 \u0B87\u0B9A\u0BC8\u0BAF\u0BC8\u0BAF\u0BC1\u0BAE\u0BCD \u0BAA\u0BA4\u0BBF\u0BB5\u0BBF\u0BB1\u0B95\u0BCD\u0B95\u0BB5\u0BC1\u0BAE\u0BCD. \u0BA4\u0BC7\u0BB0\u0BCD\u0BB5\u0BC1. \u0BAA\u0BA4\u0BBF\u0BB5\u0BBF\u0BB1\u0B95\u0BCD\u0B95\u0BAE\u0BCD. \u0BAE\u0BC1\u0B9F\u0BBF\u0BA8\u0BCD\u0BA4\u0BA4\u0BC1.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0BAE\u0BB1\u0BCD\u0BB1", grab: "\u0BAA\u0BA4\u0BBF\u0BB5\u0BBF\u0BB1\u0B95\u0B95", quit: "\u0BB5\u0BC6\u0BB3\u0BBF\u0BAF\u0BC7\u0BB1\u0BC1", cancel: "\u0BB0\u0BA4\u0BA4\u0BC1", tip: "\u0B95\u0BC1\u0BB1\u0BBF\u0BAA\u0BAA\u0BC1", lblTitle: "\u0BA4\u0BB2\u0BC8\u0BAA\u0BAA\u0BC1", lblArtist: "\u0B95\u0BB2\u0BC8\u0B9E\u0BB0", lblAlbum: "\u0B86\u0BB2\u0BAA\u0BAE", lblRelease: "\u0BB5\u0BC6\u0BB3\u0BBF\u0BAF\u0BC0\u0B9F\u0BC1", lblTime: "\u0BA8\u0BC7\u0BB0\u0BAE", lblSource: "\u0BAE\u0BC2\u0BB2\u0BAE" },
+  te: { tagline: "\u0C0F\u0C26\u0C48\u0C28\u0C3E \u0C35\u0C40\u0C21\u0C3F\u0C2F\u0C4B \u0C32\u0C47\u0C26\u0C3E \u0C38\u0C02\u0C17\u0C40\u0C24\u0C02 \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D \u0C1A\u0C47\u0C2F\u0C02\u0C21\u0C3F. \u0C0E\u0C02\u0C1A\u0C41\u0C15\u0C4B\u0C02\u0C21\u0C3F. \u0C21\u0C4C\u0C28\u0C4D\u200C\u0C32\u0C4B\u0C21\u0C4D. \u0C2A\u0C42\u0C30\u0C4D\u0C24\u0C3F.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0C07\u0C24\u0C30", grab: "\u0C21\u0C4C\u0C28\u200C\u0C32\u0C4B\u0C21", quit: "\u0C28\u0C3F\u0C37\u0C4D\u0C15\u0C4D\u0C30\u0C2E\u0C3F\u0C02\u0C1A\u0C41", cancel: "\u0C30\u0C26\u0C26\u0C41", tip: "\u0C1A\u0C3F\u0C1F\u0C15\u0C3E", lblTitle: "\u0C36\u0C40\u0C30\u0C37\u0C3F\u0C15", lblArtist: "\u0C15\u0C33\u0C3E\u0C15\u0C3E\u0C30\u0C41\u0C21\u0C41", lblAlbum: "\u0C06\u0C32\u0C2C\u0C2E", lblRelease: "\u0C35\u0C3F\u0C21\u0C41\u0C26\u0C32", lblTime: "\u0C35\u0C4D\u0C2F\u0C35\u0C27\u0C3F", lblSource: "\u0C2E\u0C42\u0C32\u0C02" },
+  kn: { tagline: "\u0CAF\u0CBE\u0CB5\u0CC1\u0CA6\u0CC7 \u0CB5\u0CC0\u0CA1\u0CBF\u0CAF\u0CCA \u0C85\u0CA5\u0CB5\u0CBE \u0CB8\u0C82\u0C97\u0CC0\u0CA4 \u0CA1\u0CCC\u0CA8\u0CB2\u0CCB\u0CA1\u0CCD \u0CAE\u0CBE\u0CA1\u0CBF. \u0C86\u0CAF\u0CCD\u0C95\u0CC6. \u0CA1\u0CCC\u0CA8\u0CB2\u0CCB\u0CA1\u0CCD. \u0CAE\u0CC1\u0C97\u0CBF\u0CAF\u0CBF\u0CA4\u0CC1.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0C87\u0CA4\u0CB0\u0CC6", grab: "\u0CA1\u0CCC\u0CA8\u0CB2\u0CCB\u0CA1", quit: "\u0CA8\u0CBF\u0CB0\u0C97\u0CAE\u0CBF\u0CB8\u0CBF", cancel: "\u0CB0\u0CA6\u0CCD\u0CA6\u0CC1", tip: "\u0CB8\u0CB2\u0CB9\u0CC6", lblTitle: "\u0CB6\u0CC0\u0CB0\u0CB7\u0CBF\u0C95\u0CC6", lblArtist: "\u0C95\u0CB2\u0CBE\u0CB5\u0CBF\u0CA6", lblAlbum: "\u0C86\u0CB2\u0CAC\u0CAE", lblRelease: "\u0CAC\u0CBF\u0CA1\u0CC1\u0C97\u0CA1\u0CC6", lblTime: "\u0C85\u0CB5\u0CA7\u0CBF", lblSource: "\u0CAE\u0CC2\u0CB2" },
+  ml: { tagline: "\u0D0F\u0D24\u0D46\u0D19\u0D4D\u0D15\u0D3F\u0D32\u0D41\u0D02 \u0D35\u0D40\u0D21\u0D3F\u0D2F\u0D4B \u0D05\u0D32\u0D4D\u0D32\u0D46\u0D19\u0D4D\u0D15\u0D3F\u0D7D \u0D38\u0D02\u0D17\u0D40\u0D24\u0D02 \u0D21\u0D57\u0D7A\u0D32\u0D4B\u0D21\u0D4D \u0D1A\u0D46\u0D2F\u0D4D\u0D2F\u0D41\u0D15. \u0D24\u0D3F\u0D30\u0D1E\u0D4D\u0D1E\u0D46\u0D1F\u0D41\u0D15\u0D4D\u0D15\u0D41\u0D15. \u0D21\u0D57\u0D7A\u0D32\u0D4B\u0D21\u0D4D. \u0D15\u0D34\u0D3F\u0D1E\u0D4D\u0D1E\u0D41.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0D2E\u0D31\u0D4D\u0D31\u0D41\u0D33\u0D4D\u0D33\u0D35", grab: "\u0D21\u0D57\u0D7A\u0D32\u0D4B\u0D21\u0D4D", quit: "\u0D2A\u0D41\u0D31\u0D24\u0D24\u0D41\u0D15\u0D1F\u0D15\u0D15\u0D41\u0D15", cancel: "\u0D31\u0D26\u0D26\u0D3E\u0D15\u0D15\u0D41\u0D15", tip: "\u0D28\u0D41\u0D31\u0D41\u0D19\u0D19", lblTitle: "\u0D36\u0D40\u0D30\u0D37\u0D15\u0D02", lblArtist: "\u0D15\u0D32\u0D3E\u0D15\u0D3E\u0D30\u0D7B", lblAlbum: "\u0D06\u0D32\u0D2C\u0D02", lblRelease: "\u0D31\u0D3F\u0D32\u0D40\u0D38", lblTime: "\u0D26\u0D48\u0D30\u0D18\u0D4D\u0D2F\u0D02", lblSource: "\u0D09\u0D31\u0D35\u0D3F\u0D1F\u0D02" },
+  mr: { tagline: "\u0915\u094B\u0923\u0924\u093E\u0939\u0940 \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0915\u093F\u0902\u0935\u093E \u0938\u0902\u0917\u0940\u0924 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u093E. \u0928\u093F\u0935\u0921\u093E. \u0921\u093E\u0909\u0928\u0932\u094B\u0921. \u091D\u093E\u0932\u0947.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0907\u0924\u0930", grab: "\u0921\u093E\u0928\u0932\u094B\u0921", quit: "\u092C\u0939\u0947\u0930 \u092A\u0921\u093E", cancel: "\u0930\u0926\u0926 \u0915\u0930\u093E", tip: "\u091F\u092A", lblTitle: "\u0936\u0930\u0937\u0915", lblArtist: "\u0915\u0932\u093E\u0915\u093E\u0930", lblAlbum: "\u0905\u0932\u092C\u092E", lblRelease: "\u092A\u094D\u0930\u0915\u093E\u0936\u0928", lblTime: "\u0915\u093E\u0932\u093E\u0935\u0927", lblSource: "\u0938\u0924" },
+  gu: { tagline: "\u0A95\u0ACB\u0A88\u0AAA\u0AA3 \u0AB5\u0ABF\u0AA1\u0ABF\u0A93 \u0A85\u0AA5\u0AB5\u0ABE \u0AB8\u0A82\u0A97\u0AC0\u0AA4 \u0AA1\u0ABE\u0A89\u0AA8\u0AB2\u0ACB\u0AA1 \u0A95\u0AB0\u0ACB. \u0AAA\u0AB8\u0A82\u0AA6 \u0A95\u0AB0\u0ACB. \u0AA1\u0ABE\u0A89\u0AA8\u0AB2\u0ACB\u0AA1. \u0AA5\u0A88 \u0A97\u0AAF\u0AC1\u0A82.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0A85\u0AA8\u0ACD\u0AAF", grab: "\u0AA1\u0ABE\u0A89\u0AA8\u0AB2\u0ACB\u0AA1", quit: "\u0AAC\u0AB9\u0ABE\u0AB0 \u0AA8\u0A95\u0AB3\u0ACB", cancel: "\u0AB0\u0AA6 \u0A95\u0AB0\u0ACB", tip: "\u0A9F\u0ABF\u0AAA", lblTitle: "\u0AB6\u0AC0\u0AB0\u0AB7\u0A95", lblArtist: "\u0A95\u0AB2\u0ABE\u0A95\u0ABE\u0AB0", lblAlbum: "\u0A86\u0AB2\u0AAC\u0AAE", lblRelease: "\u0AB0\u0ABF\u0AB2\u0AC0\u0A9D", lblTime: "\u0AB8\u0AAE\u0AAF\u0A97\u0ABE\u0AB3\u0ACB", lblSource: "\u0AB8\u0ACD\u0AB0\u0ACB\u0AA4" },
+  pa: { tagline: "\u0A15\u0A4B\u0A08 \u0A35\u0A40 \u0A35\u0A40\u0A21\u0A40\u0A13 \u0A1C\u0A3E\u0A02 \u0A38\u0A70\u0A17\u0A40\u0A24 \u0A21\u0A3E\u0A0A\u0A28\u0A32\u0A4B\u0A21 \u0A15\u0A30\u0A4B\u0964 \u0A1A\u0A41\u0A23\u0A4B\u0964 \u0A21\u0A3E\u0A0A\u0A28\u0A32\u0A4B\u0A21\u0964 \u0A39\u0A4B \u0A17\u0A3F\u0A06\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0A39\u0A4B\u0A30", grab: "\u0A21\u0A3E\u0A0A\u0A28\u0A32\u0A4B\u0A21", quit: "\u0A2C\u0A3E\u0A39\u0A30", cancel: "\u0A30\u0A71\u0A26", tip: "\u0A38\u0A41\u0A1D\u0A3E\u0A05", lblTitle: "\u0A38\u0A3F\u0A30\u0A32\u0A47\u0A16", lblArtist: "\u0A15\u0A32\u0A3E\u0A15\u0A3E\u0A30", lblAlbum: "\u0A10\u0A32\u0A2C\u0A2E", lblRelease: "\u0A30\u0A3F\u0A32\u0A40\u0A1C\u0A3C", lblTime: "\u0A2E\u0A3F\u0A06\u0A26", lblSource: "\u0A38\u0A30\u0A4B\u0A24" },
+  or: { tagline: "\u0B2F\u0B47\u0B15\u0B4C\u0B23\u0B38\u0B3F \u0B2D\u0B3F\u0B21\u0B3F\u0B13 \u0B15\u0B3F\u0B2E\u0B4D\u0B2C\u0B3E \u0B38\u0B19\u0B4D\u0B17\u0B40\u0B24 \u0B21\u0B3E\u0B09\u0B28\u0B32\u0B4B\u0B21 \u0B15\u0B30\u0B28\u0B4D\u0B24\u0B41\u0964 \u0B2C\u0B3E\u0B1B\u0B28\u0B4D\u0B24\u0B41\u0964 \u0B21\u0B3E\u0B09\u0B28\u0B32\u0B4B\u0B21\u0964 \u0B38\u0B2E\u0B4D\u0B2A\u0B28\u0B4D\u0B28\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0B05\u0B28\u0B4D\u0B5F", grab: "\u0B21\u0B3E\u0B09\u0B28\u0B32\u0B4B\u0B21", quit: "\u0B2C\u0B39\u0B3E\u0B30", cancel: "\u0B2C\u0B24\u0B32", tip: "\u0B2A\u0B30\u0B2E\u0B30\u0B36", lblTitle: "\u0B36\u0B30\u0B37\u0B15", lblArtist: "\u0B15\u0B33\u0B15\u0B30", lblAlbum: "\u0B06\u0B32\u0B2C\u0B2E", lblRelease: "\u0B30\u0B32\u0B1C", lblTime: "\u0B38\u0B2E\u0B5F", lblSource: "\u0B09\u0B24\u0B38" },
+  as: { tagline: "\u09AF\u09BF\u0995\u09CB\u09A8\u09CB \u09AD\u09BF\u09A1\u09BF\u0985' \u09AC\u09BE \u09B8\u0982\u0997\u09C0\u09A4 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u0995\u09F0\u0995\u0964 \u09AC\u09BE\u099B\u09A8\u09BF \u0995\u09F0\u0995\u0964 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1\u0964 \u09B8\u09AE\u09CD\u09AA\u09A8\u09CD\u09A8\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0986\u09A8", grab: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1", quit: "\u0993\u09B2\u09BE\u0993\u0995", cancel: "\u09AC\u09BE\u09A4\u09BF\u09B2", tip: "\u09AA\u09F0\u09BE\u09AE\u09F0\u09B6", lblTitle: "\u09B6\u09F0\u09B7\u0995", lblArtist: "\u09B6\u09BF\u09B2\u09AA", lblAlbum: "\u098F\u09B2\u09AC\u09BE\u09AE", lblRelease: "\u09AE\u09C1\u0995\u09CD\u09A4\u09BF", lblTime: "\u09B8\u09AE\u09AF", lblSource: "\u0989\u09A4\u09B8" },
+  ha: { tagline: "sauke kowane bidiyo ko ki\u0257a. za\u0253a. sauke. an gama.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 wasu", grab: "sauke", quit: "fita", cancel: "soke", tip: "Shawara", lblTitle: "Take", lblArtist: "Mai fasaha", lblAlbum: "Album", lblRelease: "Saki", lblTime: "Lokaci", lblSource: "Tushe" },
+  yo: { tagline: "gba fidio tabi orin eyikeyi sil\u1EB9. yan. gba sil\u1EB9. pari.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 miiran", grab: "gba sil\u1EB9", quit: "jade", cancel: "fagilee", tip: "Im\u1ECDran", lblTitle: "Ak\u1ECDle", lblArtist: "O\u1E63ere", lblAlbum: "Awo-orin", lblRelease: "Itusil\u1EB9", lblTime: "Akoko", lblSource: "Orisun" },
+  ig: { tagline: "budata vidiyo ma \u1ECD b\u1EE5 egwu \u1ECD b\u1EE5la. h\u1ECDr\u1ECD. budata. emechara.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 nd\u1ECB \u1ECDz\u1ECD", grab: "budata", quit: "p\u1EE5\u1ECD", cancel: "kagbuo", tip: "Nd\u1EE5m\u1ECDd\u1EE5", lblTitle: "Aha", lblArtist: "Onye na-ese", lblAlbum: "Album", lblRelease: "Mwep\u1EE5ta", lblTime: "Oge", lblSource: "Isi iyi" },
+  zu: { tagline: "landa noma yiliphi ividiyo noma umculo. khetha. landa. kwenziwe.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 ezinye", grab: "landa", quit: "phuma", cancel: "khansela", tip: "Ithiphu", lblTitle: "Isihloko", lblArtist: "Umculi", lblAlbum: "Album", lblRelease: "Ukukhishwa", lblTime: "Isikhathi", lblSource: "Umthombo" },
+  xh: { tagline: "khuphela nayiphi na ividiyo okanye umculo. khetha. khuphela. kugqityiwe.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 ezinye", grab: "khuphela", quit: "phuma", cancel: "rhoxisa", tip: "Icebo", lblTitle: "Isihloko", lblArtist: "Umculi", lblAlbum: "Album", lblRelease: "Ukhutsho", lblTime: "Ixesha", lblSource: "Umthombo" },
+  ht: { tagline: "telechaje nenp\xF2t videyo oswa mizik. chwazi. telechaje. fini.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 l\xF2t", grab: "telechaje", quit: "soti", cancel: "anile", tip: "Kons\xE8y", lblTitle: "Tit", lblArtist: "Atis", lblAlbum: "Album", lblRelease: "Lage", lblTime: "Dire", lblSource: "Sous" },
+  so: { tagline: "soo deji muuqaal ama muusikada. dooro. soo deji. dhammaaday.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 kale", grab: "soo deji", quit: "ka bax", cancel: "jooji", tip: "Talo", lblTitle: "Cinwaan", lblArtist: "Fanaan", lblAlbum: "Album", lblRelease: "Sii dayn", lblTime: "Muddo", lblSource: "Il" },
+  rw: { tagline: "kuramo videwo cyangwa umuzika. hitamo. kuramo. byarangiye.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 ibindi", grab: "gukuramo", quit: "sohoka", cancel: "hagarika", tip: "Inama", lblTitle: "Umutwe", lblArtist: "Umukinnyi", lblAlbum: "Album", lblRelease: "Irekurwa", lblTime: "Igihe", lblSource: "Isoko" },
+  ln: { tagline: "kitis\xE1 video to muziki. pon\xE1. kitis\xE1. es\xEDli.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 mosusu", grab: "kokitisa", quit: "kobima", cancel: "kotika", tip: "Toli", lblTitle: "Mot\xF3", lblArtist: "Moyembi", lblAlbum: "Album", lblRelease: "Bimisa", lblTime: "Ntango", lblSource: "Esika" },
+  lg: { tagline: "wanula vidiyo oba ennyimba. londa. wanula. kiwedde.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 endala", grab: "wanula", quit: "fuluma", cancel: "sazaamu", tip: "Amagezi", lblTitle: "Omutwe", lblArtist: "Omuyimbi", lblAlbum: "Album", lblRelease: "Okufulumya", lblTime: "Obudde", lblSource: "Ensibuko" },
+  sn: { tagline: "dhawunirodha vhidhiyo kana mimhanzi. sarudza. dhawunirodha. zvapera.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 zvimwe", grab: "dhawunirodha", quit: "buda", cancel: "kanzura", tip: "Zano", lblTitle: "Zita", lblArtist: "Muimbi", lblAlbum: "Album", lblRelease: "Kuburitswa", lblTime: "Nguva", lblSource: "Kwakabva" },
+  st: { tagline: "jarolla video kapa mmino. kgetha. jarolla. ho fedile.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 tse ding", grab: "jarolla", quit: "tsoa", cancel: "hlakola", tip: "Keletso", lblTitle: "Sehlooho", lblArtist: "Sebini", lblAlbum: "Album", lblRelease: "Tokollo", lblTime: "Nako", lblSource: "Mohloli" },
+  tn: { tagline: "tsaya video kgotsa mmino. tlhopha. tsaya. go feditse.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 tse dingwe", grab: "tsaya", quit: "tsamaya", cancel: "khansela", tip: "Kgakololo", lblTitle: "Setlhogo", lblArtist: "Moopedi", lblAlbum: "Album", lblRelease: "Kgatiso", lblTime: "Nako", lblSource: "Motswedi" },
+  ny: { tagline: "tsitsa kanema kapena nyimbo. sankhani. tsitsa. kwatha.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 zina", grab: "tsitsa", quit: "tuluka", cancel: "lekani", tip: "Malangizo", lblTitle: "Mutu", lblArtist: "Wojambula", lblAlbum: "Album", lblRelease: "Kutuluka", lblTime: "Nthawi", lblSource: "Gwero" },
+  mg: { tagline: "ampidino horonan-tsary na mozika. safidio. ampidino. vita.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 hafa", grab: "ampidino", quit: "hivoaka", cancel: "hanafoana", tip: "Torohevitra", lblTitle: "Lohateny", lblArtist: "Mpanakanto", lblAlbum: "Album", lblRelease: "Famoahana", lblTime: "Fotoana", lblSource: "Loharano" },
+  eo: { tagline: "el\u015Dutu ajnan videon a\u016D muzikon. elektu. el\u015Dutu. finite.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 aliaj", grab: "el\u015Duti", quit: "eliri", cancel: "nuligi", tip: "Konsilo", lblTitle: "Titolo", lblArtist: "Artisto", lblAlbum: "Albumo", lblRelease: "Eldono", lblTime: "Da\u016Dro", lblSource: "Fonto" },
+  la: { tagline: "detrahe quemlibet videum aut musicam. elige. detrahe. factum.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 alia", grab: "detrahere", quit: "exire", cancel: "irritum", tip: "Consilium", lblTitle: "Titulus", lblArtist: "Artifex", lblAlbum: "Album", lblRelease: "Editio", lblTime: "Tempus", lblSource: "Fons" },
+  yi: { tagline: "\u05DC\u05D0\u05B8\u05D3 \u05D0\u05B7\u05E8\u05D0\u05B8\u05E4\u05BC \u05D0\u05B7 \u05D5\u05D5\u05D9\u05D3\u05E2\u05D0\u05B8 \u05D0\u05B8\u05D3\u05E2\u05E8 \u05DE\u05D5\u05D6\u05D9\u05E7. \u05E7\u05DC\u05F2\u05B7\u05D1. \u05DC\u05D0\u05B8\u05D3 \u05D0\u05B7\u05E8\u05D0\u05B8\u05E4\u05BC. \u05E4\u05D0\u05B7\u05E8\u05D8\u05D9\u05E7.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u05D0\u05B7\u05E0\u05D3\u05E2\u05E8\u05E2", grab: "\u05D0\u05B7\u05E8\u05D0\u05B8\u05E4\u05BC\u05DC\u05D0\u05B8\u05D3\u05DF", quit: "\u05D0\u05B7\u05E8\u05D5\u05D9\u05E1\u05D2\u05D0\u05B7\u05E0\u05D2", cancel: "\u05D0\u05B8\u05E4\u05BC\u05D6\u05D0\u05B8\u05D2\u05DF", tip: "\u05E2\u05E6\u05D4", lblTitle: "\u05D8\u05D9\u05D8\u05DC", lblArtist: "\u05E7\u05D5\u05E0\u05E1\u05D8\u05DC\u05E2\u05E8", lblAlbum: "\u05D0\u05B7\u05DC\u05D1\u05D0\u05B8\u05DD", lblRelease: "\u05D0\u05B7\u05E8\u05D5\u05D9\u05E1\u05DC\u05D0\u05B8\u05D6\u05DF", lblTime: "\u05E6\u05F2\u05B7\u05D8", lblSource: "\u05DE\u05E7\u05D5\u05E8" },
+  bo: { tagline: "\u0F56\u0F62\u0F99\u0F53\u0F0B\u0F60\u0F55\u0FB2\u0F72\u0F53\u0F0B\u0F44\u0F58\u0F0B\u0F62\u0F7C\u0F63\u0F0B\u0F58\u0F7C\u0F0B\u0F55\u0F56\u0F0B\u0F63\u0F7A\u0F53\u0F0B\u0F56\u0FB1\u0F7C\u0F66\u0F0D \u0F60\u0F51\u0F7A\u0F58\u0F66\u0F0D \u0F55\u0F56\u0F0B\u0F63\u0F7A\u0F53\u0F0D \u0F5A\u0F62\u0F0B\u0F66\u0F7C\u0F44\u0F0B\u0F0D", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0F42\u0F5E\u0F53", grab: "\u0F55\u0F56\u0F0B\u0F63\u0F7A\u0F53", quit: "\u0F55\u0FB1\u0F72\u0F62\u0F0B\u0F50\u0F7C\u0F53", cancel: "\u0F60\u0F51\u0F7C\u0F62\u0F0B\u0F56", tip: "\u0F56\u0F66\u0FB3\u0F56\u0F0B\u0F56\u0FB1", lblTitle: "\u0F41\u0F0B\u0F56\u0FB1\u0F44", lblArtist: "\u0F66\u0F92\u0FB1\u0F74\u0F0B\u0F62\u0FA9\u0F63\u0F0B\u0F54", lblAlbum: "\u0F46\u0F0B\u0F5A\u0F44", lblRelease: "\u0F60\u0F42\u0FB2\u0F7A\u0F58\u0F66\u0F0B\u0F66\u0FA4\u0F7A\u0F63", lblTime: "\u0F51\u0F74\u0F66\u0F0B\u0F5A\u0F7C\u0F51", lblSource: "\u0F41\u0F74\u0F44\u0F66" },
+  ug: { tagline: "\u06BE\u06D5\u0631 \u0642\u0627\u0646\u062F\u0627\u0642 \u06CB\u0649\u062F\u0649\u0626\u0648 \u064A\u0627\u0643\u0649 \u0645\u06C7\u0632\u0649\u0643\u0627 \u0686\u06C8\u0634\u06C8\u0631\u06C8\u06AD. \u062A\u0627\u0644\u0644\u0627\u06AD. \u0686\u06C8\u0634\u06C8\u0631\u06C8\u06AD. \u062A\u0627\u0645\u0627\u0645.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0628\u0627\u0634\u0642\u0627", grab: "\u0686\u06C8\u0634\u06C8\u0631\u06C8\u0634", quit: "\u0686\u0649\u0642\u0649\u0634", cancel: "\u0628\u0649\u0643\u0627\u0631", tip: "\u0643\u06C6\u0631\u0633\u06D5\u062A\u0645\u06D5", lblTitle: "\u0645\u0627\u06CB\u0632\u06C7", lblArtist: "\u0633\u06D5\u0646\u0626\u06D5\u062A\u0643\u0627\u0631", lblAlbum: "\u0626\u0627\u0644\u0628\u0648\u0645", lblRelease: "\u062A\u0627\u0631\u0642\u0649\u062A\u0649\u0634", lblTime: "\u06CB\u0627\u0642\u0649\u062A", lblSource: "\u0645\u06D5\u0646\u0628\u06D5" },
+  dv: { tagline: "\u0786\u07AE\u0782\u07B0\u0789\u07AC \u0788\u07A9\u0791\u07A8\u0787\u07AF\u0787\u07AC\u0787\u07B0 \u0782\u07AA\u0788\u07A6\u078C\u07A6 \u0789\u07A8\u0787\u07AA\u0792\u07A8\u0786\u07AC\u0787\u07B0 \u0791\u07A6\u0787\u07AA\u0782\u07B0\u078D\u07AF\u0791\u07B0 \u0786\u07AA\u0783\u07AD. \u079A\u07A8\u0794\u07A7\u0783\u07AA \u0786\u07AA\u0783\u07AD. \u0791\u07A6\u0787\u07AA\u0782\u07B0\u078D\u07AF\u0791\u07B0. \u0789\u07AA\u0785\u07A8\u0782\u07B0.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0787\u07AC\u0780\u07AC\u0782\u07B0", grab: "\u0791\u07A6\u0787\u07AA\u0782\u07B0\u078D\u07AF\u0791\u07B0", quit: "\u0782\u07AA\u0786\u07AA\u0782\u0782\u07A7", cancel: "\u0786\u07AC\u0782\u0790\u07A6\u078D\u07B0", tip: "\u0782\u07A6\u0790\u07AD\u0780\u07A6\u078C\u07B0", lblTitle: "\u0790\u07AA\u0783\u07AA\u079A\u07A9", lblArtist: "\u078A\u07A6\u0782\u0782\u07B0\u0782\u07A7\u0782", lblAlbum: "\u0787\u07A6\u078D\u07B0\u0784\u07A6\u0789\u07B0", lblRelease: "\u0783\u07A8\u078D\u07A9\u0790\u07B0", lblTime: "\u0788\u07A6\u078E\u07AA\u078C\u07AA", lblSource: "\u0789\u07A6\u0790\u07B0\u078B\u07A6\u0783\u07AA" },
+  haw: { tagline: "ho\u02BBoiho i kekahi wiki\u014D a mele paha. koho. ho\u02BBoiho. pau.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u02BB\u0113 a\u02BBe", grab: "ho\u02BBoiho", quit: "ha\u02BBalele", cancel: "k\u0101pae", tip: "Mana\u02BBo", lblTitle: "Po\u02BBo", lblArtist: "Mea hana", lblAlbum: "Album", lblRelease: "Ho\u02BBoku\u02BBu", lblTime: "Ka l\u014D\u02BBihi", lblSource: "Kumu" },
+  mi: { tagline: "tangohia t\u0113tahi ataata, waiata r\u0101nei. k\u014Dwhiri. tango. kua oti.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0113tahi atu", grab: "tango", quit: "puta", cancel: "whakakore", tip: "Tohutohu", lblTitle: "Taitara", lblArtist: "Kaitoi", lblAlbum: "Pukaemi", lblRelease: "Tuku", lblTime: "Roanga", lblSource: "P\u016Btake" },
+  sm: { tagline: "sii mai so\u02BBo se vitio po\u02BBo se musika. filifili. sii mai. ua mae\u02BBa.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 isi", grab: "sii mai", quit: "alu ese", cancel: "faaleaoga", tip: "Fautuaga", lblTitle: "Ulutala", lblArtist: "Tusitala", lblAlbum: "Album", lblRelease: "Lolomi", lblTime: "Umi", lblSource: "Punavai" },
+  to: { tagline: "download ha vitio pe musika. fili. download. kuo \u02BBosi.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 kehe", grab: "download", quit: "mavae", cancel: "kaniseli", tip: "Fale\u02BBi", lblTitle: "Ulunga", lblArtist: "Tokotaha", lblAlbum: "Album", lblRelease: "Tuku", lblTime: "Taimi", lblSource: "Ma\u02BBu\u02BBanga" },
+  fj: { tagline: "lavetaka e dua na vidio se sere. digitaka. lavetaka. sa oti.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 tale", grab: "lavetaka", quit: "biuta", cancel: "bokoca", tip: "iVakaro", lblTitle: "iYatukana", lblArtist: "Dauveiqaravi", lblAlbum: "Album", lblRelease: "Vakadewa", lblTime: "Gauna", lblSource: "iVurevure" }
 };
 var table = { en, id, es, fr, de, pt, it, ru, ja, ko, zh, "zh-TW": zhTW, ar, hi, tr, vi, th, ms, nl, pl, uk, fil };
 function merge(base, override) {
@@ -41472,9 +51402,9 @@ function merge(base, override) {
 for (const [code, p] of Object.entries(partial)) {
   table[code] = merge(en, p);
 }
-function normalizeLocale(raw) {
-  if (!raw) return void 0;
-  const cleaned = raw.split(".")[0].replace("_", "-");
+function normalizeLocale(raw2) {
+  if (!raw2) return void 0;
+  const cleaned = raw2.split(".")[0].replace("_", "-");
   const lower = cleaned.toLowerCase();
   if (lower === "zh-tw" || lower === "zh-hk") return "zh-TW";
   return lower.split("-")[0];
@@ -41523,12 +51453,12 @@ function fmtDesc(descKey) {
   const s = t();
   return s[descKey] ?? descKey;
 }
-function hasBitrateOptions(format) {
-  return Boolean(format.bitrates && format.bitrates.length > 0);
+function hasBitrateOptions(format2) {
+  return Boolean(format2.bitrates && format2.bitrates.length > 0);
 }
-function bitrateItems(format) {
+function bitrateItems(format2) {
   const s = t();
-  const rates = [...format.bitrates ?? []].sort((a, b) => b - a);
+  const rates = [...format2.bitrates ?? []].sort((a, b) => b - a);
   return rates.map((kbps) => ({
     key: String(kbps),
     label: `${kbps} kbps${kbps >= 320 ? `  \u2605 ${s.brHighest}` : kbps >= 192 ? `  ${s.brHigh}` : kbps >= 128 ? `  ${s.brStandard}` : `  ${s.brSmall}`}`,
@@ -42308,7 +52238,7 @@ function isNewerVersion(a, b) {
 async function checkForUpdate(signal) {
   try {
     const controller = new AbortController();
-    const timeout = setTimeout(() => controller.abort(), 5e3);
+    const timeout2 = setTimeout(() => controller.abort(), 5e3);
     const combinedSignal = signal ? AbortSignal.any([signal, controller.signal]) : controller.signal;
     const res = await fetch(`https://api.github.com/repos/${GITHUB_REPO}/releases/latest`, {
       headers: {
@@ -42317,7 +52247,7 @@ async function checkForUpdate(signal) {
       },
       signal: combinedSignal
     });
-    clearTimeout(timeout);
+    clearTimeout(timeout2);
     if (!res.ok) return null;
     const data = await res.json();
     const latest = data.tag_name?.replace(/^v/, "") ?? "";
@@ -42657,16 +52587,33 @@ async function downloadMacOsFfmpeg(targetFfmpeg, targetFfprobe, signal) {
     }
   }
 }
-function formatReleaseDate(raw) {
-  if (!raw || raw.length !== 8) return void 0;
-  const year = raw.slice(0, 4);
-  const month = raw.slice(4, 6);
-  const day = raw.slice(6, 8);
+function formatReleaseDate(raw2) {
+  if (!raw2 || raw2.length !== 8) return void 0;
+  const year = raw2.slice(0, 4);
+  const month = raw2.slice(4, 6);
+  const day = raw2.slice(6, 8);
   if (!/^\d{4}$/.test(year) || !/^\d{2}$/.test(month) || !/^\d{2}$/.test(day)) return void 0;
   return `${year}-${month}-${day}`;
 }
 function artistOf(info) {
   return info.artist ?? info.creator ?? info.uploader;
+}
+function bestThumbnail(info) {
+  if (info.thumbnails && info.thumbnails.length > 0) {
+    const candidates = info.thumbnails.filter((t2) => t2.url);
+    if (candidates.length > 0) {
+      const sorted = [...candidates].sort((a, b) => {
+        const areaA = (a.width ?? 0) * (a.height ?? 0);
+        const areaB = (b.width ?? 0) * (b.height ?? 0);
+        if (areaB !== areaA) return areaB - areaA;
+        return (b.preference ?? 0) - (a.preference ?? 0);
+      });
+      const best = sorted[0];
+      return { url: best.url, width: best.width, height: best.height };
+    }
+  }
+  if (info.thumbnail) return { url: info.thumbnail };
+  return void 0;
 }
 async function fetchSpotifyMetadata(url, signal) {
   try {
@@ -42945,10 +52892,10 @@ async function probe(ytdlp, url, signal, useCookies = false) {
     const looksLikeMusicPage = ogMeta?.type?.startsWith("music.") || /music|song|track|listen/i.test(ogMeta?.title ?? "");
     const looksLikeMusicDrm = isDrmMusicService(url) || /soundcloud\.com|bandcamp\.com|audiomack\.com/i.test(url) || /\bdrm\b|premium|subscription required/i.test(errMsg) || looksLikeMusicPage;
     if (!looksLikeMusicDrm) throw directError;
-    const metadata = await fetchMusicMetadata(url, signal);
+    const metadata2 = await fetchMusicMetadata(url, signal);
     let searchQuery;
-    if (metadata?.title) {
-      searchQuery = metadata.artist ? `${metadata.artist} - ${metadata.title}` : metadata.title;
+    if (metadata2?.title) {
+      searchQuery = metadata2.artist ? `${metadata2.artist} - ${metadata2.title}` : metadata2.title;
     } else if (ogMeta?.title) {
       searchQuery = ogMeta.title.replace(/\s*[·|]\s*\w+$/, "").trim();
     } else {
@@ -42959,9 +52906,9 @@ async function probe(ytdlp, url, signal, useCookies = false) {
       if (youtubeUrl) {
         try {
           const info = await doProbe(youtubeUrl);
-          if (metadata?.title && !info.title) info.title = metadata.title;
-          if (metadata?.artist && !info.artist) info.artist = metadata.artist;
-          if (metadata?.album && !info.album) info.album = metadata.album;
+          if (metadata2?.title && !info.title) info.title = metadata2.title;
+          if (metadata2?.artist && !info.artist) info.artist = metadata2.artist;
+          if (metadata2?.album && !info.album) info.album = metadata2.album;
           return { info, spotifyFallback: true, originalUrl: url };
         } catch {
         }
@@ -42977,14 +52924,14 @@ function maxHeight(info) {
 function hasAudio(info) {
   return (info.formats ?? []).some((f) => f.acodec && f.acodec !== "none");
 }
-function buildVideoArgs(format, resolution, fps) {
+function buildVideoArgs(format2, resolution, fps) {
   const heightFilter = resolution > 0 ? `[height<=${resolution}]` : "";
   const fpsFilter = fps > 0 ? `[fps<=${fps}]` : "";
   const selector = `bv*${heightFilter}${fpsFilter}+ba/b${heightFilter}${fpsFilter}/bv*${heightFilter}+ba/b`;
-  return ["-f", selector, "--merge-output-format", format.ext];
+  return ["-f", selector, "--merge-output-format", format2.ext];
 }
-function buildAudioArgs(format, bitrateKbps = 0) {
-  const args2 = ["-f", "ba/b", "-x", "--audio-format", format.id];
+function buildAudioArgs(format2, bitrateKbps = 0) {
+  const args2 = ["-f", "ba/b", "-x", "--audio-format", format2.id];
   if (bitrateKbps > 0) {
     args2.push("--audio-quality", `${bitrateKbps}K`);
   } else {
@@ -43032,12 +52979,12 @@ async function download(opts, handlers, signal) {
     let part = 0;
     let totalParts = 1;
     let lastDownloaded = 0;
-    let buffer = "";
+    let buffer2 = "";
     const destinations = [];
     child.stdout.on("data", (chunk) => {
-      buffer += chunk.toString();
-      const lines = buffer.split("\n");
-      buffer = lines.pop() ?? "";
+      buffer2 += chunk.toString();
+      const lines = buffer2.split("\n");
+      buffer2 = lines.pop() ?? "";
       for (const rawLine of lines) {
         const line = rawLine.trim();
         if (!line) continue;
@@ -43102,28 +53049,451 @@ function cleanYtDlpError(stderr) {
   return last ? last.replace(/^ERROR:\s*(\[[^\]]+\]\s*)?/, "") : "";
 }
 
-// src/app.tsx
+// src/components/thumbnail.tsx
+var import_react39 = __toESM(require_react(), 1);
+
+// src/lib/image-protocol.ts
+var cachedProtocol;
+var cellPixelSize;
+var protocolSource;
+var DEBUG = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+function debugLog(msg) {
+  if (DEBUG) process.stderr.write(`[image] ${msg}
+`);
+}
+async function queryTerminal(timeoutMs = 350) {
+  if (!process.stdout.isTTY || !process.stdin.isTTY) {
+    debugLog("queryTerminal: skipped (not a TTY)");
+    return {};
+  }
+  debugLog(`queryTerminal: TERM=${process.env.TERM ?? "(unset)"} TERM_PROGRAM=${process.env.TERM_PROGRAM ?? "(unset)"} LC_TERMINAL=${process.env.LC_TERMINAL ?? "(unset)"} KITTY_WINDOW_ID=${process.env.KITTY_WINDOW_ID ?? "(unset)"}`);
+  const kittyQuery = "\x1B_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA\x1B\\";
+  const cellQuery = "\x1B[16t";
+  const da1Query = "\x1B[c";
+  return new Promise((resolve) => {
+    let resolved = false;
+    let buffer2 = "";
+    let sawKittyReply = false;
+    let sawDa1Reply = false;
+    const caps = {};
+    const cleanup = () => {
+      process.stdin.removeListener("data", onData);
+      process.stdin.pause();
+      if (process.stdin.setRawMode) {
+        try {
+          process.stdin.setRawMode(false);
+        } catch {
+        }
+      }
+    };
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timer);
+      cleanup();
+      debugLog(`queryTerminal result: protocol=${caps.protocol ?? "(none)"} cell=${caps.cellPixelSize ? `${caps.cellPixelSize.width}x${caps.cellPixelSize.height}` : "(unknown)"}`);
+      resolve(caps);
+    };
+    const onData = (chunk) => {
+      buffer2 += chunk.toString();
+      if (!sawKittyReply && buffer2.includes("\x1B_Gi=31;")) {
+        sawKittyReply = true;
+        if (buffer2.includes("\x1B_Gi=31;OK")) caps.protocol = "kitty";
+      }
+      const cellMatch = /\x1b\[6;(\d+);(\d+)t/.exec(buffer2);
+      if (cellMatch && !caps.cellPixelSize) {
+        const height = Number.parseInt(cellMatch[1], 10);
+        const width = Number.parseInt(cellMatch[2], 10);
+        if (width > 0 && height > 0) caps.cellPixelSize = { width, height };
+      }
+      if (!sawDa1Reply) {
+        const da1Match = /\x1b\[\?([\d;]+)c/.exec(buffer2);
+        if (da1Match) {
+          sawDa1Reply = true;
+          const params = da1Match[1].split(";").map((p) => Number.parseInt(p, 10));
+          if (params.includes(4) && caps.protocol !== "kitty") caps.protocol = "sixel";
+        }
+      }
+      if (sawKittyReply && sawDa1Reply && caps.cellPixelSize) finish();
+    };
+    const timer = setTimeout(finish, timeoutMs);
+    try {
+      if (process.stdin.setRawMode) process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.on("data", onData);
+      process.stdout.write(kittyQuery + cellQuery + da1Query);
+    } catch {
+      clearTimeout(timer);
+      cleanup();
+      resolve(caps);
+    }
+  });
+}
+function setProtocol(protocol) {
+  cachedProtocol = protocol;
+  protocolSource = "queryTerminal";
+  debugLog(`setProtocol: ${protocol} (from terminal query)`);
+}
+function setCellPixelSize(size) {
+  cellPixelSize = size;
+}
+function getCellPixelSize() {
+  return cellPixelSize ?? { width: 10, height: 20 };
+}
+function detectProtocol() {
+  if (cachedProtocol) {
+    debugLog(`detectProtocol: cached=${cachedProtocol} (source: ${protocolSource ?? "env"})`);
+    return cachedProtocol;
+  }
+  const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase();
+  const lcTerminal = (process.env.LC_TERMINAL ?? "").toLowerCase();
+  const term = (process.env.TERM ?? "").toLowerCase();
+  debugLog(`detectProtocol: env scan \u2014 TERM=${term || "(empty)"} TERM_PROGRAM=${termProgram || "(empty)"} LC_TERMINAL=${lcTerminal || "(empty)"} KITTY_WINDOW_ID=${process.env.KITTY_WINDOW_ID ?? "(unset)"}`);
+  if (termProgram === "kitty" || process.env.KITTY_WINDOW_ID !== void 0 || term.includes("kitty")) {
+    cachedProtocol = "kitty";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 kitty (env)");
+    return cachedProtocol;
+  }
+  if (termProgram === "iterm.app" || lcTerminal === "iterm2" || termProgram === "mintty") {
+    cachedProtocol = "iterm2";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 iterm2 (env)");
+    return cachedProtocol;
+  }
+  if (termProgram === "wezterm") {
+    cachedProtocol = "kitty";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 kitty (wezterm env)");
+    return cachedProtocol;
+  }
+  if (term.includes("sixel") || termProgram === "foot" || termProgram === "mlterm" || termProgram === "rlogin") {
+    cachedProtocol = "sixel";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 sixel (env)");
+    return cachedProtocol;
+  }
+  debugLog("detectProtocol: \u2192 halfblock (fallback, NOT cached)");
+  return "halfblock";
+}
+async function sixelSequence(rgba, width, height) {
+  try {
+    const sixelMod = await Promise.resolve().then(() => __toESM(require_lib(), 1));
+    const encode = sixelMod.sixelEncode;
+    const palette = Array.from(sixelMod.PALETTE_ANSI_256);
+    if (!encode) return "";
+    return encode(new Uint8Array(rgba), width, height, palette);
+  } catch {
+    return "";
+  }
+}
+function iterm2Sequence(png2, widthCells) {
+  const b64 = png2.toString("base64");
+  return `\x1B]1337;File=inline=1;size=${png2.length};width=${widthCells};preserveAspectRatio=1:${b64}\x07`;
+}
+function kittyDeleteById(imageId) {
+  return `\x1B_Ga=d,d=i,i=${imageId}\x1B\\`;
+}
+var ROWCOL_DIACRITICS = [
+  773,
+  781,
+  782,
+  784,
+  786,
+  820,
+  821,
+  822,
+  823,
+  824,
+  861,
+  862,
+  863,
+  864,
+  865,
+  866,
+  867,
+  868,
+  869,
+  870,
+  871,
+  872,
+  873,
+  874,
+  875,
+  876,
+  877,
+  878,
+  879
+];
+function kittyTransmitQuiet(png2, imageId) {
+  const b64 = png2.toString("base64");
+  const CHUNK = 4096;
+  const parts = [];
+  for (let i = 0; i < b64.length; i += CHUNK) {
+    const chunk = b64.slice(i, i + CHUNK);
+    const more = i + CHUNK < b64.length ? ",m=1" : ",m=0";
+    parts.push(
+      i === 0 ? `\x1B_Ga=t,f=100,i=${imageId},q=2${more};${chunk}\x1B\\` : `\x1B_G${more};${chunk}\x1B\\`
+    );
+  }
+  return parts.join("");
+}
+function kittyVirtualPlacement(imageId, cols, rows) {
+  return `\x1B_Ga=p,U=1,i=${imageId},c=${cols},r=${rows},q=2\x1B\\`;
+}
+function kittyPlaceholderGrid(imageId, cols, rows) {
+  const d = (n) => String.fromCodePoint(ROWCOL_DIACRITICS[Math.max(0, Math.min(n, ROWCOL_DIACRITICS.length - 1))]);
+  const lines = [];
+  for (let r = 0; r < rows; r++) {
+    let line = `\x1B[38;5;${imageId}m`;
+    for (let c = 0; c < cols; c++) line += `\u{10EEEE}${d(r)}${d(c)}`;
+    line += "\x1B[39m";
+    lines.push(line);
+  }
+  return lines.join("\n");
+}
+var cprAttached = false;
+var cprSubscribers = /* @__PURE__ */ new Set();
+function attachCprListener() {
+  if (cprAttached) return;
+  cprAttached = true;
+  process.stdin.on("data", (chunk) => {
+    const match = /\x1b\[(\d+);(\d+)R/.exec(chunk.toString());
+    if (!match) return;
+    const pos = { row: Number.parseInt(match[1], 10), col: Number.parseInt(match[2], 10) };
+    for (const fn2 of cprSubscribers) fn2(pos);
+  });
+}
+function subscribeCpr(fn2) {
+  cprSubscribers.add(fn2);
+  return () => {
+    cprSubscribers.delete(fn2);
+  };
+}
+var CPR_QUERY = "\x1B[6n";
+
+// src/components/thumbnail.tsx
 var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
-var OUT_DIR = path3.join(os5.homedir(), "Downloads");
+var nextImageId = 0;
+var DEBUG2 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+var loggedRenderer;
+function logRenderer(protocol, hasPng, hasRgba, hasGrid) {
+  if (!DEBUG2) return;
+  const key = `${protocol}|png=${hasPng}|rgba=${hasRgba}|grid=${hasGrid}`;
+  if (loggedRenderer === key) return;
+  loggedRenderer = key;
+  let renderer2 = "halfblock-fallback";
+  if (protocol === "kitty" && hasPng) renderer2 = "kitty-native(placeholder)";
+  else if (protocol === "iterm2" && hasPng) renderer2 = "iterm2-native";
+  else if (protocol === "sixel" && hasRgba) renderer2 = "sixel-native(cpr-anchored)";
+  else if (protocol === "kitty" || protocol === "iterm2" || protocol === "sixel") renderer2 = `${protocol}-DEGRADED(missing data)`;
+  process.stderr.write(`[image] renderer: ${renderer2} (protocol=${protocol} png=${hasPng} rgba=${hasRgba} grid=${hasGrid})
+`);
+}
+var MAX_SIXEL_CACHED = 12;
+var sixelCache = /* @__PURE__ */ new Map();
+function Thumbnail({ grid, png: png2, rgba, cols, rows }) {
+  const { stdout } = use_stdout_default();
+  const protocol = detectProtocol();
+  const spacer = (0, import_react39.useMemo)(() => {
+    const lines = [];
+    for (let r = 0; r < rows; r++) {
+      lines.push(" ".repeat(cols));
+    }
+    return lines.join("\n");
+  }, [cols, rows]);
+  const [kittyId, setKittyId] = (0, import_react39.useState)(void 0);
+  const kittyPngRef = (0, import_react39.useRef)(void 0);
+  const kittyIdRef = (0, import_react39.useRef)(void 0);
+  kittyIdRef.current = kittyId;
+  (0, import_react39.useEffect)(() => {
+    if (protocol !== "kitty" || !png2 || !stdout) return;
+    if (kittyPngRef.current === png2) return;
+    const id2 = nextImageId++ % 254 + 1;
+    stdout.write(kittyTransmitQuiet(png2, id2) + kittyVirtualPlacement(id2, cols, rows));
+    kittyPngRef.current = png2;
+    setKittyId(id2);
+  }, [protocol, png2, cols, rows, stdout]);
+  (0, import_react39.useEffect)(() => {
+    return () => {
+      const id2 = kittyIdRef.current;
+      if (protocol === "kitty" && id2 !== void 0 && stdout) stdout.write(kittyDeleteById(id2));
+      kittyPngRef.current = void 0;
+    };
+  }, [protocol, stdout]);
+  const [sixelSeq, setSixelSeq] = (0, import_react39.useState)(void 0);
+  (0, import_react39.useEffect)(() => {
+    if (protocol !== "sixel" || !rgba) return;
+    const cached = sixelCache.get(rgba.data);
+    if (cached !== void 0) {
+      setSixelSeq(cached);
+      return;
+    }
+    let cancelled = false;
+    void sixelSequence(rgba.data, rgba.width, rgba.height).then((seq) => {
+      if (cancelled) return;
+      sixelCache.set(rgba.data, seq);
+      if (sixelCache.size > MAX_SIXEL_CACHED) {
+        const oldest = sixelCache.keys().next().value;
+        if (oldest !== void 0) sixelCache.delete(oldest);
+      }
+      setSixelSeq(seq);
+    });
+    return () => {
+      cancelled = true;
+    };
+  }, [protocol, rgba]);
+  const [anchor, setAnchor] = (0, import_react39.useState)(void 0);
+  (0, import_react39.useEffect)(() => {
+    if (protocol !== "sixel") return;
+    attachCprListener();
+    return subscribeCpr(setAnchor);
+  }, [protocol]);
+  (0, import_react39.useEffect)(() => {
+    if (protocol !== "sixel" || !sixelSeq || !anchor || !stdout) return;
+    stdout.write(`\x1B[${anchor.row};${anchor.col}H${sixelSeq}`);
+  }, [protocol, sixelSeq, anchor, stdout]);
+  logRenderer(protocol, Boolean(png2), Boolean(rgba), grid.length > 0);
+  if (protocol === "kitty" && png2) {
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { children: kittyId !== void 0 ? kittyPlaceholderGrid(kittyId, cols, rows) : spacer });
+  }
+  if (protocol === "iterm2" && png2) {
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { children: iterm2Sequence(png2, cols) + spacer });
+  }
+  if (protocol === "sixel") {
+    return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
+      CPR_QUERY,
+      grid.map((row, i) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
+        row.map((cell, j) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: cell.top, backgroundColor: cell.bottom, children: "\u2580" }, j)),
+        i < grid.length - 1 ? "\n" : ""
+      ] }, i))
+    ] });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { children: grid.map((row, i) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
+    row.map((cell, j) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: cell.top, backgroundColor: cell.bottom, children: "\u2580" }, j)),
+    i < grid.length - 1 ? "\n" : ""
+  ] }, i)) });
+}
+
+// src/lib/thumbnail.ts
+var MAX_NATIVE_WIDTH = 1920;
+var MAX_NATIVE_HEIGHT = 1080;
+var MAX_CACHED = 12;
+var thumbCache = /* @__PURE__ */ new Map();
+async function fetchThumbnail(url, cols, rows, protocol, signal) {
+  const key = `${url}|${cols}|${rows}|${protocol}`;
+  const cached = thumbCache.get(key);
+  if (cached) return cached;
+  try {
+    const response = await fetch(url, { signal });
+    if (!response.ok || !response.body) return void 0;
+    const buffer2 = Buffer.from(await response.arrayBuffer());
+    if (buffer2.length === 0) return void 0;
+    const sharpMod = await Promise.resolve().then(() => (init_dist(), dist_exports));
+    const sharpFn = sharpMod.default ?? sharpMod;
+    const grid = await buildGrid(sharpFn, buffer2, cols, rows);
+    let png2;
+    let rgba;
+    if (protocol === "kitty" || protocol === "iterm2") {
+      png2 = await buildHighResPng(sharpFn, buffer2);
+    } else if (protocol === "sixel") {
+      rgba = await buildSixelRgba(sharpFn, buffer2, cols, rows);
+    }
+    const result = { grid, png: png2, rgba };
+    thumbCache.set(key, result);
+    if (thumbCache.size > MAX_CACHED) {
+      const oldest = thumbCache.keys().next().value;
+      if (oldest !== void 0) thumbCache.delete(oldest);
+    }
+    return result;
+  } catch {
+    return void 0;
+  }
+}
+async function buildHighResPng(sharpFn, buffer2) {
+  try {
+    let pipeline2 = sharpFn(buffer2);
+    const meta = await pipeline2.clone().metadata();
+    const srcW = meta.width ?? 0;
+    const srcH = meta.height ?? 0;
+    if (srcW > MAX_NATIVE_WIDTH || srcH > MAX_NATIVE_HEIGHT) {
+      pipeline2 = pipeline2.resize(MAX_NATIVE_WIDTH, MAX_NATIVE_HEIGHT, {
+        fit: "inside",
+        withoutEnlargement: true,
+        kernel: "lanczos3"
+      });
+    }
+    return await pipeline2.png({ quality: 95 }).toBuffer();
+  } catch {
+    return void 0;
+  }
+}
+async function buildSixelRgba(sharpFn, buffer2, cols, rows) {
+  try {
+    const cell = getCellPixelSize();
+    const targetWidth = Math.max(64, cols * cell.width);
+    const targetHeight = Math.max(64, rows * cell.height);
+    const { data, info } = await sharpFn(buffer2).resize(targetWidth, targetHeight, { fit: "cover", kernel: "lanczos3" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+    return { data, width: info.width, height: info.height };
+  } catch {
+    return void 0;
+  }
+}
+async function buildGrid(sharpFn, buffer2, cols, rows) {
+  const width = Math.max(1, cols);
+  const height = Math.max(2, rows * 2);
+  const { data, info } = await sharpFn(buffer2).resize(width, height, { fit: "cover", kernel: "lanczos3" }).sharpen({ sigma: 0.8 }).normalise().removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const channels = info.channels;
+  const grid = [];
+  for (let row = 0; row < rows; row++) {
+    const line = [];
+    for (let col = 0; col < cols; col++) {
+      const topIdx = (row * 2 * info.width + col) * channels;
+      const botIdx = ((row * 2 + 1) * info.width + col) * channels;
+      line.push({ top: toHex(data, topIdx), bottom: toHex(data, botIdx) });
+    }
+    grid.push(line);
+  }
+  return grid;
+}
+function toHex(data, idx) {
+  const r = data[idx] ?? 0;
+  const g = data[idx + 1] ?? 0;
+  const b = data[idx + 2] ?? 0;
+  return `#${r.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
+// src/app.tsx
+var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+var OUT_DIR = path4.join(os5.homedir(), "Downloads");
 function UpdateBadge({ info }) {
   const theme = useTheme();
   const s = t();
   if (!info?.hasUpdate) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { position: "absolute", top: 0, right: 1, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.warning ?? theme.accent ?? theme.primary, bold: true, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { position: "absolute", top: 0, right: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.warning ?? theme.accent ?? theme.primary, bold: true, children: [
     "\u2191 ",
     s.updateAvailable ?? "Update Carbon available",
     ": v",
     info.latestVersion
   ] }) });
 }
-var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { children: " " }, i)) });
+var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: " " }, i)) });
+function BrandLine() {
+  const theme = useTheme();
+  const s = t();
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", flexShrink: 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u25C8 CARBON" }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: true, children: "  \xB7  " }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, children: s.tagline })
+  ] });
+}
 function ChoiceIndicator({ isSelected }) {
   const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { marginRight: 1, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.accent ?? theme.primary, children: isSelected ? "\u25B6" : " " }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { marginRight: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: isSelected ? "\u25B6" : " " }) });
 }
 function ChoiceItem({ isSelected, label }) {
   const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: isSelected ? theme.accent ?? theme.primary : theme.primary, bold: isSelected, children: label });
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: isSelected ? theme.accent ?? theme.primary : theme.primary, bold: isSelected, children: label });
 }
 function MetadataBlock({ info, platform: platform2, maxWidth }) {
   const theme = useTheme();
@@ -43140,10 +53510,47 @@ function MetadataBlock({ info, platform: platform2, maxWidth }) {
     [s.lblTime, info.duration ? formatDuration(info.duration) : "-"],
     [s.lblSource, platform2?.label ?? "-"]
   ];
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", children: rows.map(([label, value]) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "row", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.accent ?? theme.gray, bold: true, children: label.padEnd(labelW) }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.primary, children: truncate(value, valueW) })
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", children: rows.map(([label, value]) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.gray, bold: true, children: label.padEnd(labelW) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, children: truncate(value, valueW) })
   ] }, label)) });
+}
+function CoverArt({ thumbInfo, cols }) {
+  const protocol = detectProtocol();
+  const cell = getCellPixelSize();
+  const aspect = thumbInfo.width && thumbInfo.height ? thumbInfo.width / thumbInfo.height : 1;
+  const rows = Math.max(4, Math.min(18, Math.round(cols * cell.width / (aspect * cell.height))));
+  const [thumb, setThumb] = (0, import_react40.useState)(void 0);
+  (0, import_react40.useEffect)(() => {
+    const controller = new AbortController();
+    let cancelled = false;
+    void fetchThumbnail(thumbInfo.url, cols, rows, protocol, controller.signal).then((result) => {
+      if (!cancelled && result) setThumb(result);
+    });
+    return () => {
+      cancelled = true;
+      controller.abort();
+    };
+  }, [thumbInfo.url, cols, rows, protocol]);
+  if (!thumb) {
+    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: cols, height: rows, flexShrink: 0 });
+  }
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexShrink: 0, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Thumbnail, { grid: thumb.grid, png: thumb.png, rgba: thumb.rgba, cols, rows }) });
+}
+function MediaHeader({ info, platform: platform2, contentWidth }) {
+  const thumbInfo = (0, import_react40.useMemo)(() => bestThumbnail(info), [info]);
+  const coverCols = 24;
+  const gap = 2;
+  const minMeta = 24;
+  const showCover = Boolean(thumbInfo) && contentWidth >= coverCols + gap + minMeta;
+  const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth;
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", width: contentWidth, children: [
+    showCover && thumbInfo ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(CoverArt, { thumbInfo, cols: coverCols }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: gap, flexShrink: 0 })
+    ] }) : null,
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", flexGrow: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: metaWidth }) })
+  ] });
 }
 function ModernProgressBar({ percent, width = 40 }) {
   const theme = useTheme();
@@ -43151,10 +53558,10 @@ function ModernProgressBar({ percent, width = 40 }) {
   const filled = Math.round(clamped * width);
   const empty = width - filled;
   const pct = Math.round(clamped * 100);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u2588".repeat(filled) }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.gray, dimColor: true, children: "\u2591".repeat(empty) }),
-    /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.primary, bold: true, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u2588".repeat(filled) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: true, children: "\u2591".repeat(empty) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.primary, bold: true, children: [
       " ",
       pct,
       "%"
@@ -43164,25 +53571,25 @@ function ModernProgressBar({ percent, width = 40 }) {
 function TipDisplay({ maxWidth }) {
   const theme = useTheme();
   const s = t();
-  const [tip, setTip] = (0, import_react39.useState)(randomTip);
-  (0, import_react39.useEffect)(() => {
+  const [tip, setTip] = (0, import_react40.useState)(randomTip);
+  (0, import_react40.useEffect)(() => {
     const interval = setInterval(() => {
       setTip(nextTip());
     }, TIP_INTERVAL_MS);
     return () => clearInterval(interval);
   }, []);
   const wrapped = wrapText2(`${s.tip}: ${tip}`, maxWidth);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: wrapped.slice(0, 2).map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, italic: true, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: wrapped.slice(0, 2).map((line, i) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, italic: true, children: [
     i === 0 ? "\u{1F4A1} " : "   ",
     line
   ] }, i)) });
 }
 function App2({ initialThemeMode: initialThemeMode2 = "system", ...props }) {
-  const [themeMode, setThemeMode] = (0, import_react39.useState)(initialThemeMode2);
-  const cycleTheme = (0, import_react39.useCallback)(() => {
+  const [themeMode, setThemeMode] = (0, import_react40.useState)(initialThemeMode2);
+  const cycleTheme = (0, import_react40.useCallback)(() => {
     setThemeMode(nextThemeMode);
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(AppContent, { ...props, cycleTheme }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AppContent, { ...props, cycleTheme }) });
 }
 function AppContent({
   initialUrl: initialUrl2,
@@ -43193,18 +53600,18 @@ function AppContent({
   const s = t();
   const { exit } = use_app_default();
   const { stdout } = use_stdout_default();
-  const [url, setUrl] = (0, import_react39.useState)(initialUrl2 ?? "");
-  const [urlInput, setUrlInput] = (0, import_react39.useState)("");
-  const [history, setHistory] = (0, import_react39.useState)(loadHistory);
-  const [platform2, setPlatform] = (0, import_react39.useState)();
-  const [info, setInfo] = (0, import_react39.useState)();
-  const downloadUrlRef = (0, import_react39.useRef)("");
-  const [wizard, setWizard] = (0, import_react39.useState)({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
-  const ytdlpRef = (0, import_react39.useRef)("");
-  const abortRef = (0, import_react39.useRef)(void 0);
-  const [phase, setPhase] = (0, import_react39.useState)(initialUrl2 ? { name: "probing", status: s.warmingUp } : { name: "input" });
-  const [updateInfo, setUpdateInfo] = (0, import_react39.useState)(null);
-  (0, import_react39.useEffect)(() => {
+  const [url, setUrl] = (0, import_react40.useState)(initialUrl2 ?? "");
+  const [urlInput, setUrlInput] = (0, import_react40.useState)("");
+  const [history, setHistory] = (0, import_react40.useState)(loadHistory);
+  const [platform2, setPlatform] = (0, import_react40.useState)();
+  const [info, setInfo] = (0, import_react40.useState)();
+  const downloadUrlRef = (0, import_react40.useRef)("");
+  const [wizard, setWizard] = (0, import_react40.useState)({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
+  const ytdlpRef = (0, import_react40.useRef)("");
+  const abortRef = (0, import_react40.useRef)(void 0);
+  const [phase, setPhase] = (0, import_react40.useState)(initialUrl2 ? { name: "probing", status: s.warmingUp } : { name: "input" });
+  const [updateInfo, setUpdateInfo] = (0, import_react40.useState)(null);
+  (0, import_react40.useEffect)(() => {
     let cancelled = false;
     void checkForUpdate().then((info2) => {
       if (!cancelled) setUpdateInfo(info2);
@@ -43217,7 +53624,7 @@ function AppContent({
   const rows = stdout?.rows && stdout.rows > 0 ? stdout.rows : 24;
   const boxWidth = Math.max(14, Math.min(64, columns - 6));
   const contentWidth = Math.max(10, Math.min(columns - 4, 78));
-  const startProbe = (0, import_react39.useCallback)(async (targetUrl) => {
+  const startProbe = (0, import_react40.useCallback)(async (targetUrl) => {
     const controller = new AbortController();
     abortRef.current = controller;
     setPlatform(detectPlatform(targetUrl));
@@ -43259,10 +53666,10 @@ function AppContent({
       setPhase({ name: "error", message: error instanceof Error ? error.message : String(error) });
     }
   }, []);
-  (0, import_react39.useEffect)(() => {
+  (0, import_react40.useEffect)(() => {
     if (initialUrl2) void startProbe(initialUrl2);
   }, [initialUrl2, startProbe]);
-  const resetToInput = (0, import_react39.useCallback)(() => {
+  const resetToInput = (0, import_react40.useCallback)(() => {
     setUrl("");
     setUrlInput("");
     setPlatform(void 0);
@@ -43270,7 +53677,7 @@ function AppContent({
     setWizard({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
     setPhase({ name: "input" });
   }, []);
-  const cancelRun = (0, import_react39.useCallback)(() => {
+  const cancelRun = (0, import_react40.useCallback)(() => {
     abortRef.current?.abort();
     resetToInput();
     setUrlInput(url);
@@ -43304,7 +53711,7 @@ function AppContent({
     setUrl(trimmed);
     void startProbe(trimmed);
   };
-  const startDownload = (0, import_react39.useCallback)(
+  const startDownload = (0, import_react40.useCallback)(
     (choice) => {
       const controller = new AbortController();
       abortRef.current = controller;
@@ -43451,8 +53858,7 @@ function AppContent({
     if (step === "fps") return s.stepFps;
     return s.stepBitrate;
   };
-  const showFullLogo = phase.name === "input";
-  return /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
     Box_default,
     {
       flexDirection: "column",
@@ -43462,22 +53868,13 @@ function AppContent({
       height: rows,
       backgroundColor: theme.background,
       children: [
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(UpdateBadge, { info: updateInfo }),
-        showFullLogo ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Logo, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.primary, bold: true, children: s.tagline }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s.sitesLine })
-        ] }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "row", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(LogoCompact, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
-            "  \xB7  ",
-            s.tagline
-          ] })
-        ] }),
-        /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-        phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Panel, { title: s.pasteLink, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(UpdateBadge, { info: updateInfo }),
+        phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Logo, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, children: s.tagline }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s.sitesLine }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, { lines: 2 }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Panel, { title: s.pasteLink, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             TextInput,
             {
               value: urlInput,
@@ -43488,18 +53885,24 @@ function AppContent({
               history,
               submitOnPaste: isProbablyUrl
             }
-          ) }),
-          phase.warning ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.danger ?? theme.primary, children: [
+          ) }) }),
+          phase.warning ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.danger ?? theme.primary, children: [
             "\u2717 ",
             phase.warning
           ] }) : null
         ] }),
-        phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Panel, { title: platform2 ? platform2.label : s.analyzing, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: url.length > boxWidth - 10 ? `${url.slice(0, boxWidth - 11)}\u2026` : url }) }) }),
-        phase.name === "wizard" && info && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { width: contentWidth, flexDirection: "column", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: contentWidth }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Panel, { title: stepTitle(phase.step), width: Math.min(56, contentWidth), children: [
-            phase.step === "type" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Panel, { title: platform2 ? platform2.label : s.analyzing, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: url.length > boxWidth - 10 ? `${url.slice(0, boxWidth - 11)}\u2026` : url }) })
+        ] }),
+        phase.name === "wizard" && info && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { width: contentWidth, flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Panel, { title: stepTitle(phase.step), width: Math.max(48, Math.round(contentWidth * 0.8)), children: [
+            phase.step === "type" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -43508,7 +53911,7 @@ function AppContent({
                 onSelect: handleTypePick
               }
             ),
-            phase.step === "format" && wizard.kind === "video" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            phase.step === "format" && wizard.kind === "video" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -43517,7 +53920,7 @@ function AppContent({
                 onSelect: handleFormatPick
               }
             ),
-            phase.step === "format" && wizard.kind === "audio" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            phase.step === "format" && wizard.kind === "audio" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -43526,7 +53929,7 @@ function AppContent({
                 onSelect: handleFormatPick
               }
             ),
-            phase.step === "resolution" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            phase.step === "resolution" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -43535,7 +53938,7 @@ function AppContent({
                 onSelect: handleResolutionPick
               }
             ),
-            phase.step === "fps" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            phase.step === "fps" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -43544,7 +53947,7 @@ function AppContent({
                 onSelect: handleFpsPick
               }
             ),
-            phase.step === "bitrate" && wizard.audioFormat && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+            phase.step === "bitrate" && wizard.audioFormat && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -43555,89 +53958,91 @@ function AppContent({
             )
           ] })
         ] }),
-        phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: contentWidth, children: [
-          info ? /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: contentWidth }) : null,
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.accent ?? theme.primary, bold: true, children: [
+        phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: contentWidth, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          info ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth }) : null,
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.accent ?? theme.primary, bold: true, children: [
             "\u25B8 ",
             phase.choice.label
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-          phase.processing ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ModernProgressBar, { percent: 1, width: Math.min(40, contentWidth - 10) }),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(build_default, { type: "dots" }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          phase.processing ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ModernProgressBar, { percent: 1, width: Math.min(40, contentWidth - 10) }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
                 " ",
                 s.processing
               ] })
             ] })
-          ] }) : phase.progress?.totalBytes ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          ] }) : phase.progress?.totalBytes ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
               ModernProgressBar,
               {
                 percent: phase.progress.downloadedBytes / phase.progress.totalBytes,
                 width: Math.min(40, contentWidth - 10)
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: downloadMeta(phase.progress) })
-          ] }) : phase.progress ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(build_default, { type: "dots" }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: downloadMeta(phase.progress) })
+          ] }) : phase.progress ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
                 " ",
                 s.downloading
               ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: indeterminateMeta(phase.progress) })
-          ] }) : /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(ModernProgressBar, { percent: 0, width: Math.min(40, contentWidth - 10) }),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(build_default, { type: "dots" }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: phase.refreshing ? ` ${s.linkExpired}` : ` ${s.starting}` })
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: indeterminateMeta(phase.progress) })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ModernProgressBar, { percent: 0, width: Math.min(40, contentWidth - 10) }),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: phase.refreshing ? ` ${s.linkExpired}` : ` ${s.starting}` })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(TipDisplay, { maxWidth: contentWidth })
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(TipDisplay, { maxWidth: contentWidth })
         ] }),
-        phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { bold: true, color: theme.success ?? theme.primary, children: [
+        phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { bold: true, color: theme.success ?? theme.primary, children: [
               "\u2713 ",
               s.grabbed,
               " "
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.primary, children: s.savedTo })
+            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, children: s.savedTo })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(phase.filepath, os5.homedir(), 60) }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(phase.filepath, os5.homedir(), 60) }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             Box_default,
             {
               borderStyle: "double",
               borderColor: theme.accent ?? theme.gray,
               paddingX: 3,
-              children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { bold: true, color: theme.primary, children: s.grabAnother })
+              children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { bold: true, color: theme.primary, children: s.grabAnother })
             }
           )
         ] }),
-        phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: Math.max(10, Math.min(columns - 6, 72)), children: /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { bold: true, color: theme.danger ?? theme.primary, children: [
+        phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: Math.max(10, Math.min(columns - 6, 72)), children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { bold: true, color: theme.danger ?? theme.primary, children: [
           "\u2717 ",
           phase.message
         ] }) }),
-        hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(import_jsx_runtime5.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Gap, { lines: 2 }),
-          /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(
+        hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, { lines: 2 }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
             Shortcuts,
             {
               items: hints,
-              leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(build_default, { type: "dots" }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime5.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+              leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
                   " ",
                   phase.status
                 ] })
@@ -43686,71 +54091,8 @@ function parseArgs(argv) {
   return result;
 }
 
-// src/lib/image-protocol.ts
-var cachedProtocol;
-var cellPixelSize;
-async function queryTerminal(timeoutMs = 350) {
-  if (!process.stdout.isTTY || !process.stdin.isTTY) return {};
-  const kittyQuery = "\x1B_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA\x1B\\";
-  const cellQuery = "\x1B[16t";
-  return new Promise((resolve) => {
-    let resolved = false;
-    let buffer = "";
-    let sawKittyReply = false;
-    const caps = {};
-    const cleanup = () => {
-      process.stdin.removeListener("data", onData);
-      process.stdin.pause();
-      if (process.stdin.setRawMode) {
-        try {
-          process.stdin.setRawMode(false);
-        } catch {
-        }
-      }
-    };
-    const finish = () => {
-      if (resolved) return;
-      resolved = true;
-      clearTimeout(timer);
-      cleanup();
-      resolve(caps);
-    };
-    const onData = (chunk) => {
-      buffer += chunk.toString();
-      if (!sawKittyReply && buffer.includes("\x1B_Gi=31;")) {
-        sawKittyReply = true;
-        if (buffer.includes("\x1B_Gi=31;OK")) caps.protocol = "kitty";
-      }
-      const cellMatch = /\x1b\[6;(\d+);(\d+)t/.exec(buffer);
-      if (cellMatch && !caps.cellPixelSize) {
-        const height = Number.parseInt(cellMatch[1], 10);
-        const width = Number.parseInt(cellMatch[2], 10);
-        if (width > 0 && height > 0) caps.cellPixelSize = { width, height };
-      }
-      if (sawKittyReply && caps.cellPixelSize) finish();
-    };
-    const timer = setTimeout(finish, timeoutMs);
-    try {
-      if (process.stdin.setRawMode) process.stdin.setRawMode(true);
-      process.stdin.resume();
-      process.stdin.on("data", onData);
-      process.stdout.write(kittyQuery + cellQuery);
-    } catch {
-      clearTimeout(timer);
-      cleanup();
-      resolve(caps);
-    }
-  });
-}
-function setProtocol(protocol) {
-  cachedProtocol = protocol;
-}
-function setCellPixelSize(size) {
-  cellPixelSize = size;
-}
-
 // src/cli.tsx
-var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
 var HELP = `
   \u25C8 Carbon \u2014 grab any video or music. pick. download. done.
 
@@ -43796,8 +54138,13 @@ if (!process.stdin.isTTY || typeof process.stdin.setRawMode !== "function") {
 }
 var enterAltScreen = () => process.stdout.write("\x1B[?1049h\x1B[H");
 var leaveAltScreen = () => process.stdout.write("\x1B[?1049l");
+var DEBUG3 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
 if (isTTY) {
   const caps = await queryTerminal(350);
+  if (DEBUG3) {
+    process.stderr.write(`[image] queryTerminal: protocol=${caps.protocol ?? "(none)"} cell=${caps.cellPixelSize ? `${caps.cellPixelSize.width}x${caps.cellPixelSize.height}` : "(unknown)"}
+`);
+  }
   if (caps.protocol) setProtocol(caps.protocol);
   if (caps.cellPixelSize) setCellPixelSize(caps.cellPixelSize);
 }
@@ -43814,7 +54161,7 @@ if (isTTY) {
 }
 var outcome = {};
 var { waitUntilExit } = render_default(
-  /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+  /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
     App2,
     {
       initialUrl,
@@ -43939,4 +54286,50 @@ react/cjs/react-jsx-runtime.development.js:
    * This source code is licensed under the MIT license found in the
    * LICENSE file in the root directory of this source tree.
    *)
+
+sixel/lib/Colors.js:
+sixel/lib/SixelEncoder.js:
+  (**
+   * Copyright (c) 2019 Joerg Breitbart.
+   * @license MIT
+   *)
+
+sixel/lib/Decoder.js:
+  (**
+   * Copyright (c) 2021 Joerg Breitbart.
+   * @license MIT
+   *)
+
+sixel/lib/Quantizer.js:
+  (**
+   * Copyright (c) 2020 Joerg Breitbart.
+   * @license MIT
+   *
+   * Parts taken from UPNG:
+   * MIT License, Copyright (c) 2017 Photopea
+   *)
+
+sixel/lib/index.js:
+  (**
+   * Copyright (c) 2019, 2021 Joerg Breitbart.
+   * @license MIT
+   *)
+
+sharp/dist/is.mjs:
+sharp/dist/libvips.mjs:
+sharp/dist/sharp.mjs:
+sharp/dist/constructor.mjs:
+sharp/dist/input.mjs:
+sharp/dist/resize.mjs:
+sharp/dist/composite.mjs:
+sharp/dist/operation.mjs:
+sharp/dist/colour.mjs:
+sharp/dist/channel.mjs:
+sharp/dist/output.mjs:
+sharp/dist/utility.mjs:
+sharp/dist/index.mjs:
+  (*!
+    Copyright 2013 Lovell Fuller and others.
+    SPDX-License-Identifier: Apache-2.0
+  *)
 */
