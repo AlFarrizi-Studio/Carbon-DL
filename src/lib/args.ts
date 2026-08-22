@@ -4,6 +4,7 @@ export type ParsedArgs = {
   help: boolean
   version: boolean
   update: boolean
+  uninstall: boolean
   force: boolean
   initialUrl?: string
   themeMode?: ThemeMode
@@ -11,7 +12,7 @@ export type ParsedArgs = {
 }
 
 export function parseArgs(argv: string[]): ParsedArgs {
-  const result: ParsedArgs = {help: false, version: false, update: false, force: false}
+  const result: ParsedArgs = {help: false, version: false, update: false, uninstall: false, force: false}
   const rest: string[] = []
 
   for (let i = 0; i < argv.length; i++) {
@@ -22,6 +23,8 @@ export function parseArgs(argv: string[]): ParsedArgs {
       result.version = true
     } else if (arg === 'update') {
       result.update = true
+    } else if (arg === 'uninstall') {
+      result.uninstall = true
     } else if (arg === '--force' || arg === '-f') {
       result.force = true
     } else if (arg === '--theme') {

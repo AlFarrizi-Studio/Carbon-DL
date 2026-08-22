@@ -10430,10 +10430,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id2--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path8, index2, value) {
-        if (index2 >= path8.length) return value;
-        var key = path8[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path8, index2 + 1, value);
+      function copyWithSetImpl(obj, path9, index2, value) {
+        if (index2 >= path9.length) return value;
+        var key = path9[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path9, index2 + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10460,11 +10460,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path8, index2) {
-        var key = path8[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index2 + 1 === path8.length)
+      function copyWithDeleteImpl(obj, path9, index2) {
+        var key = path9[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index2 + 1 === path9.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path8, index2 + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path9, index2 + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -23741,29 +23741,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id2, path8, value) {
+      overrideHookState = function(fiber, id2, path9, value) {
         id2 = findHook(fiber, id2);
-        null !== id2 && (path8 = copyWithSetImpl(id2.memoizedState, path8, 0, value), id2.memoizedState = path8, id2.baseState = path8, fiber.memoizedProps = assign({}, fiber.memoizedProps), path8 = enqueueConcurrentRenderForLane(fiber, 2), null !== path8 && scheduleUpdateOnFiber(path8, fiber, 2));
+        null !== id2 && (path9 = copyWithSetImpl(id2.memoizedState, path9, 0, value), id2.memoizedState = path9, id2.baseState = path9, fiber.memoizedProps = assign({}, fiber.memoizedProps), path9 = enqueueConcurrentRenderForLane(fiber, 2), null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id2, path8) {
+      overrideHookStateDeletePath = function(fiber, id2, path9) {
         id2 = findHook(fiber, id2);
-        null !== id2 && (path8 = copyWithDeleteImpl(id2.memoizedState, path8, 0), id2.memoizedState = path8, id2.baseState = path8, fiber.memoizedProps = assign({}, fiber.memoizedProps), path8 = enqueueConcurrentRenderForLane(fiber, 2), null !== path8 && scheduleUpdateOnFiber(path8, fiber, 2));
+        null !== id2 && (path9 = copyWithDeleteImpl(id2.memoizedState, path9, 0), id2.memoizedState = path9, id2.baseState = path9, fiber.memoizedProps = assign({}, fiber.memoizedProps), path9 = enqueueConcurrentRenderForLane(fiber, 2), null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id2, oldPath, newPath) {
         id2 = findHook(fiber, id2);
         null !== id2 && (oldPath = copyWithRename(id2.memoizedState, oldPath, newPath), id2.memoizedState = oldPath, id2.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path8, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path8, 0, value);
+      overrideProps = function(fiber, path9, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path9, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path8 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path8 && scheduleUpdateOnFiber(path8, fiber, 2);
+        path9 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path8) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path8, 0);
+      overridePropsDeletePath = function(fiber, path9) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path9, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path8 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path8 && scheduleUpdateOnFiber(path8, fiber, 2);
+        path9 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -32739,27 +32739,27 @@ var require_process = __commonJS({
 var require_filesystem = __commonJS({
   "node_modules/detect-libc/lib/filesystem.js"(exports, module) {
     "use strict";
-    var fs10 = __require("fs");
+    var fs11 = __require("fs");
     var LDD_PATH = "/usr/bin/ldd";
     var SELF_PATH = "/proc/self/exe";
     var MAX_LENGTH = 2048;
-    var readFileSync2 = (path8) => {
-      const fd = fs10.openSync(path8, "r");
+    var readFileSync2 = (path9) => {
+      const fd = fs11.openSync(path9, "r");
       const buffer2 = Buffer.alloc(MAX_LENGTH);
-      const bytesRead = fs10.readSync(fd, buffer2, 0, MAX_LENGTH, 0);
-      fs10.close(fd, () => {
+      const bytesRead = fs11.readSync(fd, buffer2, 0, MAX_LENGTH, 0);
+      fs11.close(fd, () => {
       });
       return buffer2.subarray(0, bytesRead);
     };
-    var readFile2 = (path8) => new Promise((resolve, reject) => {
-      fs10.open(path8, "r", (err, fd) => {
+    var readFile2 = (path9) => new Promise((resolve, reject) => {
+      fs11.open(path9, "r", (err, fd) => {
         if (err) {
           reject(err);
         } else {
           const buffer2 = Buffer.alloc(MAX_LENGTH);
-          fs10.read(fd, buffer2, 0, MAX_LENGTH, 0, (_, bytesRead) => {
+          fs11.read(fd, buffer2, 0, MAX_LENGTH, 0, (_, bytesRead) => {
             resolve(buffer2.subarray(0, bytesRead));
-            fs10.close(fd, () => {
+            fs11.close(fd, () => {
             });
           });
         }
@@ -32871,11 +32871,11 @@ var require_detect_libc = __commonJS({
       }
       return null;
     };
-    var familyFromInterpreterPath = (path8) => {
-      if (path8) {
-        if (path8.includes("/ld-musl-")) {
+    var familyFromInterpreterPath = (path9) => {
+      if (path9) {
+        if (path9.includes("/ld-musl-")) {
           return MUSL;
-        } else if (path8.includes("/ld-linux-")) {
+        } else if (path9.includes("/ld-linux-")) {
           return GLIBC;
         }
       }
@@ -32922,8 +32922,8 @@ var require_detect_libc = __commonJS({
       cachedFamilyInterpreter = null;
       try {
         const selfContent = await readFile2(SELF_PATH);
-        const path8 = interpreterPath(selfContent);
-        cachedFamilyInterpreter = familyFromInterpreterPath(path8);
+        const path9 = interpreterPath(selfContent);
+        cachedFamilyInterpreter = familyFromInterpreterPath(path9);
       } catch (e2) {
       }
       return cachedFamilyInterpreter;
@@ -32935,8 +32935,8 @@ var require_detect_libc = __commonJS({
       cachedFamilyInterpreter = null;
       try {
         const selfContent = readFileSync2(SELF_PATH);
-        const path8 = interpreterPath(selfContent);
-        cachedFamilyInterpreter = familyFromInterpreterPath(path8);
+        const path9 = interpreterPath(selfContent);
+        cachedFamilyInterpreter = familyFromInterpreterPath(path9);
       } catch (e2) {
       }
       return cachedFamilyInterpreter;
@@ -35591,7 +35591,7 @@ var init_sharp = __esm({
       }
     }
     if (!sharp) {
-      const [isLinux2, isMacOs2, isWindows3] = ["linux", "darwin", "win32"].map((os7) => runtimePlatform.startsWith(os7));
+      const [isLinux2, isMacOs2, isWindows3] = ["linux", "darwin", "win32"].map((os8) => runtimePlatform.startsWith(os8));
       const help = [`Could not load the "sharp" module using the ${runtimePlatform} runtime`];
       errors.forEach((err) => {
         if (!err.code.endsWith("MODULE_NOT_FOUND")) {
@@ -35604,15 +35604,15 @@ var init_sharp = __esm({
         const { found, expected } = isUnsupportedNodeRuntime2();
         help.push("- Please upgrade Node.js:", `    Found ${found}`, `    Requires ${expected}`);
       } else if (prebuiltPlatforms2.includes(runtimePlatform)) {
-        const [os7, cpu] = runtimePlatform.split("-");
-        const libc = os7.endsWith("musl") ? " --libc=musl" : "";
+        const [os8, cpu] = runtimePlatform.split("-");
+        const libc = os8.endsWith("musl") ? " --libc=musl" : "";
         help.push(
           "- Ensure optional dependencies can be installed:",
           "    npm install --include=optional sharp",
           "- Ensure your package manager supports multi-platform installation:",
           "    See https://sharp.pixelplumbing.com/install#cross-platform",
           "- Add platform-specific dependencies:",
-          `    npm install --os=${os7.replace("musl", "")}${libc} --cpu=${cpu} sharp`
+          `    npm install --os=${os8.replace("musl", "")}${libc} --cpu=${cpu} sharp`
         );
       } else {
         help.push(
@@ -38489,15 +38489,15 @@ var require_color = __commonJS({
       };
     }
     function wrapConversion(toModel, graph) {
-      const path8 = [graph[toModel].parent, toModel];
+      const path9 = [graph[toModel].parent, toModel];
       let fn2 = conversions_default[graph[toModel].parent][toModel];
       let cur = graph[toModel].parent;
       while (graph[cur].parent) {
-        path8.unshift(graph[cur].parent);
+        path9.unshift(graph[cur].parent);
         fn2 = link2(conversions_default[graph[cur].parent][cur], fn2);
         cur = graph[cur].parent;
       }
-      fn2.conversion = path8;
+      fn2.conversion = path9;
       return fn2;
     }
     function route(fromModel) {
@@ -45816,7 +45816,7 @@ var require_gifframe = __commonJS({
 var require_gifutil = __commonJS({
   "node_modules/gifwrap/src/gifutil.js"(exports) {
     "use strict";
-    var fs10 = __require("fs");
+    var fs11 = __require("fs");
     var ImageQ = require_image_q();
     var BitmapImage2 = require_bitmapimage();
     var { GifFrame: GifFrame2 } = require_gifframe();
@@ -45931,14 +45931,14 @@ var require_gifutil = __commonJS({
       jimpImage.bitmap.data = bitmapImageToShare.bitmap.data;
       return jimpImage;
     };
-    exports.write = function(path8, frames, spec, encoder) {
+    exports.write = function(path9, frames, spec, encoder) {
       encoder = encoder || defaultCodec;
-      const matches = path8.match(/\.[a-zA-Z]+$/);
+      const matches = path9.match(/\.[a-zA-Z]+$/);
       if (matches !== null && INVALID_SUFFIXES.includes(matches[0].toLowerCase())) {
-        throw new Error(`GIF '${path8}' has an unexpected suffix`);
+        throw new Error(`GIF '${path9}' has an unexpected suffix`);
       }
       return encoder.encodeGif(frames, spec).then((gif3) => {
-        return _writeBinary(path8, gif3.buffer).then(() => {
+        return _writeBinary(path9, gif3.buffer).then(() => {
           return gif3;
         });
       });
@@ -46010,9 +46010,9 @@ var require_gifutil = __commonJS({
         }
       }
     }
-    function _readBinary(path8) {
+    function _readBinary(path9) {
       return new Promise((resolve, reject) => {
-        fs10.readFile(path8, (err, buffer2) => {
+        fs11.readFile(path9, (err, buffer2) => {
           if (err) {
             return reject(err);
           }
@@ -46020,9 +46020,9 @@ var require_gifutil = __commonJS({
         });
       });
     }
-    function _writeBinary(path8, buffer2) {
+    function _writeBinary(path9, buffer2) {
       return new Promise((resolve, reject) => {
-        fs10.writeFile(path8, buffer2, (err) => {
+        fs11.writeFile(path9, buffer2, (err) => {
           if (err) {
             return reject(err);
           }
@@ -48036,9 +48036,9 @@ var require_decoder = __commonJS({
         return a2 < 0 ? 0 : a2 > 255 ? 255 : a2;
       }
       constructor.prototype = {
-        load: function load(path8) {
+        load: function load(path9) {
           var xhr = new XMLHttpRequest();
-          xhr.open("GET", path8, true);
+          xhr.open("GET", path9, true);
           xhr.responseType = "arraybuffer";
           xhr.onload = (function() {
             var data = new Uint8Array(xhr.response || xhr.mozResponseArrayBuffer);
@@ -58952,8 +58952,8 @@ var init_parseUtil = __esm({
     init_errors();
     init_en();
     makeIssue = (params) => {
-      const { data, path: path8, errorMaps, issueData } = params;
-      const fullPath = [...path8, ...issueData.path || []];
+      const { data, path: path9, errorMaps, issueData } = params;
+      const fullPath = [...path9, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -59264,11 +59264,11 @@ var init_types2 = __esm({
     init_parseUtil();
     init_util();
     ParseInputLazyPath = class {
-      constructor(parent, value, path8, key) {
+      constructor(parent, value, path9, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path8;
+        this._path = path9;
         this._key = key;
       }
       get path() {
@@ -64268,11 +64268,11 @@ var require_Mime = __commonJS({
         }
       }
     };
-    Mime.prototype.getType = function(path8) {
-      path8 = String(path8);
-      let last = path8.replace(/^.*[/\\]/, "").toLowerCase();
+    Mime.prototype.getType = function(path9) {
+      path9 = String(path9);
+      let last = path9.replace(/^.*[/\\]/, "").toLowerCase();
       let ext = last.replace(/^.*\./, "").toLowerCase();
-      let hasPath = last.length < path8.length;
+      let hasPath = last.length < path9.length;
       let hasDot = ext.length < last.length - 1;
       return (hasDot || !hasPath) && this._types[ext] || null;
     };
@@ -70855,8 +70855,8 @@ function isTokenizerStreamBoundsError(error) {
   }
   return /strtok3[/\\]lib[/\\]stream[/\\]/.test(error.stack);
 }
-async function fileTypeFromFile(path8, options) {
-  return new FileTypeParser2(options).fromFile(path8, options);
+async function fileTypeFromFile(path9, options) {
+  return new FileTypeParser2(options).fromFile(path9, options);
 }
 async function fileTypeFromStream(stream2, options) {
   return new FileTypeParser2(options).fromStream(stream2);
@@ -70888,9 +70888,9 @@ var init_file_type = __esm({
           }
         }
       }
-      async fromFile(path8) {
+      async fromFile(path9) {
         this.options.signal?.throwIfAborted();
-        const fileHandle = await fs6.open(path8, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
+        const fileHandle = await fs6.open(path9, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
         const fileStat = await fileHandle.stat();
         if (!fileStat.isFile()) {
           await fileHandle.close();
@@ -70899,7 +70899,7 @@ var init_file_type = __esm({
         const tokenizer = new FileTokenizer(fileHandle, {
           ...this.getTokenizerOptions(),
           fileInfo: {
-            path: path8,
+            path: path9,
             size: fileStat.size
           }
         });
@@ -71234,9 +71234,9 @@ function createJimp({ plugins: pluginsArg, formats: formatsArg } = {}) {
      * await image.write("test/output.png");
      * ```
      */
-    async write(path8, options) {
-      const mimeType = import_lite.default.getType(path8);
-      await writeFile(path8, await this.getBuffer(mimeType, options));
+    async write(path9, options) {
+      const mimeType = import_lite.default.getType(path9);
+      await writeFile(path9, await this.getBuffer(mimeType, options));
     }
     /**
      * Clone the image into a new Jimp instance.
@@ -82845,9 +82845,9 @@ var init_load_bitmap_font = __esm({
 async function loadFont(file) {
   let fileOrBuffer = file;
   if (typeof window === "undefined" && !isWebWorker2) {
-    const { existsSync: existsSync3, promises: fs10 } = await import("fs");
+    const { existsSync: existsSync3, promises: fs11 } = await import("fs");
     if (existsSync3(file)) {
-      fileOrBuffer = await fs10.readFile(file);
+      fileOrBuffer = await fs11.readFile(file);
     }
   }
   const data = await loadBitmapFontData(fileOrBuffer);
@@ -87998,8 +87998,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs10 = await import("fs");
-  const content = fs10.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs11 = await import("fs");
+  const content = fs11.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -90395,8 +90395,8 @@ function Text({ color: color2, backgroundColor, dimColor = false, bold = false, 
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path8) => {
-  return path8?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path9) => {
+  return path9?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -97181,7 +97181,7 @@ function AppContent({
 
 // src/lib/args.ts
 function parseArgs(argv) {
-  const result = { help: false, version: false, update: false, force: false };
+  const result = { help: false, version: false, update: false, uninstall: false, force: false };
   const rest = [];
   for (let i2 = 0; i2 < argv.length; i2++) {
     const arg = argv[i2];
@@ -97191,6 +97191,8 @@ function parseArgs(argv) {
       result.version = true;
     } else if (arg === "update") {
       result.update = true;
+    } else if (arg === "uninstall") {
+      result.uninstall = true;
     } else if (arg === "--force" || arg === "-f") {
       result.force = true;
     } else if (arg === "--theme") {
@@ -97327,6 +97329,121 @@ Try running the installer again, or check that the install directory is writable
   };
 }
 
+// src/lib/self-uninstall.ts
+import fs10 from "fs";
+import os7 from "os";
+import path8 from "path";
+import { execSync } from "child_process";
+function rmDir(dir) {
+  try {
+    fs10.rmSync(dir, { recursive: true, force: true });
+    return true;
+  } catch {
+    return false;
+  }
+}
+function rmFile(file) {
+  try {
+    fs10.unlinkSync(file);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function removeFromWindowsPath(installDir) {
+  try {
+    const currentPath = execSync(
+      `powershell -NoProfile -Command "[Environment]::GetEnvironmentVariable('Path', 'User')"`,
+      { encoding: "utf8", timeout: 1e4 }
+    ).trim();
+    const normalizedDir = installDir.toLowerCase().replace(/[/\\]+$/, "");
+    const parts = currentPath.split(";").filter((p2) => {
+      const normalized = p2.trim().toLowerCase().replace(/[/\\]+$/, "");
+      return normalized !== normalizedDir && normalized !== "";
+    });
+    const newPath = parts.join(";");
+    if (newPath !== currentPath) {
+      execSync(
+        `powershell -NoProfile -Command "[Environment]::SetEnvironmentVariable('Path', '${newPath.replace(/'/g, "''")}', 'User')"`,
+        { encoding: "utf8", timeout: 1e4 }
+      );
+      return true;
+    }
+    return false;
+  } catch {
+    return false;
+  }
+}
+function removeFromShellProfile() {
+  const removed = [];
+  const home = os7.homedir();
+  const profiles = [".bashrc", ".zshrc", ".profile", ".bash_profile"];
+  for (const profile of profiles) {
+    const profilePath = path8.join(home, profile);
+    try {
+      if (!fs10.existsSync(profilePath)) continue;
+      const content = fs10.readFileSync(profilePath, "utf8");
+      const lines = content.split("\n");
+      const filtered = lines.filter((line) => {
+        const trimmed = line.trim();
+        return !trimmed.includes("# Added by Carbon installer") && !trimmed.includes(".carbon/bin") && !trimmed.includes(".carbon/node/bin");
+      });
+      if (filtered.length !== lines.length) {
+        fs10.writeFileSync(profilePath, filtered.join("\n"));
+        removed.push(profilePath);
+      }
+    } catch {
+    }
+  }
+  return removed;
+}
+async function selfUninstall() {
+  const removed = [];
+  const home = os7.homedir();
+  const platform2 = process.platform;
+  if (platform2 === "win32") {
+    const installDir = path8.join(process.env.LOCALAPPDATA ?? path8.join(home, "AppData", "Local"), "Carbon");
+    if (fs10.existsSync(installDir)) {
+      if (rmDir(installDir)) removed.push(installDir);
+    }
+    if (removeFromWindowsPath(installDir)) {
+      removed.push("PATH entry (User)");
+    }
+  } else {
+    const carbonDir = path8.join(home, ".carbon");
+    if (fs10.existsSync(carbonDir)) {
+      if (rmDir(carbonDir)) removed.push(carbonDir);
+    }
+    const profileChanges = removeFromShellProfile();
+    removed.push(...profileChanges);
+  }
+  const binDir = path8.join(home, ".carbon", "bin");
+  if (fs10.existsSync(binDir)) {
+    if (rmDir(binDir)) removed.push(binDir);
+  }
+  const configDir = path8.join(home, ".config", "carbon");
+  if (fs10.existsSync(configDir)) {
+    if (rmDir(configDir)) removed.push(configDir);
+  }
+  const debugLog4 = path8.join(os7.tmpdir(), "carbon-debug.log");
+  if (fs10.existsSync(debugLog4)) {
+    if (rmFile(debugLog4)) removed.push(debugLog4);
+  }
+  if (removed.length === 0) {
+    return {
+      ok: true,
+      removed: [],
+      message: "Carbon was not found on this system. Nothing to remove."
+    };
+  }
+  return {
+    ok: true,
+    removed,
+    message: `Carbon has been uninstalled. Removed:
+${removed.map((r2) => `  \u2022 ${r2}`).join("\n")}`
+  };
+}
+
 // src/cli.tsx
 var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
 var HELP = `
@@ -97344,6 +97461,7 @@ var HELP = `
   Commands
     update          update Carbon to the latest version
     update --force  re-download even if already on the latest version
+    uninstall       remove Carbon completely from this system
 
   Options
     --theme <mode>  use system, dark, or light for this run
@@ -97371,6 +97489,11 @@ if (args.update) {
   console.log(`Carbon v${CURRENT_VERSION} \u2014 checking for updates...`);
   const result = await selfUpdate(args.force);
   console.log(result.updated ? `\u2713 ${result.message}` : result.message);
+  process.exitCode = result.ok ? 0 : 1;
+} else if (args.uninstall) {
+  console.log(`Carbon v${CURRENT_VERSION} \u2014 uninstalling...`);
+  const result = await selfUninstall();
+  console.log(result.message);
   process.exitCode = result.ok ? 0 : 1;
 } else {
   await runTui();

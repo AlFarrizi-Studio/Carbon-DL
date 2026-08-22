@@ -5,6 +5,7 @@ import {parseArgs} from './lib/args.js'
 import {queryTerminal, setProtocol, setCellPixelSize} from './lib/image-protocol.js'
 import {CURRENT_VERSION as VERSION} from './lib/update-check.js'
 import {selfUpdate} from './lib/self-update.js'
+import {selfUninstall} from './lib/self-uninstall.js'
 
 const HELP = `
   ◈ Carbon — grab any video or music. pick. download. done.
@@ -21,6 +22,7 @@ const HELP = `
   Commands
     update          update Carbon to the latest version
     update --force  re-download even if already on the latest version
+    uninstall       remove Carbon completely from this system
 
   Options
     --theme <mode>  use system, dark, or light for this run
@@ -57,6 +59,11 @@ if (args.update) {
   // Use exitCode (not process.exit) so pending sockets from the update fetch
   // can close cleanly — process.exit while handles are open triggers a libuv
   // assertion crash on Windows. The process exits once the loop drains.
+  process.exitCode = result.ok ? 0 : 1
+} else if (args.uninstall) {
+  console.log(`Carbon v${VERSION} — uninstalling...`)
+  const result = await selfUninstall()
+  console.log(result.message)
   process.exitCode = result.ok ? 0 : 1
 } else {
   await runTui()
