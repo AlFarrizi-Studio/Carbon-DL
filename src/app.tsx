@@ -1,0 +1,750 @@
+import React, {useCallback, useEffect, useRef, useState} from 'react'
+import os from 'node:os'
+import path from 'node:path'
+import {Box, Text, useApp, useInput, useStdout} from 'ink'
+import SelectInput, {type IndicatorProps, type ItemProps} from 'ink-select-input'
+import Spinner from 'ink-spinner'
+import {Logo, LogoCompact} from './components/logo.js'
+import {Panel} from './components/panel.js'
+import {Shortcuts} from './components/shortcuts.js'
+import {TextInput} from './components/text-input.js'
+import {formatBytes, formatDuration, formatEta, formatSpeed, shortenPath, truncate, wrapText} from './lib/format.js'
+import {AUDIO_FORMATS, FPS_OPTIONS, RESOLUTIONS, VIDEO_FORMATS, bitrateItems, fmtDesc, hasBitrateOptions, type AudioFormat, type VideoFormat} from './lib/formats.js'
+import {addToHistory, loadHistory} from './lib/history.js'
+import {detectPlatform, isProbablyUrl, type Platform} from './lib/platforms.js'
+import {nextThemeMode, ThemeProvider, type ThemeMode, useTheme} from './theme.js'
+import {t, getLanguage} from './lib/i18n.js'
+import {nextTip, randomTip, TIP_INTERVAL_MS} from './lib/tips.js'
+import {checkForUpdate, type UpdateInfo} from './lib/update-check.js'
+import {
+  buildAudioArgs,
+  buildVideoArgs,
+  download,
+  ensureYtDlp,
+  findFfmpeg,
+  hasAudio,
+  maxHeight,
+  probe,
+  artistOf,
+  formatReleaseDate,
+  type DownloadChoice,
+  type DownloadProgress,
+  type VideoInfo,
+} from './lib/ytdlp.js'
+
+const OUT_DIR = path.join(os.homedir(), 'Downloads')
+
+function UpdateBadge({info}: {info: UpdateInfo | null}) {
+  const theme = useTheme()
+  const s = t()
+  if (!info?.hasUpdate) return null
+  return (
+    <Box position="absolute" top={0} right={1}>
+      <Text color={theme.warning ?? theme.accent ?? theme.primary} bold>
+        ↑ {s.updateAvailable ?? 'Update Carbon available'}: v{info.latestVersion}
+      </Text>
+    </Box>
+  )
+}
+
+const Gap = ({lines = 1}: {lines?: number}) => (
+  <Box flexDirection="column" flexShrink={0}>
+    {Array.from({length: lines}, (_, i) => (
+      <Text key={i}> </Text>
+    ))}
+  </Box>
+)
+
+function ChoiceIndicator({isSelected}: IndicatorProps) {
+  const theme = useTheme()
+  return (
+    <Box marginRight={1}>
+      <Text color={theme.accent ?? theme.primary}>{isSelected ? '▶' : ' '}</Text>
+    </Box>
+  )
+}
+
+function ChoiceItem({isSelected, label}: ItemProps) {
+  const theme = useTheme()
+  return (
+    <Text color={isSelected ? (theme.accent ?? theme.primary) : theme.primary} bold={isSelected}>
+      {label}
+    </Text>
+  )
+}
+
+/**
+ * Media metadata block — Title / Artist / Album / Release / Time / Source.
+ * All fields always shown; missing values display "-".
+ */
+function MetadataBlock({info, platform, maxWidth}: {info: VideoInfo; platform?: Platform; maxWidth: number}) {
+  const theme = useTheme()
+  const s = t()
+  const artist = artistOf(info)
+  const release = formatReleaseDate(info.release_date)
+  const labelW = 9
+  const valueW = Math.max(10, maxWidth - labelW - 4)
+
+  const rows: Array<[string, string]> = [
+    [s.lblTitle, info.title ?? '-'],
+    [s.lblArtist, artist ?? '-'],
+    [s.lblAlbum, info.album ?? '-'],
+    [s.lblRelease, release ?? '-'],
+    [s.lblTime, info.duration ? formatDuration(info.duration) : '-'],
+    [s.lblSource, platform?.label ?? '-'],
+  ]
+
+  return (
+    <Box flexDirection="column">
+      {rows.map(([label, value]) => (
+        <Box key={label} flexDirection="row">
+          <Text color={theme.accent ?? theme.gray} bold>
+            {label.padEnd(labelW)}
+          </Text>
+          <Text color={theme.primary}>{truncate(value, valueW)}</Text>
+        </Box>
+      ))}
+    </Box>
+  )
+}
+
+/**
+ * Modern progress bar with percentage, filled/empty segments, and stats.
+ */
+function ModernProgressBar({percent, width = 40}: {percent: number; width?: number}) {
+  const theme = useTheme()
+  const clamped = Math.max(0, Math.min(1, percent))
+  const filled = Math.round(clamped * width)
+  const empty = width - filled
+  const pct = Math.round(clamped * 100)
+
+  return (
+    <Box flexDirection="column" alignItems="center">
+      <Text>
+        <Text color={theme.accent ?? theme.primary} bold>
+          {'█'.repeat(filled)}
+        </Text>
+        <Text color={theme.gray} dimColor>
+          {'░'.repeat(empty)}
+        </Text>
+        <Text color={theme.primary} bold>
+          {' '}{pct}%
+        </Text>
+      </Text>
+    </Box>
+  )
+}
+
+/**
+ * Rotating tip display — changes every TIP_INTERVAL_MS.
+ */
+function TipDisplay({maxWidth}: {maxWidth: number}) {
+  const theme = useTheme()
+  const s = t()
+  const [tip, setTip] = useState(randomTip)
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setTip(nextTip())
+    }, TIP_INTERVAL_MS)
+    return () => clearInterval(interval)
+  }, [])
+
+  const wrapped = wrapText(`${s.tip}: ${tip}`, maxWidth)
+
+  return (
+    <Box flexDirection="column" alignItems="center">
+      {wrapped.slice(0, 2).map((line, i) => (
+        <Text key={i} color={theme.gray} dimColor={theme.dimSecondary} italic>
+          {i === 0 ? '💡 ' : '   '}{line}
+        </Text>
+      ))}
+    </Box>
+  )
+}
+
+export type Outcome = {filepath?: string}
+
+type Step = 'type' | 'format' | 'resolution' | 'fps' | 'bitrate'
+
+type Phase =
+  | {name: 'input'; warning?: string}
+  | {name: 'probing'; status: string}
+  | {name: 'wizard'; step: Step}
+  | {
+      name: 'downloading'
+      choice: DownloadChoice
+      progress?: DownloadProgress
+      processing: boolean
+      refreshing?: boolean
+    }
+  | {name: 'done'; filepath: string}
+  | {name: 'error'; message: string}
+
+type WizardState = {
+  kind: 'video' | 'audio' | null
+  videoFormat: VideoFormat | null
+  audioFormat: AudioFormat | null
+  resolution: number
+  fps: number
+  bitrate: number
+}
+
+type AppProps = {
+  initialUrl?: string
+  initialThemeMode?: ThemeMode
+  onOutcome: (outcome: Outcome) => void
+}
+
+export function App({initialThemeMode = 'system', ...props}: AppProps) {
+  const [themeMode, setThemeMode] = useState(initialThemeMode)
+  const cycleTheme = useCallback(() => {
+    setThemeMode(nextThemeMode)
+  }, [])
+
+  return (
+    <ThemeProvider mode={themeMode}>
+      <AppContent {...props} cycleTheme={cycleTheme} />
+    </ThemeProvider>
+  )
+}
+
+function AppContent({
+  initialUrl,
+  onOutcome,
+  cycleTheme,
+}: {
+  initialUrl?: string
+  onOutcome: (outcome: Outcome) => void
+  cycleTheme: () => void
+}) {
+  const theme = useTheme()
+  const s = t()
+  const {exit} = useApp()
+  const {stdout} = useStdout()
+  const [url, setUrl] = useState(initialUrl ?? '')
+  const [urlInput, setUrlInput] = useState('')
+  const [history, setHistory] = useState(loadHistory)
+  const [platform, setPlatform] = useState<Platform>()
+  const [info, setInfo] = useState<VideoInfo>()
+  /** Actual URL to download (may differ from `url` when Spotify fallback is used) */
+  const downloadUrlRef = useRef<string>('')
+  const [wizard, setWizard] = useState<WizardState>({kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0})
+  const ytdlpRef = useRef('')
+  const abortRef = useRef<AbortController | undefined>(undefined)
+  const [phase, setPhase] = useState<Phase>(initialUrl ? {name: 'probing', status: s.warmingUp} : {name: 'input'})
+  const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
+
+  useEffect(() => {
+    let cancelled = false
+    void checkForUpdate().then(info => {
+      if (!cancelled) setUpdateInfo(info)
+    })
+    return () => {
+      cancelled = true
+    }
+  }, [])
+
+  const columns = stdout?.columns && stdout.columns > 0 ? stdout.columns : 80
+  const rows = stdout?.rows && stdout.rows > 0 ? stdout.rows : 24
+  const boxWidth = Math.max(14, Math.min(64, columns - 6))
+  const contentWidth = Math.max(10, Math.min(columns - 4, 78))
+
+  const startProbe = useCallback(async (targetUrl: string) => {
+    const controller = new AbortController()
+    abortRef.current = controller
+    setPlatform(detectPlatform(targetUrl))
+    setPhase({name: 'probing', status: t().warmingUp})
+    try {
+      const ytdlp =
+        ytdlpRef.current ||
+        (await ensureYtDlp(status => setPhase({name: 'probing', status}), controller.signal))
+      ytdlpRef.current = ytdlp
+      if (controller.signal.aborted) return
+      setPhase({name: 'probing', status: t().fetchingInfo})
+      let videoInfo
+      let downloadUrl = targetUrl
+      try {
+        // First attempt without cookies
+        const result = await probe(ytdlp, targetUrl, controller.signal)
+        videoInfo = result.info
+        // If Spotify fallback was used, download from the YouTube URL instead
+        if (result.spotifyFallback && videoInfo.webpage_url) {
+          downloadUrl = videoInfo.webpage_url
+        }
+      } catch (firstError) {
+        if (controller.signal.aborted) return
+        // If DRM error, retry with browser cookies
+        const errMsg = firstError instanceof Error ? firstError.message : String(firstError)
+        if (errMsg.toLowerCase().includes('drm') || errMsg.toLowerCase().includes('sign in') || errMsg.toLowerCase().includes('age')) {
+          setPhase({name: 'probing', status: t().fetchingInfo})
+          const result = await probe(ytdlp, targetUrl, controller.signal, true)
+          videoInfo = result.info
+          if (result.spotifyFallback && videoInfo.webpage_url) {
+            downloadUrl = videoInfo.webpage_url
+          }
+        } else {
+          throw firstError
+        }
+      }
+      downloadUrlRef.current = downloadUrl
+      if (controller.signal.aborted) return
+      setInfo(videoInfo)
+      setWizard({kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0})
+      setPhase({name: 'wizard', step: 'type'})
+    } catch (error) {
+      if (controller.signal.aborted) return
+      setPhase({name: 'error', message: error instanceof Error ? error.message : String(error)})
+    }
+  }, [])
+
+  useEffect(() => {
+    if (initialUrl) void startProbe(initialUrl)
+  }, [initialUrl, startProbe])
+
+  const resetToInput = useCallback(() => {
+    setUrl('')
+    setUrlInput('')
+    setPlatform(undefined)
+    setInfo(undefined)
+    setWizard({kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0})
+    setPhase({name: 'input'})
+  }, [])
+
+  const cancelRun = useCallback(() => {
+    abortRef.current?.abort()
+    resetToInput()
+    setUrlInput(url)
+  }, [resetToInput, url])
+
+  useInput(
+    (input, key) => {
+      if (key.ctrl && input === 't') {
+        cycleTheme()
+        return
+      }
+      if (key.escape && phase.name === 'wizard') {
+        if (phase.step === 'type') resetToInput()
+        else if (phase.step === 'format') setPhase({name: 'wizard', step: 'type'})
+        else if (phase.step === 'resolution') setPhase({name: 'wizard', step: 'format'})
+        else if (phase.step === 'fps') setPhase({name: 'wizard', step: 'resolution'})
+        else if (phase.step === 'bitrate') setPhase({name: 'wizard', step: 'format'})
+        return
+      }
+      if (key.escape && (phase.name === 'error' || phase.name === 'done')) resetToInput()
+      if (key.escape && (phase.name === 'probing' || phase.name === 'downloading')) cancelRun()
+      if (key.return && (phase.name === 'error' || phase.name === 'done')) resetToInput()
+    },
+    {isActive: Boolean(process.stdin.isTTY)},
+  )
+
+  const handleUrlSubmit = (value: string) => {
+    const trimmed = value.trim()
+    if (!isProbablyUrl(trimmed)) {
+      setPhase({name: 'input', warning: t().notUrl})
+      return
+    }
+    setUrl(trimmed)
+    void startProbe(trimmed)
+  }
+
+  const startDownload = useCallback(
+    (choice: DownloadChoice) => {
+      const controller = new AbortController()
+      abortRef.current = controller
+      setPhase({name: 'downloading', choice, processing: false})
+      void (async () => {
+        const handlers = {
+          onProgress: (progress: DownloadProgress) =>
+            setPhase(prev => (prev.name === 'downloading' ? {...prev, progress, processing: false} : prev)),
+          onProcessing: () =>
+            setPhase(prev => (prev.name === 'downloading' ? {...prev, processing: true} : prev)),
+        }
+        try {
+          const ffmpegLocation = await findFfmpeg()
+          const actualUrl = downloadUrlRef.current || url
+          const base = {ytdlp: ytdlpRef.current, ffmpegLocation, url: actualUrl, choice, outDir: OUT_DIR}
+          let filepath: string
+          try {
+            filepath = await download(base, handlers, controller.signal)
+          } catch (error) {
+            if (controller.signal.aborted) throw error
+            const errMsg = error instanceof Error ? error.message : String(error)
+            const isDrm = errMsg.toLowerCase().includes('drm') || errMsg.toLowerCase().includes('sign in') || errMsg.toLowerCase().includes('age')
+            setPhase(prev =>
+              prev.name === 'downloading' ? {...prev, progress: undefined, refreshing: true} : prev,
+            )
+            // Retry with browser cookies if DRM/auth related, else plain retry.
+            // strongBypass uses alternative player clients (may lower quality),
+            // so it's only used here as a last resort after the normal attempt.
+            filepath = await download({...base, useCookies: isDrm, strongBypass: true}, handlers, controller.signal)
+          }
+          onOutcome({filepath})
+          setHistory(addToHistory(url))
+          setPhase({name: 'done', filepath})
+        } catch (error) {
+          if (controller.signal.aborted) return
+          setPhase({name: 'error', message: error instanceof Error ? error.message : String(error)})
+        }
+      })()
+    },
+    [url, onOutcome],
+  )
+
+  const handleTypePick = (item: {value: string}) => {
+    const kind = item.value as 'video' | 'audio'
+    setWizard(w => ({...w, kind}))
+    setPhase({name: 'wizard', step: 'format'})
+  }
+
+  const handleFormatPick = (item: {value: string}) => {
+    if (wizard.kind === 'video') {
+      const fmt = VIDEO_FORMATS.find(f => f.id === item.value)
+      if (!fmt) return
+      setWizard(w => ({...w, videoFormat: fmt}))
+      setPhase({name: 'wizard', step: 'resolution'})
+    } else {
+      const fmt = AUDIO_FORMATS.find(f => f.id === item.value)
+      if (!fmt) return
+      setWizard(w => ({...w, audioFormat: fmt}))
+      if (hasBitrateOptions(fmt)) {
+        setPhase({name: 'wizard', step: 'bitrate'})
+      } else {
+        const choice: DownloadChoice = {
+          kind: 'audio',
+          label: `audio · ${fmt.label}`,
+          detail: fmtDesc(fmt.descKey),
+          args: buildAudioArgs(fmt),
+        }
+        startDownload(choice)
+      }
+    }
+  }
+
+  const handleBitratePick = (item: {value: number}) => {
+    const fmt = wizard.audioFormat
+    if (!fmt) return
+    setWizard(w => ({...w, bitrate: item.value}))
+    const choice: DownloadChoice = {
+      kind: 'audio',
+      label: `audio · ${fmt.label} · ${item.value} kbps`,
+      detail: fmtDesc(fmt.descKey),
+      args: buildAudioArgs(fmt, item.value),
+    }
+    startDownload(choice)
+  }
+
+  const handleResolutionPick = (item: {value: number}) => {
+    setWizard(w => ({...w, resolution: item.value}))
+    setPhase({name: 'wizard', step: 'fps'})
+  }
+
+  const handleFpsPick = (item: {value: number}) => {
+    const fmt = wizard.videoFormat
+    if (!fmt) return
+    setWizard(w => ({...w, fps: item.value}))
+    const resLabel = wizard.resolution > 0 ? `${wizard.resolution}p` : 'best'
+    const fpsLabel = item.value > 0 ? `${item.value}fps` : t().sourceFps
+    const choice: DownloadChoice = {
+      kind: 'video',
+      label: `video · ${fmt.label} · ${resLabel} · ${fpsLabel}`,
+      detail: fmtDesc(fmt.descKey),
+      args: buildVideoArgs(fmt, wizard.resolution, item.value),
+    }
+    startDownload(choice)
+  }
+
+  const sourceHasVideo = info ? maxHeight(info) > 0 : true
+  const sourceHasAudio = info ? hasAudio(info) : true
+  // Always show both options; if detection fails, default to showing both.
+  const typeItems = [
+    ...(sourceHasVideo || !sourceHasAudio ? [{key: 'video', label: `▶  ${t().videoOption}`, value: 'video'}] : []),
+    ...(sourceHasAudio || !sourceHasVideo ? [{key: 'audio', label: `♪  ${t().audioOption}`, value: 'audio'}] : []),
+  ]
+
+  // Always show ALL resolution options — let yt-dlp handle what's actually available.
+  // Filtering by source maxHeight was too aggressive and hid valid options.
+  const resolutionItems = RESOLUTIONS.map(r => ({
+    key: String(r.value),
+    label: `${r.label}  ${fmtDesc(r.descKey)}`,
+    value: r.value,
+  }))
+
+  // Always show ALL FPS options — let yt-dlp handle what's actually available.
+  const fpsItems = FPS_OPTIONS.map(f => ({
+    key: String(f.value),
+    label: `${f.label}  ${fmtDesc(f.descKey)}`,
+    value: f.value,
+  }))
+
+  const videoFormatItems = VIDEO_FORMATS.map(f => ({
+    key: f.id,
+    label: `${f.label}${f.recommended ? `  ★ ${t().recommended}` : ''}  ${fmtDesc(f.descKey)}`,
+    value: f.id,
+  }))
+
+  const audioFormatItems = AUDIO_FORMATS.map(f => ({
+    key: f.id,
+    label: `${f.label}${f.recommended ? `  ★ ${t().recommended}` : ''}  ${fmtDesc(f.descKey)}`,
+    value: f.id,
+  }))
+
+  const hints: Array<[string, string]> = (() => {
+    const base: Array<[string, string]> =
+      phase.name === 'input'
+        ? [['↵', s.grab], ['^c', s.quit]]
+        : phase.name === 'probing'
+          ? [['esc', s.cancel], ['^c', s.quit]]
+          : phase.name === 'wizard'
+            ? [['↑↓', s.choose], ['↵', s.select], ['esc', s.back], ['^c', s.quit]]
+            : phase.name === 'downloading'
+              ? [['esc', s.cancel], ['^c', s.quit]]
+              : phase.name === 'done'
+                ? [['^c', s.quit]]
+                : [['↵', s.tryAgain], ['^c', s.quit]]
+    const withTheme: Array<[string, string]> = [...base, ['^t', `${s.theme}:${theme.mode}`]]
+    if (phase.name === 'input' && history.length > 0) {
+      return [withTheme[0]!, ['↑', s.history], ...withTheme.slice(1)]
+    }
+    return withTheme
+  })()
+
+  const partLabel = (progress: DownloadProgress): string =>
+    progress.totalParts > 1 ? `${s.part} ${progress.part + 1}/${progress.totalParts}  ` : ''
+
+  const downloadMeta = (progress: DownloadProgress): string => {
+    const speed = progress.speed ? formatSpeed(progress.speed) : ''
+    const eta = progress.eta ? `${formatEta(progress.eta)} ${s.left}` : ''
+    return `${partLabel(progress)}${speed.padStart(10)}  ${eta.padEnd(12)}`
+  }
+
+  const indeterminateMeta = (progress: DownloadProgress): string => {
+    const bytes = formatBytes(progress.downloadedBytes)
+    const speed = progress.speed ? formatSpeed(progress.speed) : ''
+    return `${partLabel(progress)}${bytes.padStart(8)}  ${speed.padEnd(10)}`
+  }
+
+  const stepTitle = (step: Step): string => {
+    if (step === 'type') return s.stepType
+    if (step === 'format') return wizard.kind === 'video' ? s.stepVideoFormat : s.stepAudioFormat
+    if (step === 'resolution') return s.stepResolution
+    if (step === 'fps') return s.stepFps
+    return s.stepBitrate
+  }
+
+  const showFullLogo = phase.name === 'input'
+
+  return (
+    <Box
+      flexDirection="column"
+      alignItems="center"
+      justifyContent="center"
+      width={columns}
+      height={rows}
+      backgroundColor={theme.background}
+    >
+      <UpdateBadge info={updateInfo} />
+      {showFullLogo ? (
+        <>
+          <Logo />
+          <Gap />
+          <Text color={theme.primary} bold>{s.tagline}</Text>
+          <Text color={theme.gray} dimColor={theme.dimSecondary}>{s.sitesLine}</Text>
+        </>
+      ) : (
+        <Box flexDirection="row" alignItems="center">
+          <LogoCompact />
+          <Text color={theme.gray} dimColor={theme.dimSecondary}>  ·  {s.tagline}</Text>
+        </Box>
+      )}
+      <Gap />
+
+      {phase.name === 'input' && (
+        <Box flexDirection="column" alignItems="center">
+          <Panel title={s.pasteLink} width={boxWidth}>
+            <TextInput
+              value={urlInput}
+              onChange={setUrlInput}
+              onSubmit={handleUrlSubmit}
+              placeholder={s.placeholder}
+              width={boxWidth - 8}
+              history={history}
+              submitOnPaste={isProbablyUrl}
+            />
+          </Panel>
+          {phase.warning ? (
+            <Text color={theme.danger ?? theme.primary}>✗ {phase.warning}</Text>
+          ) : null}
+        </Box>
+      )}
+
+      {phase.name === 'probing' && (
+        <Box flexDirection="column" alignItems="center">
+          <Panel title={platform ? platform.label : s.analyzing} width={boxWidth}>
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              {url.length > boxWidth - 10 ? `${url.slice(0, boxWidth - 11)}…` : url}
+            </Text>
+          </Panel>
+        </Box>
+      )}
+
+      {phase.name === 'wizard' && info && (
+        <Box width={contentWidth} flexDirection="column" alignItems="center">
+          <MetadataBlock info={info} platform={platform} maxWidth={contentWidth} />
+          <Gap />
+          <Panel title={stepTitle(phase.step)} width={Math.min(56, contentWidth)}>
+            {phase.step === 'type' && (
+              <SelectInput
+                indicatorComponent={ChoiceIndicator}
+                itemComponent={ChoiceItem}
+                items={typeItems}
+                onSelect={handleTypePick}
+              />
+            )}
+            {phase.step === 'format' && wizard.kind === 'video' && (
+              <SelectInput
+                indicatorComponent={ChoiceIndicator}
+                itemComponent={ChoiceItem}
+                items={videoFormatItems}
+                onSelect={handleFormatPick}
+              />
+            )}
+            {phase.step === 'format' && wizard.kind === 'audio' && (
+              <SelectInput
+                indicatorComponent={ChoiceIndicator}
+                itemComponent={ChoiceItem}
+                items={audioFormatItems}
+                onSelect={handleFormatPick}
+              />
+            )}
+            {phase.step === 'resolution' && (
+              <SelectInput
+                indicatorComponent={ChoiceIndicator}
+                itemComponent={ChoiceItem}
+                items={resolutionItems}
+                onSelect={handleResolutionPick}
+              />
+            )}
+            {phase.step === 'fps' && (
+              <SelectInput
+                indicatorComponent={ChoiceIndicator}
+                itemComponent={ChoiceItem}
+                items={fpsItems}
+                onSelect={handleFpsPick}
+              />
+            )}
+            {phase.step === 'bitrate' && wizard.audioFormat && (
+              <SelectInput
+                indicatorComponent={ChoiceIndicator}
+                itemComponent={ChoiceItem}
+                items={bitrateItems(wizard.audioFormat)}
+                onSelect={handleBitratePick}
+              />
+            )}
+          </Panel>
+        </Box>
+      )}
+
+      {phase.name === 'downloading' && (
+        <Box flexDirection="column" alignItems="center" width={contentWidth}>
+          {info ? <MetadataBlock info={info} platform={platform} maxWidth={contentWidth} /> : null}
+          <Gap />
+          <Text color={theme.accent ?? theme.primary} bold>
+            ▸ {phase.choice.label}
+          </Text>
+          <Gap />
+          {phase.processing ? (
+            <>
+              <ModernProgressBar percent={1} width={Math.min(40, contentWidth - 10)} />
+              <Gap />
+              <Text>
+                <Text color={theme.accent ?? theme.primary}>
+                  <Spinner type="dots" />
+                </Text>
+                <Text color={theme.gray} dimColor={theme.dimSecondary}> {s.processing}</Text>
+              </Text>
+            </>
+          ) : phase.progress?.totalBytes ? (
+            <>
+              <ModernProgressBar
+                percent={phase.progress.downloadedBytes / phase.progress.totalBytes}
+                width={Math.min(40, contentWidth - 10)}
+              />
+              <Gap />
+              <Text color={theme.gray} dimColor={theme.dimSecondary}>{downloadMeta(phase.progress)}</Text>
+            </>
+          ) : phase.progress ? (
+            <>
+              <Text>
+                <Text color={theme.accent ?? theme.primary}>
+                  <Spinner type="dots" />
+                </Text>
+                <Text color={theme.gray} dimColor={theme.dimSecondary}> {s.downloading}</Text>
+              </Text>
+              <Gap />
+              <Text color={theme.gray} dimColor={theme.dimSecondary}>{indeterminateMeta(phase.progress)}</Text>
+            </>
+          ) : (
+            <>
+              <ModernProgressBar percent={0} width={Math.min(40, contentWidth - 10)} />
+              <Gap />
+              <Text>
+                <Text color={theme.accent ?? theme.primary}>
+                  <Spinner type="dots" />
+                </Text>
+                <Text color={theme.gray} dimColor={theme.dimSecondary}>
+                  {phase.refreshing ? ` ${s.linkExpired}` : ` ${s.starting}`}
+                </Text>
+              </Text>
+            </>
+          )}
+          <Gap />
+          <TipDisplay maxWidth={contentWidth} />
+        </Box>
+      )}
+
+      {phase.name === 'done' && (
+        <Box flexDirection="column" alignItems="center">
+          <Text>
+            <Text bold color={theme.success ?? theme.primary}>✓ {s.grabbed} </Text>
+            <Text color={theme.primary}>{s.savedTo}</Text>
+          </Text>
+          <Text color={theme.gray} dimColor={theme.dimSecondary}>{shortenPath(phase.filepath, os.homedir(), 60)}</Text>
+          <Gap />
+          <Box
+            borderStyle="double"
+            borderColor={theme.accent ?? theme.gray}
+            paddingX={3}
+          >
+            <Text bold color={theme.primary}>{s.grabAnother}</Text>
+          </Box>
+        </Box>
+      )}
+
+      {phase.name === 'error' && (
+        <Box flexDirection="column" alignItems="center" width={Math.max(10, Math.min(columns - 6, 72))}>
+          <Text bold color={theme.danger ?? theme.primary}>✗ {phase.message}</Text>
+        </Box>
+      )}
+
+      {hints.length > 0 ? (
+        <>
+          <Gap lines={2} />
+          <Shortcuts
+            items={hints}
+            leading={
+              phase.name === 'probing' ? (
+                <Text>
+                  <Text color={theme.accent ?? theme.primary}>
+                    <Spinner type="dots" />
+                  </Text>
+                  <Text color={theme.gray} dimColor={theme.dimSecondary}> {phase.status}</Text>
+                </Text>
+              ) : undefined
+            }
+          />
+        </>
+      ) : null}
+    </Box>
+  )
+}
