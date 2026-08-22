@@ -120,23 +120,18 @@ echo -e "${GREEN} ✓ Node.js v$NODE_VER${RESET}"
 # --- Download Carbon from GitHub ---
 echo " → Downloading Carbon from GitHub..."
 
-# Get latest release tag
-TAG_NAME=""
+# Get latest release tag (for display only)
+TAG_NAME="latest"
 if command -v curl >/dev/null 2>&1; then
-    TAG_NAME=$(curl -fsSL "https://api.github.com/repos/$GITHUB_REPO/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || true)
+    TAG_NAME=$(curl -fsSL "https://api.github.com/repos/$GITHUB_REPO/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || echo "latest")
 elif command -v wget >/dev/null 2>&1; then
-    TAG_NAME=$(wget -qO- "https://api.github.com/repos/$GITHUB_REPO/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || true)
-fi
-
-# Fallback to main branch if no releases
-if [ -z "$TAG_NAME" ]; then
-    TAG_NAME="main"
+    TAG_NAME=$(wget -qO- "https://api.github.com/repos/$GITHUB_REPO/releases/latest" 2>/dev/null | grep -o '"tag_name": *"[^"]*"' | cut -d'"' -f4 || echo "latest")
 fi
 
 echo "   Version: $TAG_NAME"
 
-# Download cli.js directly from raw.githubusercontent.com
-CLI_URL="https://raw.githubusercontent.com/$GITHUB_REPO/$TAG_NAME/dist/cli.js"
+# Always download from main branch — dist/cli.js there is the latest build
+CLI_URL="https://raw.githubusercontent.com/$GITHUB_REPO/main/dist/cli.js"
 APP_DIR="$INSTALL_DIR/app"
 mkdir -p "$APP_DIR"
 
