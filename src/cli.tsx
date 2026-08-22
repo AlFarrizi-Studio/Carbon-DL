@@ -1,11 +1,9 @@
 import React from 'react'
-import {createRequire} from 'node:module'
 import {render} from 'ink'
 import {App, type Outcome} from './app.js'
 import {parseArgs} from './lib/args.js'
 import {queryTerminal, setProtocol, setCellPixelSize} from './lib/image-protocol.js'
-
-const VERSION: string = createRequire(import.meta.url)('../package.json').version
+import {CURRENT_VERSION as VERSION} from './lib/update-check.js'
 
 const HELP = `
   ◈ Carbon — grab any video or music. pick. download. done.
