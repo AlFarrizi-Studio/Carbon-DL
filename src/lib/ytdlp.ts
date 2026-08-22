@@ -293,6 +293,53 @@ async function fetchMusicMetadata(url: string, signal?: AbortSignal): Promise<Mu
   return undefined
 }
 
+function decodeHtmlEntities(s: string): string {
+  const named: Record<string, string> = {
+    quot: '"',
+    amp: '&',
+    lt: '<',
+    gt: '>',
+    apos: "'",
+    nbsp: ' ',
+  }
+  return s.replace(/&(#x?[0-9a-f]+|[a-z]+);/gi, (match, code: string) => {
+    const c = String(code)
+    if (/^#x/i.test(c)) return String.fromCodePoint(parseInt(c.slice(2), 16))
+    if (c.startsWith('#')) return String.fromCodePoint(parseInt(c.slice(1), 10))
+    return named[c.toLowerCase()] ?? match
+  })
+}
+
+/** Open Graph metadata scraped from any webpage. */
+type OgMetadata = {title?: string; description?: string; image?: string; type?: string}
+
+/** Fetch Open Graph metadata from an arbitrary webpage.
+ *  Used for sites yt-dlp has no extractor for (e.g. rythm.fm): if the page
+ *  declares music.* og tags we can still build a YouTube Music search query
+ *  and download the track from there. */
+async function fetchPageOgMetadata(url: string, signal?: AbortSignal): Promise<OgMetadata | undefined> {
+  try {
+    const response = await fetch(url, {signal, headers: {'user-agent': BROWSER_UA}})
+    if (!response.ok) return undefined
+    const html = await response.text()
+    const og = (prop: string): string | undefined => {
+      const m =
+        new RegExp(`<meta[^>]+property=["']${prop}["'][^>]+content=["']([^"']+)["']`, 'i').exec(html) ??
+        new RegExp(`<meta[^>]+content=["']([^"']+)["'][^>]+property=["']${prop}["']`, 'i').exec(html)
+      return m?.[1] ? decodeHtmlEntities(m[1]) : undefined
+    }
+    const meta: OgMetadata = {
+      title: og('og:title'),
+      description: og('og:description'),
+      image: og('og:image'),
+      type: og('og:type'),
+    }
+    return meta.title || meta.description ? meta : undefined
+  } catch {
+    return undefined
+  }
+}
+
 /** Search YouTube Music for a track and return the best match URL.
  *  Uses the YouTube Music InnerTube API directly (WEB_REMIX client) for
  *  reliable search results — no dependency on yt-dlp's ytmsearch extractor. */
@@ -547,20 +594,30 @@ export async function probe(ytdlp: string, url: string, signal?: AbortSignal, us
       }
     }
 
-    // STEP 2: Decide whether a YouTube Music fallback even makes sense. We only
-    // fall back for music-service URLs or when the error clearly indicates DRM.
+    // STEP 3: For unknown/unsupported URLs, try scraping Open Graph metadata.
+    // If the page declares music.* og tags (e.g. rythm.fm), we can build a
+    // YouTube Music search query and download from there.
+    const ogMeta = await fetchPageOgMetadata(url, signal)
+    const looksLikeMusicPage = ogMeta?.type?.startsWith('music.') || /music|song|track|listen/i.test(ogMeta?.title ?? '')
+
+    // STEP 4: Decide whether a YouTube Music fallback even makes sense. We fall
+    // back for music-service URLs, DRM errors, or pages with music OG tags.
     const looksLikeMusicDrm =
       isDrmMusicService(url) ||
       /soundcloud\.com|bandcamp\.com|audiomack\.com/i.test(url) ||
-      /\bdrm\b|premium|subscription required/i.test(errMsg)
+      /\bdrm\b|premium|subscription required/i.test(errMsg) ||
+      looksLikeMusicPage
 
     if (!looksLikeMusicDrm) throw directError
 
-    // Build a search query: prefer API metadata, then URL slug.
+    // Build a search query: prefer API metadata, then OG title, then URL slug.
     const metadata = await fetchMusicMetadata(url, signal)
     let searchQuery: string | undefined
     if (metadata?.title) {
       searchQuery = metadata.artist ? `${metadata.artist} - ${metadata.title}` : metadata.title
+    } else if (ogMeta?.title) {
+      // OG title often contains "Track - Artist · Site" or "Track by Artist"
+      searchQuery = ogMeta.title.replace(/\s*[·|]\s*\w+$/, '').trim()
     } else {
       searchQuery = queryFromUrlSlug(url)
     }
