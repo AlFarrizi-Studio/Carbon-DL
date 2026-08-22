@@ -68,8 +68,12 @@ const leaveAltScreen = () => process.stdout.write('\x1b[?1049l')
 // protocol is supported and (b) the character-cell pixel size, so images
 // can be rendered at the true display resolution instead of a tiny bitmap
 // that the terminal upscales into a pixelated mess.
+const DEBUG = process.env.CARBON_DEBUG === '1' || process.env.CARBON_DEBUG === 'true'
 if (isTTY) {
   const caps = await queryTerminal(350)
+  if (DEBUG) {
+    process.stderr.write(`[image] queryTerminal: protocol=${caps.protocol ?? '(none)'} cell=${caps.cellPixelSize ? `${caps.cellPixelSize.width}x${caps.cellPixelSize.height}` : '(unknown)'}\n`)
+  }
   if (caps.protocol) setProtocol(caps.protocol)
   if (caps.cellPixelSize) setCellPixelSize(caps.cellPixelSize)
 }

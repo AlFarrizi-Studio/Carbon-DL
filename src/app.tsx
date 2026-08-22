@@ -1,10 +1,10 @@
-import React, {useCallback, useEffect, useRef, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import os from 'node:os'
 import path from 'node:path'
 import {Box, Text, useApp, useInput, useStdout} from 'ink'
 import SelectInput, {type IndicatorProps, type ItemProps} from 'ink-select-input'
 import Spinner from 'ink-spinner'
-import {Logo, LogoCompact} from './components/logo.js'
+import {Logo} from './components/logo.js'
 import {Panel} from './components/panel.js'
 import {Shortcuts} from './components/shortcuts.js'
 import {TextInput} from './components/text-input.js'
@@ -17,6 +17,7 @@ import {t, getLanguage} from './lib/i18n.js'
 import {nextTip, randomTip, TIP_INTERVAL_MS} from './lib/tips.js'
 import {checkForUpdate, type UpdateInfo} from './lib/update-check.js'
 import {
+  bestThumbnail,
   buildAudioArgs,
   buildVideoArgs,
   download,
@@ -29,8 +30,12 @@ import {
   formatReleaseDate,
   type DownloadChoice,
   type DownloadProgress,
+  type ThumbnailInfo,
   type VideoInfo,
 } from './lib/ytdlp.js'
+import {Thumbnail} from './components/thumbnail.js'
+import {fetchThumbnail, type ThumbResult} from './lib/thumbnail.js'
+import {detectProtocol, getCellPixelSize} from './lib/image-protocol.js'
 
 const OUT_DIR = path.join(os.homedir(), 'Downloads')
 
@@ -54,6 +59,23 @@ const Gap = ({lines = 1}: {lines?: number}) => (
     ))}
   </Box>
 )
+
+/**
+ * Compact brand line: "◈ CARBON · tagline".
+ * Shown during probing, wizard, and downloading phases so the identity
+ * is always visible above the active content.
+ */
+function BrandLine() {
+  const theme = useTheme()
+  const s = t()
+  return (
+    <Box flexDirection="row" flexShrink={0}>
+      <Text color={theme.accent ?? theme.primary} bold>◈ CARBON</Text>
+      <Text color={theme.gray} dimColor>  ·  </Text>
+      <Text color={theme.gray}>{s.tagline}</Text>
+    </Box>
+  )
+}
 
 function ChoiceIndicator({isSelected}: IndicatorProps) {
   const theme = useTheme()
@@ -104,6 +126,71 @@ function MetadataBlock({info, platform, maxWidth}: {info: VideoInfo; platform?: 
           <Text color={theme.primary}>{truncate(value, valueW)}</Text>
         </Box>
       ))}
+    </Box>
+  )
+}
+
+/**
+ * Cover art for the current item, rendered with the best terminal image
+ * protocol (Kitty / iTerm2 / Sixel, half-block fallback). Fetches the
+ * highest-resolution artwork URL once and reserves its area while loading so
+ * the layout doesn't jump when the image arrives.
+ */
+function CoverArt({thumbInfo, cols}: {thumbInfo: ThumbnailInfo; cols: number}) {
+  const protocol = detectProtocol()
+  const cell = getCellPixelSize()
+  // Reproduce the artwork's true aspect ratio in terminal cells. Cells are
+  // ~twice as tall as wide, so rows = cols * cellW / (aspect * cellH).
+  const aspect = thumbInfo.width && thumbInfo.height ? thumbInfo.width / thumbInfo.height : 1
+  const rows = Math.max(4, Math.min(18, Math.round((cols * cell.width) / (aspect * cell.height))))
+
+  const [thumb, setThumb] = useState<ThumbResult | undefined>(undefined)
+  useEffect(() => {
+    const controller = new AbortController()
+    let cancelled = false
+    void fetchThumbnail(thumbInfo.url, cols, rows, protocol, controller.signal).then(result => {
+      if (!cancelled && result) setThumb(result)
+    })
+    return () => {
+      cancelled = true
+      controller.abort()
+    }
+  }, [thumbInfo.url, cols, rows, protocol])
+
+  if (!thumb) {
+    // Reserve the exact area so layout is stable while the art downloads.
+    return <Box width={cols} height={rows} flexShrink={0} />
+  }
+  return (
+    <Box flexShrink={0}>
+      <Thumbnail grid={thumb.grid} png={thumb.png} rgba={thumb.rgba} cols={cols} rows={rows} />
+    </Box>
+  )
+}
+
+/**
+ * Metadata header row: cover art on the left (when the terminal is wide
+ * enough and artwork exists) + the metadata block on the right.
+ */
+function MediaHeader({info, platform, contentWidth}: {info: VideoInfo; platform?: Platform; contentWidth: number}) {
+  const thumbInfo = useMemo(() => bestThumbnail(info), [info])
+  const coverCols = 24
+  const gap = 2
+  const minMeta = 24
+  const showCover = Boolean(thumbInfo) && contentWidth >= coverCols + gap + minMeta
+  const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth
+
+  return (
+    <Box flexDirection="row" width={contentWidth}>
+      {showCover && thumbInfo ? (
+        <>
+          <CoverArt thumbInfo={thumbInfo} cols={coverCols} />
+          <Box width={gap} flexShrink={0} />
+        </>
+      ) : null}
+      <Box flexDirection="column" flexGrow={1}>
+        <MetadataBlock info={info} platform={platform} maxWidth={metaWidth} />
+      </Box>
     </Box>
   )
 }
@@ -532,8 +619,6 @@ function AppContent({
     return s.stepBitrate
   }
 
-  const showFullLogo = phase.name === 'input'
-
   return (
     <Box
       flexDirection="column"
@@ -544,34 +629,30 @@ function AppContent({
       backgroundColor={theme.background}
     >
       <UpdateBadge info={updateInfo} />
-      {showFullLogo ? (
-        <>
-          <Logo />
-          <Gap />
-          <Text color={theme.primary} bold>{s.tagline}</Text>
-          <Text color={theme.gray} dimColor={theme.dimSecondary}>{s.sitesLine}</Text>
-        </>
-      ) : (
-        <Box flexDirection="row" alignItems="center">
-          <LogoCompact />
-          <Text color={theme.gray} dimColor={theme.dimSecondary}>  ·  {s.tagline}</Text>
-        </Box>
-      )}
-      <Gap />
 
       {phase.name === 'input' && (
         <Box flexDirection="column" alignItems="center">
-          <Panel title={s.pasteLink} width={boxWidth}>
-            <TextInput
-              value={urlInput}
-              onChange={setUrlInput}
-              onSubmit={handleUrlSubmit}
-              placeholder={s.placeholder}
-              width={boxWidth - 8}
-              history={history}
-              submitOnPaste={isProbablyUrl}
-            />
-          </Panel>
+          <Logo />
+          <Text color={theme.primary}>
+            {s.tagline}
+          </Text>
+          <Text color={theme.gray} dimColor={theme.dimSecondary}>
+            {s.sitesLine}
+          </Text>
+          <Gap lines={2} />
+          <Box flexDirection="column" alignItems="center" width={boxWidth}>
+            <Panel title={s.pasteLink} width={boxWidth}>
+              <TextInput
+                value={urlInput}
+                onChange={setUrlInput}
+                onSubmit={handleUrlSubmit}
+                placeholder={s.placeholder}
+                width={boxWidth - 8}
+                history={history}
+                submitOnPaste={isProbablyUrl}
+              />
+            </Panel>
+          </Box>
           {phase.warning ? (
             <Text color={theme.danger ?? theme.primary}>✗ {phase.warning}</Text>
           ) : null}
@@ -580,6 +661,8 @@ function AppContent({
 
       {phase.name === 'probing' && (
         <Box flexDirection="column" alignItems="center">
+          <BrandLine />
+          <Gap />
           <Panel title={platform ? platform.label : s.analyzing} width={boxWidth}>
             <Text color={theme.gray} dimColor={theme.dimSecondary}>
               {url.length > boxWidth - 10 ? `${url.slice(0, boxWidth - 11)}…` : url}
@@ -590,9 +673,11 @@ function AppContent({
 
       {phase.name === 'wizard' && info && (
         <Box width={contentWidth} flexDirection="column" alignItems="center">
-          <MetadataBlock info={info} platform={platform} maxWidth={contentWidth} />
+          <BrandLine />
           <Gap />
-          <Panel title={stepTitle(phase.step)} width={Math.min(56, contentWidth)}>
+          <MediaHeader info={info} platform={platform} contentWidth={contentWidth} />
+          <Gap />
+          <Panel title={stepTitle(phase.step)} width={Math.max(48, Math.round(contentWidth * 0.8))}>
             {phase.step === 'type' && (
               <SelectInput
                 indicatorComponent={ChoiceIndicator}
@@ -647,7 +732,9 @@ function AppContent({
 
       {phase.name === 'downloading' && (
         <Box flexDirection="column" alignItems="center" width={contentWidth}>
-          {info ? <MetadataBlock info={info} platform={platform} maxWidth={contentWidth} /> : null}
+          <BrandLine />
+          <Gap />
+          {info ? <MediaHeader info={info} platform={platform} contentWidth={contentWidth} /> : null}
           <Gap />
           <Text color={theme.accent ?? theme.primary} bold>
             ▸ {phase.choice.label}
