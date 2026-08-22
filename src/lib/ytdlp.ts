@@ -59,19 +59,178 @@ export async function ensureYtDlp(onStatus: (message: string) => void, signal?: 
 }
 
 /**
- * Find ffmpeg for stream merging / audio extraction: system install first,
- * ffmpeg-static as fallback. Returns undefined if neither exists.
+ * Find or download ffmpeg for stream merging / audio extraction.
+ * Checks: system PATH → previously downloaded → download from GitHub.
+ * Supports Windows, Linux (x64/arm64), and macOS.
  */
-export async function findFfmpeg(): Promise<string | undefined> {
+export async function ensureFfmpeg(onStatus?: (message: string) => void, signal?: AbortSignal): Promise<string | undefined> {
+  // 1. System ffmpeg
   if (await commandWorks('ffmpeg', ['-version'])) return undefined
-  try {
-    const mod = await import('ffmpeg-static')
-    const ffmpegPath = (mod.default ?? mod) as unknown as string | null
-    if (ffmpegPath && (await commandWorks(ffmpegPath, ['-version']))) return ffmpegPath
-  } catch {
-    // ffmpeg-static not installed or unsupported platform
+
+  // 2. Previously downloaded
+  const ffmpegName = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+  const ffprobeName = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+  const localFfmpeg = path.join(CARBON_DIR, ffmpegName)
+  const localFfprobe = path.join(CARBON_DIR, ffprobeName)
+  if (await commandWorks(localFfmpeg, ['-version'])) return CARBON_DIR
+
+  // 3. Download ffmpeg
+  onStatus?.('first run: fetching ffmpeg…')
+  await fs.mkdir(CARBON_DIR, {recursive: true})
+
+  const platform = process.platform
+  const arch = process.arch
+
+  let downloadUrl: string
+  let archiveType: 'zip' | 'tar.xz'
+
+  if (platform === 'win32') {
+    downloadUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
+    archiveType = 'zip'
+  } else if (platform === 'darwin') {
+    // macOS: use evermeet.cx static builds (ffmpeg + ffprobe separately)
+    await downloadMacOsFfmpeg(localFfmpeg, localFfprobe, signal)
+    if (await commandWorks(localFfmpeg, ['-version'])) return CARBON_DIR
+    return undefined
+  } else {
+    // Linux
+    if (arch === 'arm64') {
+      downloadUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-linuxarm64-gpl.tar.xz'
+    } else {
+      downloadUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-linux64-gpl.tar.xz'
+    }
+    archiveType = 'tar.xz'
   }
+
+  try {
+    const response = await fetch(downloadUrl, {signal, redirect: 'follow'})
+    if (!response.ok || !response.body) {
+      throw new Error(`HTTP ${response.status}`)
+    }
+
+    const archivePath = path.join(CARBON_DIR, archiveType === 'zip' ? 'ffmpeg.zip' : 'ffmpeg.tar.xz')
+    await pipeline(Readable.fromWeb(response.body as never), createWriteStream(archivePath), {signal})
+
+    // Extract
+    if (archiveType === 'zip') {
+      if (platform === 'win32') {
+        // Use PowerShell to extract on Windows
+        await new Promise<void>((resolve, reject) => {
+          const child = spawn('powershell', ['-NoProfile', '-Command',
+            `Expand-Archive -Path "${archivePath}" -DestinationPath "${CARBON_DIR}" -Force`], {stdio: 'ignore'})
+          child.on('error', reject)
+          child.on('close', code => code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`)))
+        })
+      } else {
+        // macOS: use unzip
+        await new Promise<void>((resolve, reject) => {
+          const child = spawn('unzip', ['-o', archivePath, '-d', CARBON_DIR], {stdio: 'ignore'})
+          child.on('error', reject)
+          child.on('close', code => code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`)))
+        })
+      }
+    } else {
+      // Linux: use tar
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn('tar', ['-xf', archivePath, '-C', CARBON_DIR], {stdio: 'ignore'})
+        child.on('error', reject)
+        child.on('close', code => code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`)))
+      })
+    }
+
+    // Find and move ffmpeg/ffprobe binaries to CARBON_DIR
+    await moveExtractedBinaries(CARBON_DIR, localFfmpeg, localFfprobe)
+
+    // Cleanup archive
+    await fs.unlink(archivePath).catch(() => {})
+
+    if (await commandWorks(localFfmpeg, ['-version'])) return CARBON_DIR
+  } catch {
+    // Download failed — return undefined, yt-dlp will try without ffmpeg
+  }
+
   return undefined
+}
+
+/** Recursively find ffmpeg/ffprobe in extracted directory and move to target. */
+async function moveExtractedBinaries(searchDir: string, targetFfmpeg: string, targetFfprobe: string): Promise<void> {
+  const ffmpegName = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
+  const ffprobeName = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
+
+  async function findFile(dir: string, name: string): Promise<string | undefined> {
+    try {
+      const entries = await fs.readdir(dir, {withFileTypes: true})
+      for (const entry of entries) {
+        const fullPath = path.join(dir, entry.name)
+        if (entry.isDirectory()) {
+          const found = await findFile(fullPath, name)
+          if (found) return found
+        } else if (entry.name === name) {
+          return fullPath
+        }
+      }
+    } catch {}
+    return undefined
+  }
+
+  const foundFfmpeg = await findFile(searchDir, ffmpegName)
+  const foundFfprobe = await findFile(searchDir, ffprobeName)
+
+  if (foundFfmpeg) {
+    await fs.copyFile(foundFfmpeg, targetFfmpeg)
+    if (process.platform !== 'win32') await fs.chmod(targetFfmpeg, 0o755)
+  }
+  if (foundFfprobe) {
+    await fs.copyFile(foundFfprobe, targetFfprobe)
+    if (process.platform !== 'win32') await fs.chmod(targetFfprobe, 0o755)
+  }
+
+  // Cleanup extracted directories (ffmpeg-master-latest-* folders)
+  try {
+    const entries = await fs.readdir(searchDir, {withFileTypes: true})
+    for (const entry of entries) {
+      if (entry.isDirectory() && entry.name.startsWith('ffmpeg-')) {
+        await fs.rm(path.join(searchDir, entry.name), {recursive: true, force: true}).catch(() => {})
+      }
+    }
+  } catch {}
+}
+
+/** Download ffmpeg and ffprobe for macOS from evermeet.cx static builds. */
+async function downloadMacOsFfmpeg(targetFfmpeg: string, targetFfprobe: string, signal?: AbortSignal): Promise<void> {
+  const downloads = [
+    {url: 'https://evermeet.cx/ffmpeg/getrelease/zip', target: targetFfmpeg, name: 'ffmpeg'},
+    {url: 'https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip', target: targetFfprobe, name: 'ffprobe'},
+  ]
+
+  for (const {url, target, name} of downloads) {
+    try {
+      const response = await fetch(url, {signal, redirect: 'follow'})
+      if (!response.ok || !response.body) continue
+
+      const zipPath = path.join(CARBON_DIR, `${name}.zip`)
+      await pipeline(Readable.fromWeb(response.body as never), createWriteStream(zipPath), {signal})
+
+      // Extract using unzip
+      await new Promise<void>((resolve, reject) => {
+        const child = spawn('unzip', ['-o', zipPath, '-d', CARBON_DIR], {stdio: 'ignore'})
+        child.on('error', reject)
+        child.on('close', code => (code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`))))
+      })
+
+      // The extracted binary may be named 'ffmpeg' or 'ffprobe' directly
+      const extractedPath = path.join(CARBON_DIR, name)
+      if (extractedPath !== target) {
+        await fs.rename(extractedPath, target).catch(() => {})
+      }
+      await fs.chmod(target, 0o755).catch(() => {})
+
+      // Cleanup zip
+      await fs.unlink(zipPath).catch(() => {})
+    } catch {
+      // Continue to next binary
+    }
+  }
 }
 
 export type RawFormat = {
