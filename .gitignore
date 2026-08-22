@@ -1,0 +1,4 @@
+node_modules/
+_reference_yoinks/
+*.log
+.DS_Store
