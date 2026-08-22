@@ -52223,7 +52223,7 @@ function randomTip() {
 
 // src/lib/update-check.ts
 var GITHUB_REPO = "AlFarrizi-Studio/Carbon-DL";
-var CURRENT_VERSION = "1.0.7";
+var CURRENT_VERSION = "1.0.8-beta";
 function isNewerVersion(a, b) {
   const pa = a.replace(/^v/, "").split(".").map(Number);
   const pb = b.replace(/^v/, "").split(".").map(Number);
