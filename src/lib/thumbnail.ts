@@ -4,7 +4,8 @@ export type ThumbCell = {top: string; bottom: string}
 export type ThumbGrid = ThumbCell[][]
 
 export type ThumbResult = {
-  /** Half-block grid fallback (always generated). */
+  /** Half-block grid — ALWAYS generated as the universal fallback, so the
+   *  cover area is never blank even when a native path fails. */
   grid: ThumbGrid
   /** PNG buffer for native terminal image protocols (Kitty / iTerm2). */
   png?: Buffer
@@ -22,20 +23,29 @@ const MAX_NATIVE_WIDTH = 1920
 const MAX_NATIVE_HEIGHT = 1080
 
 /**
+ * Result cache keyed by url|cols|rows|protocol. The same artwork is shown in
+ * several screens (wizard → downloading), and the Kitty path keys its
+ * transmit-once optimisation on the Buffer instance — so reusing the exact
+ * same ThumbResult across mounts avoids both a re-download and a re-transmit.
+ * Only successful results are cached; failures/aborts stay retryable.
+ */
+const MAX_CACHED = 12
+const thumbCache = new Map<string, ThumbResult>()
+
+/**
  * Download an image and prepare it for terminal display.
  *
- * ratatui-image / MovieBox-TUI style: the representation produced depends on
- * the target protocol, so we never waste CPU/memory building data that the
- * selected backend will not use:
+ *  - The half-block grid is ALWAYS built — it is the universal fallback and
+ *    guarantees the cover area is never blank, even when a native protocol
+ *    path fails or the terminal turns out not to support graphics.
+ *  - kitty / iterm2 → additionally a high-resolution PNG (source is NOT
+ *    downscaled to the display cell area; the terminal scales it into the
+ *    placeholder/width target). Only capped at MAX_NATIVE_WIDTH/HEIGHT.
+ *  - sixel → additionally raw RGBA at the true display pixel size. The Sixel
+ *    stream is written directly to stdout by the renderer (CPR-anchored),
+ *    never through Ink, so it cannot be corrupted by text wrapping. The
+ *    grid stays underneath as a visible fallback.
  *
- *  - kitty / iterm2 → high-resolution PNG (source is NOT downscaled to the
- *    display cell area; the terminal scales it to the c/r or width target).
- *    Only capped at MAX_NATIVE_WIDTH/HEIGHT for very large sources.
- *  - sixel → raw RGBA resized to the true display pixel size (Sixel has no
- *    placement/scaling parameters, so we must scale before encoding).
- *  - halfblock → colour-sampled grid only (2 pixels per cell). No PNG/RGBA.
- *
- * The half-block grid is always generated as the universal fallback.
  * Returns undefined on any failure so the UI can simply skip the cover art.
  */
 export async function fetchThumbnail(
@@ -45,6 +55,10 @@ export async function fetchThumbnail(
   protocol: ImageProtocol,
   signal?: AbortSignal,
 ): Promise<ThumbResult | undefined> {
+  const key = `${url}|${cols}|${rows}|${protocol}`
+  const cached = thumbCache.get(key)
+  if (cached) return cached
+
   try {
     const response = await fetch(url, {signal})
     if (!response.ok || !response.body) return undefined
@@ -54,25 +68,29 @@ export async function fetchThumbnail(
     const sharpMod = await import('sharp')
     const sharpFn = (sharpMod.default ?? sharpMod) as unknown as (input: Buffer) => import('sharp').Sharp
 
-    // Half-block grid fallback — always produced (universal, cheap).
+    // Grid is ALWAYS built — universal fallback, never blank.
     const grid = await buildGrid(sharpFn, buffer, cols, rows)
 
     let png: Buffer | undefined
     let rgba: {data: Buffer; width: number; height: number} | undefined
-
     if (protocol === 'kitty' || protocol === 'iterm2') {
       // Native protocols: send a high-resolution source. The terminal scales
-      // it into the target cell rectangle (Kitty c/r, iTerm2 width param),
-      // which produces smoother results than pre-downscaling with sharp.
+      // it into the target cell rectangle (Kitty placeholders, iTerm2 width
+      // param), which produces smoother results than pre-downscaling.
       png = await buildHighResPng(sharpFn, buffer)
     } else if (protocol === 'sixel') {
-      // Sixel has no placement parameters — pixels map 1:1 to the screen, so
-      // we resize to the true display pixel size before encoding.
+      // Sixel has no placement/scaling parameters — pixels map 1:1 to the
+      // screen, so resize to the true display pixel size before encoding.
       rgba = await buildSixelRgba(sharpFn, buffer, cols, rows)
     }
-    // halfblock: nothing extra needed beyond the grid.
 
-    return {grid, png, rgba}
+    const result: ThumbResult = {grid, png, rgba}
+    thumbCache.set(key, result)
+    if (thumbCache.size > MAX_CACHED) {
+      const oldest = thumbCache.keys().next().value
+      if (oldest !== undefined) thumbCache.delete(oldest)
+    }
+    return result
   } catch {
     return undefined
   }
