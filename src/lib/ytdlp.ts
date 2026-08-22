@@ -440,6 +440,37 @@ export async function probe(ytdlp: string, url: string, signal?: AbortSignal, us
     }
   }
 
+  /** Probe using yt-dlp's generic extractor (--force-generic-extractor).
+   *  This handles sites without dedicated extractors: direct video links,
+   *  HTML5 video embeds, and pages with embedded players. */
+  const doProbeGeneric = async (targetUrl: string): Promise<VideoInfo> => {
+    const stdout = await new Promise<string>((resolve, reject) => {
+      const child = spawn(
+        ytdlp,
+        ['-J', '--no-playlist', '--no-warnings', '--force-generic-extractor', ...GENERIC_BYPASS_ARGS, targetUrl],
+        {signal},
+      )
+      let out = ''
+      let stderr = ''
+      child.stdout.on('data', chunk => (out += chunk))
+      child.stderr.on('data', chunk => (stderr += chunk))
+      child.on('error', reject)
+      child.on('close', code => {
+        if (code !== 0) {
+          reject(new Error(cleanYtDlpError(stderr) || `yt-dlp exited with code ${code}`))
+        } else {
+          resolve(out)
+        }
+      })
+    })
+
+    try {
+      return JSON.parse(stdout) as VideoInfo
+    } catch {
+      throw new Error('Could not parse video info from yt-dlp generic extractor.')
+    }
+  }
+
   // STRATEGY: Always try a direct yt-dlp probe first. yt-dlp natively supports
   // 1800+ sites (YouTube, music.youtube.com, TikTok, Instagram, Facebook, X,
   // Twitch, SoundCloud, Deezer, etc.) and returns the FULL quality format list
@@ -453,6 +484,21 @@ export async function probe(ytdlp: string, url: string, signal?: AbortSignal, us
     if (signal?.aborted) throw directError
 
     const errMsg = directError instanceof Error ? directError.message : String(directError)
+
+    // STEP 0: Retry with generic extractor for "Unsupported URL" errors.
+    // yt-dlp's generic extractor can handle many sites that don't have
+    // dedicated extractors (direct video links, embeds, etc.)
+    const needsGeneric =
+      /unsupported url|no video extractor|no extractor|unable to extract|generic extractor/i.test(errMsg)
+
+    if (needsGeneric) {
+      try {
+        const info = await doProbeGeneric(url)
+        return {info}
+      } catch {
+        // Generic extractor failed too, continue to other fallbacks
+      }
+    }
 
     // STEP 1: Retry with strong bypass args (alternative player clients / API hosts).
     // This handles TikTok IP blocks, YouTube PO-token blocks, etc.
