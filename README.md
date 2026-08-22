@@ -31,6 +31,7 @@ YouTube · X/Twitter · Instagram · Threads · TikTok and 1,800+ other sites
 - 🎚️ **Audio bitrate picker** — 8 kbps up to 512 kbps (FLAC/WAV are lossless)
 - 🖥️ **Resolution picker** — from 360p up to 4K
 - 🎞️ **FPS picker** — source FPS, 24, 30, or 60
+- 🖼️ **Cover art** — shows the video/music thumbnail in the wizard using native terminal graphics (Kitty, iTerm2, Sixel) with a half-block fallback
 - 🎨 **Themes** — `system`, `dark`, or `light` (press `^t` to cycle live)
 - 🌐 **1800+ sites** — powered by yt-dlp
 - 🌍 **Multi-language** — auto-detects your system language (20+ languages)
@@ -83,6 +84,8 @@ carbon-dl
 carbon-dl                          # interactive — paste a link
 carbon-dl https://youtu.be/xyz     # start with a link
 carbon-dl --theme dark             # force dark theme
+carbon-dl update                   # update to the latest version
+carbon-dl update --force           # re-download even if already latest
 carbon-dl --help                   # show help
 carbon-dl --version                # show version
 ```
@@ -126,7 +129,7 @@ CARBON_LANG=ja carbon-dl    # force Japanese
 
 Supported: English, Indonesian, Spanish, French, German, Portuguese, Italian, Russian, Japanese, Korean, Chinese (Simplified & Traditional), Arabic, Hindi, Turkish, Vietnamese, Thai, Malay, Dutch, Polish, Ukrainian, Filipino, and more.
 
-## 🔔 Update notifications
+## 🔔 Updates
 
 When a newer release is published on GitHub, Carbon shows a badge in the top-right corner:
 
@@ -134,7 +137,15 @@ When a newer release is published on GitHub, Carbon shows a badge in the top-rig
 ↑ Latest Carbon update available: vX.Y.Z
 ```
 
-Update by re-running the install command for your platform above — it always fetches the latest release.
+To update, run:
+
+```bash
+carbon-dl update
+```
+
+This checks GitHub for the latest release and replaces the installed `cli.js` automatically — works on Windows, Linux, and macOS. Use `--force` to re-download even when already on the latest version (useful for repairing a corrupted install).
+
+Alternatively, re-run the install command for your platform above — it always fetches the latest release.
 
 ## 🗂️ Where files go
 
@@ -145,6 +156,7 @@ Downloads are saved to your `~/Downloads` folder.
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) does the heavy lifting (extraction + download). Carbon auto-downloads the binary on first run if it's not on your PATH.
 - [ffmpeg](https://ffmpeg.org) merges video+audio streams and converts formats. Carbon uses your system ffmpeg, or auto-downloads a static build on first run if none is found.
 - UI is built with [Ink](https://github.com/vadimdemedes/ink) (React for CLIs).
+- Cover art is rendered via the best available terminal graphics protocol — Kitty (placeholders), iTerm2 (inline images), or Sixel (CPR-anchored) — with a universal half-block (▀) fallback. Image decoding uses [sharp](https://github.com/lovell/sharp) when available, falling back to [jimp](https://github.com/jimp-dev/jimp) (pure JS, bundled) so thumbnails always work even in the single-file installed build.
 
 ## 🛠️ Development
 
