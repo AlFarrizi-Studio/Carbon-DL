@@ -74,19 +74,17 @@ Write-Host " ✓ Node.js v$nodeVersion" -ForegroundColor Green
 # --- Download Carbon from GitHub ---
 Write-Host ' → Downloading Carbon from GitHub...' -ForegroundColor White
 
-# Get latest release tag
+# Get latest release tag (for display only)
+$tagName = 'latest'
 try {
     $releaseInfo = Invoke-RestMethod -Uri "https://api.github.com/repos/$GITHUB_REPO/releases/latest" -UseBasicParsing
     $tagName = $releaseInfo.tag_name
-} catch {
-    # Fallback: use main branch if no releases
-    $tagName = 'main'
-}
+} catch {}
 
 Write-Host "   Version: $tagName" -ForegroundColor White
 
-# Download cli.js directly from raw.githubusercontent.com
-$cliUrl = "https://raw.githubusercontent.com/$GITHUB_REPO/$tagName/dist/cli.js"
+# Always download from main branch — dist/cli.js there is the latest build
+$cliUrl = "https://raw.githubusercontent.com/$GITHUB_REPO/main/dist/cli.js"
 $cliPath = Join-Path $INSTALL_DIR 'cli.js'
 
 # Create install directory
