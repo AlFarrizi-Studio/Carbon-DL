@@ -4,7 +4,7 @@
  */
 
 const GITHUB_REPO = 'AlFarrizi-Studio/Carbon-DL'
-const CURRENT_VERSION = '1.0.7'
+const CURRENT_VERSION = '1.0.8-beta'
 
 export type UpdateInfo = {
   hasUpdate: boolean
