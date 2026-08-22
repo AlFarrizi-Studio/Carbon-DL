@@ -21,7 +21,7 @@ import {
   buildVideoArgs,
   download,
   ensureYtDlp,
-  findFfmpeg,
+  ensureFfmpeg,
   hasAudio,
   maxHeight,
   probe,
@@ -361,7 +361,7 @@ function AppContent({
             setPhase(prev => (prev.name === 'downloading' ? {...prev, processing: true} : prev)),
         }
         try {
-          const ffmpegLocation = await findFfmpeg()
+          const ffmpegLocation = await ensureFfmpeg(status => setPhase({name: 'downloading', choice, processing: false}), controller.signal)
           const actualUrl = downloadUrlRef.current || url
           const base = {ytdlp: ytdlpRef.current, ffmpegLocation, url: actualUrl, choice, outDir: OUT_DIR}
           let filepath: string
