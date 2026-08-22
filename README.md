@@ -1,6 +1,6 @@
 <div align="center">
 
-<pre style="text-align: center;">
+<pre>
  ██████╗ █████╗ ██████╗ ██████╗  ██████╗ ███╗   ██╗
 ██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔═══██╗████╗  ██║
 ██║     ███████║██████╔╝██████╔╝██║   ██║██╔██╗ ██║
@@ -23,6 +23,13 @@ YouTube · X/Twitter · Instagram · Threads · TikTok and 1,800+ other sites
 ---
 
 **Carbon** is a terminal-based video & audio downloader with a beautiful interactive UI. Paste any link from YouTube, TikTok, Instagram, X, SoundCloud, or 1800+ other sites, and Carbon walks you through picking exactly what you want — format, resolution, FPS, bitrate.
+
+<p align="center">
+  <img src="https://raw.githubusercontent.com/AlFarrizi-Studio/Carbon-DL/refs/heads/main/assets/1.png" width="100%" />
+  <br><br>
+  <img src="https://raw.githubusercontent.com/AlFarrizi-Studio/Carbon-DL/refs/heads/main/assets/2.png" width="100%" />
+</p>
+
 
 ## ✨ Features
 
@@ -135,7 +142,7 @@ Downloads are saved to your `~/Downloads` folder.
 ## 🧰 How it works
 
 - [yt-dlp](https://github.com/yt-dlp/yt-dlp) does the heavy lifting (extraction + download). Carbon auto-downloads the binary on first run if it's not on your PATH.
-- [ffmpeg](https://ffmpeg.org) merges video+audio streams and converts formats. Carbon uses your system ffmpeg or falls back to `ffmpeg-static`.
+- [ffmpeg](https://ffmpeg.org) merges video+audio streams and converts formats. Carbon uses your system ffmpeg, or auto-downloads a static build on first run if none is found.
 - UI is built with [Ink](https://github.com/vadimdemedes/ink) (React for CLIs).
 
 ## 🛠️ Development
