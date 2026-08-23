@@ -96537,17 +96537,29 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
   const tmpOut = filepath + ".tmp" + ext;
   try {
     let coverData = artwork;
+    let isJpeg = false;
     const sharpFn = await loadSharp();
     if (sharpFn) {
       try {
         coverData = await sharpFn(artwork).jpeg({ quality: 90 }).toBuffer();
+        isJpeg = true;
       } catch {
       }
     }
+    if (!isJpeg) {
+      try {
+        const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
+        const image3 = await Jimp2.read(artwork);
+        coverData = await image3.getBuffer("image/jpeg");
+        isJpeg = true;
+      } catch {
+      }
+    }
+    debugLog3(`embedSquareCover: cover format=${isJpeg ? "jpeg" : "original"} (${coverData.length} bytes)`);
     await fs7.writeFile(coverPath, coverData);
     const ffmpegBin = ffmpegLocation ? path5.join(ffmpegLocation, process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg") : "ffmpeg";
     debugLog3(`embedSquareCover: running ffmpeg (${ffmpegBin}) on ${filepath}`);
-    const coverCodec = coverPath.endsWith(".jpg") || coverPath.endsWith(".jpeg") ? "mjpeg" : "png";
+    const coverCodec = isJpeg ? "mjpeg" : "png";
     const ffmpegArgs = [
       "-y",
       "-i",
@@ -96819,15 +96831,16 @@ function MediaHeader({ info, platform: platform2, contentWidth, audioMode }) {
   const metaRows = 6;
   const coverCols = square ? Math.max(8, Math.round(metaRows * cell.height / cell.width)) : 24;
   const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta;
-  const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth;
+  const maxMeta = 42;
+  const metaWidth = showCover ? Math.min(maxMeta, Math.max(minMeta, contentWidth - coverCols - gap)) : Math.min(maxMeta, contentWidth);
   debugLog4(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`);
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", width: contentWidth, justifyContent: "center", children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "row", width: contentWidth, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", children: [
     showCover ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(CoverArt, { candidates, cols: coverCols, square }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: gap, flexShrink: 0 })
     ] }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", width: metaWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: metaWidth }) })
-  ] });
+  ] }) });
 }
 function ModernProgressBar({ percent, width = 40 }) {
   const theme = useTheme();

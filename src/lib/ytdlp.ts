@@ -1049,15 +1049,27 @@ export async function embedSquareCover(
   const tmpOut = filepath + '.tmp' + ext
 
   try {
-    // Convert PNG artwork to JPEG for maximum container compatibility.
+    // Convert artwork to JPEG for maximum container compatibility.
     // MP3 (ID3v2), M4A (MP4), FLAC, and OGG all handle JPEG covers well.
+    // Try sharp first, fall back to jimp (both may produce PNG from cropSquare).
     let coverData = artwork
+    let isJpeg = false
     const sharpFn = await loadSharp()
     if (sharpFn) {
       try {
         coverData = await sharpFn(artwork).jpeg({quality: 90}).toBuffer()
-      } catch { /* keep original PNG */ }
+        isJpeg = true
+      } catch { /* try jimp below */ }
     }
+    if (!isJpeg) {
+      try {
+        const {Jimp} = await import('jimp')
+        const image = await Jimp.read(artwork)
+        coverData = await image.getBuffer('image/jpeg')
+        isJpeg = true
+      } catch { /* keep original format */ }
+    }
+    debugLog(`embedSquareCover: cover format=${isJpeg ? 'jpeg' : 'original'} (${coverData.length} bytes)`)
     await fs.writeFile(coverPath, coverData)
 
     const ffmpegBin = ffmpegLocation
@@ -1066,8 +1078,8 @@ export async function embedSquareCover(
 
     debugLog(`embedSquareCover: running ffmpeg (${ffmpegBin}) on ${filepath}`)
 
-    // Build codec args based on container format.
-    const coverCodec = coverPath.endsWith('.jpg') || coverPath.endsWith('.jpeg') ? 'mjpeg' : 'png'
+    // Build codec args based on ACTUAL image format (not file extension).
+    const coverCodec = isJpeg ? 'mjpeg' : 'png'
     const ffmpegArgs = [
       '-y',
       '-i', filepath,

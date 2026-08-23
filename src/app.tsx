@@ -215,19 +215,29 @@ function MediaHeader({info, platform, contentWidth, audioMode}: {info: VideoInfo
     ? Math.max(8, Math.round((metaRows * cell.height) / cell.width))
     : 24
   const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta
-  const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth
+  // Cap metadata width so the cover+metadata group stays compact and
+  // justifyContent="center" can visually center it. Without the cap the
+  // metadata box fills all remaining space, pushing cover and text apart.
+  const maxMeta = 42
+  const metaWidth = showCover
+    ? Math.min(maxMeta, Math.max(minMeta, contentWidth - coverCols - gap))
+    : Math.min(maxMeta, contentWidth)
   debugLog(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`)
 
+  // Inner row auto-sizes to cover+metadata so the outer justifyContent="center"
+  // can actually center the group (a full-width child would defeat centering).
   return (
     <Box flexDirection="row" width={contentWidth} justifyContent="center">
-      {showCover ? (
-        <>
-          <CoverArt candidates={candidates} cols={coverCols} square={square} />
-          <Box width={gap} flexShrink={0} />
-        </>
-      ) : null}
-      <Box flexDirection="column" width={metaWidth}>
-        <MetadataBlock info={info} platform={platform} maxWidth={metaWidth} />
+      <Box flexDirection="row">
+        {showCover ? (
+          <>
+            <CoverArt candidates={candidates} cols={coverCols} square={square} />
+            <Box width={gap} flexShrink={0} />
+          </>
+        ) : null}
+        <Box flexDirection="column" width={metaWidth}>
+          <MetadataBlock info={info} platform={platform} maxWidth={metaWidth} />
+        </Box>
       </Box>
     </Box>
   )
