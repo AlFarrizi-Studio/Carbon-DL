@@ -39117,14 +39117,14 @@ var init_channel = __esm({
 });
 
 // node_modules/sharp/dist/output.mjs
-import path3 from "path";
+import path2 from "path";
 function toFile(fileOut, callback) {
   let err;
   if (!is_default.string(fileOut)) {
     err = new Error("Missing output file path");
-  } else if (is_default.string(this.options.input.file) && path3.resolve(this.options.input.file) === path3.resolve(fileOut)) {
+  } else if (is_default.string(this.options.input.file) && path2.resolve(this.options.input.file) === path2.resolve(fileOut)) {
     err = new Error("Cannot use same file for input and output");
-  } else if (jp2Regex.test(path3.extname(fileOut)) && !this.constructor.format.jp2.output.file) {
+  } else if (jp2Regex.test(path2.extname(fileOut)) && !this.constructor.format.jp2.output.file) {
     err = errJp2Save();
   }
   if (err) {
@@ -64219,14 +64219,14 @@ var init_await_to_js_es5 = __esm({
 });
 
 // node_modules/@jimp/file-ops/dist/esm/index.js
-import { promises as fs5 } from "fs";
+import { promises as fs4 } from "fs";
 import { existsSync as existsSync2 } from "fs";
 var readFile, writeFile;
 var init_esm13 = __esm({
   "node_modules/@jimp/file-ops/dist/esm/index.js"() {
     "use strict";
-    readFile = fs5.readFile;
-    writeFile = fs5.writeFile;
+    readFile = fs4.readFile;
+    writeFile = fs4.writeFile;
   }
 });
 
@@ -70846,8 +70846,8 @@ __export(file_type_exports, {
   supportedMimeTypes: () => supportedMimeTypes
 });
 import { ReadableStream as WebReadableStream } from "stream/web";
-import { pipeline as pipeline2, PassThrough as PassThrough2, Readable as Readable2 } from "stream";
-import fs6 from "fs/promises";
+import { pipeline, PassThrough as PassThrough2, Readable } from "stream";
+import fs5 from "fs/promises";
 import { constants as fileSystemConstants } from "fs";
 function isTokenizerStreamBoundsError(error) {
   if (!(error instanceof RangeError) || error.message !== "offset is out of bounds" || typeof error.stack !== "string") {
@@ -70883,14 +70883,14 @@ var init_file_type = __esm({
           }
           throw error;
         } finally {
-          if (stream2 instanceof Readable2 && !stream2.destroyed) {
+          if (stream2 instanceof Readable && !stream2.destroyed) {
             stream2.destroy();
           }
         }
       }
       async fromFile(path9) {
         this.options.signal?.throwIfAborted();
-        const fileHandle = await fs6.open(path9, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
+        const fileHandle = await fs5.open(path9, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
         const fileStat = await fileHandle.stat();
         if (!fileStat.isFile()) {
           await fileHandle.close();
@@ -70906,7 +70906,7 @@ var init_file_type = __esm({
         return super.fromTokenizer(tokenizer);
       }
       async toDetectionStream(readableStream, options = {}) {
-        if (!(readableStream instanceof Readable2)) {
+        if (!(readableStream instanceof Readable)) {
           return super.toDetectionStream(readableStream, options);
         }
         const { sampleSize = reasonableDetectionSizeInBytes } = options;
@@ -70941,7 +70941,7 @@ var init_file_type = __esm({
             (async () => {
               try {
                 const pass = new PassThrough2();
-                const outputStream = pipeline2 ? pipeline2(readableStream, pass, () => {
+                const outputStream = pipeline ? pipeline(readableStream, pass, () => {
                 }) : readableStream.pipe(pass);
                 const chunk = readableStream.read(normalizedSampleSize) ?? readableStream.read() ?? new Uint8Array(0);
                 try {
@@ -82730,7 +82730,7 @@ var init_simpleXmlToJson_min = __esm({
 });
 
 // node_modules/@jimp/plugin-print/dist/esm/load-bitmap-font.js
-import path4 from "path";
+import path3 from "path";
 function isBinary(buf) {
   if (typeof buf === "string") {
     return buf.substring(0, 3) === "BMF";
@@ -82821,7 +82821,7 @@ async function processBitmapFont(file, font) {
     ...font,
     chars,
     kernings,
-    pages: await Promise.all(font.pages.map(async (page) => CharacterJimp.read(path4.join(path4.dirname(file), page))))
+    pages: await Promise.all(font.pages.map(async (page) => CharacterJimp.read(path3.join(path3.dirname(file), page))))
   };
 }
 var import_parse_bmfont_ascii, import_parse_bmfont_xml, import_parse_bmfont_binary, convertXML, isWebWorker2, CharacterJimp, HEADER;
@@ -95250,11 +95250,11 @@ async function checkForUpdate(signal) {
 // src/lib/ytdlp.ts
 import { spawn } from "child_process";
 import { createWriteStream } from "fs";
-import fs4 from "fs/promises";
-import os4 from "os";
-import path2 from "path";
-import { Readable } from "stream";
-import { pipeline } from "stream/promises";
+import fs7 from "fs/promises";
+import os5 from "os";
+import path5 from "path";
+import { Readable as Readable2 } from "stream";
+import { pipeline as pipeline2 } from "stream/promises";
 
 // src/lib/ytmusic.ts
 var YTMUSIC_SEARCH_URL = "https://music.youtube.com/youtubei/v1/search?key=AIzaSyC9XL3ZjWddXya6X74dJoCTL-WEYFDNX30&prettyPrint=false";
@@ -95396,8 +95396,498 @@ function ytmTrackUrl(track) {
   return `https://www.youtube.com/watch?v=${track.videoId}`;
 }
 
+// src/lib/thumbnail.ts
+import fs6 from "fs";
+import path4 from "path";
+import os4 from "os";
+
+// src/lib/image-protocol.ts
+var cachedProtocol;
+var cellPixelSize;
+var protocolSource;
+var DEBUG = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+function debugLog(msg) {
+  if (DEBUG) process.stderr.write(`[image] ${msg}
+`);
+}
+async function queryTerminal(timeoutMs = 350) {
+  if (!process.stdout.isTTY || !process.stdin.isTTY) {
+    debugLog("queryTerminal: skipped (not a TTY)");
+    return {};
+  }
+  debugLog(`queryTerminal: TERM=${process.env.TERM ?? "(unset)"} TERM_PROGRAM=${process.env.TERM_PROGRAM ?? "(unset)"} LC_TERMINAL=${process.env.LC_TERMINAL ?? "(unset)"} KITTY_WINDOW_ID=${process.env.KITTY_WINDOW_ID ?? "(unset)"}`);
+  const kittyQuery = "\x1B_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA\x1B\\";
+  const cellQuery = "\x1B[16t";
+  const da1Query = "\x1B[c";
+  return new Promise((resolve) => {
+    let resolved = false;
+    let buffer2 = "";
+    let sawKittyReply = false;
+    let sawDa1Reply = false;
+    const caps = {};
+    const cleanup = () => {
+      process.stdin.removeListener("data", onData);
+      process.stdin.pause();
+      if (process.stdin.setRawMode) {
+        try {
+          process.stdin.setRawMode(false);
+        } catch {
+        }
+      }
+    };
+    const finish = () => {
+      if (resolved) return;
+      resolved = true;
+      clearTimeout(timer);
+      cleanup();
+      debugLog(`queryTerminal result: protocol=${caps.protocol ?? "(none)"} cell=${caps.cellPixelSize ? `${caps.cellPixelSize.width}x${caps.cellPixelSize.height}` : "(unknown)"}`);
+      resolve(caps);
+    };
+    const onData = (chunk) => {
+      buffer2 += chunk.toString();
+      if (!sawKittyReply && buffer2.includes("\x1B_Gi=31;")) {
+        sawKittyReply = true;
+        if (buffer2.includes("\x1B_Gi=31;OK")) caps.protocol = "kitty";
+      }
+      const cellMatch = /\x1b\[6;(\d+);(\d+)t/.exec(buffer2);
+      if (cellMatch && !caps.cellPixelSize) {
+        const height = Number.parseInt(cellMatch[1], 10);
+        const width = Number.parseInt(cellMatch[2], 10);
+        if (width > 0 && height > 0) caps.cellPixelSize = { width, height };
+      }
+      if (!sawDa1Reply) {
+        const da1Match = /\x1b\[\?([\d;]+)c/.exec(buffer2);
+        if (da1Match) {
+          sawDa1Reply = true;
+          const params = da1Match[1].split(";").map((p2) => Number.parseInt(p2, 10));
+          if (params.includes(4) && caps.protocol !== "kitty") caps.protocol = "sixel";
+        }
+      }
+      if (sawKittyReply && sawDa1Reply && caps.cellPixelSize) finish();
+    };
+    const timer = setTimeout(finish, timeoutMs);
+    try {
+      if (process.stdin.setRawMode) process.stdin.setRawMode(true);
+      process.stdin.resume();
+      process.stdin.on("data", onData);
+      process.stdout.write(kittyQuery + cellQuery + da1Query);
+    } catch {
+      clearTimeout(timer);
+      cleanup();
+      resolve(caps);
+    }
+  });
+}
+function setProtocol(protocol) {
+  cachedProtocol = protocol;
+  protocolSource = "queryTerminal";
+  debugLog(`setProtocol: ${protocol} (from terminal query)`);
+}
+function setCellPixelSize(size) {
+  cellPixelSize = size;
+}
+function getCellPixelSize() {
+  return cellPixelSize ?? { width: 10, height: 20 };
+}
+function detectProtocol() {
+  if (cachedProtocol) {
+    debugLog(`detectProtocol: cached=${cachedProtocol} (source: ${protocolSource ?? "env"})`);
+    return cachedProtocol;
+  }
+  const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase();
+  const lcTerminal = (process.env.LC_TERMINAL ?? "").toLowerCase();
+  const term = (process.env.TERM ?? "").toLowerCase();
+  debugLog(`detectProtocol: env scan \u2014 TERM=${term || "(empty)"} TERM_PROGRAM=${termProgram || "(empty)"} LC_TERMINAL=${lcTerminal || "(empty)"} KITTY_WINDOW_ID=${process.env.KITTY_WINDOW_ID ?? "(unset)"}`);
+  if (termProgram === "kitty" || process.env.KITTY_WINDOW_ID !== void 0 || term.includes("kitty")) {
+    cachedProtocol = "kitty";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 kitty (env)");
+    return cachedProtocol;
+  }
+  if (termProgram === "iterm.app" || lcTerminal === "iterm2" || termProgram === "mintty") {
+    cachedProtocol = "iterm2";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 iterm2 (env)");
+    return cachedProtocol;
+  }
+  if (termProgram === "wezterm") {
+    cachedProtocol = "kitty";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 kitty (wezterm env)");
+    return cachedProtocol;
+  }
+  if (term.includes("sixel") || termProgram === "foot" || termProgram === "mlterm" || termProgram === "rlogin") {
+    cachedProtocol = "sixel";
+    protocolSource = "env";
+    debugLog("detectProtocol: \u2192 sixel (env)");
+    return cachedProtocol;
+  }
+  debugLog("detectProtocol: \u2192 halfblock (fallback, NOT cached)");
+  return "halfblock";
+}
+async function sixelSequence(rgba, width, height) {
+  try {
+    const sixelMod = await Promise.resolve().then(() => __toESM(require_lib(), 1));
+    const encode3 = sixelMod.sixelEncode;
+    const palette2 = Array.from(sixelMod.PALETTE_ANSI_256);
+    if (!encode3) return "";
+    return encode3(new Uint8Array(rgba), width, height, palette2);
+  } catch {
+    return "";
+  }
+}
+function iterm2Sequence(png3, widthCells) {
+  const b64 = png3.toString("base64");
+  return `\x1B]1337;File=inline=1;size=${png3.length};width=${widthCells};preserveAspectRatio=1:${b64}\x07`;
+}
+function kittyDeleteById(imageId) {
+  return `\x1B_Ga=d,d=i,i=${imageId}\x1B\\`;
+}
+var ROWCOL_DIACRITICS = [
+  773,
+  781,
+  782,
+  784,
+  786,
+  820,
+  821,
+  822,
+  823,
+  824,
+  861,
+  862,
+  863,
+  864,
+  865,
+  866,
+  867,
+  868,
+  869,
+  870,
+  871,
+  872,
+  873,
+  874,
+  875,
+  876,
+  877,
+  878,
+  879
+];
+function kittyTransmitQuiet(png3, imageId) {
+  const b64 = png3.toString("base64");
+  const CHUNK2 = 4096;
+  const parts = [];
+  for (let i2 = 0; i2 < b64.length; i2 += CHUNK2) {
+    const chunk = b64.slice(i2, i2 + CHUNK2);
+    const more = i2 + CHUNK2 < b64.length ? ",m=1" : ",m=0";
+    parts.push(
+      i2 === 0 ? `\x1B_Ga=t,f=100,i=${imageId},q=2${more};${chunk}\x1B\\` : `\x1B_G${more};${chunk}\x1B\\`
+    );
+  }
+  return parts.join("");
+}
+function kittyVirtualPlacement(imageId, cols, rows) {
+  return `\x1B_Ga=p,U=1,i=${imageId},c=${cols},r=${rows},q=2\x1B\\`;
+}
+function kittyPlaceholderGrid(imageId, cols, rows) {
+  const d = (n2) => String.fromCodePoint(ROWCOL_DIACRITICS[Math.max(0, Math.min(n2, ROWCOL_DIACRITICS.length - 1))]);
+  const lines = [];
+  for (let r2 = 0; r2 < rows; r2++) {
+    let line = `\x1B[38;5;${imageId}m`;
+    for (let c3 = 0; c3 < cols; c3++) line += `\u{10EEEE}${d(r2)}${d(c3)}`;
+    line += "\x1B[39m";
+    lines.push(line);
+  }
+  return lines.join("\n");
+}
+var cprAttached = false;
+var cprSubscribers = /* @__PURE__ */ new Set();
+function attachCprListener() {
+  if (cprAttached) return;
+  cprAttached = true;
+  process.stdin.on("data", (chunk) => {
+    const match = /\x1b\[(\d+);(\d+)R/.exec(chunk.toString());
+    if (!match) return;
+    const pos = { row: Number.parseInt(match[1], 10), col: Number.parseInt(match[2], 10) };
+    for (const fn2 of cprSubscribers) fn2(pos);
+  });
+}
+function subscribeCpr(fn2) {
+  cprSubscribers.add(fn2);
+  return () => {
+    cprSubscribers.delete(fn2);
+  };
+}
+var CPR_QUERY = "\x1B[6n";
+
+// src/lib/thumbnail.ts
+var DEBUG2 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+var DEBUG_LOG = path4.join(os4.tmpdir(), "carbon-debug.log");
+function debugLog2(msg) {
+  if (!DEBUG2) return;
+  const line = `[thumb] ${(/* @__PURE__ */ new Date()).toISOString()} ${msg}
+`;
+  process.stderr.write(line);
+  try {
+    fs6.appendFileSync(DEBUG_LOG, line);
+  } catch {
+  }
+}
+var MAX_NATIVE_WIDTH = 1920;
+var MAX_NATIVE_HEIGHT = 1080;
+var MAX_CACHED = 12;
+var thumbCache = /* @__PURE__ */ new Map();
+var sharpPromise;
+function loadSharp() {
+  if (!sharpPromise) {
+    sharpPromise = Promise.resolve().then(() => (init_dist(), dist_exports)).then((mod) => mod.default ?? mod).catch(() => {
+      debugLog2("sharp unavailable \u2014 using pure-JS (jimp) backend");
+      return void 0;
+    });
+  }
+  return sharpPromise;
+}
+async function fetchThumbnail(url, cols, rows, protocol, signal, square = false) {
+  const key = `${url}|${cols}|${rows}|${protocol}|sq=${square ? 1 : 0}`;
+  const cached = thumbCache.get(key);
+  if (cached) return cached;
+  debugLog2(`fetchThumbnail: url=${url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`);
+  try {
+    const response = await fetch(url, { signal });
+    if (!response.ok || !response.body) {
+      debugLog2(`fetchThumbnail: fetch failed \u2014 status=${response.status}`);
+      return void 0;
+    }
+    let buffer2 = Buffer.from(await response.arrayBuffer());
+    if (buffer2.length === 0) {
+      debugLog2("fetchThumbnail: empty response body");
+      return void 0;
+    }
+    debugLog2(`fetchThumbnail: downloaded ${buffer2.length} bytes`);
+    if (square) {
+      buffer2 = await cropSquare(buffer2);
+      debugLog2(`fetchThumbnail: cropped to square (${buffer2.length} bytes)`);
+    }
+    const grid = await buildGrid(buffer2, cols, rows);
+    debugLog2(`fetchThumbnail: grid built ${grid.length} rows`);
+    let png3;
+    let rgba;
+    if (protocol === "kitty" || protocol === "iterm2") {
+      png3 = await buildHighResPng(buffer2);
+      debugLog2(`fetchThumbnail: png=${png3 ? `${png3.length} bytes` : "FAILED"}`);
+    } else if (protocol === "sixel") {
+      rgba = await buildSixelRgba(buffer2, cols, rows);
+      debugLog2(`fetchThumbnail: rgba=${rgba ? `${rgba.width}x${rgba.height}` : "FAILED"}`);
+    }
+    const result = { grid, png: png3, rgba };
+    thumbCache.set(key, result);
+    if (thumbCache.size > MAX_CACHED) {
+      const oldest = thumbCache.keys().next().value;
+      if (oldest !== void 0) thumbCache.delete(oldest);
+    }
+    return result;
+  } catch (err) {
+    debugLog2(`fetchThumbnail: ERROR \u2014 ${err instanceof Error ? err.message : String(err)}`);
+    return void 0;
+  }
+}
+async function cropSquare(buffer2) {
+  const sharpFn = await loadSharp();
+  if (sharpFn) {
+    try {
+      const meta = await sharpFn(buffer2).metadata();
+      const w = meta.width ?? 0;
+      const h = meta.height ?? 0;
+      if (w > 0 && h > 0 && w !== h) {
+        const side = Math.min(w, h);
+        const left = Math.floor((w - side) / 2);
+        const top = Math.floor((h - side) / 2);
+        return await sharpFn(buffer2).extract({ left, top, width: side, height: side }).toBuffer();
+      }
+      return buffer2;
+    } catch (err) {
+      debugLog2(`cropSquare: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
+    }
+  }
+  try {
+    const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
+    const image3 = await Jimp2.read(buffer2);
+    const w = image3.width;
+    const h = image3.height;
+    if (w > 0 && h > 0 && w !== h) {
+      const side = Math.min(w, h);
+      const x2 = Math.floor((w - side) / 2);
+      const y2 = Math.floor((h - side) / 2);
+      image3.crop({ x: x2, y: y2, w: side, h: side });
+      return await image3.getBuffer("image/png");
+    }
+    return buffer2;
+  } catch (err) {
+    debugLog2(`cropSquare: jimp failed (${err instanceof Error ? err.message : String(err)})`);
+    return buffer2;
+  }
+}
+async function downloadArtwork(candidates, opts = {}) {
+  for (const candidate of candidates) {
+    if (opts.signal?.aborted) return void 0;
+    try {
+      const response = await fetch(candidate.url, { signal: opts.signal });
+      if (!response.ok || !response.body) continue;
+      let buffer2 = Buffer.from(await response.arrayBuffer());
+      if (buffer2.length === 0) continue;
+      if (opts.square) buffer2 = await cropSquare(buffer2);
+      return buffer2;
+    } catch {
+      continue;
+    }
+  }
+  return void 0;
+}
+async function buildGrid(buffer2, cols, rows) {
+  const sharpFn = await loadSharp();
+  if (sharpFn) {
+    try {
+      return await buildGridSharp(sharpFn, buffer2, cols, rows);
+    } catch (err) {
+      debugLog2(`buildGrid: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
+    }
+  }
+  return buildGridJimp(buffer2, cols, rows);
+}
+async function buildGridSharp(sharpFn, buffer2, cols, rows) {
+  const width = Math.max(1, cols);
+  const height = Math.max(2, rows * 2);
+  const { data, info } = await sharpFn(buffer2).resize(width, height, { fit: "cover", kernel: "lanczos3" }).sharpen({ sigma: 0.8 }).normalise().removeAlpha().raw().toBuffer({ resolveWithObject: true });
+  const channels = info.channels;
+  const grid = [];
+  for (let row = 0; row < rows; row++) {
+    const line = [];
+    for (let col = 0; col < cols; col++) {
+      const topIdx = (row * 2 * info.width + col) * channels;
+      const botIdx = ((row * 2 + 1) * info.width + col) * channels;
+      line.push({ top: toHex2(data, topIdx), bottom: toHex2(data, botIdx) });
+    }
+    grid.push(line);
+  }
+  return grid;
+}
+async function buildGridJimp(buffer2, cols, rows) {
+  const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
+  const width = Math.max(1, cols);
+  const height = Math.max(2, rows * 2);
+  const image3 = await Jimp2.read(buffer2);
+  image3.cover({ w: width, h: height });
+  const grid = [];
+  for (let row = 0; row < rows; row++) {
+    const line = [];
+    for (let col = 0; col < cols; col++) {
+      const topC = image3.getPixelColor(col, row * 2);
+      const botC = image3.getPixelColor(col, row * 2 + 1);
+      line.push({ top: intToHex(topC), bottom: intToHex(botC) });
+    }
+    grid.push(line);
+  }
+  return grid;
+}
+async function buildHighResPng(buffer2) {
+  const sharpFn = await loadSharp();
+  if (sharpFn) {
+    try {
+      return await buildHighResPngSharp(sharpFn, buffer2);
+    } catch (err) {
+      debugLog2(`buildHighResPng: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
+    }
+  }
+  return buildHighResPngJimp(buffer2);
+}
+async function buildHighResPngSharp(sharpFn, buffer2) {
+  let pipeline3 = sharpFn(buffer2);
+  const meta = await pipeline3.clone().metadata();
+  const srcW = meta.width ?? 0;
+  const srcH = meta.height ?? 0;
+  if (srcW > MAX_NATIVE_WIDTH || srcH > MAX_NATIVE_HEIGHT) {
+    pipeline3 = pipeline3.resize(MAX_NATIVE_WIDTH, MAX_NATIVE_HEIGHT, {
+      fit: "inside",
+      withoutEnlargement: true,
+      kernel: "lanczos3"
+    });
+  }
+  return await pipeline3.png({ quality: 95 }).toBuffer();
+}
+async function buildHighResPngJimp(buffer2) {
+  try {
+    const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
+    const image3 = await Jimp2.read(buffer2);
+    if (image3.width > MAX_NATIVE_WIDTH || image3.height > MAX_NATIVE_HEIGHT) {
+      image3.scaleToFit({ w: MAX_NATIVE_WIDTH, h: MAX_NATIVE_HEIGHT });
+    }
+    return await image3.getBuffer("image/png");
+  } catch (err) {
+    debugLog2(`buildHighResPngJimp: ERROR \u2014 ${err instanceof Error ? err.message : String(err)}`);
+    return void 0;
+  }
+}
+async function buildSixelRgba(buffer2, cols, rows) {
+  const sharpFn = await loadSharp();
+  if (sharpFn) {
+    try {
+      return await buildSixelRgbaSharp(sharpFn, buffer2, cols, rows);
+    } catch (err) {
+      debugLog2(`buildSixelRgba: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
+    }
+  }
+  return buildSixelRgbaJimp(buffer2, cols, rows);
+}
+async function buildSixelRgbaSharp(sharpFn, buffer2, cols, rows) {
+  const cell = getCellPixelSize();
+  const targetWidth = Math.max(64, cols * cell.width);
+  const targetHeight = Math.max(64, rows * cell.height);
+  const { data, info } = await sharpFn(buffer2).resize(targetWidth, targetHeight, { fit: "cover", kernel: "lanczos3" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
+  return { data, width: info.width, height: info.height };
+}
+async function buildSixelRgbaJimp(buffer2, cols, rows) {
+  try {
+    const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
+    const cell = getCellPixelSize();
+    const targetWidth = Math.max(64, cols * cell.width);
+    const targetHeight = Math.max(64, rows * cell.height);
+    const image3 = await Jimp2.read(buffer2);
+    image3.cover({ w: targetWidth, h: targetHeight });
+    const w = image3.width;
+    const h = image3.height;
+    const data = Buffer.alloc(w * h * 4);
+    for (let y2 = 0; y2 < h; y2++) {
+      for (let x2 = 0; x2 < w; x2++) {
+        const c3 = image3.getPixelColor(x2, y2);
+        const idx = (y2 * w + x2) * 4;
+        data[idx] = c3 >>> 24 & 255;
+        data[idx + 1] = c3 >>> 16 & 255;
+        data[idx + 2] = c3 >>> 8 & 255;
+        data[idx + 3] = c3 & 255;
+      }
+    }
+    return { data, width: w, height: h };
+  } catch (err) {
+    debugLog2(`buildSixelRgbaJimp: ERROR \u2014 ${err instanceof Error ? err.message : String(err)}`);
+    return void 0;
+  }
+}
+function toHex2(data, idx) {
+  const r2 = data[idx] ?? 0;
+  const g = data[idx + 1] ?? 0;
+  const b = data[idx + 2] ?? 0;
+  return `#${r2.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+function intToHex(c3) {
+  const r2 = c3 >>> 24 & 255;
+  const g = c3 >>> 16 & 255;
+  const b = c3 >>> 8 & 255;
+  return `#${r2.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
+}
+
 // src/lib/ytdlp.ts
-var CARBON_DIR = path2.join(os4.homedir(), ".carbon", "bin");
+var CARBON_DIR = path5.join(os5.homedir(), ".carbon", "bin");
 var RELEASE_BASE = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 function ytDlpAssetName() {
   if (process.platform === "win32") return "yt-dlp.exe";
@@ -95419,30 +95909,30 @@ function commandWorks(cmd, args2) {
 }
 async function ensureYtDlp(onStatus, signal) {
   if (await commandWorks("yt-dlp", ["--version"])) return "yt-dlp";
-  const local = path2.join(CARBON_DIR, process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp");
+  const local = path5.join(CARBON_DIR, process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp");
   if (await commandWorks(local, ["--version"])) return local;
   onStatus("first run: fetching yt-dlp\u2026");
-  await fs4.mkdir(CARBON_DIR, { recursive: true });
+  await fs7.mkdir(CARBON_DIR, { recursive: true });
   const url = `${RELEASE_BASE}/${ytDlpAssetName()}`;
   const response = await fetch(url, { signal });
   if (!response.ok || !response.body) {
     throw new Error(`Could not download yt-dlp (${response.status}). Check your connection and try again.`);
   }
   const tmp = `${local}.download`;
-  await pipeline(Readable.fromWeb(response.body), createWriteStream(tmp), { signal });
-  if (process.platform !== "win32") await fs4.chmod(tmp, 493);
-  await fs4.rename(tmp, local);
+  await pipeline2(Readable2.fromWeb(response.body), createWriteStream(tmp), { signal });
+  if (process.platform !== "win32") await fs7.chmod(tmp, 493);
+  await fs7.rename(tmp, local);
   return local;
 }
 async function ensureFfmpeg(onStatus, signal) {
   if (await commandWorks("ffmpeg", ["-version"])) return void 0;
   const ffmpegName = process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg";
   const ffprobeName = process.platform === "win32" ? "ffprobe.exe" : "ffprobe";
-  const localFfmpeg = path2.join(CARBON_DIR, ffmpegName);
-  const localFfprobe = path2.join(CARBON_DIR, ffprobeName);
+  const localFfmpeg = path5.join(CARBON_DIR, ffmpegName);
+  const localFfprobe = path5.join(CARBON_DIR, ffprobeName);
   if (await commandWorks(localFfmpeg, ["-version"])) return CARBON_DIR;
   onStatus?.("first run: fetching ffmpeg\u2026");
-  await fs4.mkdir(CARBON_DIR, { recursive: true });
+  await fs7.mkdir(CARBON_DIR, { recursive: true });
   const platform2 = process.platform;
   const arch = process.arch;
   let downloadUrl;
@@ -95467,8 +95957,8 @@ async function ensureFfmpeg(onStatus, signal) {
     if (!response.ok || !response.body) {
       throw new Error(`HTTP ${response.status}`);
     }
-    const archivePath = path2.join(CARBON_DIR, archiveType === "zip" ? "ffmpeg.zip" : "ffmpeg.tar.xz");
-    await pipeline(Readable.fromWeb(response.body), createWriteStream(archivePath), { signal });
+    const archivePath = path5.join(CARBON_DIR, archiveType === "zip" ? "ffmpeg.zip" : "ffmpeg.tar.xz");
+    await pipeline2(Readable2.fromWeb(response.body), createWriteStream(archivePath), { signal });
     if (archiveType === "zip") {
       if (platform2 === "win32") {
         await new Promise((resolve, reject) => {
@@ -95495,7 +95985,7 @@ async function ensureFfmpeg(onStatus, signal) {
       });
     }
     await moveExtractedBinaries(CARBON_DIR, localFfmpeg, localFfprobe);
-    await fs4.unlink(archivePath).catch(() => {
+    await fs7.unlink(archivePath).catch(() => {
     });
     if (await commandWorks(localFfmpeg, ["-version"])) return CARBON_DIR;
   } catch {
@@ -95507,9 +95997,9 @@ async function moveExtractedBinaries(searchDir, targetFfmpeg, targetFfprobe) {
   const ffprobeName = process.platform === "win32" ? "ffprobe.exe" : "ffprobe";
   async function findFile(dir, name) {
     try {
-      const entries = await fs4.readdir(dir, { withFileTypes: true });
+      const entries = await fs7.readdir(dir, { withFileTypes: true });
       for (const entry of entries) {
-        const fullPath = path2.join(dir, entry.name);
+        const fullPath = path5.join(dir, entry.name);
         if (entry.isDirectory()) {
           const found = await findFile(fullPath, name);
           if (found) return found;
@@ -95524,18 +96014,18 @@ async function moveExtractedBinaries(searchDir, targetFfmpeg, targetFfprobe) {
   const foundFfmpeg = await findFile(searchDir, ffmpegName);
   const foundFfprobe = await findFile(searchDir, ffprobeName);
   if (foundFfmpeg) {
-    await fs4.copyFile(foundFfmpeg, targetFfmpeg);
-    if (process.platform !== "win32") await fs4.chmod(targetFfmpeg, 493);
+    await fs7.copyFile(foundFfmpeg, targetFfmpeg);
+    if (process.platform !== "win32") await fs7.chmod(targetFfmpeg, 493);
   }
   if (foundFfprobe) {
-    await fs4.copyFile(foundFfprobe, targetFfprobe);
-    if (process.platform !== "win32") await fs4.chmod(targetFfprobe, 493);
+    await fs7.copyFile(foundFfprobe, targetFfprobe);
+    if (process.platform !== "win32") await fs7.chmod(targetFfprobe, 493);
   }
   try {
-    const entries = await fs4.readdir(searchDir, { withFileTypes: true });
+    const entries = await fs7.readdir(searchDir, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.isDirectory() && entry.name.startsWith("ffmpeg-")) {
-        await fs4.rm(path2.join(searchDir, entry.name), { recursive: true, force: true }).catch(() => {
+        await fs7.rm(path5.join(searchDir, entry.name), { recursive: true, force: true }).catch(() => {
         });
       }
     }
@@ -95551,21 +96041,21 @@ async function downloadMacOsFfmpeg(targetFfmpeg, targetFfprobe, signal) {
     try {
       const response = await fetch(url, { signal, redirect: "follow" });
       if (!response.ok || !response.body) continue;
-      const zipPath = path2.join(CARBON_DIR, `${name}.zip`);
-      await pipeline(Readable.fromWeb(response.body), createWriteStream(zipPath), { signal });
+      const zipPath = path5.join(CARBON_DIR, `${name}.zip`);
+      await pipeline2(Readable2.fromWeb(response.body), createWriteStream(zipPath), { signal });
       await new Promise((resolve, reject) => {
         const child = spawn("unzip", ["-o", zipPath, "-d", CARBON_DIR], { stdio: "ignore" });
         child.on("error", reject);
         child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`)));
       });
-      const extractedPath = path2.join(CARBON_DIR, name);
+      const extractedPath = path5.join(CARBON_DIR, name);
       if (extractedPath !== target) {
-        await fs4.rename(extractedPath, target).catch(() => {
+        await fs7.rename(extractedPath, target).catch(() => {
         });
       }
-      await fs4.chmod(target, 493).catch(() => {
+      await fs7.chmod(target, 493).catch(() => {
       });
-      await fs4.unlink(zipPath).catch(() => {
+      await fs7.unlink(zipPath).catch(() => {
       });
     } catch {
     }
@@ -95959,7 +96449,7 @@ async function download(opts, handlers, signal) {
     "--embed-metadata",
     "--embed-thumbnail",
     "-o",
-    path2.join(opts.outDir, "%(title).80s.%(ext)s")
+    path5.join(opts.outDir, "%(title).80s.%(ext)s")
   ];
   if (opts.ffmpegLocation) args2.push("--ffmpeg-location", opts.ffmpegLocation);
   return new Promise((resolve, reject) => {
@@ -96002,7 +96492,7 @@ async function download(opts, handlers, signal) {
           handlers.onProcessing();
         } else if (line.startsWith("[download] Destination: ")) {
           destinations.push(line.slice("[download] Destination: ".length));
-        } else if (path2.isAbsolute(line)) {
+        } else if (path5.isAbsolute(line)) {
           filepath = line;
         }
       }
@@ -96024,9 +96514,54 @@ async function download(opts, handlers, signal) {
     });
   });
 }
+async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
+  if (candidates.length === 0) return;
+  const artwork = await downloadArtwork(candidates, { square: true, signal });
+  if (!artwork || signal?.aborted) return;
+  const ext = path5.extname(filepath);
+  const coverPath = filepath + ".cover.png";
+  const tmpOut = filepath + ".tmp" + ext;
+  try {
+    await fs7.writeFile(coverPath, artwork);
+    const ffmpegBin = ffmpegLocation ? path5.join(ffmpegLocation, process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg") : "ffmpeg";
+    await new Promise((resolve, reject) => {
+      const child = spawn(ffmpegBin, [
+        "-y",
+        "-i",
+        filepath,
+        "-i",
+        coverPath,
+        "-map",
+        "0:a",
+        "-map",
+        "1:v",
+        "-c:a",
+        "copy",
+        "-c:v",
+        "png",
+        "-disposition:v:0",
+        "attached_pic",
+        "-metadata:s:v",
+        "title=Album cover",
+        "-metadata:s:v",
+        "comment=Cover (front)",
+        tmpOut
+      ], { signal, stdio: "ignore" });
+      child.on("error", reject);
+      child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}`)));
+    });
+    await fs7.rename(tmpOut, filepath);
+  } catch {
+    await fs7.rm(tmpOut, { force: true }).catch(() => {
+    });
+  } finally {
+    await fs7.rm(coverPath, { force: true }).catch(() => {
+    });
+  }
+}
 function removePartials(destinations) {
   return Promise.allSettled(
-    destinations.flatMap((dest) => [dest, `${dest}.part`, `${dest}.ytdl`]).map((file) => fs4.rm(file, { force: true }))
+    destinations.flatMap((dest) => [dest, `${dest}.part`, `${dest}.ytdl`]).map((file) => fs7.rm(file, { force: true }))
   );
 }
 function toNumber(value) {
@@ -96042,234 +96577,12 @@ function cleanYtDlpError(stderr) {
 
 // src/components/thumbnail.tsx
 var import_react39 = __toESM(require_react(), 1);
-
-// src/lib/image-protocol.ts
-var cachedProtocol;
-var cellPixelSize;
-var protocolSource;
-var DEBUG = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
-function debugLog(msg) {
-  if (DEBUG) process.stderr.write(`[image] ${msg}
-`);
-}
-async function queryTerminal(timeoutMs = 350) {
-  if (!process.stdout.isTTY || !process.stdin.isTTY) {
-    debugLog("queryTerminal: skipped (not a TTY)");
-    return {};
-  }
-  debugLog(`queryTerminal: TERM=${process.env.TERM ?? "(unset)"} TERM_PROGRAM=${process.env.TERM_PROGRAM ?? "(unset)"} LC_TERMINAL=${process.env.LC_TERMINAL ?? "(unset)"} KITTY_WINDOW_ID=${process.env.KITTY_WINDOW_ID ?? "(unset)"}`);
-  const kittyQuery = "\x1B_Gi=31,s=1,v=1,a=q,t=d,f=24;AAAA\x1B\\";
-  const cellQuery = "\x1B[16t";
-  const da1Query = "\x1B[c";
-  return new Promise((resolve) => {
-    let resolved = false;
-    let buffer2 = "";
-    let sawKittyReply = false;
-    let sawDa1Reply = false;
-    const caps = {};
-    const cleanup = () => {
-      process.stdin.removeListener("data", onData);
-      process.stdin.pause();
-      if (process.stdin.setRawMode) {
-        try {
-          process.stdin.setRawMode(false);
-        } catch {
-        }
-      }
-    };
-    const finish = () => {
-      if (resolved) return;
-      resolved = true;
-      clearTimeout(timer);
-      cleanup();
-      debugLog(`queryTerminal result: protocol=${caps.protocol ?? "(none)"} cell=${caps.cellPixelSize ? `${caps.cellPixelSize.width}x${caps.cellPixelSize.height}` : "(unknown)"}`);
-      resolve(caps);
-    };
-    const onData = (chunk) => {
-      buffer2 += chunk.toString();
-      if (!sawKittyReply && buffer2.includes("\x1B_Gi=31;")) {
-        sawKittyReply = true;
-        if (buffer2.includes("\x1B_Gi=31;OK")) caps.protocol = "kitty";
-      }
-      const cellMatch = /\x1b\[6;(\d+);(\d+)t/.exec(buffer2);
-      if (cellMatch && !caps.cellPixelSize) {
-        const height = Number.parseInt(cellMatch[1], 10);
-        const width = Number.parseInt(cellMatch[2], 10);
-        if (width > 0 && height > 0) caps.cellPixelSize = { width, height };
-      }
-      if (!sawDa1Reply) {
-        const da1Match = /\x1b\[\?([\d;]+)c/.exec(buffer2);
-        if (da1Match) {
-          sawDa1Reply = true;
-          const params = da1Match[1].split(";").map((p2) => Number.parseInt(p2, 10));
-          if (params.includes(4) && caps.protocol !== "kitty") caps.protocol = "sixel";
-        }
-      }
-      if (sawKittyReply && sawDa1Reply && caps.cellPixelSize) finish();
-    };
-    const timer = setTimeout(finish, timeoutMs);
-    try {
-      if (process.stdin.setRawMode) process.stdin.setRawMode(true);
-      process.stdin.resume();
-      process.stdin.on("data", onData);
-      process.stdout.write(kittyQuery + cellQuery + da1Query);
-    } catch {
-      clearTimeout(timer);
-      cleanup();
-      resolve(caps);
-    }
-  });
-}
-function setProtocol(protocol) {
-  cachedProtocol = protocol;
-  protocolSource = "queryTerminal";
-  debugLog(`setProtocol: ${protocol} (from terminal query)`);
-}
-function setCellPixelSize(size) {
-  cellPixelSize = size;
-}
-function getCellPixelSize() {
-  return cellPixelSize ?? { width: 10, height: 20 };
-}
-function detectProtocol() {
-  if (cachedProtocol) {
-    debugLog(`detectProtocol: cached=${cachedProtocol} (source: ${protocolSource ?? "env"})`);
-    return cachedProtocol;
-  }
-  const termProgram = (process.env.TERM_PROGRAM ?? "").toLowerCase();
-  const lcTerminal = (process.env.LC_TERMINAL ?? "").toLowerCase();
-  const term = (process.env.TERM ?? "").toLowerCase();
-  debugLog(`detectProtocol: env scan \u2014 TERM=${term || "(empty)"} TERM_PROGRAM=${termProgram || "(empty)"} LC_TERMINAL=${lcTerminal || "(empty)"} KITTY_WINDOW_ID=${process.env.KITTY_WINDOW_ID ?? "(unset)"}`);
-  if (termProgram === "kitty" || process.env.KITTY_WINDOW_ID !== void 0 || term.includes("kitty")) {
-    cachedProtocol = "kitty";
-    protocolSource = "env";
-    debugLog("detectProtocol: \u2192 kitty (env)");
-    return cachedProtocol;
-  }
-  if (termProgram === "iterm.app" || lcTerminal === "iterm2" || termProgram === "mintty") {
-    cachedProtocol = "iterm2";
-    protocolSource = "env";
-    debugLog("detectProtocol: \u2192 iterm2 (env)");
-    return cachedProtocol;
-  }
-  if (termProgram === "wezterm") {
-    cachedProtocol = "kitty";
-    protocolSource = "env";
-    debugLog("detectProtocol: \u2192 kitty (wezterm env)");
-    return cachedProtocol;
-  }
-  if (term.includes("sixel") || termProgram === "foot" || termProgram === "mlterm" || termProgram === "rlogin") {
-    cachedProtocol = "sixel";
-    protocolSource = "env";
-    debugLog("detectProtocol: \u2192 sixel (env)");
-    return cachedProtocol;
-  }
-  debugLog("detectProtocol: \u2192 halfblock (fallback, NOT cached)");
-  return "halfblock";
-}
-async function sixelSequence(rgba, width, height) {
-  try {
-    const sixelMod = await Promise.resolve().then(() => __toESM(require_lib(), 1));
-    const encode3 = sixelMod.sixelEncode;
-    const palette2 = Array.from(sixelMod.PALETTE_ANSI_256);
-    if (!encode3) return "";
-    return encode3(new Uint8Array(rgba), width, height, palette2);
-  } catch {
-    return "";
-  }
-}
-function iterm2Sequence(png3, widthCells) {
-  const b64 = png3.toString("base64");
-  return `\x1B]1337;File=inline=1;size=${png3.length};width=${widthCells};preserveAspectRatio=1:${b64}\x07`;
-}
-function kittyDeleteById(imageId) {
-  return `\x1B_Ga=d,d=i,i=${imageId}\x1B\\`;
-}
-var ROWCOL_DIACRITICS = [
-  773,
-  781,
-  782,
-  784,
-  786,
-  820,
-  821,
-  822,
-  823,
-  824,
-  861,
-  862,
-  863,
-  864,
-  865,
-  866,
-  867,
-  868,
-  869,
-  870,
-  871,
-  872,
-  873,
-  874,
-  875,
-  876,
-  877,
-  878,
-  879
-];
-function kittyTransmitQuiet(png3, imageId) {
-  const b64 = png3.toString("base64");
-  const CHUNK2 = 4096;
-  const parts = [];
-  for (let i2 = 0; i2 < b64.length; i2 += CHUNK2) {
-    const chunk = b64.slice(i2, i2 + CHUNK2);
-    const more = i2 + CHUNK2 < b64.length ? ",m=1" : ",m=0";
-    parts.push(
-      i2 === 0 ? `\x1B_Ga=t,f=100,i=${imageId},q=2${more};${chunk}\x1B\\` : `\x1B_G${more};${chunk}\x1B\\`
-    );
-  }
-  return parts.join("");
-}
-function kittyVirtualPlacement(imageId, cols, rows) {
-  return `\x1B_Ga=p,U=1,i=${imageId},c=${cols},r=${rows},q=2\x1B\\`;
-}
-function kittyPlaceholderGrid(imageId, cols, rows) {
-  const d = (n2) => String.fromCodePoint(ROWCOL_DIACRITICS[Math.max(0, Math.min(n2, ROWCOL_DIACRITICS.length - 1))]);
-  const lines = [];
-  for (let r2 = 0; r2 < rows; r2++) {
-    let line = `\x1B[38;5;${imageId}m`;
-    for (let c3 = 0; c3 < cols; c3++) line += `\u{10EEEE}${d(r2)}${d(c3)}`;
-    line += "\x1B[39m";
-    lines.push(line);
-  }
-  return lines.join("\n");
-}
-var cprAttached = false;
-var cprSubscribers = /* @__PURE__ */ new Set();
-function attachCprListener() {
-  if (cprAttached) return;
-  cprAttached = true;
-  process.stdin.on("data", (chunk) => {
-    const match = /\x1b\[(\d+);(\d+)R/.exec(chunk.toString());
-    if (!match) return;
-    const pos = { row: Number.parseInt(match[1], 10), col: Number.parseInt(match[2], 10) };
-    for (const fn2 of cprSubscribers) fn2(pos);
-  });
-}
-function subscribeCpr(fn2) {
-  cprSubscribers.add(fn2);
-  return () => {
-    cprSubscribers.delete(fn2);
-  };
-}
-var CPR_QUERY = "\x1B[6n";
-
-// src/components/thumbnail.tsx
 var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
 var nextImageId = 0;
-var DEBUG2 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+var DEBUG3 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
 var loggedRenderer;
 function logRenderer(protocol, hasPng, hasRgba, hasGrid) {
-  if (!DEBUG2) return;
+  if (!DEBUG3) return;
   const key = `${protocol}|png=${hasPng}|rgba=${hasRgba}|grid=${hasGrid}`;
   if (loggedRenderer === key) return;
   loggedRenderer = key;
@@ -96364,258 +96677,6 @@ function Thumbnail({ grid, png: png3, rgba, cols, rows }) {
     row.map((cell, j) => /* @__PURE__ */ (0, import_jsx_runtime5.jsx)(Text, { color: cell.top, backgroundColor: cell.bottom, children: "\u2580" }, j)),
     i2 < grid.length - 1 ? "\n" : ""
   ] }, i2)) });
-}
-
-// src/lib/thumbnail.ts
-import fs7 from "fs";
-import path5 from "path";
-import os5 from "os";
-var DEBUG3 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
-var DEBUG_LOG = path5.join(os5.tmpdir(), "carbon-debug.log");
-function debugLog2(msg) {
-  if (!DEBUG3) return;
-  const line = `[thumb] ${(/* @__PURE__ */ new Date()).toISOString()} ${msg}
-`;
-  process.stderr.write(line);
-  try {
-    fs7.appendFileSync(DEBUG_LOG, line);
-  } catch {
-  }
-}
-var MAX_NATIVE_WIDTH = 1920;
-var MAX_NATIVE_HEIGHT = 1080;
-var MAX_CACHED = 12;
-var thumbCache = /* @__PURE__ */ new Map();
-var sharpPromise;
-function loadSharp() {
-  if (!sharpPromise) {
-    sharpPromise = Promise.resolve().then(() => (init_dist(), dist_exports)).then((mod) => mod.default ?? mod).catch(() => {
-      debugLog2("sharp unavailable \u2014 using pure-JS (jimp) backend");
-      return void 0;
-    });
-  }
-  return sharpPromise;
-}
-async function fetchThumbnail(url, cols, rows, protocol, signal, square = false) {
-  const key = `${url}|${cols}|${rows}|${protocol}|sq=${square ? 1 : 0}`;
-  const cached = thumbCache.get(key);
-  if (cached) return cached;
-  debugLog2(`fetchThumbnail: url=${url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`);
-  try {
-    const response = await fetch(url, { signal });
-    if (!response.ok || !response.body) {
-      debugLog2(`fetchThumbnail: fetch failed \u2014 status=${response.status}`);
-      return void 0;
-    }
-    let buffer2 = Buffer.from(await response.arrayBuffer());
-    if (buffer2.length === 0) {
-      debugLog2("fetchThumbnail: empty response body");
-      return void 0;
-    }
-    debugLog2(`fetchThumbnail: downloaded ${buffer2.length} bytes`);
-    if (square) {
-      buffer2 = await cropSquare(buffer2);
-      debugLog2(`fetchThumbnail: cropped to square (${buffer2.length} bytes)`);
-    }
-    const grid = await buildGrid(buffer2, cols, rows);
-    debugLog2(`fetchThumbnail: grid built ${grid.length} rows`);
-    let png3;
-    let rgba;
-    if (protocol === "kitty" || protocol === "iterm2") {
-      png3 = await buildHighResPng(buffer2);
-      debugLog2(`fetchThumbnail: png=${png3 ? `${png3.length} bytes` : "FAILED"}`);
-    } else if (protocol === "sixel") {
-      rgba = await buildSixelRgba(buffer2, cols, rows);
-      debugLog2(`fetchThumbnail: rgba=${rgba ? `${rgba.width}x${rgba.height}` : "FAILED"}`);
-    }
-    const result = { grid, png: png3, rgba };
-    thumbCache.set(key, result);
-    if (thumbCache.size > MAX_CACHED) {
-      const oldest = thumbCache.keys().next().value;
-      if (oldest !== void 0) thumbCache.delete(oldest);
-    }
-    return result;
-  } catch (err) {
-    debugLog2(`fetchThumbnail: ERROR \u2014 ${err instanceof Error ? err.message : String(err)}`);
-    return void 0;
-  }
-}
-async function cropSquare(buffer2) {
-  const sharpFn = await loadSharp();
-  if (sharpFn) {
-    try {
-      const meta = await sharpFn(buffer2).metadata();
-      const w = meta.width ?? 0;
-      const h = meta.height ?? 0;
-      if (w > 0 && h > 0 && w !== h) {
-        const side = Math.min(w, h);
-        const left = Math.floor((w - side) / 2);
-        const top = Math.floor((h - side) / 2);
-        return await sharpFn(buffer2).extract({ left, top, width: side, height: side }).toBuffer();
-      }
-      return buffer2;
-    } catch (err) {
-      debugLog2(`cropSquare: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
-    }
-  }
-  try {
-    const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
-    const image3 = await Jimp2.read(buffer2);
-    const w = image3.width;
-    const h = image3.height;
-    if (w > 0 && h > 0 && w !== h) {
-      const side = Math.min(w, h);
-      const x2 = Math.floor((w - side) / 2);
-      const y2 = Math.floor((h - side) / 2);
-      image3.crop({ x: x2, y: y2, w: side, h: side });
-      return await image3.getBuffer("image/png");
-    }
-    return buffer2;
-  } catch (err) {
-    debugLog2(`cropSquare: jimp failed (${err instanceof Error ? err.message : String(err)})`);
-    return buffer2;
-  }
-}
-async function buildGrid(buffer2, cols, rows) {
-  const sharpFn = await loadSharp();
-  if (sharpFn) {
-    try {
-      return await buildGridSharp(sharpFn, buffer2, cols, rows);
-    } catch (err) {
-      debugLog2(`buildGrid: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
-    }
-  }
-  return buildGridJimp(buffer2, cols, rows);
-}
-async function buildGridSharp(sharpFn, buffer2, cols, rows) {
-  const width = Math.max(1, cols);
-  const height = Math.max(2, rows * 2);
-  const { data, info } = await sharpFn(buffer2).resize(width, height, { fit: "cover", kernel: "lanczos3" }).sharpen({ sigma: 0.8 }).normalise().removeAlpha().raw().toBuffer({ resolveWithObject: true });
-  const channels = info.channels;
-  const grid = [];
-  for (let row = 0; row < rows; row++) {
-    const line = [];
-    for (let col = 0; col < cols; col++) {
-      const topIdx = (row * 2 * info.width + col) * channels;
-      const botIdx = ((row * 2 + 1) * info.width + col) * channels;
-      line.push({ top: toHex2(data, topIdx), bottom: toHex2(data, botIdx) });
-    }
-    grid.push(line);
-  }
-  return grid;
-}
-async function buildGridJimp(buffer2, cols, rows) {
-  const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
-  const width = Math.max(1, cols);
-  const height = Math.max(2, rows * 2);
-  const image3 = await Jimp2.read(buffer2);
-  image3.cover({ w: width, h: height });
-  const grid = [];
-  for (let row = 0; row < rows; row++) {
-    const line = [];
-    for (let col = 0; col < cols; col++) {
-      const topC = image3.getPixelColor(col, row * 2);
-      const botC = image3.getPixelColor(col, row * 2 + 1);
-      line.push({ top: intToHex(topC), bottom: intToHex(botC) });
-    }
-    grid.push(line);
-  }
-  return grid;
-}
-async function buildHighResPng(buffer2) {
-  const sharpFn = await loadSharp();
-  if (sharpFn) {
-    try {
-      return await buildHighResPngSharp(sharpFn, buffer2);
-    } catch (err) {
-      debugLog2(`buildHighResPng: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
-    }
-  }
-  return buildHighResPngJimp(buffer2);
-}
-async function buildHighResPngSharp(sharpFn, buffer2) {
-  let pipeline3 = sharpFn(buffer2);
-  const meta = await pipeline3.clone().metadata();
-  const srcW = meta.width ?? 0;
-  const srcH = meta.height ?? 0;
-  if (srcW > MAX_NATIVE_WIDTH || srcH > MAX_NATIVE_HEIGHT) {
-    pipeline3 = pipeline3.resize(MAX_NATIVE_WIDTH, MAX_NATIVE_HEIGHT, {
-      fit: "inside",
-      withoutEnlargement: true,
-      kernel: "lanczos3"
-    });
-  }
-  return await pipeline3.png({ quality: 95 }).toBuffer();
-}
-async function buildHighResPngJimp(buffer2) {
-  try {
-    const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
-    const image3 = await Jimp2.read(buffer2);
-    if (image3.width > MAX_NATIVE_WIDTH || image3.height > MAX_NATIVE_HEIGHT) {
-      image3.scaleToFit({ w: MAX_NATIVE_WIDTH, h: MAX_NATIVE_HEIGHT });
-    }
-    return await image3.getBuffer("image/png");
-  } catch (err) {
-    debugLog2(`buildHighResPngJimp: ERROR \u2014 ${err instanceof Error ? err.message : String(err)}`);
-    return void 0;
-  }
-}
-async function buildSixelRgba(buffer2, cols, rows) {
-  const sharpFn = await loadSharp();
-  if (sharpFn) {
-    try {
-      return await buildSixelRgbaSharp(sharpFn, buffer2, cols, rows);
-    } catch (err) {
-      debugLog2(`buildSixelRgba: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
-    }
-  }
-  return buildSixelRgbaJimp(buffer2, cols, rows);
-}
-async function buildSixelRgbaSharp(sharpFn, buffer2, cols, rows) {
-  const cell = getCellPixelSize();
-  const targetWidth = Math.max(64, cols * cell.width);
-  const targetHeight = Math.max(64, rows * cell.height);
-  const { data, info } = await sharpFn(buffer2).resize(targetWidth, targetHeight, { fit: "cover", kernel: "lanczos3" }).ensureAlpha().raw().toBuffer({ resolveWithObject: true });
-  return { data, width: info.width, height: info.height };
-}
-async function buildSixelRgbaJimp(buffer2, cols, rows) {
-  try {
-    const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
-    const cell = getCellPixelSize();
-    const targetWidth = Math.max(64, cols * cell.width);
-    const targetHeight = Math.max(64, rows * cell.height);
-    const image3 = await Jimp2.read(buffer2);
-    image3.cover({ w: targetWidth, h: targetHeight });
-    const w = image3.width;
-    const h = image3.height;
-    const data = Buffer.alloc(w * h * 4);
-    for (let y2 = 0; y2 < h; y2++) {
-      for (let x2 = 0; x2 < w; x2++) {
-        const c3 = image3.getPixelColor(x2, y2);
-        const idx = (y2 * w + x2) * 4;
-        data[idx] = c3 >>> 24 & 255;
-        data[idx + 1] = c3 >>> 16 & 255;
-        data[idx + 2] = c3 >>> 8 & 255;
-        data[idx + 3] = c3 & 255;
-      }
-    }
-    return { data, width: w, height: h };
-  } catch (err) {
-    debugLog2(`buildSixelRgbaJimp: ERROR \u2014 ${err instanceof Error ? err.message : String(err)}`);
-    return void 0;
-  }
-}
-function toHex2(data, idx) {
-  const r2 = data[idx] ?? 0;
-  const g = data[idx + 1] ?? 0;
-  const b = data[idx + 2] ?? 0;
-  return `#${r2.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
-}
-function intToHex(c3) {
-  const r2 = c3 >>> 24 & 255;
-  const g = c3 >>> 16 & 255;
-  const b = c3 >>> 8 & 255;
-  return `#${r2.toString(16).padStart(2, "0")}${g.toString(16).padStart(2, "0")}${b.toString(16).padStart(2, "0")}`;
 }
 
 // src/app.tsx
@@ -96919,6 +96980,10 @@ function AppContent({
             );
             filepath = await download({ ...base, useCookies: isDrm, strongBypass: true }, handlers, controller.signal);
           }
+          if (choice.kind === "audio" && info && hasCompleteMusicMeta(info)) {
+            setPhase((prev) => prev.name === "downloading" ? { ...prev, processing: true } : prev);
+            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation, controller.signal);
+          }
           onOutcome({ filepath });
           setHistory(addToHistory(url));
           setPhase({ name: "done", filepath });
@@ -96928,7 +96993,7 @@ function AppContent({
         }
       })();
     },
-    [url, onOutcome]
+    [url, onOutcome, info]
   );
   const handleTypePick = (item) => {
     const kind = item.value;
@@ -97081,7 +97146,7 @@ function AppContent({
         phase.name === "wizard" && info && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { width: contentWidth, flexDirection: "column", alignItems: "center", children: [
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: false }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: wizard.kind === "audio" }),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Panel, { title: stepTitle(phase.step), width: Math.max(48, Math.round(contentWidth * 0.8)), children: [
             phase.step === "type" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(

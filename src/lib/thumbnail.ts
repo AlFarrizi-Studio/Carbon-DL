@@ -154,7 +154,7 @@ export async function fetchThumbnail(
 /** Center-crop an image buffer to a 1:1 square.
  *  Tries sharp first, falls back to jimp. On total failure the original
  *  buffer is returned unchanged (cover still renders, just not cropped). */
-async function cropSquare(buffer: Buffer): Promise<Buffer> {
+export async function cropSquare(buffer: Buffer): Promise<Buffer> {
   const sharpFn = await loadSharp()
   if (sharpFn) {
     try {
@@ -191,6 +191,29 @@ async function cropSquare(buffer: Buffer): Promise<Buffer> {
     debugLog(`cropSquare: jimp failed (${err instanceof Error ? err.message : String(err)})`)
     return buffer
   }
+}
+
+/** Download the first thumbnail candidate that succeeds, optionally
+ *  center-cropped to a square. Used to obtain the artwork buffer that gets
+ *  embedded into audio files (so players show a square album cover). */
+export async function downloadArtwork(
+  candidates: Array<{url: string}>,
+  opts: {square?: boolean; signal?: AbortSignal} = {},
+): Promise<Buffer | undefined> {
+  for (const candidate of candidates) {
+    if (opts.signal?.aborted) return undefined
+    try {
+      const response = await fetch(candidate.url, {signal: opts.signal})
+      if (!response.ok || !response.body) continue
+      let buffer: Buffer = Buffer.from(await response.arrayBuffer())
+      if (buffer.length === 0) continue
+      if (opts.square) buffer = await cropSquare(buffer)
+      return buffer
+    } catch {
+      continue
+    }
+  }
+  return undefined
 }
 
 /* ------------------------------- grid ---------------------------------- */

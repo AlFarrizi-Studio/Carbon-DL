@@ -21,6 +21,7 @@ import {
   buildAudioArgs,
   buildVideoArgs,
   download,
+  embedSquareCover,
   ensureYtDlp,
   ensureFfmpeg,
   hasAudio,
@@ -495,6 +496,13 @@ function AppContent({
             // so it's only used here as a last resort after the normal attempt.
             filepath = await download({...base, useCookies: isDrm, strongBypass: true}, handlers, controller.signal)
           }
+          // Audio with complete music metadata (title + artist + album) →
+          // replace the embedded cover with a square-cropped version so media
+          // players show a proper square album cover during playback.
+          if (choice.kind === 'audio' && info && hasCompleteMusicMeta(info)) {
+            setPhase(prev => (prev.name === 'downloading' ? {...prev, processing: true} : prev))
+            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation, controller.signal)
+          }
           onOutcome({filepath})
           setHistory(addToHistory(url))
           setPhase({name: 'done', filepath})
@@ -504,7 +512,7 @@ function AppContent({
         }
       })()
     },
-    [url, onOutcome],
+    [url, onOutcome, info],
   )
 
   const handleTypePick = (item: {value: string}) => {
@@ -704,7 +712,7 @@ function AppContent({
         <Box width={contentWidth} flexDirection="column" alignItems="center">
           <BrandLine />
           <Gap />
-          <MediaHeader info={info} platform={platform} contentWidth={contentWidth} audioMode={false} />
+          <MediaHeader info={info} platform={platform} contentWidth={contentWidth} audioMode={wizard.kind === 'audio'} />
           <Gap />
           <Panel title={stepTitle(phase.step)} width={Math.max(48, Math.round(contentWidth * 0.8))}>
             {phase.step === 'type' && (

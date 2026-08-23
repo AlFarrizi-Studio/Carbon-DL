@@ -8,6 +8,7 @@ import {pipeline} from 'node:stream/promises'
 import {formatBytes} from './format.js'
 import type {AudioFormat, VideoFormat} from './formats.js'
 import {searchYtMusic, ytmTrackUrl} from './ytmusic.js'
+import {downloadArtwork} from './thumbnail.js'
 
 const CARBON_DIR = path.join(os.homedir(), '.carbon', 'bin')
 const RELEASE_BASE = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download'
@@ -1009,6 +1010,63 @@ export async function download(
       }
     })
   })
+}
+
+/** Replace the embedded cover art in a downloaded audio file with a
+ *  square-cropped version. yt-dlp's --embed-thumbnail uses the original
+ *  (often 16:9) thumbnail; this re-embeds a 1:1 crop so media players
+ *  display a proper square album cover.
+ *
+ *  Silently no-ops when artwork can't be fetched or ffmpeg fails — the
+ *  original file (with its existing cover) is preserved. */
+export async function embedSquareCover(
+  filepath: string,
+  candidates: ThumbnailInfo[],
+  ffmpegLocation?: string,
+  signal?: AbortSignal,
+): Promise<void> {
+  if (candidates.length === 0) return
+
+  const artwork = await downloadArtwork(candidates, {square: true, signal})
+  if (!artwork || signal?.aborted) return
+
+  const ext = path.extname(filepath)
+  const coverPath = filepath + '.cover.png'
+  const tmpOut = filepath + '.tmp' + ext
+
+  try {
+    await fs.writeFile(coverPath, artwork)
+
+    const ffmpegBin = ffmpegLocation
+      ? path.join(ffmpegLocation, process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg')
+      : 'ffmpeg'
+
+    await new Promise<void>((resolve, reject) => {
+      const child = spawn(ffmpegBin, [
+        '-y',
+        '-i', filepath,
+        '-i', coverPath,
+        '-map', '0:a',
+        '-map', '1:v',
+        '-c:a', 'copy',
+        '-c:v', 'png',
+        '-disposition:v:0', 'attached_pic',
+        '-metadata:s:v', 'title=Album cover',
+        '-metadata:s:v', 'comment=Cover (front)',
+        tmpOut,
+      ], {signal, stdio: 'ignore'})
+      child.on('error', reject)
+      child.on('close', code => (code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}`))))
+    })
+
+    // Replace original with the re-embedded version.
+    await fs.rename(tmpOut, filepath)
+  } catch {
+    // Cover embedding is best-effort — never fail the download over it.
+    await fs.rm(tmpOut, {force: true}).catch(() => {})
+  } finally {
+    await fs.rm(coverPath, {force: true}).catch(() => {})
+  }
 }
 
 function removePartials(destinations: string[]): Promise<unknown> {
