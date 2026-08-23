@@ -1,6 +1,6 @@
 {
   "name": "carbon-dl",
-  "version": "1.0.9-beta",
+  "version": "1.1.0",
   "description": "Carbon — grab any video or music from anywhere. pick format, fps, quality. download. done.",
   "type": "module",
   "bin": {

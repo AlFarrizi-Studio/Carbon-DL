@@ -283,6 +283,13 @@ export function artistOf(info: VideoInfo): string | undefined {
   return info.artist ?? info.creator ?? info.uploader
 }
 
+/** Whether the info carries "complete" music metadata — title, artist, and
+ *  album all present. Release date is optional (may be "-"). Used to decide
+ *  whether to center-crop the cover art to a square in Audio mode. */
+export function hasCompleteMusicMeta(info: VideoInfo): boolean {
+  return Boolean(info.title && artistOf(info) && info.album)
+}
+
 /** Pick the best (highest-resolution) thumbnail URL from yt-dlp info.
  *
  *  yt-dlp's `thumbnails[]` array already carries the full set of artwork
@@ -301,22 +308,43 @@ export function artistOf(info: VideoInfo): string | undefined {
  *  (16:9), but many sources vary. */
 export type ThumbnailInfo = {url: string; width?: number; height?: number}
 
-export function bestThumbnail(info: VideoInfo): ThumbnailInfo | undefined {
+/** Ordered thumbnail candidates, best (largest) first.
+ *
+ *  Two reliability fixes over a naive "pick the biggest" approach:
+ *   1. Storyboard sprite sheets (`…/sb/…`, `storyboard…`) are excluded. They
+ *      are multi-frame preview grids, not real artwork, and frequently
+ *      403/404 — previously they won the size sort and left the cover blank.
+ *   2. ALL remaining candidates are returned (de-duplicated), so the UI can
+ *      fall through to the next URL when the top one fails to download. This
+ *      is why the cover now appears consistently in both Video and Audio mode
+ *      instead of only "sometimes". */
+export function thumbnailCandidates(info: VideoInfo): ThumbnailInfo[] {
+  const out: ThumbnailInfo[] = []
+  const seen = new Set<string>()
+  const push = (url: string | undefined, width?: number, height?: number): void => {
+    if (!url || seen.has(url)) return
+    if (/\/sb\/|storyboard/i.test(url)) return
+    seen.add(url)
+    out.push({url, width, height})
+  }
   if (info.thumbnails && info.thumbnails.length > 0) {
-    const candidates = info.thumbnails.filter(t => t.url)
-    if (candidates.length > 0) {
-      const sorted = [...candidates].sort((a, b) => {
+    const sorted = [...info.thumbnails]
+      .filter(t => t.url)
+      .sort((a, b) => {
         const areaA = (a.width ?? 0) * (a.height ?? 0)
         const areaB = (b.width ?? 0) * (b.height ?? 0)
         if (areaB !== areaA) return areaB - areaA
         return (b.preference ?? 0) - (a.preference ?? 0)
       })
-      const best = sorted[0]!
-      return {url: best.url!, width: best.width, height: best.height}
-    }
+    for (const t of sorted) push(t.url, t.width, t.height)
   }
-  if (info.thumbnail) return {url: info.thumbnail}
-  return undefined
+  push(info.thumbnail)
+  return out
+}
+
+/** Best (first) thumbnail candidate, or undefined when none exist. */
+export function bestThumbnail(info: VideoInfo): ThumbnailInfo | undefined {
+  return thumbnailCandidates(info)[0]
 }
 
 export type ProbeResult = {

@@ -17,13 +17,14 @@ import {t, getLanguage} from './lib/i18n.js'
 import {nextTip, randomTip, TIP_INTERVAL_MS} from './lib/tips.js'
 import {checkForUpdate, type UpdateInfo} from './lib/update-check.js'
 import {
-  bestThumbnail,
+  thumbnailCandidates,
   buildAudioArgs,
   buildVideoArgs,
   download,
   ensureYtDlp,
   ensureFfmpeg,
   hasAudio,
+  hasCompleteMusicMeta,
   maxHeight,
   probe,
   artistOf,
@@ -142,32 +143,43 @@ function MetadataBlock({info, platform, maxWidth}: {info: VideoInfo; platform?: 
 
 /**
  * Cover art for the current item, rendered with the best terminal image
- * protocol (Kitty / iTerm2 / Sixel, half-block fallback). Fetches the
- * highest-resolution artwork URL once and reserves its area while loading so
- * the layout doesn't jump when the image arrives.
+ * protocol (Kitty / iTerm2 / Sixel, half-block fallback). Tries each
+ * thumbnail candidate in order (largest first) until one downloads
+ * successfully, so the cover appears consistently even when the top URL
+ * 403/404s. Reserves its area while loading so the layout doesn't jump.
  */
-function CoverArt({thumbInfo, cols}: {thumbInfo: ThumbnailInfo; cols: number}) {
+function CoverArt({candidates, cols, square}: {candidates: ThumbnailInfo[]; cols: number; square: boolean}) {
   const protocol = detectProtocol()
   const cell = getCellPixelSize()
-  debugLog(`CoverArt: url=${thumbInfo.url} cols=${cols} protocol=${protocol} cell=${cell.width}x${cell.height}`)
-  // Reproduce the artwork's true aspect ratio in terminal cells. Cells are
-  // ~twice as tall as wide, so rows = cols * cellW / (aspect * cellH).
-  const aspect = thumbInfo.width && thumbInfo.height ? thumbInfo.width / thumbInfo.height : 1
+  // Use the first candidate's dimensions for aspect ratio calculation.
+  const first = candidates[0]
+  const aspect = square ? 1 : (first?.width && first?.height ? first.width / first.height : 1)
   const rows = Math.max(4, Math.min(18, Math.round((cols * cell.width) / (aspect * cell.height))))
 
   const [thumb, setThumb] = useState<ThumbResult | undefined>(undefined)
   useEffect(() => {
     const controller = new AbortController()
     let cancelled = false
-    void fetchThumbnail(thumbInfo.url, cols, rows, protocol, controller.signal).then(result => {
-      debugLog(`CoverArt: fetchThumbnail result=${result ? 'OK' : 'UNDEFINED'}`)
-      if (!cancelled && result) setThumb(result)
-    })
+    // Try candidates sequentially until one succeeds.
+    void (async () => {
+      for (const candidate of candidates) {
+        if (cancelled || controller.signal.aborted) return
+        debugLog(`CoverArt: trying url=${candidate.url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`)
+        const result = await fetchThumbnail(candidate.url, cols, rows, protocol, controller.signal, square)
+        if (result) {
+          debugLog(`CoverArt: fetchThumbnail OK for ${candidate.url}`)
+          if (!cancelled) setThumb(result)
+          return
+        }
+        debugLog(`CoverArt: fetchThumbnail FAILED for ${candidate.url}, trying next`)
+      }
+      debugLog('CoverArt: all candidates failed')
+    })()
     return () => {
       cancelled = true
       controller.abort()
     }
-  }, [thumbInfo.url, cols, rows, protocol])
+  }, [candidates, cols, rows, protocol, square])
 
   if (!thumb) {
     // Reserve the exact area so layout is stable while the art downloads.
@@ -183,21 +195,25 @@ function CoverArt({thumbInfo, cols}: {thumbInfo: ThumbnailInfo; cols: number}) {
 /**
  * Metadata header row: cover art on the left (when the terminal is wide
  * enough and artwork exists) + the metadata block on the right.
+ * In Audio mode with complete music metadata (title + artist + album), the
+ * cover is center-cropped to a square to look like album art.
  */
-function MediaHeader({info, platform, contentWidth}: {info: VideoInfo; platform?: Platform; contentWidth: number}) {
-  const thumbInfo = useMemo(() => bestThumbnail(info), [info])
+function MediaHeader({info, platform, contentWidth, audioMode}: {info: VideoInfo; platform?: Platform; contentWidth: number; audioMode?: boolean}) {
+  const candidates = useMemo(() => thumbnailCandidates(info), [info])
   const coverCols = 24
   const gap = 2
   const minMeta = 24
-  const showCover = Boolean(thumbInfo) && contentWidth >= coverCols + gap + minMeta
+  const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta
   const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth
-  debugLog(`MediaHeader: thumbInfo=${thumbInfo ? thumbInfo.url : 'NONE'} contentWidth=${contentWidth} showCover=${showCover}`)
+  // Square crop only for Audio mode with complete metadata (title + artist + album).
+  const square = Boolean(audioMode && hasCompleteMusicMeta(info))
+  debugLog(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square}`)
 
   return (
     <Box flexDirection="row" width={contentWidth}>
-      {showCover && thumbInfo ? (
+      {showCover ? (
         <>
-          <CoverArt thumbInfo={thumbInfo} cols={coverCols} />
+          <CoverArt candidates={candidates} cols={coverCols} square={square} />
           <Box width={gap} flexShrink={0} />
         </>
       ) : null}
@@ -688,7 +704,7 @@ function AppContent({
         <Box width={contentWidth} flexDirection="column" alignItems="center">
           <BrandLine />
           <Gap />
-          <MediaHeader info={info} platform={platform} contentWidth={contentWidth} />
+          <MediaHeader info={info} platform={platform} contentWidth={contentWidth} audioMode={false} />
           <Gap />
           <Panel title={stepTitle(phase.step)} width={Math.max(48, Math.round(contentWidth * 0.8))}>
             {phase.step === 'type' && (
@@ -747,7 +763,7 @@ function AppContent({
         <Box flexDirection="column" alignItems="center" width={contentWidth}>
           <BrandLine />
           <Gap />
-          {info ? <MediaHeader info={info} platform={platform} contentWidth={contentWidth} /> : null}
+          {info ? <MediaHeader info={info} platform={platform} contentWidth={contentWidth} audioMode={phase.choice.kind === 'audio'} /> : null}
           <Gap />
           <Text color={theme.accent ?? theme.primary} bold>
             ▸ {phase.choice.label}

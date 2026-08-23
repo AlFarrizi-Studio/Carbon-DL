@@ -95199,7 +95199,7 @@ function randomTip() {
 
 // src/lib/update-check.ts
 var GITHUB_REPO = "AlFarrizi-Studio/Carbon-DL";
-var CURRENT_VERSION = "1.0.9-beta";
+var CURRENT_VERSION = "1.1.0";
 function isNewerVersion(a2, b) {
   const parse = (v) => {
     const clean = v.replace(/^v/, "");
@@ -95582,22 +95582,29 @@ function formatReleaseDate(raw2) {
 function artistOf(info) {
   return info.artist ?? info.creator ?? info.uploader;
 }
-function bestThumbnail(info) {
+function hasCompleteMusicMeta(info) {
+  return Boolean(info.title && artistOf(info) && info.album);
+}
+function thumbnailCandidates(info) {
+  const out = [];
+  const seen = /* @__PURE__ */ new Set();
+  const push = (url, width, height) => {
+    if (!url || seen.has(url)) return;
+    if (/\/sb\/|storyboard/i.test(url)) return;
+    seen.add(url);
+    out.push({ url, width, height });
+  };
   if (info.thumbnails && info.thumbnails.length > 0) {
-    const candidates = info.thumbnails.filter((t3) => t3.url);
-    if (candidates.length > 0) {
-      const sorted = [...candidates].sort((a2, b) => {
-        const areaA = (a2.width ?? 0) * (a2.height ?? 0);
-        const areaB = (b.width ?? 0) * (b.height ?? 0);
-        if (areaB !== areaA) return areaB - areaA;
-        return (b.preference ?? 0) - (a2.preference ?? 0);
-      });
-      const best = sorted[0];
-      return { url: best.url, width: best.width, height: best.height };
-    }
+    const sorted = [...info.thumbnails].filter((t3) => t3.url).sort((a2, b) => {
+      const areaA = (a2.width ?? 0) * (a2.height ?? 0);
+      const areaB = (b.width ?? 0) * (b.height ?? 0);
+      if (areaB !== areaA) return areaB - areaA;
+      return (b.preference ?? 0) - (a2.preference ?? 0);
+    });
+    for (const t3 of sorted) push(t3.url, t3.width, t3.height);
   }
-  if (info.thumbnail) return { url: info.thumbnail };
-  return void 0;
+  push(info.thumbnail);
+  return out;
 }
 async function fetchSpotifyMetadata(url, signal) {
   try {
@@ -96389,23 +96396,27 @@ function loadSharp() {
   }
   return sharpPromise;
 }
-async function fetchThumbnail(url, cols, rows, protocol, signal) {
-  const key = `${url}|${cols}|${rows}|${protocol}`;
+async function fetchThumbnail(url, cols, rows, protocol, signal, square = false) {
+  const key = `${url}|${cols}|${rows}|${protocol}|sq=${square ? 1 : 0}`;
   const cached = thumbCache.get(key);
   if (cached) return cached;
-  debugLog2(`fetchThumbnail: url=${url} cols=${cols} rows=${rows} protocol=${protocol}`);
+  debugLog2(`fetchThumbnail: url=${url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`);
   try {
     const response = await fetch(url, { signal });
     if (!response.ok || !response.body) {
       debugLog2(`fetchThumbnail: fetch failed \u2014 status=${response.status}`);
       return void 0;
     }
-    const buffer2 = Buffer.from(await response.arrayBuffer());
+    let buffer2 = Buffer.from(await response.arrayBuffer());
     if (buffer2.length === 0) {
       debugLog2("fetchThumbnail: empty response body");
       return void 0;
     }
     debugLog2(`fetchThumbnail: downloaded ${buffer2.length} bytes`);
+    if (square) {
+      buffer2 = await cropSquare(buffer2);
+      debugLog2(`fetchThumbnail: cropped to square (${buffer2.length} bytes)`);
+    }
     const grid = await buildGrid(buffer2, cols, rows);
     debugLog2(`fetchThumbnail: grid built ${grid.length} rows`);
     let png3;
@@ -96427,6 +96438,42 @@ async function fetchThumbnail(url, cols, rows, protocol, signal) {
   } catch (err) {
     debugLog2(`fetchThumbnail: ERROR \u2014 ${err instanceof Error ? err.message : String(err)}`);
     return void 0;
+  }
+}
+async function cropSquare(buffer2) {
+  const sharpFn = await loadSharp();
+  if (sharpFn) {
+    try {
+      const meta = await sharpFn(buffer2).metadata();
+      const w = meta.width ?? 0;
+      const h = meta.height ?? 0;
+      if (w > 0 && h > 0 && w !== h) {
+        const side = Math.min(w, h);
+        const left = Math.floor((w - side) / 2);
+        const top = Math.floor((h - side) / 2);
+        return await sharpFn(buffer2).extract({ left, top, width: side, height: side }).toBuffer();
+      }
+      return buffer2;
+    } catch (err) {
+      debugLog2(`cropSquare: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`);
+    }
+  }
+  try {
+    const { Jimp: Jimp2 } = await Promise.resolve().then(() => (init_esm30(), esm_exports2));
+    const image3 = await Jimp2.read(buffer2);
+    const w = image3.width;
+    const h = image3.height;
+    if (w > 0 && h > 0 && w !== h) {
+      const side = Math.min(w, h);
+      const x2 = Math.floor((w - side) / 2);
+      const y2 = Math.floor((h - side) / 2);
+      image3.crop({ x: x2, y: y2, w: side, h: side });
+      return await image3.getBuffer("image/png");
+    }
+    return buffer2;
+  } catch (err) {
+    debugLog2(`cropSquare: jimp failed (${err instanceof Error ? err.message : String(err)})`);
+    return buffer2;
   }
 }
 async function buildGrid(buffer2, cols, rows) {
@@ -96636,41 +96683,52 @@ function MetadataBlock({ info, platform: platform2, maxWidth }) {
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, children: truncate(value, valueW) })
   ] }, label)) });
 }
-function CoverArt({ thumbInfo, cols }) {
+function CoverArt({ candidates, cols, square }) {
   const protocol = detectProtocol();
   const cell = getCellPixelSize();
-  debugLog3(`CoverArt: url=${thumbInfo.url} cols=${cols} protocol=${protocol} cell=${cell.width}x${cell.height}`);
-  const aspect = thumbInfo.width && thumbInfo.height ? thumbInfo.width / thumbInfo.height : 1;
+  const first = candidates[0];
+  const aspect = square ? 1 : first?.width && first?.height ? first.width / first.height : 1;
   const rows = Math.max(4, Math.min(18, Math.round(cols * cell.width / (aspect * cell.height))));
   const [thumb, setThumb] = (0, import_react40.useState)(void 0);
   (0, import_react40.useEffect)(() => {
     const controller = new AbortController();
     let cancelled = false;
-    void fetchThumbnail(thumbInfo.url, cols, rows, protocol, controller.signal).then((result) => {
-      debugLog3(`CoverArt: fetchThumbnail result=${result ? "OK" : "UNDEFINED"}`);
-      if (!cancelled && result) setThumb(result);
-    });
+    void (async () => {
+      for (const candidate of candidates) {
+        if (cancelled || controller.signal.aborted) return;
+        debugLog3(`CoverArt: trying url=${candidate.url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`);
+        const result = await fetchThumbnail(candidate.url, cols, rows, protocol, controller.signal, square);
+        if (result) {
+          debugLog3(`CoverArt: fetchThumbnail OK for ${candidate.url}`);
+          if (!cancelled) setThumb(result);
+          return;
+        }
+        debugLog3(`CoverArt: fetchThumbnail FAILED for ${candidate.url}, trying next`);
+      }
+      debugLog3("CoverArt: all candidates failed");
+    })();
     return () => {
       cancelled = true;
       controller.abort();
     };
-  }, [thumbInfo.url, cols, rows, protocol]);
+  }, [candidates, cols, rows, protocol, square]);
   if (!thumb) {
     return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: cols, height: rows, flexShrink: 0 });
   }
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexShrink: 0, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Thumbnail, { grid: thumb.grid, png: thumb.png, rgba: thumb.rgba, cols, rows }) });
 }
-function MediaHeader({ info, platform: platform2, contentWidth }) {
-  const thumbInfo = (0, import_react40.useMemo)(() => bestThumbnail(info), [info]);
+function MediaHeader({ info, platform: platform2, contentWidth, audioMode }) {
+  const candidates = (0, import_react40.useMemo)(() => thumbnailCandidates(info), [info]);
   const coverCols = 24;
   const gap = 2;
   const minMeta = 24;
-  const showCover = Boolean(thumbInfo) && contentWidth >= coverCols + gap + minMeta;
+  const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta;
   const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth;
-  debugLog3(`MediaHeader: thumbInfo=${thumbInfo ? thumbInfo.url : "NONE"} contentWidth=${contentWidth} showCover=${showCover}`);
+  const square = Boolean(audioMode && hasCompleteMusicMeta(info));
+  debugLog3(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square}`);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", width: contentWidth, children: [
-    showCover && thumbInfo ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(CoverArt, { thumbInfo, cols: coverCols }),
+    showCover ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(CoverArt, { candidates, cols: coverCols, square }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: gap, flexShrink: 0 })
     ] }) : null,
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", flexGrow: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: metaWidth }) })
@@ -97023,7 +97081,7 @@ function AppContent({
         phase.name === "wizard" && info && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { width: contentWidth, flexDirection: "column", alignItems: "center", children: [
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth }),
+          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: false }),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Panel, { title: stepTitle(phase.step), width: Math.max(48, Math.round(contentWidth * 0.8)), children: [
             phase.step === "type" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
@@ -97085,7 +97143,7 @@ function AppContent({
         phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: contentWidth, children: [
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          info ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth }) : null,
+          info ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: phase.choice.kind === "audio" }) : null,
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.accent ?? theme.primary, bold: true, children: [
             "\u25B8 ",

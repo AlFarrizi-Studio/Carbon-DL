@@ -92,24 +92,35 @@ export async function fetchThumbnail(
   rows: number,
   protocol: ImageProtocol,
   signal?: AbortSignal,
+  /** Center-crop the artwork to a 1:1 square before rendering. Used for
+   *  Audio mode with complete music metadata so the cover looks like a real
+   *  square album cover instead of a 16:9 video frame. */
+  square = false,
 ): Promise<ThumbResult | undefined> {
-  const key = `${url}|${cols}|${rows}|${protocol}`
+  const key = `${url}|${cols}|${rows}|${protocol}|sq=${square ? 1 : 0}`
   const cached = thumbCache.get(key)
   if (cached) return cached
 
-  debugLog(`fetchThumbnail: url=${url} cols=${cols} rows=${rows} protocol=${protocol}`)
+  debugLog(`fetchThumbnail: url=${url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`)
   try {
     const response = await fetch(url, {signal})
     if (!response.ok || !response.body) {
       debugLog(`fetchThumbnail: fetch failed — status=${response.status}`)
       return undefined
     }
-    const buffer = Buffer.from(await response.arrayBuffer())
+    let buffer: Buffer = Buffer.from(await response.arrayBuffer())
     if (buffer.length === 0) {
       debugLog('fetchThumbnail: empty response body')
       return undefined
     }
     debugLog(`fetchThumbnail: downloaded ${buffer.length} bytes`)
+
+    // Audio-mode album art → center-crop the source to a square first so every
+    // render path (grid / png / rgba) starts from a 1:1 image.
+    if (square) {
+      buffer = await cropSquare(buffer)
+      debugLog(`fetchThumbnail: cropped to square (${buffer.length} bytes)`)
+    }
 
     // Grid is ALWAYS built — universal fallback, never blank.
     const grid = await buildGrid(buffer, cols, rows)
@@ -135,6 +146,50 @@ export async function fetchThumbnail(
   } catch (err) {
     debugLog(`fetchThumbnail: ERROR — ${err instanceof Error ? err.message : String(err)}`)
     return undefined
+  }
+}
+
+/* ---------------------------- square crop ------------------------------ */
+
+/** Center-crop an image buffer to a 1:1 square.
+ *  Tries sharp first, falls back to jimp. On total failure the original
+ *  buffer is returned unchanged (cover still renders, just not cropped). */
+async function cropSquare(buffer: Buffer): Promise<Buffer> {
+  const sharpFn = await loadSharp()
+  if (sharpFn) {
+    try {
+      const meta = await sharpFn(buffer).metadata()
+      const w = meta.width ?? 0
+      const h = meta.height ?? 0
+      if (w > 0 && h > 0 && w !== h) {
+        const side = Math.min(w, h)
+        const left = Math.floor((w - side) / 2)
+        const top = Math.floor((h - side) / 2)
+        return await sharpFn(buffer)
+          .extract({left, top, width: side, height: side})
+          .toBuffer()
+      }
+      return buffer
+    } catch (err) {
+      debugLog(`cropSquare: sharp failed (${err instanceof Error ? err.message : String(err)}), trying jimp`)
+    }
+  }
+  try {
+    const {Jimp} = await import('jimp')
+    const image = await Jimp.read(buffer)
+    const w = image.width
+    const h = image.height
+    if (w > 0 && h > 0 && w !== h) {
+      const side = Math.min(w, h)
+      const x = Math.floor((w - side) / 2)
+      const y = Math.floor((h - side) / 2)
+      image.crop({x, y, w: side, h: side})
+      return await image.getBuffer('image/png')
+    }
+    return buffer
+  } catch (err) {
+    debugLog(`cropSquare: jimp failed (${err instanceof Error ? err.message : String(err)})`)
+    return buffer
   }
 }
 
