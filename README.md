@@ -135,7 +135,7 @@ Supported: English, Indonesian, Spanish, French, German, Portuguese, Italian, Ru
 When a newer release is published on GitHub, Carbon shows a badge in the top-right corner:
 
 ```
-↑ Latest Carbon update available: vX.Y.Z
+↑ Update Carbon available: vX.Y.Z
 ```
 
 To update, run:
