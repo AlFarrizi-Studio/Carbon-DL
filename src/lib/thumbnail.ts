@@ -58,7 +58,7 @@ const thumbCache = new Map<string, ThumbResult>()
 type SharpFn = (input: Buffer) => import('sharp').Sharp
 
 let sharpPromise: Promise<SharpFn | undefined> | undefined
-function loadSharp(): Promise<SharpFn | undefined> {
+export function loadSharp(): Promise<SharpFn | undefined> {
   if (!sharpPromise) {
     sharpPromise = import('sharp')
       .then(mod => (mod.default ?? mod) as unknown as SharpFn)

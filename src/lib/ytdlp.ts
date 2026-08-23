@@ -8,9 +8,15 @@ import {pipeline} from 'node:stream/promises'
 import {formatBytes} from './format.js'
 import type {AudioFormat, VideoFormat} from './formats.js'
 import {searchYtMusic, ytmTrackUrl} from './ytmusic.js'
-import {downloadArtwork} from './thumbnail.js'
+import {downloadArtwork, loadSharp} from './thumbnail.js'
 
 const CARBON_DIR = path.join(os.homedir(), '.carbon', 'bin')
+
+const DEBUG = process.env.CARBON_DEBUG === '1' || process.env.CARBON_DEBUG === 'true'
+function debugLog(msg: string): void {
+  if (!DEBUG) return
+  process.stderr.write(`[ytdlp] ${new Date().toISOString()} ${msg}\n`)
+}
 const RELEASE_BASE = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download'
 
 function ytDlpAssetName(): string {
@@ -1025,43 +1031,72 @@ export async function embedSquareCover(
   ffmpegLocation?: string,
   signal?: AbortSignal,
 ): Promise<void> {
-  if (candidates.length === 0) return
+  if (candidates.length === 0) {
+    debugLog('embedSquareCover: no candidates, skipping')
+    return
+  }
 
+  debugLog(`embedSquareCover: downloading artwork (${candidates.length} candidates)`)
   const artwork = await downloadArtwork(candidates, {square: true, signal})
-  if (!artwork || signal?.aborted) return
+  if (!artwork || signal?.aborted) {
+    debugLog(`embedSquareCover: artwork download failed or aborted`)
+    return
+  }
+  debugLog(`embedSquareCover: artwork ready (${artwork.length} bytes)`)
 
-  const ext = path.extname(filepath)
-  const coverPath = filepath + '.cover.png'
+  const ext = path.extname(filepath).toLowerCase()
+  const coverPath = filepath + '.cover.jpg'
   const tmpOut = filepath + '.tmp' + ext
 
   try {
-    await fs.writeFile(coverPath, artwork)
+    // Convert PNG artwork to JPEG for maximum container compatibility.
+    // MP3 (ID3v2), M4A (MP4), FLAC, and OGG all handle JPEG covers well.
+    let coverData = artwork
+    const sharpFn = await loadSharp()
+    if (sharpFn) {
+      try {
+        coverData = await sharpFn(artwork).jpeg({quality: 90}).toBuffer()
+      } catch { /* keep original PNG */ }
+    }
+    await fs.writeFile(coverPath, coverData)
 
     const ffmpegBin = ffmpegLocation
       ? path.join(ffmpegLocation, process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg')
       : 'ffmpeg'
 
+    debugLog(`embedSquareCover: running ffmpeg (${ffmpegBin}) on ${filepath}`)
+
+    // Build codec args based on container format.
+    const coverCodec = coverPath.endsWith('.jpg') || coverPath.endsWith('.jpeg') ? 'mjpeg' : 'png'
+    const ffmpegArgs = [
+      '-y',
+      '-i', filepath,
+      '-i', coverPath,
+      '-map', '0:a',
+      '-map', '1:v',
+      '-c:a', 'copy',
+      '-c:v', coverCodec,
+      '-disposition:v:0', 'attached_pic',
+      '-metadata:s:v', 'title=Album cover',
+      '-metadata:s:v', 'comment=Cover (front)',
+    ]
+    // MP3 needs ID3v2.3 for best player compatibility with embedded art.
+    if (ext === '.mp3') ffmpegArgs.push('-id3v2_version', '3')
+    ffmpegArgs.push(tmpOut)
+
+    let stderr = ''
     await new Promise<void>((resolve, reject) => {
-      const child = spawn(ffmpegBin, [
-        '-y',
-        '-i', filepath,
-        '-i', coverPath,
-        '-map', '0:a',
-        '-map', '1:v',
-        '-c:a', 'copy',
-        '-c:v', 'png',
-        '-disposition:v:0', 'attached_pic',
-        '-metadata:s:v', 'title=Album cover',
-        '-metadata:s:v', 'comment=Cover (front)',
-        tmpOut,
-      ], {signal, stdio: 'ignore'})
+      const child = spawn(ffmpegBin, ffmpegArgs, {signal, stdio: ['ignore', 'ignore', 'pipe']})
+      child.stderr?.on('data', (chunk: Buffer) => { stderr += chunk.toString() })
       child.on('error', reject)
-      child.on('close', code => (code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}`))))
+      child.on('close', code => (code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}: ${stderr.slice(-300)}`))))
     })
 
     // Replace original with the re-embedded version.
     await fs.rename(tmpOut, filepath)
-  } catch {
+    debugLog('embedSquareCover: success — cover replaced with square crop')
+  } catch (err) {
+    debugLog(`embedSquareCover: FAILED — ${err instanceof Error ? err.message : String(err)}`)
     // Cover embedding is best-effort — never fail the download over it.
     await fs.rm(tmpOut, {force: true}).catch(() => {})
   } finally {

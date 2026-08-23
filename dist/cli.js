@@ -95888,6 +95888,12 @@ function intToHex(c3) {
 
 // src/lib/ytdlp.ts
 var CARBON_DIR = path5.join(os5.homedir(), ".carbon", "bin");
+var DEBUG3 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+function debugLog3(msg) {
+  if (!DEBUG3) return;
+  process.stderr.write(`[ytdlp] ${(/* @__PURE__ */ new Date()).toISOString()} ${msg}
+`);
+}
 var RELEASE_BASE = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 function ytDlpAssetName() {
   if (process.platform === "win32") return "yt-dlp.exe";
@@ -96515,43 +96521,69 @@ async function download(opts, handlers, signal) {
   });
 }
 async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
-  if (candidates.length === 0) return;
+  if (candidates.length === 0) {
+    debugLog3("embedSquareCover: no candidates, skipping");
+    return;
+  }
+  debugLog3(`embedSquareCover: downloading artwork (${candidates.length} candidates)`);
   const artwork = await downloadArtwork(candidates, { square: true, signal });
-  if (!artwork || signal?.aborted) return;
-  const ext = path5.extname(filepath);
-  const coverPath = filepath + ".cover.png";
+  if (!artwork || signal?.aborted) {
+    debugLog3(`embedSquareCover: artwork download failed or aborted`);
+    return;
+  }
+  debugLog3(`embedSquareCover: artwork ready (${artwork.length} bytes)`);
+  const ext = path5.extname(filepath).toLowerCase();
+  const coverPath = filepath + ".cover.jpg";
   const tmpOut = filepath + ".tmp" + ext;
   try {
-    await fs7.writeFile(coverPath, artwork);
+    let coverData = artwork;
+    const sharpFn = await loadSharp();
+    if (sharpFn) {
+      try {
+        coverData = await sharpFn(artwork).jpeg({ quality: 90 }).toBuffer();
+      } catch {
+      }
+    }
+    await fs7.writeFile(coverPath, coverData);
     const ffmpegBin = ffmpegLocation ? path5.join(ffmpegLocation, process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg") : "ffmpeg";
+    debugLog3(`embedSquareCover: running ffmpeg (${ffmpegBin}) on ${filepath}`);
+    const coverCodec = coverPath.endsWith(".jpg") || coverPath.endsWith(".jpeg") ? "mjpeg" : "png";
+    const ffmpegArgs = [
+      "-y",
+      "-i",
+      filepath,
+      "-i",
+      coverPath,
+      "-map",
+      "0:a",
+      "-map",
+      "1:v",
+      "-c:a",
+      "copy",
+      "-c:v",
+      coverCodec,
+      "-disposition:v:0",
+      "attached_pic",
+      "-metadata:s:v",
+      "title=Album cover",
+      "-metadata:s:v",
+      "comment=Cover (front)"
+    ];
+    if (ext === ".mp3") ffmpegArgs.push("-id3v2_version", "3");
+    ffmpegArgs.push(tmpOut);
+    let stderr = "";
     await new Promise((resolve, reject) => {
-      const child = spawn(ffmpegBin, [
-        "-y",
-        "-i",
-        filepath,
-        "-i",
-        coverPath,
-        "-map",
-        "0:a",
-        "-map",
-        "1:v",
-        "-c:a",
-        "copy",
-        "-c:v",
-        "png",
-        "-disposition:v:0",
-        "attached_pic",
-        "-metadata:s:v",
-        "title=Album cover",
-        "-metadata:s:v",
-        "comment=Cover (front)",
-        tmpOut
-      ], { signal, stdio: "ignore" });
+      const child = spawn(ffmpegBin, ffmpegArgs, { signal, stdio: ["ignore", "ignore", "pipe"] });
+      child.stderr?.on("data", (chunk) => {
+        stderr += chunk.toString();
+      });
       child.on("error", reject);
-      child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}`)));
+      child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}: ${stderr.slice(-300)}`)));
     });
     await fs7.rename(tmpOut, filepath);
-  } catch {
+    debugLog3("embedSquareCover: success \u2014 cover replaced with square crop");
+  } catch (err) {
+    debugLog3(`embedSquareCover: FAILED \u2014 ${err instanceof Error ? err.message : String(err)}`);
     await fs7.rm(tmpOut, { force: true }).catch(() => {
     });
   } finally {
@@ -96579,10 +96611,10 @@ function cleanYtDlpError(stderr) {
 var import_react39 = __toESM(require_react(), 1);
 var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
 var nextImageId = 0;
-var DEBUG3 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+var DEBUG4 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
 var loggedRenderer;
 function logRenderer(protocol, hasPng, hasRgba, hasGrid) {
-  if (!DEBUG3) return;
+  if (!DEBUG4) return;
   const key = `${protocol}|png=${hasPng}|rgba=${hasRgba}|grid=${hasGrid}`;
   if (loggedRenderer === key) return;
   loggedRenderer = key;
@@ -96683,10 +96715,10 @@ function Thumbnail({ grid, png: png3, rgba, cols, rows }) {
 var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
 import fs8 from "fs";
 var OUT_DIR = path6.join(os6.homedir(), "Downloads");
-var DEBUG4 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+var DEBUG5 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
 var DEBUG_LOG2 = path6.join(os6.tmpdir(), "carbon-debug.log");
-function debugLog3(msg) {
-  if (!DEBUG4) return;
+function debugLog4(msg) {
+  if (!DEBUG5) return;
   const line = `[app] ${(/* @__PURE__ */ new Date()).toISOString()} ${msg}
 `;
   process.stderr.write(line);
@@ -96757,16 +96789,16 @@ function CoverArt({ candidates, cols, square }) {
     void (async () => {
       for (const candidate of candidates) {
         if (cancelled || controller.signal.aborted) return;
-        debugLog3(`CoverArt: trying url=${candidate.url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`);
+        debugLog4(`CoverArt: trying url=${candidate.url} cols=${cols} rows=${rows} protocol=${protocol} square=${square}`);
         const result = await fetchThumbnail(candidate.url, cols, rows, protocol, controller.signal, square);
         if (result) {
-          debugLog3(`CoverArt: fetchThumbnail OK for ${candidate.url}`);
+          debugLog4(`CoverArt: fetchThumbnail OK for ${candidate.url}`);
           if (!cancelled) setThumb(result);
           return;
         }
-        debugLog3(`CoverArt: fetchThumbnail FAILED for ${candidate.url}, trying next`);
+        debugLog4(`CoverArt: fetchThumbnail FAILED for ${candidate.url}, trying next`);
       }
-      debugLog3("CoverArt: all candidates failed");
+      debugLog4("CoverArt: all candidates failed");
     })();
     return () => {
       cancelled = true;
@@ -96788,13 +96820,13 @@ function MediaHeader({ info, platform: platform2, contentWidth, audioMode }) {
   const coverCols = square ? Math.max(8, Math.round(metaRows * cell.height / cell.width)) : 24;
   const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta;
   const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth;
-  debugLog3(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`);
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", width: contentWidth, children: [
+  debugLog4(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`);
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", width: contentWidth, justifyContent: "center", children: [
     showCover ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(CoverArt, { candidates, cols: coverCols, square }),
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: gap, flexShrink: 0 })
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", flexGrow: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: metaWidth }) })
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", width: metaWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: metaWidth }) })
   ] });
 }
 function ModernProgressBar({ percent, width = 40 }) {
@@ -97550,9 +97582,9 @@ async function selfUninstall() {
   if (fs10.existsSync(configDir)) {
     if (rmDir(configDir)) removed.push(configDir);
   }
-  const debugLog4 = path8.join(os7.tmpdir(), "carbon-debug.log");
-  if (fs10.existsSync(debugLog4)) {
-    if (rmFile(debugLog4)) removed.push(debugLog4);
+  const debugLog5 = path8.join(os7.tmpdir(), "carbon-debug.log");
+  if (fs10.existsSync(debugLog5)) {
+    if (rmFile(debugLog5)) removed.push(debugLog5);
   }
   if (removed.length === 0) {
     return {
@@ -97635,10 +97667,10 @@ async function runTui() {
   }
   const enterAltScreen = () => process.stdout.write("\x1B[?1049h\x1B[H");
   const leaveAltScreen = () => process.stdout.write("\x1B[?1049l");
-  const DEBUG5 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
+  const DEBUG6 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
   if (isTTY) {
     const caps = await queryTerminal(350);
-    if (DEBUG5) {
+    if (DEBUG6) {
       process.stderr.write(`[image] queryTerminal: protocol=${caps.protocol ?? "(none)"} cell=${caps.cellPixelSize ? `${caps.cellPixelSize.width}x${caps.cellPixelSize.height}` : "(unknown)"}
 `);
     }

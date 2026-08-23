@@ -219,14 +219,14 @@ function MediaHeader({info, platform, contentWidth, audioMode}: {info: VideoInfo
   debugLog(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`)
 
   return (
-    <Box flexDirection="row" width={contentWidth}>
+    <Box flexDirection="row" width={contentWidth} justifyContent="center">
       {showCover ? (
         <>
           <CoverArt candidates={candidates} cols={coverCols} square={square} />
           <Box width={gap} flexShrink={0} />
         </>
       ) : null}
-      <Box flexDirection="column" flexGrow={1}>
+      <Box flexDirection="column" width={metaWidth}>
         <MetadataBlock info={info} platform={platform} maxWidth={metaWidth} />
       </Box>
     </Box>
