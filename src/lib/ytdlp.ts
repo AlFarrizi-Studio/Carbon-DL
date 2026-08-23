@@ -70,7 +70,12 @@ export async function ensureYtDlp(onStatus: (message: string) => void, signal?: 
  * Checks: system PATH → previously downloaded → download from GitHub.
  * Supports Windows, Linux (x64/arm64), and macOS.
  */
-export async function ensureFfmpeg(onStatus?: (message: string) => void, signal?: AbortSignal): Promise<string | undefined> {
+/** Ensure ffmpeg is available.
+ *  Returns:
+ *   - undefined → ffmpeg is on system PATH (no --ffmpeg-location needed)
+ *   - string   → path to directory containing ffmpeg (use --ffmpeg-location)
+ *   - null     → ffmpeg not available anywhere (skip postprocessing features) */
+export async function ensureFfmpeg(onStatus?: (message: string) => void, signal?: AbortSignal): Promise<string | null | undefined> {
   // 1. System ffmpeg
   if (await commandWorks('ffmpeg', ['-version'])) return undefined
 
@@ -153,10 +158,10 @@ export async function ensureFfmpeg(onStatus?: (message: string) => void, signal?
 
     if (await commandWorks(localFfmpeg, ['-version'])) return CARBON_DIR
   } catch {
-    // Download failed — return undefined, yt-dlp will try without ffmpeg
+    // Download failed — ffmpeg truly unavailable
   }
 
-  return undefined
+  return null
 }
 
 /** Recursively find ffmpeg/ffprobe in extracted directory and move to target. */
@@ -914,7 +919,8 @@ process.on('exit', () => activeChild?.kill('SIGTERM'))
 export async function download(
   opts: {
     ytdlp: string
-    ffmpegLocation?: string
+    /** undefined = ffmpeg on PATH, string = ffmpeg dir, null = ffmpeg unavailable */
+    ffmpegLocation?: string | null
     url: string
     choice: DownloadChoice
     outDir: string
@@ -927,6 +933,8 @@ export async function download(
 ): Promise<string> {
   const browser = opts.useCookies ? await getBrowserForCookies() : undefined
   const cookieArgs = browser ? ['--cookies-from-browser', browser] : []
+  // ffmpeg unavailable → skip postprocessing features that require it
+  const hasFfmpeg = opts.ffmpegLocation !== null
   const args = [
     opts.url,
     ...opts.choice.args,
@@ -946,8 +954,8 @@ export async function download(
     ...cookieArgs,
     // Embed metadata (title, artist, album, date…) and cover art into the
     // final file so media players can display them during playback.
-    '--embed-metadata',
-    '--embed-thumbnail',
+    // Skipped when ffmpeg is unavailable (would cause postprocessing error).
+    ...(hasFfmpeg ? ['--embed-metadata', '--embed-thumbnail'] : []),
     '-o',
     path.join(opts.outDir, '%(title).80s.%(ext)s'),
   ]

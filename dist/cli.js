@@ -95996,7 +95996,7 @@ async function ensureFfmpeg(onStatus, signal) {
     if (await commandWorks(localFfmpeg, ["-version"])) return CARBON_DIR;
   } catch {
   }
-  return void 0;
+  return null;
 }
 async function moveExtractedBinaries(searchDir, targetFfmpeg, targetFfprobe) {
   const ffmpegName = process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg";
@@ -96433,6 +96433,7 @@ process.on("exit", () => activeChild?.kill("SIGTERM"));
 async function download(opts, handlers, signal) {
   const browser = opts.useCookies ? await getBrowserForCookies() : void 0;
   const cookieArgs = browser ? ["--cookies-from-browser", browser] : [];
+  const hasFfmpeg = opts.ffmpegLocation !== null;
   const args2 = [
     opts.url,
     ...opts.choice.args,
@@ -96452,8 +96453,8 @@ async function download(opts, handlers, signal) {
     ...cookieArgs,
     // Embed metadata (title, artist, album, date…) and cover art into the
     // final file so media players can display them during playback.
-    "--embed-metadata",
-    "--embed-thumbnail",
+    // Skipped when ffmpeg is unavailable (would cause postprocessing error).
+    ...hasFfmpeg ? ["--embed-metadata", "--embed-thumbnail"] : [],
     "-o",
     path5.join(opts.outDir, "%(title).80s.%(ext)s")
   ];
@@ -97027,9 +97028,9 @@ function AppContent({
             );
             filepath = await download({ ...base, useCookies: isDrm, strongBypass: true }, handlers, controller.signal);
           }
-          if (choice.kind === "audio" && info && hasCompleteMusicMeta(info)) {
+          if (choice.kind === "audio" && info && hasCompleteMusicMeta(info) && ffmpegLocation !== null) {
             setPhase((prev) => prev.name === "downloading" ? { ...prev, processing: true } : prev);
-            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation, controller.signal);
+            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation ?? void 0, controller.signal);
           }
           onOutcome({ filepath });
           setHistory(addToHistory(url));

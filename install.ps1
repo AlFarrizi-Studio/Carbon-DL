@@ -101,6 +101,57 @@ try {
     exit 1
 }
 
+# --- Download yt-dlp ---
+$BIN_DIR = Join-Path $env:USERPROFILE '.carbon\bin'
+if (-not (Test-Path $BIN_DIR)) {
+    New-Item -ItemType Directory -Path $BIN_DIR -Force | Out-Null
+}
+
+$ytdlpPath = Join-Path $BIN_DIR 'yt-dlp.exe'
+if (-not (Test-Path $ytdlpPath)) {
+    Write-Host ' → Downloading yt-dlp...' -ForegroundColor White
+    $ytdlpUrl = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe'
+    try {
+        Invoke-WebRequest -Uri $ytdlpUrl -OutFile $ytdlpPath -UseBasicParsing
+        Write-Host ' ✓ yt-dlp downloaded.' -ForegroundColor Green
+    } catch {
+        Write-Host ' ⚠ Failed to download yt-dlp (will be downloaded on first run).' -ForegroundColor Yellow
+    }
+} else {
+    Write-Host ' ✓ yt-dlp already present.' -ForegroundColor Green
+}
+
+# --- Download and extract ffmpeg ---
+$ffmpegPath = Join-Path $BIN_DIR 'ffmpeg.exe'
+$ffprobePath = Join-Path $BIN_DIR 'ffprobe.exe'
+if (-not (Test-Path $ffmpegPath)) {
+    Write-Host ' → Downloading ffmpeg...' -ForegroundColor White
+    $ffmpegUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
+    $ffmpegZip = Join-Path $env:TEMP 'ffmpeg-carbon.zip'
+    $ffmpegExtract = Join-Path $env:TEMP 'ffmpeg-carbon-extract'
+    try {
+        Invoke-WebRequest -Uri $ffmpegUrl -OutFile $ffmpegZip -UseBasicParsing
+        Write-Host '   Extracting ffmpeg...' -ForegroundColor White
+        if (Test-Path $ffmpegExtract) { Remove-Item $ffmpegExtract -Recurse -Force }
+        Expand-Archive -Path $ffmpegZip -DestinationPath $ffmpegExtract -Force
+        # Find ffmpeg.exe and ffprobe.exe in extracted folder (nested in bin/)
+        $foundFfmpeg = Get-ChildItem -Path $ffmpegExtract -Recurse -Filter 'ffmpeg.exe' | Select-Object -First 1
+        $foundFfprobe = Get-ChildItem -Path $ffmpegExtract -Recurse -Filter 'ffprobe.exe' | Select-Object -First 1
+        if ($foundFfmpeg) { Copy-Item $foundFfmpeg.FullName $ffmpegPath -Force }
+        if ($foundFfprobe) { Copy-Item $foundFfprobe.FullName $ffprobePath -Force }
+        # Cleanup
+        Remove-Item $ffmpegZip -Force -ErrorAction SilentlyContinue
+        Remove-Item $ffmpegExtract -Recurse -Force -ErrorAction SilentlyContinue
+        Write-Host ' ✓ ffmpeg downloaded and extracted.' -ForegroundColor Green
+    } catch {
+        Write-Host ' ⚠ Failed to download ffmpeg (will be downloaded on first run).' -ForegroundColor Yellow
+        Remove-Item $ffmpegZip -Force -ErrorAction SilentlyContinue
+        Remove-Item $ffmpegExtract -Recurse -Force -ErrorAction SilentlyContinue
+    }
+} else {
+    Write-Host ' ✓ ffmpeg already present.' -ForegroundColor Green
+}
+
 # --- Create launcher script ---
 $launcherPath = Join-Path $INSTALL_DIR 'carbon-dl.cmd'
 @"

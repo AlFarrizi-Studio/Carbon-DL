@@ -517,9 +517,10 @@ function AppContent({
           // Audio with complete music metadata (title + artist + album) →
           // replace the embedded cover with a square-cropped version so media
           // players show a proper square album cover during playback.
-          if (choice.kind === 'audio' && info && hasCompleteMusicMeta(info)) {
+          // Skip when ffmpeg is unavailable (ffmpegLocation === null).
+          if (choice.kind === 'audio' && info && hasCompleteMusicMeta(info) && ffmpegLocation !== null) {
             setPhase(prev => (prev.name === 'downloading' ? {...prev, processing: true} : prev))
-            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation, controller.signal)
+            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation ?? undefined, controller.signal)
           }
           onOutcome({filepath})
           setHistory(addToHistory(url))

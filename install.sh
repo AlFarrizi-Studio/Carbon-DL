@@ -145,6 +145,102 @@ else
     exit 1
 fi
 
+# --- Download yt-dlp ---
+BIN_DIR="$INSTALL_DIR/bin"
+mkdir -p "$BIN_DIR"
+
+if [ "$OS" = "Darwin" ]; then
+    YTDLP_NAME="yt-dlp_macos"
+else
+    if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+        YTDLP_NAME="yt-dlp_linux_aarch64"
+    else
+        YTDLP_NAME="yt-dlp_linux"
+    fi
+fi
+
+YTDLP_PATH="$BIN_DIR/yt-dlp"
+if [ ! -f "$YTDLP_PATH" ]; then
+    echo " → Downloading yt-dlp..."
+    YTDLP_URL="https://github.com/yt-dlp/yt-dlp/releases/latest/download/$YTDLP_NAME"
+    if command -v curl >/dev/null 2>&1; then
+        curl -fsSL "$YTDLP_URL" -o "$YTDLP_PATH" && chmod +x "$YTDLP_PATH"
+    elif command -v wget >/dev/null 2>&1; then
+        wget -q "$YTDLP_URL" -O "$YTDLP_PATH" && chmod +x "$YTDLP_PATH"
+    fi
+    if [ -f "$YTDLP_PATH" ] && [ -x "$YTDLP_PATH" ]; then
+        echo -e "${GREEN} ✓ yt-dlp downloaded.${RESET}"
+    else
+        echo -e "${YELLOW} ⚠ Failed to download yt-dlp (will be downloaded on first run).${RESET}"
+        rm -f "$YTDLP_PATH"
+    fi
+else
+    echo -e "${GREEN} ✓ yt-dlp already present.${RESET}"
+fi
+
+# --- Download and extract ffmpeg ---
+FFMPEG_PATH="$BIN_DIR/ffmpeg"
+FFPROBE_PATH="$BIN_DIR/ffprobe"
+if [ ! -f "$FFMPEG_PATH" ]; then
+    echo " → Downloading ffmpeg..."
+    FFMPEG_TMP="$(mktemp -d)"
+
+    if [ "$OS" = "Darwin" ]; then
+        # macOS: evermeet.cx static builds (separate zips for ffmpeg and ffprobe)
+        for TOOL in ffmpeg ffprobe; do
+            if [ "$TOOL" = "ffmpeg" ]; then
+                TOOL_URL="https://evermeet.cx/ffmpeg/getrelease/zip"
+            else
+                TOOL_URL="https://evermeet.cx/ffmpeg/getrelease/ffprobe/zip"
+            fi
+            TOOL_ZIP="$FFMPEG_TMP/$TOOL.zip"
+            if command -v curl >/dev/null 2>&1; then
+                curl -fsSL "$TOOL_URL" -o "$TOOL_ZIP" 2>/dev/null || true
+            elif command -v wget >/dev/null 2>&1; then
+                wget -q "$TOOL_URL" -O "$TOOL_ZIP" 2>/dev/null || true
+            fi
+            if [ -f "$TOOL_ZIP" ]; then
+                unzip -o "$TOOL_ZIP" -d "$FFMPEG_TMP" 2>/dev/null || true
+            fi
+        done
+        # Move binaries
+        [ -f "$FFMPEG_TMP/ffmpeg" ] && mv "$FFMPEG_TMP/ffmpeg" "$FFMPEG_PATH" && chmod +x "$FFMPEG_PATH"
+        [ -f "$FFMPEG_TMP/ffprobe" ] && mv "$FFMPEG_TMP/ffprobe" "$FFPROBE_PATH" && chmod +x "$FFPROBE_PATH"
+    else
+        # Linux: BtbN/FFmpeg-Builds tar.xz
+        if [ "$ARCH" = "aarch64" ] || [ "$ARCH" = "arm64" ]; then
+            FFMPEG_URL="https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-linuxarm64-gpl.tar.xz"
+        else
+            FFMPEG_URL="https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-linux64-gpl.tar.xz"
+        fi
+        FFMPEG_ARCHIVE="$FFMPEG_TMP/ffmpeg.tar.xz"
+        if command -v curl >/dev/null 2>&1; then
+            curl -fsSL "$FFMPEG_URL" -o "$FFMPEG_ARCHIVE"
+        elif command -v wget >/dev/null 2>&1; then
+            wget -q "$FFMPEG_URL" -O "$FFMPEG_ARCHIVE"
+        fi
+        if [ -f "$FFMPEG_ARCHIVE" ]; then
+            echo "   Extracting ffmpeg..."
+            tar -xJf "$FFMPEG_ARCHIVE" -C "$FFMPEG_TMP" 2>/dev/null || true
+            # Find ffmpeg and ffprobe in extracted dirs
+            FOUND_FFMPEG=$(find "$FFMPEG_TMP" -name "ffmpeg" -type f 2>/dev/null | head -1)
+            FOUND_FFPROBE=$(find "$FFMPEG_TMP" -name "ffprobe" -type f 2>/dev/null | head -1)
+            [ -n "$FOUND_FFMPEG" ] && cp "$FOUND_FFMPEG" "$FFMPEG_PATH" && chmod +x "$FFMPEG_PATH"
+            [ -n "$FOUND_FFPROBE" ] && cp "$FOUND_FFPROBE" "$FFPROBE_PATH" && chmod +x "$FFPROBE_PATH"
+        fi
+    fi
+
+    rm -rf "$FFMPEG_TMP"
+
+    if [ -f "$FFMPEG_PATH" ] && [ -x "$FFMPEG_PATH" ]; then
+        echo -e "${GREEN} ✓ ffmpeg downloaded and extracted.${RESET}"
+    else
+        echo -e "${YELLOW} ⚠ Failed to download ffmpeg (will be downloaded on first run).${RESET}"
+    fi
+else
+    echo -e "${GREEN} ✓ ffmpeg already present.${RESET}"
+fi
+
 # --- Create launcher script ---
 LAUNCHER="$INSTALL_DIR/bin/carbon-dl"
 mkdir -p "$INSTALL_DIR/bin"
