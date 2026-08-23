@@ -952,10 +952,14 @@ export async function download(
     ...bypassArgsFor(opts.url, opts.strongBypass),
     // Cookies for age restriction / DRM bypass
     ...cookieArgs,
-    // Embed metadata (title, artist, album, date…) and cover art into the
-    // final file so media players can display them during playback.
-    // Skipped when ffmpeg is unavailable (would cause postprocessing error).
-    ...(hasFfmpeg ? ['--embed-metadata', '--embed-thumbnail'] : []),
+    // Embed metadata (title, artist, album, date…) into the final file so
+    // media players can display them during playback.
+    // NOTE: --embed-thumbnail is intentionally NOT used here. yt-dlp's internal
+    // thumbnail embedding (via ffmpeg post-processing) can corrupt the audio
+    // stream for certain videos, producing files with no playable audio.
+    // Instead, we embed the cover art ourselves after download using
+    // embedSquareCover() which has proper safety checks.
+    ...(hasFfmpeg ? ['--embed-metadata'] : []),
     '-o',
     path.join(opts.outDir, '%(title).80s.%(ext)s'),
   ]
@@ -1071,6 +1075,8 @@ export async function embedSquareCover(
   candidates: ThumbnailInfo[],
   ffmpegLocation?: string,
   signal?: AbortSignal,
+  /** Center-crop to square (album art style). Only for complete music metadata. */
+  square = true,
 ): Promise<void> {
   if (candidates.length === 0) {
     debugLog('embedSquareCover: no candidates, skipping')
@@ -1084,8 +1090,8 @@ export async function embedSquareCover(
     return
   }
 
-  debugLog(`embedSquareCover: downloading artwork (${candidates.length} candidates)`)
-  const artwork = await downloadArtwork(candidates, {square: true, signal})
+  debugLog(`embedSquareCover: downloading artwork (${candidates.length} candidates, square=${square})`)
+  const artwork = await downloadArtwork(candidates, {square, signal})
   if (!artwork || signal?.aborted) {
     debugLog(`embedSquareCover: artwork download failed or aborted`)
     return

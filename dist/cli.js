@@ -96451,10 +96451,14 @@ async function download(opts, handlers, signal) {
     ...bypassArgsFor(opts.url, opts.strongBypass),
     // Cookies for age restriction / DRM bypass
     ...cookieArgs,
-    // Embed metadata (title, artist, album, date…) and cover art into the
-    // final file so media players can display them during playback.
-    // Skipped when ffmpeg is unavailable (would cause postprocessing error).
-    ...hasFfmpeg ? ["--embed-metadata", "--embed-thumbnail"] : [],
+    // Embed metadata (title, artist, album, date…) into the final file so
+    // media players can display them during playback.
+    // NOTE: --embed-thumbnail is intentionally NOT used here. yt-dlp's internal
+    // thumbnail embedding (via ffmpeg post-processing) can corrupt the audio
+    // stream for certain videos, producing files with no playable audio.
+    // Instead, we embed the cover art ourselves after download using
+    // embedSquareCover() which has proper safety checks.
+    ...hasFfmpeg ? ["--embed-metadata"] : [],
     "-o",
     path5.join(opts.outDir, "%(title).80s.%(ext)s")
   ];
@@ -96548,7 +96552,7 @@ async function fileHasAudioStream(filepath, ffmpegLocation) {
     return true;
   }
 }
-async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
+async function embedSquareCover(filepath, candidates, ffmpegLocation, signal, square = true) {
   if (candidates.length === 0) {
     debugLog3("embedSquareCover: no candidates, skipping");
     return;
@@ -96558,8 +96562,8 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
     debugLog3("embedSquareCover: WAV does not support embedded cover, skipping");
     return;
   }
-  debugLog3(`embedSquareCover: downloading artwork (${candidates.length} candidates)`);
-  const artwork = await downloadArtwork(candidates, { square: true, signal });
+  debugLog3(`embedSquareCover: downloading artwork (${candidates.length} candidates, square=${square})`);
+  const artwork = await downloadArtwork(candidates, { square, signal });
   if (!artwork || signal?.aborted) {
     debugLog3(`embedSquareCover: artwork download failed or aborted`);
     return;
@@ -97073,9 +97077,10 @@ function AppContent({
             );
             filepath = await download({ ...base, useCookies: isDrm, strongBypass: true }, handlers, controller.signal);
           }
-          if (choice.kind === "audio" && info && hasCompleteMusicMeta(info) && ffmpegLocation !== null) {
+          if (choice.kind === "audio" && info && ffmpegLocation !== null) {
             setPhase((prev) => prev.name === "downloading" ? { ...prev, processing: true } : prev);
-            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation ?? void 0, controller.signal);
+            const square = hasCompleteMusicMeta(info);
+            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation ?? void 0, controller.signal, square);
           }
           onOutcome({ filepath });
           setHistory(addToHistory(url));

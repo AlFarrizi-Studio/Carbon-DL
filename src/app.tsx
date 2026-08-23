@@ -514,13 +514,16 @@ function AppContent({
             // so it's only used here as a last resort after the normal attempt.
             filepath = await download({...base, useCookies: isDrm, strongBypass: true}, handlers, controller.signal)
           }
-          // Audio with complete music metadata (title + artist + album) →
-          // replace the embedded cover with a square-cropped version so media
-          // players show a proper square album cover during playback.
+          // Audio mode → embed cover art into the file so media players can
+          // display it during playback. We do this ourselves (instead of
+          // yt-dlp's --embed-thumbnail) because yt-dlp's internal embedding
+          // can corrupt the audio stream for certain videos.
+          // Square crop is used when complete music metadata is available.
           // Skip when ffmpeg is unavailable (ffmpegLocation === null).
-          if (choice.kind === 'audio' && info && hasCompleteMusicMeta(info) && ffmpegLocation !== null) {
+          if (choice.kind === 'audio' && info && ffmpegLocation !== null) {
             setPhase(prev => (prev.name === 'downloading' ? {...prev, processing: true} : prev))
-            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation ?? undefined, controller.signal)
+            const square = hasCompleteMusicMeta(info)
+            await embedSquareCover(filepath, thumbnailCandidates(info), ffmpegLocation ?? undefined, controller.signal, square)
           }
           onOutcome({filepath})
           setHistory(addToHistory(url))
