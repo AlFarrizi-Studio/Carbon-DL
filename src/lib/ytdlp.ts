@@ -1026,13 +1026,46 @@ export async function download(
   })
 }
 
+/** Verify that a media file contains at least one audio stream using ffprobe.
+ *  Returns true when an audio stream is found, false otherwise. */
+async function fileHasAudioStream(filepath: string, ffmpegLocation?: string): Promise<boolean> {
+  const ffprobeBin = ffmpegLocation
+    ? path.join(ffmpegLocation, process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe')
+    : 'ffprobe'
+  try {
+    const stdout = await new Promise<string>((resolve, reject) => {
+      const child = spawn(ffprobeBin, [
+        '-v', 'error',
+        '-select_streams', 'a',
+        '-show_entries', 'stream=codec_type',
+        '-of', 'csv=p=0',
+        filepath,
+      ], {stdio: ['ignore', 'pipe', 'ignore'], timeout: 15_000})
+      let out = ''
+      child.stdout?.on('data', (chunk: Buffer) => { out += chunk.toString() })
+      child.on('error', reject)
+      child.on('close', code => (code === 0 ? resolve(out) : reject(new Error(`ffprobe exit ${code}`))))
+    })
+    return stdout.trim().includes('audio')
+  } catch {
+    // ffprobe unavailable or failed — assume the file is fine to avoid
+    // blocking the user. The file was just produced by yt-dlp/ffmpeg.
+    return true
+  }
+}
+
 /** Replace the embedded cover art in a downloaded audio file with a
  *  square-cropped version. yt-dlp's --embed-thumbnail uses the original
  *  (often 16:9) thumbnail; this re-embeds a 1:1 crop so media players
  *  display a proper square album cover.
  *
  *  Silently no-ops when artwork can't be fetched or ffmpeg fails — the
- *  original file (with its existing cover) is preserved. */
+ *  original file (with its existing cover) is preserved.
+ *
+ *  SAFETY: after ffmpeg finishes, the output is verified with ffprobe to
+ *  confirm it still contains an audio stream before the original file is
+ *  replaced. This prevents a silent/corrupt ffmpeg run from destroying a
+ *  perfectly good download. */
 export async function embedSquareCover(
   filepath: string,
   candidates: ThumbnailInfo[],
@@ -1044,6 +1077,13 @@ export async function embedSquareCover(
     return
   }
 
+  // WAV does not support embedded images via video streams — skip entirely.
+  const ext = path.extname(filepath).toLowerCase()
+  if (ext === '.wav') {
+    debugLog('embedSquareCover: WAV does not support embedded cover, skipping')
+    return
+  }
+
   debugLog(`embedSquareCover: downloading artwork (${candidates.length} candidates)`)
   const artwork = await downloadArtwork(candidates, {square: true, signal})
   if (!artwork || signal?.aborted) {
@@ -1052,7 +1092,6 @@ export async function embedSquareCover(
   }
   debugLog(`embedSquareCover: artwork ready (${artwork.length} bytes)`)
 
-  const ext = path.extname(filepath).toLowerCase()
   const coverPath = filepath + '.cover.jpg'
   const tmpOut = filepath + '.tmp' + ext
 
@@ -1111,6 +1150,27 @@ export async function embedSquareCover(
       child.on('error', reject)
       child.on('close', code => (code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}: ${stderr.slice(-300)}`))))
     })
+
+    // ── SAFETY CHECK ──────────────────────────────────────────────────────
+    // Verify the output file actually contains an audio stream before
+    // replacing the original. ffmpeg can exit 0 yet produce a file with
+    // only the cover image (no audio) when the container/codec combo is
+    // unsupported — previously this silently destroyed the good download.
+    const hasAudio = await fileHasAudioStream(tmpOut, ffmpegLocation)
+    if (!hasAudio) {
+      debugLog('embedSquareCover: output has NO audio stream — keeping original file')
+      await fs.rm(tmpOut, {force: true}).catch(() => {})
+      return
+    }
+
+    // Extra sanity: output must not be drastically smaller than the original
+    // (a near-empty file indicates something went wrong).
+    const [origStat, tmpStat] = await Promise.all([fs.stat(filepath), fs.stat(tmpOut)])
+    if (tmpStat.size < origStat.size * 0.5) {
+      debugLog(`embedSquareCover: output suspiciously small (${tmpStat.size} vs ${origStat.size} bytes) — keeping original`)
+      await fs.rm(tmpOut, {force: true}).catch(() => {})
+      return
+    }
 
     // Replace original with the re-embedded version.
     await fs.rename(tmpOut, filepath)

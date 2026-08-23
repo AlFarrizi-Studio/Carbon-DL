@@ -96521,9 +96521,41 @@ async function download(opts, handlers, signal) {
     });
   });
 }
+async function fileHasAudioStream(filepath, ffmpegLocation) {
+  const ffprobeBin = ffmpegLocation ? path5.join(ffmpegLocation, process.platform === "win32" ? "ffprobe.exe" : "ffprobe") : "ffprobe";
+  try {
+    const stdout = await new Promise((resolve, reject) => {
+      const child = spawn(ffprobeBin, [
+        "-v",
+        "error",
+        "-select_streams",
+        "a",
+        "-show_entries",
+        "stream=codec_type",
+        "-of",
+        "csv=p=0",
+        filepath
+      ], { stdio: ["ignore", "pipe", "ignore"], timeout: 15e3 });
+      let out = "";
+      child.stdout?.on("data", (chunk) => {
+        out += chunk.toString();
+      });
+      child.on("error", reject);
+      child.on("close", (code) => code === 0 ? resolve(out) : reject(new Error(`ffprobe exit ${code}`)));
+    });
+    return stdout.trim().includes("audio");
+  } catch {
+    return true;
+  }
+}
 async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
   if (candidates.length === 0) {
     debugLog3("embedSquareCover: no candidates, skipping");
+    return;
+  }
+  const ext = path5.extname(filepath).toLowerCase();
+  if (ext === ".wav") {
+    debugLog3("embedSquareCover: WAV does not support embedded cover, skipping");
     return;
   }
   debugLog3(`embedSquareCover: downloading artwork (${candidates.length} candidates)`);
@@ -96533,7 +96565,6 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
     return;
   }
   debugLog3(`embedSquareCover: artwork ready (${artwork.length} bytes)`);
-  const ext = path5.extname(filepath).toLowerCase();
   const coverPath = filepath + ".cover.jpg";
   const tmpOut = filepath + ".tmp" + ext;
   try {
@@ -96593,6 +96624,20 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal) {
       child.on("error", reject);
       child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`ffmpeg exit ${code}: ${stderr.slice(-300)}`)));
     });
+    const hasAudio2 = await fileHasAudioStream(tmpOut, ffmpegLocation);
+    if (!hasAudio2) {
+      debugLog3("embedSquareCover: output has NO audio stream \u2014 keeping original file");
+      await fs7.rm(tmpOut, { force: true }).catch(() => {
+      });
+      return;
+    }
+    const [origStat, tmpStat] = await Promise.all([fs7.stat(filepath), fs7.stat(tmpOut)]);
+    if (tmpStat.size < origStat.size * 0.5) {
+      debugLog3(`embedSquareCover: output suspiciously small (${tmpStat.size} vs ${origStat.size} bytes) \u2014 keeping original`);
+      await fs7.rm(tmpOut, { force: true }).catch(() => {
+      });
+      return;
+    }
     await fs7.rename(tmpOut, filepath);
     debugLog3("embedSquareCover: success \u2014 cover replaced with square crop");
   } catch (err) {
