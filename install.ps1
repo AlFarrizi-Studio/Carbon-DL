@@ -125,29 +125,54 @@ if (-not (Test-Path $ytdlpPath)) {
 $ffmpegPath = Join-Path $BIN_DIR 'ffmpeg.exe'
 $ffprobePath = Join-Path $BIN_DIR 'ffprobe.exe'
 if (-not (Test-Path $ffmpegPath)) {
-    Write-Host ' → Downloading ffmpeg...' -ForegroundColor White
+    Write-Host ' → Downloading ffmpeg (~170 MB, this may take a while)...' -ForegroundColor White
     $ffmpegUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
     $ffmpegZip = Join-Path $env:TEMP 'ffmpeg-carbon.zip'
     $ffmpegExtract = Join-Path $env:TEMP 'ffmpeg-carbon-extract'
-    try {
-        Invoke-WebRequest -Uri $ffmpegUrl -OutFile $ffmpegZip -UseBasicParsing
-        Write-Host '   Extracting ffmpeg...' -ForegroundColor White
-        if (Test-Path $ffmpegExtract) { Remove-Item $ffmpegExtract -Recurse -Force }
-        Expand-Archive -Path $ffmpegZip -DestinationPath $ffmpegExtract -Force
-        # Find ffmpeg.exe and ffprobe.exe in extracted folder (nested in bin/)
-        $foundFfmpeg = Get-ChildItem -Path $ffmpegExtract -Recurse -Filter 'ffmpeg.exe' | Select-Object -First 1
-        $foundFfprobe = Get-ChildItem -Path $ffmpegExtract -Recurse -Filter 'ffprobe.exe' | Select-Object -First 1
-        if ($foundFfmpeg) { Copy-Item $foundFfmpeg.FullName $ffmpegPath -Force }
-        if ($foundFfprobe) { Copy-Item $foundFfprobe.FullName $ffprobePath -Force }
-        # Cleanup
-        Remove-Item $ffmpegZip -Force -ErrorAction SilentlyContinue
-        Remove-Item $ffmpegExtract -Recurse -Force -ErrorAction SilentlyContinue
-        Write-Host ' ✓ ffmpeg downloaded and extracted.' -ForegroundColor Green
-    } catch {
-        Write-Host ' ⚠ Failed to download ffmpeg (will be downloaded on first run).' -ForegroundColor Yellow
-        Remove-Item $ffmpegZip -Force -ErrorAction SilentlyContinue
-        Remove-Item $ffmpegExtract -Recurse -Force -ErrorAction SilentlyContinue
+    $ffmpegOk = $false
+
+    # Try curl.exe first (handles large files + redirects better than Invoke-WebRequest)
+    $curlExe = Get-Command curl.exe -ErrorAction SilentlyContinue
+    if ($curlExe) {
+        Write-Host '   Downloading with curl...' -ForegroundColor White
+        & curl.exe -fsSL -o $ffmpegZip $ffmpegUrl 2>$null
+        if ($LASTEXITCODE -eq 0 -and (Test-Path $ffmpegZip)) { $ffmpegOk = $true }
     }
+
+    # Fallback to Invoke-WebRequest with TLS 1.2
+    if (-not $ffmpegOk) {
+        Write-Host '   Downloading with Invoke-WebRequest...' -ForegroundColor White
+        try {
+            [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::Tls12
+            $ProgressPreference = 'SilentlyContinue'  # Speeds up large downloads
+            Invoke-WebRequest -Uri $ffmpegUrl -OutFile $ffmpegZip -UseBasicParsing
+            if (Test-Path $ffmpegZip) { $ffmpegOk = $true }
+        } catch {
+            Write-Host "   Download error: $_" -ForegroundColor Yellow
+        }
+    }
+
+    if ($ffmpegOk -and (Test-Path $ffmpegZip)) {
+        Write-Host '   Extracting ffmpeg...' -ForegroundColor White
+        try {
+            if (Test-Path $ffmpegExtract) { Remove-Item $ffmpegExtract -Recurse -Force }
+            Expand-Archive -Path $ffmpegZip -DestinationPath $ffmpegExtract -Force
+            # Find ffmpeg.exe and ffprobe.exe in extracted folder (nested in bin/)
+            $foundFfmpeg = Get-ChildItem -Path $ffmpegExtract -Recurse -Filter 'ffmpeg.exe' | Select-Object -First 1
+            $foundFfprobe = Get-ChildItem -Path $ffmpegExtract -Recurse -Filter 'ffprobe.exe' | Select-Object -First 1
+            if ($foundFfmpeg) { Copy-Item $foundFfmpeg.FullName $ffmpegPath -Force }
+            if ($foundFfprobe) { Copy-Item $foundFfprobe.FullName $ffprobePath -Force }
+            Write-Host ' ✓ ffmpeg downloaded and extracted.' -ForegroundColor Green
+        } catch {
+            Write-Host " ⚠ Failed to extract ffmpeg: $_" -ForegroundColor Yellow
+        }
+    } else {
+        Write-Host ' ⚠ Failed to download ffmpeg (will be downloaded on first run).' -ForegroundColor Yellow
+    }
+
+    # Cleanup
+    Remove-Item $ffmpegZip -Force -ErrorAction SilentlyContinue
+    Remove-Item $ffmpegExtract -Recurse -Force -ErrorAction SilentlyContinue
 } else {
     Write-Host ' ✓ ffmpeg already present.' -ForegroundColor Green
 }
