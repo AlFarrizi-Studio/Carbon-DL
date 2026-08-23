@@ -96780,13 +96780,15 @@ function CoverArt({ candidates, cols, square }) {
 }
 function MediaHeader({ info, platform: platform2, contentWidth, audioMode }) {
   const candidates = (0, import_react40.useMemo)(() => thumbnailCandidates(info), [info]);
-  const coverCols = 24;
   const gap = 2;
   const minMeta = 24;
+  const square = Boolean(audioMode && hasCompleteMusicMeta(info));
+  const cell = getCellPixelSize();
+  const metaRows = 6;
+  const coverCols = square ? Math.max(8, Math.round(metaRows * cell.height / cell.width)) : 24;
   const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta;
   const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth;
-  const square = Boolean(audioMode && hasCompleteMusicMeta(info));
-  debugLog3(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square}`);
+  debugLog3(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", width: contentWidth, children: [
     showCover ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
       /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(CoverArt, { candidates, cols: coverCols, square }),

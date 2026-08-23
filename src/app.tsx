@@ -201,14 +201,22 @@ function CoverArt({candidates, cols, square}: {candidates: ThumbnailInfo[]; cols
  */
 function MediaHeader({info, platform, contentWidth, audioMode}: {info: VideoInfo; platform?: Platform; contentWidth: number; audioMode?: boolean}) {
   const candidates = useMemo(() => thumbnailCandidates(info), [info])
-  const coverCols = 24
   const gap = 2
   const minMeta = 24
-  const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta
-  const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth
   // Square crop only for Audio mode with complete metadata (title + artist + album).
   const square = Boolean(audioMode && hasCompleteMusicMeta(info))
-  debugLog(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square}`)
+  // Size the cover to match the metadata block height (6 rows) so it never
+  // towers over the metadata. In square mode the width is derived from the
+  // cell aspect ratio so the result is a true visual square:
+  //   cols = metaRows * cellHeight / cellWidth  (e.g. 6 * 20/10 = 12)
+  const cell = getCellPixelSize()
+  const metaRows = 6
+  const coverCols = square
+    ? Math.max(8, Math.round((metaRows * cell.height) / cell.width))
+    : 24
+  const showCover = candidates.length > 0 && contentWidth >= coverCols + gap + minMeta
+  const metaWidth = showCover ? Math.max(minMeta, contentWidth - coverCols - gap) : contentWidth
+  debugLog(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`)
 
   return (
     <Box flexDirection="row" width={contentWidth}>
