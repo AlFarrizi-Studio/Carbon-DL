@@ -8,6 +8,8 @@
  *  4. Fallback: English
  */
 
+import {useEffect, useState} from 'react'
+
 export type LangCode = string
 
 export type Strings = {
@@ -87,6 +89,12 @@ export type Strings = {
   brSmall?: string
   // Update notification
   updateAvailable?: string
+  // Language picker
+  langPickerTitle?: string
+  langPickerHint?: string
+  langPickerSearch?: string
+  // Shortcut label for the language switcher
+  lang?: string
   // Allow additional keys for extensibility
   [key: string]: string | undefined
 }
@@ -168,6 +176,11 @@ const en: Strings = {
   brSmall: 'small',
   // Update notification
   updateAvailable: 'Update Carbon available',
+  // Language picker
+  langPickerTitle: 'Choose language',
+  langPickerHint: 'type to filter',
+  langPickerSearch: 'search…',
+  lang: 'language',
 }
 
 const id: Strings = {
@@ -247,6 +260,11 @@ const id: Strings = {
   brSmall: 'kecil',
   // Update notification
   updateAvailable: 'Update Carbon terbaru tersedia',
+  // Language picker
+  langPickerTitle: "Pilih bahasa",
+  langPickerHint: "ketik untuk memfilter",
+  langPickerSearch: "cari…",
+  lang: "bahasa",
 }
 
 const es: Strings = {
@@ -295,6 +313,11 @@ const es: Strings = {
   lblRelease: 'Lanzamiento',
   lblTime: 'Duración',
   lblSource: 'Fuente',
+  // Language picker
+  langPickerTitle: "Elegir idioma",
+  langPickerHint: "escribe para filtrar",
+  langPickerSearch: "buscar…",
+  lang: "idioma",
 }
 
 const fr: Strings = {
@@ -343,6 +366,11 @@ const fr: Strings = {
   lblRelease: 'Sortie',
   lblTime: 'Durée',
   lblSource: 'Source',
+  // Language picker
+  langPickerTitle: "Choisir la langue",
+  langPickerHint: "tapez pour filtrer",
+  langPickerSearch: "rechercher…",
+  lang: "langue",
 }
 
 const de: Strings = {
@@ -391,6 +419,11 @@ const de: Strings = {
   lblRelease: 'Veröffentlichung',
   lblTime: 'Dauer',
   lblSource: 'Quelle',
+  // Language picker
+  langPickerTitle: "Sprache wählen",
+  langPickerHint: "tippen zum filtern",
+  langPickerSearch: "suchen…",
+  lang: "sprache",
 }
 
 const pt: Strings = {
@@ -439,6 +472,11 @@ const pt: Strings = {
   lblRelease: 'Lançamento',
   lblTime: 'Duração',
   lblSource: 'Fonte',
+  // Language picker
+  langPickerTitle: "Escolher idioma",
+  langPickerHint: "digite para filtrar",
+  langPickerSearch: "pesquisar…",
+  lang: "idioma",
 }
 
 const it: Strings = {
@@ -487,6 +525,11 @@ const it: Strings = {
   lblRelease: 'Uscita',
   lblTime: 'Durata',
   lblSource: 'Fonte',
+  // Language picker
+  langPickerTitle: "Scegli lingua",
+  langPickerHint: "digita per filtrare",
+  langPickerSearch: "cerca…",
+  lang: "lingua",
 }
 
 const ru: Strings = {
@@ -535,6 +578,11 @@ const ru: Strings = {
   lblRelease: 'Релиз',
   lblTime: 'Длительность',
   lblSource: 'Источник',
+  // Language picker
+  langPickerTitle: "Выбрать язык",
+  langPickerHint: "наберите для фильтрации",
+  langPickerSearch: "поиск…",
+  lang: "язык",
 }
 
 const ja: Strings = {
@@ -583,6 +631,11 @@ const ja: Strings = {
   lblRelease: 'リリース',
   lblTime: '再生時間',
   lblSource: 'ソース',
+  // Language picker
+  langPickerTitle: "言語を選択",
+  langPickerHint: "入力で絞り込み",
+  langPickerSearch: "検索…",
+  lang: "言語",
 }
 
 const ko: Strings = {
@@ -631,6 +684,11 @@ const ko: Strings = {
   lblRelease: '발매',
   lblTime: '재생 시간',
   lblSource: '출처',
+  // Language picker
+  langPickerTitle: "언어 선택",
+  langPickerHint: "입력하여 필터링",
+  langPickerSearch: "검색…",
+  lang: "언어",
 }
 
 const zh: Strings = {
@@ -679,6 +737,11 @@ const zh: Strings = {
   lblRelease: '发行',
   lblTime: '时长',
   lblSource: '来源',
+  // Language picker
+  langPickerTitle: "选择语言",
+  langPickerHint: "输入以筛选",
+  langPickerSearch: "搜索…",
+  lang: "语言",
 }
 
 const zhTW: Strings = {
@@ -727,6 +790,11 @@ const zhTW: Strings = {
   lblRelease: '發行',
   lblTime: '時長',
   lblSource: '來源',
+  // Language picker
+  langPickerTitle: "選擇語言",
+  langPickerHint: "輸入以篩選",
+  langPickerSearch: "搜尋…",
+  lang: "語言",
 }
 
 const ar: Strings = {
@@ -775,6 +843,11 @@ const ar: Strings = {
   lblRelease: 'الإصدار',
   lblTime: 'المدة',
   lblSource: 'المصدر',
+  // Language picker
+  langPickerTitle: "اختر اللغة",
+  langPickerHint: "اكتب للتصفية",
+  langPickerSearch: "بحث…",
+  lang: "لغة",
 }
 
 const hi: Strings = {
@@ -823,6 +896,11 @@ const hi: Strings = {
   lblRelease: 'रिलीज़',
   lblTime: 'अवधि',
   lblSource: 'स्रोत',
+  // Language picker
+  langPickerTitle: "भाषा चुनें",
+  langPickerHint: "फ़िल्टर करने के लिए टाइप करें",
+  langPickerSearch: "खोजें…",
+  lang: "भाषा",
 }
 
 const tr: Strings = {
@@ -871,6 +949,11 @@ const tr: Strings = {
   lblRelease: 'Yayın',
   lblTime: 'Süre',
   lblSource: 'Kaynak',
+  // Language picker
+  langPickerTitle: "Dil seçin",
+  langPickerHint: "filtrelemek için yazın",
+  langPickerSearch: "ara…",
+  lang: "dil",
 }
 
 const vi: Strings = {
@@ -919,6 +1002,11 @@ const vi: Strings = {
   lblRelease: 'Phát hành',
   lblTime: 'Thời lượng',
   lblSource: 'Nguồn',
+  // Language picker
+  langPickerTitle: "Chọn ngôn ngữ",
+  langPickerHint: "gõ để lọc",
+  langPickerSearch: "tìm…",
+  lang: "ngôn ngữ",
 }
 
 const th: Strings = {
@@ -967,6 +1055,11 @@ const th: Strings = {
   lblRelease: 'เผยแพร่',
   lblTime: 'ระยะเวลา',
   lblSource: 'แหล่งที่มา',
+  // Language picker
+  langPickerTitle: "เลือกภาษา",
+  langPickerHint: "พิมพ์เพื่อกรอง",
+  langPickerSearch: "ค้นหา…",
+  lang: "ภาษา",
 }
 
 const ms: Strings = {
@@ -1015,6 +1108,11 @@ const ms: Strings = {
   lblRelease: 'Keluaran',
   lblTime: 'Tempoh',
   lblSource: 'Sumber',
+  // Language picker
+  langPickerTitle: "Pilih bahasa",
+  langPickerHint: "taip untuk tapis",
+  langPickerSearch: "cari…",
+  lang: "bahasa",
 }
 
 const nl: Strings = {
@@ -1063,6 +1161,11 @@ const nl: Strings = {
   lblRelease: 'Release',
   lblTime: 'Duur',
   lblSource: 'Bron',
+  // Language picker
+  langPickerTitle: "Kies taal",
+  langPickerHint: "typ om te filteren",
+  langPickerSearch: "zoeken…",
+  lang: "taal",
 }
 
 const pl: Strings = {
@@ -1111,6 +1214,11 @@ const pl: Strings = {
   lblRelease: 'Wydanie',
   lblTime: 'Czas',
   lblSource: 'Źródło',
+  // Language picker
+  langPickerTitle: "Wybierz język",
+  langPickerHint: "wpisz aby filtrować",
+  langPickerSearch: "szukaj…",
+  lang: "język",
 }
 
 const uk: Strings = {
@@ -1159,6 +1267,11 @@ const uk: Strings = {
   lblRelease: 'Реліз',
   lblTime: 'Тривалість',
   lblSource: 'Джерело',
+  // Language picker
+  langPickerTitle: "Вибрати мову",
+  langPickerHint: "введіть для фільтрації",
+  langPickerSearch: "пошук…",
+  lang: "мова",
 }
 
 const fil: Strings = {
@@ -1207,6 +1320,11 @@ const fil: Strings = {
   lblRelease: 'Release',
   lblTime: 'Tagal',
   lblSource: 'Pinagmulan',
+  // Language picker
+  langPickerTitle: "Pumili ng wika",
+  langPickerHint: "mag-type para i-filter",
+  langPickerSearch: "maghanap…",
+  lang: "wika",
 }
 
 // Partial translations for remaining languages — falls back to English for missing keys.
@@ -1338,8 +1456,14 @@ export function detectLanguage(): LangCode {
 
 let currentLang: LangCode = detectLanguage()
 
+type Listener = (lang: LangCode) => void
+const listeners = new Set<Listener>()
+
 export function setLanguage(lang: LangCode): void {
-  currentLang = table[lang] ? lang : 'en'
+  const next = table[lang] ? lang : 'en'
+  if (next === currentLang) return
+  currentLang = next
+  for (const fn of listeners) fn(next)
 }
 
 export function getLanguage(): LangCode {
@@ -1350,6 +1474,141 @@ export function t(): Strings {
   return table[currentLang] ?? en
 }
 
+/**
+ * React hook: returns the active translation object and re-renders the caller
+ * when the language changes (via setLanguage). Use this instead of bare `t()`
+ * in components that may change language at runtime (e.g. via ctrl+l picker).
+ */
+export function useT(): Strings {
+  const [, force] = useState(0)
+  useEffect(() => {
+    const fn: Listener = () => force(x => x + 1)
+    listeners.add(fn)
+    return () => {
+      listeners.delete(fn)
+    }
+  }, [])
+  return table[currentLang] ?? en
+}
+
 export function supportedLanguages(): string[] {
-  return Object.keys(table)
+  return Object.keys(table).sort()
+}
+
+/**
+ * Map of language code → native display name. Used by the ctrl+l picker so
+ * each entry reads as "Bahasa Indonesia", "日本語", "English" — not just "id".
+ */
+export const LANGUAGE_NAMES: Record<string, string> = {
+  en: 'English',
+  id: 'Bahasa Indonesia',
+  es: 'Español',
+  fr: 'Français',
+  de: 'Deutsch',
+  pt: 'Português',
+  it: 'Italiano',
+  ru: 'Русский',
+  ja: '日本語',
+  ko: '한국어',
+  zh: '中文 (简体)',
+  'zh-TW': '中文 (繁體)',
+  ar: 'العربية',
+  hi: 'हिन्दी',
+  tr: 'Türkçe',
+  vi: 'Tiếng Việt',
+  th: 'ภาษาไทย',
+  ms: 'Bahasa Melayu',
+  nl: 'Nederlands',
+  pl: 'Polski',
+  uk: 'Українська',
+  fil: 'Filipino',
+  sv: 'Svenska',
+  no: 'Norsk',
+  da: 'Dansk',
+  fi: 'Suomi',
+  cs: 'Čeština',
+  sk: 'Slovenčina',
+  hu: 'Magyar',
+  ro: 'Română',
+  bg: 'Български',
+  el: 'Ελληνικά',
+  hr: 'Hrvatski',
+  sr: 'Srpski',
+  sl: 'Slovenščina',
+  lt: 'Lietuvių',
+  lv: 'Latviešu',
+  et: 'Eesti',
+  ca: 'Català',
+  eu: 'Euskara',
+  gl: 'Galego',
+  is: 'Íslenska',
+  ga: 'Gaeilge',
+  cy: 'Cymraeg',
+  mt: 'Malti',
+  sq: 'Shqip',
+  mk: 'Македонски',
+  bs: 'Bosanski',
+  lb: 'Lëtzebuergesch',
+  af: 'Afrikaans',
+  sw: 'Kiswahili',
+  am: 'አማርኛ',
+  hy: 'Հայերեն',
+  ka: 'ქართული',
+  az: 'Azərbaycanca',
+  kk: 'Қазақша',
+  ky: 'Кыргызча',
+  uz: 'Oʻzbekcha',
+  tg: 'Тоҷикӣ',
+  tk: 'Türkmençe',
+  mn: 'Монгол',
+  ne: 'नेपाली',
+  bn: 'বাংলা',
+  fa: 'فارسی',
+  he: 'עברית',
+  ur: 'اردو',
+  ps: 'پښتو',
+  ku: 'Kurdî',
+  km: 'ភាសាខ្មែរ',
+  lo: 'ລາວ',
+  my: 'မြန်မာ',
+  si: 'සිංහල',
+  ta: 'தமிழ்',
+  te: 'తెలుగు',
+  kn: 'ಕನ್ನಡ',
+  ml: 'മലയാളം',
+  mr: 'मराठी',
+  gu: 'ગુજરાતી',
+  pa: 'ਪੰਜਾਬੀ',
+  or: 'ଓଡ଼ିଆ',
+  as: 'অসমীয়া',
+  ha: 'Hausa',
+  yo: 'Yorùbá',
+  ig: 'Igbo',
+  zu: 'isiZulu',
+  xh: 'isiXhosa',
+  ht: 'Kreyòl Ayisyen',
+  so: 'Soomaali',
+  rw: 'Kinyarwanda',
+  ln: 'Lingála',
+  lg: 'Luganda',
+  sn: 'chiShona',
+  st: 'Sesotho',
+  tn: 'Setswana',
+  ny: 'Chichewa',
+  mg: 'Malagasy',
+  eo: 'Esperanto',
+  la: 'Latina',
+  yi: 'ייִדיש',
+  bo: 'བོད་སྐད་',
+  ug: 'ئۇيغۇرچە',
+  dv: 'ދިވެހި',
+  haw: 'ʻŌlelo Hawaiʻi',
+  mi: 'Māori',
+  sm: 'Gagana Sāmoa',
+  to: 'Lea Faka-Tonga',
+  fj: 'Vosa Vakaviti',
+}
+
+export function languageDisplayName(code: string): string {
+  return LANGUAGE_NAMES[code] ?? code
 }
