@@ -34,7 +34,7 @@ YouTube · X/Twitter · Instagram · Threads · TikTok and 1,800+ other sites
 - 🖼️ **Cover art** — shows the video/music thumbnail in the wizard using native terminal graphics (Kitty, iTerm2, Sixel) with a half-block fallback
 - 🎨 **Themes** — `system`, `dark`, or `light` (press `^t` to cycle live)
 - 🌐 **1800+ sites** — powered by yt-dlp
-- 🌍 **Multi-language** — auto-detects your system language (20+ languages)
+- 🌍 **80+ languages** — auto-detects your system language, or pick any from the in-app picker
 - 🔔 **Update notifications** — in-app badge when a new GitHub release is available
 - 📋 **History** — recall recent links with ↑/↓
 - ⚡ **Zero setup** — auto-downloads yt-dlp on first run, bundles ffmpeg fallback
@@ -107,6 +107,7 @@ carbon-dl --version                # show version
 | `↑↓` | navigate choices / history |
 | `esc` | go back / cancel |
 | `^t` | cycle theme (system → dark → light) |
+| `^l` | open language picker (80+ languages, searchable) |
 | `^c` | quit |
 
 ## 🎨 Themes
@@ -121,14 +122,17 @@ Press `^t` inside the app to cycle themes live.
 
 ## 🌍 Languages
 
-Carbon auto-detects your system language. Override it with:
+Carbon auto-detects your system language. You can override it at any time without restarting:
+
+- **In-app:** press `^l` to open the searchable language picker — works from every phase (input, wizard, downloading, done, error). Pick any of 80+ supported languages and the UI re-renders instantly.
+- **CLI / env var:** set `CARBON_LANG` before launch to force a language for the whole session.
 
 ```bash
 CARBON_LANG=id carbon-dl    # force Indonesian
 CARBON_LANG=ja carbon-dl    # force Japanese
 ```
 
-Supported: English, Indonesian, Spanish, French, German, Portuguese, Italian, Russian, Japanese, Korean, Chinese (Simplified & Traditional), Arabic, Hindi, Turkish, Vietnamese, Thai, Malay, Dutch, Polish, Ukrainian, Filipino, and more.
+Supported: English, Indonesian, Spanish, French, German, Portuguese, Italian, Russian, Japanese, Korean, Chinese (Simplified & Traditional), Arabic, Hindi, Turkish, Vietnamese, Thai, Malay, Dutch, Polish, Ukrainian, Filipino, Swedish, Norwegian, Danish, Finnish, Czech, Slovak, Hungarian, Romanian, Bulgarian, Greek, Croatian, Serbian, Slovenian, Lithuanian, Latvian, Estonian, Catalan, Basque, Galician, Icelandic, Irish, Welsh, Maltese, Albanian, Macedonian, Bosnian, Luxembourgish, Afrikaans, Swahili, Amharic, Armenian, Georgian, Azerbaijani, Kazakh, Kyrgyz, Uzbek, Tajik, Turkmen, Mongolian, Nepali, Bengali, Persian, Hebrew, Urdu, Pashto, Kurdish, Khmer, Lao, Burmese, Sinhala, Tamil, Telugu, Kannada, Malayalam, Marathi, Gujarati, Punjabi, Odia, Assamese, Hausa, Yoruba, Igbo, Zulu, Xhosa, Haitian Creole, Somali, Kinyarwanda, Lingala, Luganda, Shona, Sesotho, Setswana, Chichewa, Malagasy, Esperanto, Latin, Yiddish, Tibetan, Uyghur, Dhivehi, Hawaiian, Maori, Samoan, Tongan, Fijian, and more.
 
 ## 🔔 Updates
 
