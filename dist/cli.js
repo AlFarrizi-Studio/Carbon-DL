@@ -1586,8 +1586,8 @@ var require_signal_exit = __commonJS({
           if (!processOk(global.process)) {
             return;
           }
-          var listeners = process15.listeners(sig);
-          if (listeners.length === emitter.count) {
+          var listeners2 = process15.listeners(sig);
+          if (listeners2.length === emitter.count) {
             unload();
             emit("exit", null, sig);
             emit("afterexit", null, sig);
@@ -3256,33 +3256,33 @@ var require_react_reconciler_production = __commonJS({
       function pingEngtangledActionScope() {
         if (0 === --currentEntangledPendingCount && null !== currentEntangledListeners) {
           null !== currentEntangledActionThenable && (currentEntangledActionThenable.status = "fulfilled");
-          var listeners = currentEntangledListeners;
+          var listeners2 = currentEntangledListeners;
           currentEntangledListeners = null;
           currentEntangledLane = 0;
           currentEntangledActionThenable = null;
-          for (var i2 = 0; i2 < listeners.length; i2++) (0, listeners[i2])();
+          for (var i2 = 0; i2 < listeners2.length; i2++) (0, listeners2[i2])();
         }
       }
       function chainThenableValue(thenable, result) {
-        var listeners = [], thenableWithOverride = {
+        var listeners2 = [], thenableWithOverride = {
           status: "pending",
           value: null,
           reason: null,
           then: function(resolve) {
-            listeners.push(resolve);
+            listeners2.push(resolve);
           }
         };
         thenable.then(
           function() {
             thenableWithOverride.status = "fulfilled";
             thenableWithOverride.value = result;
-            for (var i2 = 0; i2 < listeners.length; i2++) (0, listeners[i2])(result);
+            for (var i2 = 0; i2 < listeners2.length; i2++) (0, listeners2[i2])(result);
           },
           function(error) {
             thenableWithOverride.status = "rejected";
             thenableWithOverride.reason = error;
-            for (error = 0; error < listeners.length; error++)
-              (0, listeners[error])(void 0);
+            for (error = 0; error < listeners2.length; error++)
+              (0, listeners2[error])(void 0);
           }
         );
         return thenableWithOverride;
@@ -9705,15 +9705,15 @@ var require_react_reconciler_production = __commonJS({
         }
         console.error(error);
       }, hasOwnProperty = Object.prototype.hasOwnProperty, prefix, suffix, reentry = false, CapturedStacks = /* @__PURE__ */ new WeakMap(), forkStack = [], forkStackIndex = 0, treeForkProvider = null, treeForkCount = 0, idStack = [], idStackIndex = 0, treeContextProvider = null, treeContextId = 1, treeContextOverflow = "", contextStackCursor = createCursor(null), contextFiberStackCursor = createCursor(null), rootInstanceStackCursor = createCursor(null), hostTransitionProviderCursor = createCursor(null), hydrationParentFiber = null, nextHydratableInstance = null, isHydrating = false, hydrationErrors = null, rootOrSingletonContext = false, HydrationMismatchException = Error(formatProdErrorMessage(519)), valueCursor = createCursor(null), currentlyRenderingFiber$1 = null, lastContextDependency = null, AbortControllerLocal = "undefined" !== typeof AbortController ? AbortController : function() {
-        var listeners = [], signal = this.signal = {
+        var listeners2 = [], signal = this.signal = {
           aborted: false,
           addEventListener: function(type, listener) {
-            listeners.push(listener);
+            listeners2.push(listener);
           }
         };
         this.abort = function() {
           signal.aborted = true;
-          listeners.forEach(function(listener) {
+          listeners2.forEach(function(listener) {
             return listener();
           });
         };
@@ -12880,33 +12880,33 @@ var require_react_reconciler_development = __commonJS({
       function pingEngtangledActionScope() {
         if (0 === --currentEntangledPendingCount && (-1 < transitionUpdateTime || (transitionStartTime = -1.1), null !== currentEntangledListeners)) {
           null !== currentEntangledActionThenable && (currentEntangledActionThenable.status = "fulfilled");
-          var listeners = currentEntangledListeners;
+          var listeners2 = currentEntangledListeners;
           currentEntangledListeners = null;
           currentEntangledLane = 0;
           currentEntangledActionThenable = null;
-          for (var i2 = 0; i2 < listeners.length; i2++) (0, listeners[i2])();
+          for (var i2 = 0; i2 < listeners2.length; i2++) (0, listeners2[i2])();
         }
       }
       function chainThenableValue(thenable, result) {
-        var listeners = [], thenableWithOverride = {
+        var listeners2 = [], thenableWithOverride = {
           status: "pending",
           value: null,
           reason: null,
           then: function(resolve) {
-            listeners.push(resolve);
+            listeners2.push(resolve);
           }
         };
         thenable.then(
           function() {
             thenableWithOverride.status = "fulfilled";
             thenableWithOverride.value = result;
-            for (var i2 = 0; i2 < listeners.length; i2++) (0, listeners[i2])(result);
+            for (var i2 = 0; i2 < listeners2.length; i2++) (0, listeners2[i2])(result);
           },
           function(error) {
             thenableWithOverride.status = "rejected";
             thenableWithOverride.reason = error;
-            for (error = 0; error < listeners.length; error++)
-              (0, listeners[error])(void 0);
+            for (error = 0; error < listeners2.length; error++)
+              (0, listeners2[error])(void 0);
           }
         );
         return thenableWithOverride;
@@ -22331,15 +22331,15 @@ var require_react_reconciler_development = __commonJS({
       var renderer2CursorDEV = createCursor(null);
       var rendererSigil = {};
       var currentlyRenderingFiber$1 = null, lastContextDependency = null, isDisallowedContextReadInDEV = false, AbortControllerLocal = "undefined" !== typeof AbortController ? AbortController : function() {
-        var listeners = [], signal = this.signal = {
+        var listeners2 = [], signal = this.signal = {
           aborted: false,
           addEventListener: function(type, listener) {
-            listeners.push(listener);
+            listeners2.push(listener);
           }
         };
         this.abort = function() {
           signal.aborted = true;
-          listeners.forEach(function(listener) {
+          listeners2.forEach(function(listener) {
             return listener();
           });
         };
@@ -35067,7 +35067,7 @@ var init_package = __esm({
     package_default = {
       name: "sharp",
       description: "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
-      version: "0.35.3",
+      version: "0.35.4",
       author: "Lovell Fuller <npm@lovell.info>",
       homepage: "https://sharp.pixelplumbing.com",
       contributors: [
@@ -35229,31 +35229,31 @@ var init_package = __esm({
         semver: "^7.8.5"
       },
       optionalDependencies: {
-        "@img/sharp-darwin-arm64": "0.35.3",
-        "@img/sharp-darwin-x64": "0.35.3",
-        "@img/sharp-freebsd-wasm32": "0.35.3",
-        "@img/sharp-libvips-darwin-arm64": "1.3.2",
-        "@img/sharp-libvips-darwin-x64": "1.3.2",
-        "@img/sharp-libvips-linux-arm": "1.3.2",
-        "@img/sharp-libvips-linux-arm64": "1.3.2",
-        "@img/sharp-libvips-linux-ppc64": "1.3.2",
-        "@img/sharp-libvips-linux-riscv64": "1.3.2",
-        "@img/sharp-libvips-linux-s390x": "1.3.2",
-        "@img/sharp-libvips-linux-x64": "1.3.2",
-        "@img/sharp-libvips-linuxmusl-arm64": "1.3.2",
-        "@img/sharp-libvips-linuxmusl-x64": "1.3.2",
-        "@img/sharp-linux-arm": "0.35.3",
-        "@img/sharp-linux-arm64": "0.35.3",
-        "@img/sharp-linux-ppc64": "0.35.3",
-        "@img/sharp-linux-riscv64": "0.35.3",
-        "@img/sharp-linux-s390x": "0.35.3",
-        "@img/sharp-linux-x64": "0.35.3",
-        "@img/sharp-linuxmusl-arm64": "0.35.3",
-        "@img/sharp-linuxmusl-x64": "0.35.3",
-        "@img/sharp-webcontainers-wasm32": "0.35.3",
-        "@img/sharp-win32-arm64": "0.35.3",
-        "@img/sharp-win32-ia32": "0.35.3",
-        "@img/sharp-win32-x64": "0.35.3"
+        "@img/sharp-darwin-arm64": "0.35.4",
+        "@img/sharp-darwin-x64": "0.35.4",
+        "@img/sharp-freebsd-wasm32": "0.35.4",
+        "@img/sharp-libvips-darwin-arm64": "1.3.3",
+        "@img/sharp-libvips-darwin-x64": "1.3.3",
+        "@img/sharp-libvips-linux-arm": "1.3.3",
+        "@img/sharp-libvips-linux-arm64": "1.3.3",
+        "@img/sharp-libvips-linux-ppc64": "1.3.3",
+        "@img/sharp-libvips-linux-riscv64": "1.3.3",
+        "@img/sharp-libvips-linux-s390x": "1.3.3",
+        "@img/sharp-libvips-linux-x64": "1.3.3",
+        "@img/sharp-libvips-linuxmusl-arm64": "1.3.3",
+        "@img/sharp-libvips-linuxmusl-x64": "1.3.3",
+        "@img/sharp-linux-arm": "0.35.4",
+        "@img/sharp-linux-arm64": "0.35.4",
+        "@img/sharp-linux-ppc64": "0.35.4",
+        "@img/sharp-linux-riscv64": "0.35.4",
+        "@img/sharp-linux-s390x": "0.35.4",
+        "@img/sharp-linux-x64": "0.35.4",
+        "@img/sharp-linuxmusl-arm64": "0.35.4",
+        "@img/sharp-linuxmusl-x64": "0.35.4",
+        "@img/sharp-webcontainers-wasm32": "0.35.4",
+        "@img/sharp-win32-arm64": "0.35.4",
+        "@img/sharp-win32-ia32": "0.35.4",
+        "@img/sharp-win32-x64": "0.35.4"
       },
       peerDependenciesMeta: {
         "@types/node": {
@@ -35261,22 +35261,22 @@ var init_package = __esm({
         }
       },
       devDependencies: {
-        "@biomejs/biome": "^2.5.1",
+        "@biomejs/biome": "^2.5.10",
         "@cpplint/cli": "^0.1.0",
-        "@emnapi/runtime": "^1.11.1",
-        "@img/sharp-libvips-dev": "1.3.2",
-        "@img/sharp-libvips-dev-wasm32": "1.3.2",
-        "@img/sharp-libvips-win32-arm64": "1.3.2",
-        "@img/sharp-libvips-win32-ia32": "1.3.2",
-        "@img/sharp-libvips-win32-x64": "1.3.2",
+        "@emnapi/runtime": "^1.11.3",
+        "@img/sharp-libvips-dev": "1.3.3",
+        "@img/sharp-libvips-dev-wasm32": "1.3.3",
+        "@img/sharp-libvips-win32-arm64": "1.3.3",
+        "@img/sharp-libvips-win32-ia32": "1.3.3",
+        "@img/sharp-libvips-win32-x64": "1.3.3",
         "@types/node": "*",
-        emnapi: "^1.11.1",
+        emnapi: "^1.11.3",
         "exif-reader": "^2.0.3",
-        "extract-zip": "^2.0.1",
+        yauzl: "^3.4.0",
         icc: "^4.0.0",
-        "node-addon-api": "^8.9.0",
+        "node-addon-api": "^8.9.2",
         "node-gyp": "^12.4.0",
-        publint: "^0.3.21",
+        publint: "^0.3.24",
         "tar-fs": "^3.1.3",
         tsd: "^0.33.0"
       },
@@ -35285,7 +35285,7 @@ var init_package = __esm({
         node: ">=20.9.0"
       },
       config: {
-        libvips: ">=8.18.3"
+        libvips: ">=8.18.6"
       },
       funding: {
         url: "https://opencollective.com/libvips"
@@ -35665,7 +35665,7 @@ function clone() {
   clone4.options.debuglog = debuglog2;
   clone4.options.queueListener = queueListener2;
   if (this._isStreamInput()) {
-    this.on("finish", () => {
+    this._whenStreamInFinished(() => {
       this._flattenBufferIn();
       clone4.options.input.buffer = this.options.input.buffer;
       clone4.emit("finish");
@@ -36330,11 +36330,6 @@ function _createInputDescriptor(input, inputOptions, containerOptions) {
 function _write(chunk, _encoding, callback) {
   if (Array.isArray(this.options.input.buffer)) {
     if (is_default.buffer(chunk)) {
-      if (this.options.input.buffer.length === 0) {
-        this.on("finish", () => {
-          this.streamInFinished = true;
-        });
-      }
       this.options.input.buffer.push(chunk);
       callback();
     } else {
@@ -36352,11 +36347,18 @@ function _flattenBufferIn() {
 function _isStreamInput() {
   return Array.isArray(this.options.input.buffer);
 }
+function _whenStreamInFinished(fn2) {
+  if (this.writableFinished) {
+    fn2();
+  } else {
+    this.once("finish", fn2);
+  }
+}
 function metadata(callback) {
   const stack = Error();
   if (is_default.fn(callback)) {
     if (this._isStreamInput()) {
-      this.on("finish", () => {
+      this._whenStreamInFinished(() => {
         this._flattenBufferIn();
         sharp_default.metadata(this.options, (err, metadata2) => {
           if (err) {
@@ -36379,7 +36381,7 @@ function metadata(callback) {
   } else {
     if (this._isStreamInput()) {
       return new Promise((resolve, reject) => {
-        const finished = () => {
+        this._whenStreamInFinished(() => {
           this._flattenBufferIn();
           sharp_default.metadata(this.options, (err, metadata2) => {
             if (err) {
@@ -36388,12 +36390,7 @@ function metadata(callback) {
               resolve(metadata2);
             }
           });
-        };
-        if (this.writableFinished) {
-          finished();
-        } else {
-          this.once("finish", finished);
-        }
+        });
       });
     } else {
       return new Promise((resolve, reject) => {
@@ -36412,7 +36409,7 @@ function stats(callback) {
   const stack = Error();
   if (is_default.fn(callback)) {
     if (this._isStreamInput()) {
-      this.on("finish", () => {
+      this._whenStreamInFinished(() => {
         this._flattenBufferIn();
         sharp_default.stats(this.options, (err, stats2) => {
           if (err) {
@@ -36435,7 +36432,7 @@ function stats(callback) {
   } else {
     if (this._isStreamInput()) {
       return new Promise((resolve, reject) => {
-        this.on("finish", function() {
+        this._whenStreamInFinished(() => {
           this._flattenBufferIn();
           sharp_default.stats(this.options, (err, stats2) => {
             if (err) {
@@ -36509,6 +36506,7 @@ var init_input = __esm({
         _write,
         _flattenBufferIn,
         _isStreamInput,
+        _whenStreamInFinished,
         // Public
         metadata,
         stats
@@ -36535,36 +36533,36 @@ function resize2(widthOrOptions, height, options) {
   if (is_default.defined(widthOrOptions)) {
     if (is_default.object(widthOrOptions) && !is_default.defined(options)) {
       options = widthOrOptions;
-    } else if (is_default.integer(widthOrOptions) && widthOrOptions > 0) {
+    } else if (is_default.integer(widthOrOptions) && is_default.inRange(widthOrOptions, 1, 1e8)) {
       this.options.width = widthOrOptions;
     } else {
-      throw is_default.invalidParameterError("width", "positive integer", widthOrOptions);
+      throw is_default.invalidParameterError("width", "positive integer between 1 and 100000000", widthOrOptions);
     }
   } else {
     this.options.width = -1;
   }
   if (is_default.defined(height)) {
-    if (is_default.integer(height) && height > 0) {
+    if (is_default.integer(height) && is_default.inRange(height, 1, 1e8)) {
       this.options.height = height;
     } else {
-      throw is_default.invalidParameterError("height", "positive integer", height);
+      throw is_default.invalidParameterError("height", "positive integer between 1 and 100000000", height);
     }
   } else {
     this.options.height = -1;
   }
   if (is_default.object(options)) {
     if (is_default.defined(options.width)) {
-      if (is_default.integer(options.width) && options.width > 0) {
+      if (is_default.integer(options.width) && is_default.inRange(options.width, 1, 1e8)) {
         this.options.width = options.width;
       } else {
-        throw is_default.invalidParameterError("width", "positive integer", options.width);
+        throw is_default.invalidParameterError("width", "positive integer between 1 and 100000000", options.width);
       }
     }
     if (is_default.defined(options.height)) {
-      if (is_default.integer(options.height) && options.height > 0) {
+      if (is_default.integer(options.height) && is_default.inRange(options.height, 1, 1e8)) {
         this.options.height = options.height;
       } else {
-        throw is_default.invalidParameterError("height", "positive integer", options.height);
+        throw is_default.invalidParameterError("height", "positive integer between 1 and 100000000", options.height);
       }
     }
     if (is_default.defined(options.fit)) {
@@ -36826,17 +36824,17 @@ function composite(images) {
       }
     }
     if (is_default.defined(image3.left)) {
-      if (is_default.integer(image3.left)) {
+      if (is_default.integer(image3.left) && is_default.inRange(image3.left, -1e8, 1e8)) {
         composite3.left = image3.left;
       } else {
-        throw is_default.invalidParameterError("left", "integer", image3.left);
+        throw is_default.invalidParameterError("left", "integer between -100000000 and 100000000", image3.left);
       }
     }
     if (is_default.defined(image3.top)) {
-      if (is_default.integer(image3.top)) {
+      if (is_default.integer(image3.top) && is_default.inRange(image3.top, -1e8, 1e8)) {
         composite3.top = image3.top;
       } else {
-        throw is_default.invalidParameterError("top", "integer", image3.top);
+        throw is_default.invalidParameterError("top", "integer between -100000000 and 100000000", image3.top);
       }
     }
     if (is_default.defined(image3.top) !== is_default.defined(image3.left)) {
@@ -39880,7 +39878,7 @@ function _read() {
 function _pipeline(callback, stack) {
   if (typeof callback === "function") {
     if (this._isStreamInput()) {
-      this.on("finish", () => {
+      this._whenStreamInFinished(() => {
         this._flattenBufferIn();
         sharp_default.pipeline(this.options, (err, data, info) => {
           if (err) {
@@ -39902,7 +39900,7 @@ function _pipeline(callback, stack) {
     return this;
   } else if (this.options.streamOut) {
     if (this._isStreamInput()) {
-      this.once("finish", () => {
+      this._whenStreamInFinished(() => {
         this._flattenBufferIn();
         sharp_default.pipeline(this.options, (err, data, info) => {
           if (err) {
@@ -39915,9 +39913,6 @@ function _pipeline(callback, stack) {
           this.on("end", () => this.emit("close"));
         });
       });
-      if (this.streamInFinished) {
-        this.emit("finish");
-      }
     } else {
       sharp_default.pipeline(this.options, (err, data, info) => {
         if (err) {
@@ -39934,7 +39929,7 @@ function _pipeline(callback, stack) {
   } else {
     if (this._isStreamInput()) {
       return new Promise((resolve, reject) => {
-        this.once("finish", () => {
+        this._whenStreamInFinished(() => {
           this._flattenBufferIn();
           sharp_default.pipeline(this.options, (err, data, info) => {
             if (err) {
@@ -39995,7 +39990,7 @@ var init_output = __esm({
     ]);
     jp2Regex = /\.(jp[2x]|j2[kc])$/i;
     errJp2Save = () => new Error("JP2 output requires libvips with support for OpenJPEG");
-    bitdepthFromColourCount = (colours) => 1 << 31 - Math.clz32(Math.ceil(Math.log2(colours)));
+    bitdepthFromColourCount = (colours) => 1 << 32 - Math.clz32(Math.ceil(Math.log2(colours)) - 1);
     output_default = (Sharp2) => {
       Object.assign(Sharp2.prototype, {
         // Public
@@ -83254,7 +83249,7 @@ function debounce2(func, debounceMs = 0, options = {}) {
     if (maxWait != null) {
       if (pendingAt === null) pendingAt = Date.now();
       if (Date.now() - pendingAt >= maxWait) {
-        result = func.apply(this, args2);
+        if (leading || trailing) result = func.apply(this, args2);
         pendingAt = Date.now();
         _debounced.cancel();
         _debounced.schedule();
@@ -92484,7 +92479,7 @@ var import_react32 = __toESM(require_react(), 1);
 var import_react33 = __toESM(require_react(), 1);
 
 // src/app.tsx
-var import_react40 = __toESM(require_react(), 1);
+var import_react41 = __toESM(require_react(), 1);
 import os6 from "os";
 import path6 from "path";
 
@@ -93188,6 +93183,7 @@ function wrapText2(text, width) {
 }
 
 // src/lib/i18n.ts
+var import_react39 = __toESM(require_react(), 1);
 var en = {
   tagline: "grab any video or music. pick. download. done.",
   sitesLine: "YouTube \xB7 X/Twitter \xB7 Instagram \xB7 Threads \xB7 TikTok and 1,800+ other sites",
@@ -93264,7 +93260,12 @@ var en = {
   brStandard: "standard",
   brSmall: "small",
   // Update notification
-  updateAvailable: "Update Carbon available"
+  updateAvailable: "Update Carbon available",
+  // Language picker
+  langPickerTitle: "Choose language",
+  langPickerHint: "type to filter",
+  langPickerSearch: "search\u2026",
+  lang: "language"
 };
 var id = {
   tagline: "unduh video atau musik apa pun. pilih. unduh. selesai.",
@@ -93342,7 +93343,12 @@ var id = {
   brStandard: "standar",
   brSmall: "kecil",
   // Update notification
-  updateAvailable: "Update Carbon terbaru tersedia"
+  updateAvailable: "Update Carbon terbaru tersedia",
+  // Language picker
+  langPickerTitle: "Pilih bahasa",
+  langPickerHint: "ketik untuk memfilter",
+  langPickerSearch: "cari\u2026",
+  lang: "bahasa"
 };
 var es = {
   tagline: "descarga cualquier video o m\xFAsica. elige. descarga. listo.",
@@ -93389,7 +93395,12 @@ var es = {
   lblAlbum: "\xC1lbum",
   lblRelease: "Lanzamiento",
   lblTime: "Duraci\xF3n",
-  lblSource: "Fuente"
+  lblSource: "Fuente",
+  // Language picker
+  langPickerTitle: "Elegir idioma",
+  langPickerHint: "escribe para filtrar",
+  langPickerSearch: "buscar\u2026",
+  lang: "idioma"
 };
 var fr = {
   tagline: "t\xE9l\xE9chargez vid\xE9os ou musique. choisissez. t\xE9l\xE9chargez. termin\xE9.",
@@ -93436,7 +93447,12 @@ var fr = {
   lblAlbum: "Album",
   lblRelease: "Sortie",
   lblTime: "Dur\xE9e",
-  lblSource: "Source"
+  lblSource: "Source",
+  // Language picker
+  langPickerTitle: "Choisir la langue",
+  langPickerHint: "tapez pour filtrer",
+  langPickerSearch: "rechercher\u2026",
+  lang: "langue"
 };
 var de = {
   tagline: "lade videos oder musik herunter. w\xE4hle. lade. fertig.",
@@ -93483,7 +93499,12 @@ var de = {
   lblAlbum: "Album",
   lblRelease: "Ver\xF6ffentlichung",
   lblTime: "Dauer",
-  lblSource: "Quelle"
+  lblSource: "Quelle",
+  // Language picker
+  langPickerTitle: "Sprache w\xE4hlen",
+  langPickerHint: "tippen zum filtern",
+  langPickerSearch: "suchen\u2026",
+  lang: "sprache"
 };
 var pt = {
   tagline: "baixe qualquer v\xEDdeo ou m\xFAsica. escolha. baixe. pronto.",
@@ -93530,7 +93551,12 @@ var pt = {
   lblAlbum: "\xC1lbum",
   lblRelease: "Lan\xE7amento",
   lblTime: "Dura\xE7\xE3o",
-  lblSource: "Fonte"
+  lblSource: "Fonte",
+  // Language picker
+  langPickerTitle: "Escolher idioma",
+  langPickerHint: "digite para filtrar",
+  langPickerSearch: "pesquisar\u2026",
+  lang: "idioma"
 };
 var it = {
   tagline: "scarica qualsiasi video o musica. scegli. scarica. fatto.",
@@ -93577,7 +93603,12 @@ var it = {
   lblAlbum: "Album",
   lblRelease: "Uscita",
   lblTime: "Durata",
-  lblSource: "Fonte"
+  lblSource: "Fonte",
+  // Language picker
+  langPickerTitle: "Scegli lingua",
+  langPickerHint: "digita per filtrare",
+  langPickerSearch: "cerca\u2026",
+  lang: "lingua"
 };
 var ru = {
   tagline: "\u0441\u043A\u0430\u0447\u0438\u0432\u0430\u0439\u0442\u0435 \u0432\u0438\u0434\u0435\u043E \u0438\u043B\u0438 \u043C\u0443\u0437\u044B\u043A\u0443. \u0432\u044B\u0431\u0435\u0440\u0438\u0442\u0435. \u0441\u043A\u0430\u0447\u0430\u0439\u0442\u0435. \u0433\u043E\u0442\u043E\u0432\u043E.",
@@ -93624,7 +93655,12 @@ var ru = {
   lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C",
   lblRelease: "\u0420\u0435\u043B\u0438\u0437",
   lblTime: "\u0414\u043B\u0438\u0442\u0435\u043B\u044C\u043D\u043E\u0441\u0442\u044C",
-  lblSource: "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A"
+  lblSource: "\u0418\u0441\u0442\u043E\u0447\u043D\u0438\u043A",
+  // Language picker
+  langPickerTitle: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044F\u0437\u044B\u043A",
+  langPickerHint: "\u043D\u0430\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u043B\u044F \u0444\u0438\u043B\u044C\u0442\u0440\u0430\u0446\u0438\u0438",
+  langPickerSearch: "\u043F\u043E\u0438\u0441\u043A\u2026",
+  lang: "\u044F\u0437\u044B\u043A"
 };
 var ja = {
   tagline: "\u52D5\u753B\u3084\u97F3\u697D\u3092\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3002\u9078\u629E\u3002\u30C0\u30A6\u30F3\u30ED\u30FC\u30C9\u3002\u5B8C\u4E86\u3002",
@@ -93671,7 +93707,12 @@ var ja = {
   lblAlbum: "\u30A2\u30EB\u30D0\u30E0",
   lblRelease: "\u30EA\u30EA\u30FC\u30B9",
   lblTime: "\u518D\u751F\u6642\u9593",
-  lblSource: "\u30BD\u30FC\u30B9"
+  lblSource: "\u30BD\u30FC\u30B9",
+  // Language picker
+  langPickerTitle: "\u8A00\u8A9E\u3092\u9078\u629E",
+  langPickerHint: "\u5165\u529B\u3067\u7D5E\u308A\u8FBC\u307F",
+  langPickerSearch: "\u691C\u7D22\u2026",
+  lang: "\u8A00\u8A9E"
 };
 var ko = {
   tagline: "\uBAA8\uB4E0 \uBE44\uB514\uC624\uB098 \uC74C\uC545\uC744 \uB2E4\uC6B4\uB85C\uB4DC\uD558\uC138\uC694. \uC120\uD0DD. \uB2E4\uC6B4\uB85C\uB4DC. \uC644\uB8CC.",
@@ -93718,7 +93759,12 @@ var ko = {
   lblAlbum: "\uC568\uBC94",
   lblRelease: "\uBC1C\uB9E4",
   lblTime: "\uC7AC\uC0DD \uC2DC\uAC04",
-  lblSource: "\uCD9C\uCC98"
+  lblSource: "\uCD9C\uCC98",
+  // Language picker
+  langPickerTitle: "\uC5B8\uC5B4 \uC120\uD0DD",
+  langPickerHint: "\uC785\uB825\uD558\uC5EC \uD544\uD130\uB9C1",
+  langPickerSearch: "\uAC80\uC0C9\u2026",
+  lang: "\uC5B8\uC5B4"
 };
 var zh = {
   tagline: "\u4E0B\u8F7D\u4EFB\u4F55\u89C6\u9891\u6216\u97F3\u4E50\u3002\u9009\u62E9\u3002\u4E0B\u8F7D\u3002\u5B8C\u6210\u3002",
@@ -93765,7 +93811,12 @@ var zh = {
   lblAlbum: "\u4E13\u8F91",
   lblRelease: "\u53D1\u884C",
   lblTime: "\u65F6\u957F",
-  lblSource: "\u6765\u6E90"
+  lblSource: "\u6765\u6E90",
+  // Language picker
+  langPickerTitle: "\u9009\u62E9\u8BED\u8A00",
+  langPickerHint: "\u8F93\u5165\u4EE5\u7B5B\u9009",
+  langPickerSearch: "\u641C\u7D22\u2026",
+  lang: "\u8BED\u8A00"
 };
 var zhTW = {
   tagline: "\u4E0B\u8F09\u4EFB\u4F55\u5F71\u7247\u6216\u97F3\u6A02\u3002\u9078\u64C7\u3002\u4E0B\u8F09\u3002\u5B8C\u6210\u3002",
@@ -93812,7 +93863,12 @@ var zhTW = {
   lblAlbum: "\u5C08\u8F2F",
   lblRelease: "\u767C\u884C",
   lblTime: "\u6642\u9577",
-  lblSource: "\u4F86\u6E90"
+  lblSource: "\u4F86\u6E90",
+  // Language picker
+  langPickerTitle: "\u9078\u64C7\u8A9E\u8A00",
+  langPickerHint: "\u8F38\u5165\u4EE5\u7BE9\u9078",
+  langPickerSearch: "\u641C\u5C0B\u2026",
+  lang: "\u8A9E\u8A00"
 };
 var ar = {
   tagline: "\u062D\u0645\u0651\u0644 \u0623\u064A \u0641\u064A\u062F\u064A\u0648 \u0623\u0648 \u0645\u0648\u0633\u064A\u0642\u0649. \u0627\u062E\u062A\u0631. \u062D\u0645\u0651\u0644. \u062A\u0645.",
@@ -93859,7 +93915,12 @@ var ar = {
   lblAlbum: "\u0627\u0644\u0623\u0644\u0628\u0648\u0645",
   lblRelease: "\u0627\u0644\u0625\u0635\u062F\u0627\u0631",
   lblTime: "\u0627\u0644\u0645\u062F\u0629",
-  lblSource: "\u0627\u0644\u0645\u0635\u062F\u0631"
+  lblSource: "\u0627\u0644\u0645\u0635\u062F\u0631",
+  // Language picker
+  langPickerTitle: "\u0627\u062E\u062A\u0631 \u0627\u0644\u0644\u063A\u0629",
+  langPickerHint: "\u0627\u0643\u062A\u0628 \u0644\u0644\u062A\u0635\u0641\u064A\u0629",
+  langPickerSearch: "\u0628\u062D\u062B\u2026",
+  lang: "\u0644\u063A\u0629"
 };
 var hi = {
   tagline: "\u0915\u094B\u0908 \u092D\u0940 \u0935\u0940\u0921\u093F\u092F\u094B \u092F\u093E \u0938\u0902\u0917\u0940\u0924 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0947\u0902\u0964 \u091A\u0941\u0928\u0947\u0902\u0964 \u0921\u093E\u0909\u0928\u0932\u094B\u0921\u0964 \u0939\u094B \u0917\u092F\u093E\u0964",
@@ -93906,7 +93967,12 @@ var hi = {
   lblAlbum: "\u090F\u0932\u094D\u092C\u092E",
   lblRelease: "\u0930\u093F\u0932\u0940\u091C\u093C",
   lblTime: "\u0905\u0935\u0927\u093F",
-  lblSource: "\u0938\u094D\u0930\u094B\u0924"
+  lblSource: "\u0938\u094D\u0930\u094B\u0924",
+  // Language picker
+  langPickerTitle: "\u092D\u093E\u0937\u093E \u091A\u0941\u0928\u0947\u0902",
+  langPickerHint: "\u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u091F\u093E\u0907\u092A \u0915\u0930\u0947\u0902",
+  langPickerSearch: "\u0916\u094B\u091C\u0947\u0902\u2026",
+  lang: "\u092D\u093E\u0937\u093E"
 };
 var tr = {
   tagline: "herhangi bir video veya m\xFCzik indir. se\xE7. indir. bitti.",
@@ -93953,7 +94019,12 @@ var tr = {
   lblAlbum: "Alb\xFCm",
   lblRelease: "Yay\u0131n",
   lblTime: "S\xFCre",
-  lblSource: "Kaynak"
+  lblSource: "Kaynak",
+  // Language picker
+  langPickerTitle: "Dil se\xE7in",
+  langPickerHint: "filtrelemek i\xE7in yaz\u0131n",
+  langPickerSearch: "ara\u2026",
+  lang: "dil"
 };
 var vi = {
   tagline: "t\u1EA3i video ho\u1EB7c nh\u1EA1c b\u1EA5t k\u1EF3. ch\u1ECDn. t\u1EA3i. xong.",
@@ -94000,7 +94071,12 @@ var vi = {
   lblAlbum: "Album",
   lblRelease: "Ph\xE1t h\xE0nh",
   lblTime: "Th\u1EDDi l\u01B0\u1EE3ng",
-  lblSource: "Ngu\u1ED3n"
+  lblSource: "Ngu\u1ED3n",
+  // Language picker
+  langPickerTitle: "Ch\u1ECDn ng\xF4n ng\u1EEF",
+  langPickerHint: "g\xF5 \u0111\u1EC3 l\u1ECDc",
+  langPickerSearch: "t\xECm\u2026",
+  lang: "ng\xF4n ng\u1EEF"
 };
 var th = {
   tagline: "\u0E14\u0E32\u0E27\u0E19\u0E4C\u0E42\u0E2B\u0E25\u0E14\u0E27\u0E34\u0E14\u0E35\u0E42\u0E2D\u0E2B\u0E23\u0E37\u0E2D\u0E40\u0E1E\u0E25\u0E07\u0E43\u0E14\u0E46 \u0E40\u0E25\u0E37\u0E2D\u0E01 \u0E14\u0E32\u0E27\u0E19\u0E4C\u0E42\u0E2B\u0E25\u0E14 \u0E40\u0E2A\u0E23\u0E47\u0E08",
@@ -94047,7 +94123,12 @@ var th = {
   lblAlbum: "\u0E2D\u0E31\u0E25\u0E1A\u0E31\u0E49\u0E21",
   lblRelease: "\u0E40\u0E1C\u0E22\u0E41\u0E1E\u0E23\u0E48",
   lblTime: "\u0E23\u0E30\u0E22\u0E30\u0E40\u0E27\u0E25\u0E32",
-  lblSource: "\u0E41\u0E2B\u0E25\u0E48\u0E07\u0E17\u0E35\u0E48\u0E21\u0E32"
+  lblSource: "\u0E41\u0E2B\u0E25\u0E48\u0E07\u0E17\u0E35\u0E48\u0E21\u0E32",
+  // Language picker
+  langPickerTitle: "\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E20\u0E32\u0E29\u0E32",
+  langPickerHint: "\u0E1E\u0E34\u0E21\u0E1E\u0E4C\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E01\u0E23\u0E2D\u0E07",
+  langPickerSearch: "\u0E04\u0E49\u0E19\u0E2B\u0E32\u2026",
+  lang: "\u0E20\u0E32\u0E29\u0E32"
 };
 var ms = {
   tagline: "muat turun video atau muzik. pilih. muat turun. selesai.",
@@ -94094,7 +94175,12 @@ var ms = {
   lblAlbum: "Album",
   lblRelease: "Keluaran",
   lblTime: "Tempoh",
-  lblSource: "Sumber"
+  lblSource: "Sumber",
+  // Language picker
+  langPickerTitle: "Pilih bahasa",
+  langPickerHint: "taip untuk tapis",
+  langPickerSearch: "cari\u2026",
+  lang: "bahasa"
 };
 var nl = {
   tagline: "download video of muziek. kies. download. klaar.",
@@ -94141,7 +94227,12 @@ var nl = {
   lblAlbum: "Album",
   lblRelease: "Release",
   lblTime: "Duur",
-  lblSource: "Bron"
+  lblSource: "Bron",
+  // Language picker
+  langPickerTitle: "Kies taal",
+  langPickerHint: "typ om te filteren",
+  langPickerSearch: "zoeken\u2026",
+  lang: "taal"
 };
 var pl = {
   tagline: "pobieraj wideo lub muzyk\u0119. wybierz. pobierz. gotowe.",
@@ -94188,7 +94279,12 @@ var pl = {
   lblAlbum: "Album",
   lblRelease: "Wydanie",
   lblTime: "Czas",
-  lblSource: "\u0179r\xF3d\u0142o"
+  lblSource: "\u0179r\xF3d\u0142o",
+  // Language picker
+  langPickerTitle: "Wybierz j\u0119zyk",
+  langPickerHint: "wpisz aby filtrowa\u0107",
+  langPickerSearch: "szukaj\u2026",
+  lang: "j\u0119zyk"
 };
 var uk = {
   tagline: "\u0437\u0430\u0432\u0430\u043D\u0442\u0430\u0436\u0443\u0439\u0442\u0435 \u0432\u0456\u0434\u0435\u043E \u0430\u0431\u043E \u043C\u0443\u0437\u0438\u043A\u0443. \u043E\u0431\u0435\u0440\u0456\u0442\u044C. \u0437\u0430\u0432\u0430\u043D\u0442\u0430\u0436\u0442\u0435. \u0433\u043E\u0442\u043E\u0432\u043E.",
@@ -94235,7 +94331,12 @@ var uk = {
   lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C",
   lblRelease: "\u0420\u0435\u043B\u0456\u0437",
   lblTime: "\u0422\u0440\u0438\u0432\u0430\u043B\u0456\u0441\u0442\u044C",
-  lblSource: "\u0414\u0436\u0435\u0440\u0435\u043B\u043E"
+  lblSource: "\u0414\u0436\u0435\u0440\u0435\u043B\u043E",
+  // Language picker
+  langPickerTitle: "\u0412\u0438\u0431\u0440\u0430\u0442\u0438 \u043C\u043E\u0432\u0443",
+  langPickerHint: "\u0432\u0432\u0435\u0434\u0456\u0442\u044C \u0434\u043B\u044F \u0444\u0456\u043B\u044C\u0442\u0440\u0430\u0446\u0456\u0457",
+  langPickerSearch: "\u043F\u043E\u0448\u0443\u043A\u2026",
+  lang: "\u043C\u043E\u0432\u0430"
 };
 var fil = {
   tagline: "mag-download ng video o musika. piliin. i-download. tapos na.",
@@ -94282,7 +94383,12 @@ var fil = {
   lblAlbum: "Album",
   lblRelease: "Release",
   lblTime: "Tagal",
-  lblSource: "Pinagmulan"
+  lblSource: "Pinagmulan",
+  // Language picker
+  langPickerTitle: "Pumili ng wika",
+  langPickerHint: "mag-type para i-filter",
+  langPickerSearch: "maghanap\u2026",
+  lang: "wika"
 };
 var partial = {
   sv: { tagline: "ladda ner video eller musik. v\xE4lj. ladda ner. klart.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 fler", grab: "ladda ner", quit: "avsluta", cancel: "avbryt", tip: "Tips", lblTitle: "Titel", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Sl\xE4pp", lblTime: "L\xE4ngd", lblSource: "K\xE4lla" },
@@ -94403,11 +94509,144 @@ function detectLanguage() {
   return "en";
 }
 var currentLang = detectLanguage();
+var listeners = /* @__PURE__ */ new Set();
+function setLanguage(lang) {
+  const next = table[lang] ? lang : "en";
+  if (next === currentLang) return;
+  currentLang = next;
+  for (const fn2 of listeners) fn2(next);
+}
 function getLanguage() {
   return currentLang;
 }
 function t() {
   return table[currentLang] ?? en;
+}
+function useT() {
+  const [, force] = (0, import_react39.useState)(0);
+  (0, import_react39.useEffect)(() => {
+    const fn2 = () => force((x2) => x2 + 1);
+    listeners.add(fn2);
+    return () => {
+      listeners.delete(fn2);
+    };
+  }, []);
+  return table[currentLang] ?? en;
+}
+function supportedLanguages() {
+  return Object.keys(table).sort();
+}
+var LANGUAGE_NAMES = {
+  en: "English",
+  id: "Bahasa Indonesia",
+  es: "Espa\xF1ol",
+  fr: "Fran\xE7ais",
+  de: "Deutsch",
+  pt: "Portugu\xEAs",
+  it: "Italiano",
+  ru: "\u0420\u0443\u0441\u0441\u043A\u0438\u0439",
+  ja: "\u65E5\u672C\u8A9E",
+  ko: "\uD55C\uAD6D\uC5B4",
+  zh: "\u4E2D\u6587 (\u7B80\u4F53)",
+  "zh-TW": "\u4E2D\u6587 (\u7E41\u9AD4)",
+  ar: "\u0627\u0644\u0639\u0631\u0628\u064A\u0629",
+  hi: "\u0939\u093F\u0928\u094D\u0926\u0940",
+  tr: "T\xFCrk\xE7e",
+  vi: "Ti\u1EBFng Vi\u1EC7t",
+  th: "\u0E20\u0E32\u0E29\u0E32\u0E44\u0E17\u0E22",
+  ms: "Bahasa Melayu",
+  nl: "Nederlands",
+  pl: "Polski",
+  uk: "\u0423\u043A\u0440\u0430\u0457\u043D\u0441\u044C\u043A\u0430",
+  fil: "Filipino",
+  sv: "Svenska",
+  no: "Norsk",
+  da: "Dansk",
+  fi: "Suomi",
+  cs: "\u010Ce\u0161tina",
+  sk: "Sloven\u010Dina",
+  hu: "Magyar",
+  ro: "Rom\xE2n\u0103",
+  bg: "\u0411\u044A\u043B\u0433\u0430\u0440\u0441\u043A\u0438",
+  el: "\u0395\u03BB\u03BB\u03B7\u03BD\u03B9\u03BA\u03AC",
+  hr: "Hrvatski",
+  sr: "Srpski",
+  sl: "Sloven\u0161\u010Dina",
+  lt: "Lietuvi\u0173",
+  lv: "Latvie\u0161u",
+  et: "Eesti",
+  ca: "Catal\xE0",
+  eu: "Euskara",
+  gl: "Galego",
+  is: "\xCDslenska",
+  ga: "Gaeilge",
+  cy: "Cymraeg",
+  mt: "Malti",
+  sq: "Shqip",
+  mk: "\u041C\u0430\u043A\u0435\u0434\u043E\u043D\u0441\u043A\u0438",
+  bs: "Bosanski",
+  lb: "L\xEBtzebuergesch",
+  af: "Afrikaans",
+  sw: "Kiswahili",
+  am: "\u12A0\u121B\u122D\u129B",
+  hy: "\u0540\u0561\u0575\u0565\u0580\u0565\u0576",
+  ka: "\u10E5\u10D0\u10E0\u10D7\u10E3\u10DA\u10D8",
+  az: "Az\u0259rbaycanca",
+  kk: "\u049A\u0430\u0437\u0430\u049B\u0448\u0430",
+  ky: "\u041A\u044B\u0440\u0433\u044B\u0437\u0447\u0430",
+  uz: "O\u02BBzbekcha",
+  tg: "\u0422\u043E\u04B7\u0438\u043A\u04E3",
+  tk: "T\xFCrkmen\xE7e",
+  mn: "\u041C\u043E\u043D\u0433\u043E\u043B",
+  ne: "\u0928\u0947\u092A\u093E\u0932\u0940",
+  bn: "\u09AC\u09BE\u0982\u09B2\u09BE",
+  fa: "\u0641\u0627\u0631\u0633\u06CC",
+  he: "\u05E2\u05D1\u05E8\u05D9\u05EA",
+  ur: "\u0627\u0631\u062F\u0648",
+  ps: "\u067E\u069A\u062A\u0648",
+  ku: "Kurd\xEE",
+  km: "\u1797\u17B6\u179F\u17B6\u1781\u17D2\u1798\u17C2\u179A",
+  lo: "\u0EA5\u0EB2\u0EA7",
+  my: "\u1019\u103C\u1014\u103A\u1019\u102C",
+  si: "\u0DC3\u0DD2\u0D82\u0DC4\u0DBD",
+  ta: "\u0BA4\u0BAE\u0BBF\u0BB4\u0BCD",
+  te: "\u0C24\u0C46\u0C32\u0C41\u0C17\u0C41",
+  kn: "\u0C95\u0CA8\u0CCD\u0CA8\u0CA1",
+  ml: "\u0D2E\u0D32\u0D2F\u0D3E\u0D33\u0D02",
+  mr: "\u092E\u0930\u093E\u0920\u0940",
+  gu: "\u0A97\u0AC1\u0A9C\u0AB0\u0ABE\u0AA4\u0AC0",
+  pa: "\u0A2A\u0A70\u0A1C\u0A3E\u0A2C\u0A40",
+  or: "\u0B13\u0B21\u0B3C\u0B3F\u0B06",
+  as: "\u0985\u09B8\u09AE\u09C0\u09AF\u09BC\u09BE",
+  ha: "Hausa",
+  yo: "Yor\xF9b\xE1",
+  ig: "Igbo",
+  zu: "isiZulu",
+  xh: "isiXhosa",
+  ht: "Krey\xF2l Ayisyen",
+  so: "Soomaali",
+  rw: "Kinyarwanda",
+  ln: "Ling\xE1la",
+  lg: "Luganda",
+  sn: "chiShona",
+  st: "Sesotho",
+  tn: "Setswana",
+  ny: "Chichewa",
+  mg: "Malagasy",
+  eo: "Esperanto",
+  la: "Latina",
+  yi: "\u05D9\u05D9\u05B4\u05D3\u05D9\u05E9",
+  bo: "\u0F56\u0F7C\u0F51\u0F0B\u0F66\u0F90\u0F51\u0F0B",
+  ug: "\u0626\u06C7\u064A\u063A\u06C7\u0631\u0686\u06D5",
+  dv: "\u078B\u07A8\u0788\u07AC\u0780\u07A8",
+  haw: "\u02BB\u014Clelo Hawai\u02BBi",
+  mi: "M\u0101ori",
+  sm: "Gagana S\u0101moa",
+  to: "Lea Faka-Tonga",
+  fj: "Vosa Vakaviti"
+};
+function languageDisplayName(code) {
+  return LANGUAGE_NAMES[code] ?? code;
 }
 
 // src/lib/formats.ts
@@ -95199,7 +95438,7 @@ function randomTip() {
 
 // src/lib/update-check.ts
 var GITHUB_REPO = "AlFarrizi-Studio/Carbon-DL";
-var CURRENT_VERSION = "1.1.0";
+var CURRENT_VERSION = "1.1.2";
 function isNewerVersion(a2, b) {
   const parse = (v) => {
     const clean = v.replace(/^v/, "");
@@ -96670,7 +96909,7 @@ function cleanYtDlpError(stderr) {
 }
 
 // src/components/thumbnail.tsx
-var import_react39 = __toESM(require_react(), 1);
+var import_react40 = __toESM(require_react(), 1);
 var import_jsx_runtime5 = __toESM(require_jsx_runtime(), 1);
 var nextImageId = 0;
 var DEBUG4 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
@@ -96693,18 +96932,18 @@ var sixelCache = /* @__PURE__ */ new Map();
 function Thumbnail({ grid, png: png3, rgba, cols, rows }) {
   const { stdout } = use_stdout_default();
   const protocol = detectProtocol();
-  const spacer = (0, import_react39.useMemo)(() => {
+  const spacer = (0, import_react40.useMemo)(() => {
     const lines = [];
     for (let r2 = 0; r2 < rows; r2++) {
       lines.push(" ".repeat(cols));
     }
     return lines.join("\n");
   }, [cols, rows]);
-  const [kittyId, setKittyId] = (0, import_react39.useState)(void 0);
-  const kittyPngRef = (0, import_react39.useRef)(void 0);
-  const kittyIdRef = (0, import_react39.useRef)(void 0);
+  const [kittyId, setKittyId] = (0, import_react40.useState)(void 0);
+  const kittyPngRef = (0, import_react40.useRef)(void 0);
+  const kittyIdRef = (0, import_react40.useRef)(void 0);
   kittyIdRef.current = kittyId;
-  (0, import_react39.useEffect)(() => {
+  (0, import_react40.useEffect)(() => {
     if (protocol !== "kitty" || !png3 || !stdout) return;
     if (kittyPngRef.current === png3) return;
     const id2 = nextImageId++ % 254 + 1;
@@ -96712,15 +96951,15 @@ function Thumbnail({ grid, png: png3, rgba, cols, rows }) {
     kittyPngRef.current = png3;
     setKittyId(id2);
   }, [protocol, png3, cols, rows, stdout]);
-  (0, import_react39.useEffect)(() => {
+  (0, import_react40.useEffect)(() => {
     return () => {
       const id2 = kittyIdRef.current;
       if (protocol === "kitty" && id2 !== void 0 && stdout) stdout.write(kittyDeleteById(id2));
       kittyPngRef.current = void 0;
     };
   }, [protocol, stdout]);
-  const [sixelSeq, setSixelSeq] = (0, import_react39.useState)(void 0);
-  (0, import_react39.useEffect)(() => {
+  const [sixelSeq, setSixelSeq] = (0, import_react40.useState)(void 0);
+  (0, import_react40.useEffect)(() => {
     if (protocol !== "sixel" || !rgba) return;
     const cached = sixelCache.get(rgba.data);
     if (cached !== void 0) {
@@ -96741,13 +96980,13 @@ function Thumbnail({ grid, png: png3, rgba, cols, rows }) {
       cancelled = true;
     };
   }, [protocol, rgba]);
-  const [anchor, setAnchor] = (0, import_react39.useState)(void 0);
-  (0, import_react39.useEffect)(() => {
+  const [anchor, setAnchor] = (0, import_react40.useState)(void 0);
+  (0, import_react40.useEffect)(() => {
     if (protocol !== "sixel") return;
     attachCprListener();
     return subscribeCpr(setAnchor);
   }, [protocol]);
-  (0, import_react39.useEffect)(() => {
+  (0, import_react40.useEffect)(() => {
     if (protocol !== "sixel" || !sixelSeq || !anchor || !stdout) return;
     stdout.write(`\x1B[${anchor.row};${anchor.col}H${sixelSeq}`);
   }, [protocol, sixelSeq, anchor, stdout]);
@@ -96791,7 +97030,7 @@ function debugLog4(msg) {
 }
 function UpdateBadge({ info }) {
   const theme = useTheme();
-  const s2 = t();
+  const s2 = useT();
   if (!info?.hasUpdate) return null;
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { position: "absolute", top: 0, right: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.warning ?? theme.accent ?? theme.primary, bold: true, children: [
     "\u2191 ",
@@ -96803,7 +97042,7 @@ function UpdateBadge({ info }) {
 var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i2) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: " " }, i2)) });
 function BrandLine() {
   const theme = useTheme();
-  const s2 = t();
+  const s2 = useT();
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", flexShrink: 0, children: [
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u25C8 CARBON" }),
     /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: true, children: "  \xB7  " }),
@@ -96818,9 +97057,65 @@ function ChoiceItem({ isSelected, label }) {
   const theme = useTheme();
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: isSelected ? theme.accent ?? theme.primary : theme.primary, bold: isSelected, children: label });
 }
+function LanguagePicker({ onPick, onCancel, boxWidth }) {
+  const { stdout } = use_stdout_default();
+  const theme = useTheme();
+  const s2 = useT();
+  const [query, setQuery] = (0, import_react41.useState)("");
+  const all = supportedLanguages();
+  const q = query.trim().toLowerCase();
+  const items = q ? all.filter((code) => {
+    const name = languageDisplayName(code).toLowerCase();
+    return name.includes(q) || code.toLowerCase().includes(q);
+  }) : all;
+  const visible = items.length > 0 ? items : all;
+  const current = getLanguage();
+  const listLimit = Math.max(8, Math.min(14, stdout?.rows ? stdout.rows - 14 : 12));
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Panel, { title: s2.langPickerTitle ?? "Choose language", width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: "\u2315 " }),
+        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          TextInput,
+          {
+            value: query,
+            onChange: setQuery,
+            placeholder: s2.langPickerSearch ?? "search\u2026",
+            width: boxWidth - 12
+          }
+        )
+      ] }),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        SelectInput_default,
+        {
+          indicatorComponent: ChoiceIndicator,
+          itemComponent: ChoiceItem,
+          limit: listLimit,
+          items: visible.map((code) => {
+            const isCurrent = code === current;
+            const label = `${languageDisplayName(code)}  \xB7 ${code}${isCurrent ? "  \u2713" : ""}`;
+            return { key: code, label, value: code };
+          }),
+          onSelect: (item) => onPick(item.value)
+        }
+      ),
+      items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s2.langPickerHint ?? "type to filter" }) : null
+    ] }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+      "^l ",
+      s2.langPickerHint ?? "type to filter",
+      " \xB7 esc ",
+      s2.back
+    ] })
+  ] });
+}
 function MetadataBlock({ info, platform: platform2, maxWidth }) {
   const theme = useTheme();
-  const s2 = t();
+  const s2 = useT();
   const artist = artistOf(info);
   const release = formatReleaseDate(info.release_date);
   const labelW = 9;
@@ -96844,8 +97139,8 @@ function CoverArt({ candidates, cols, square }) {
   const first = candidates[0];
   const aspect = square ? 1 : first?.width && first?.height ? first.width / first.height : 1;
   const rows = Math.max(4, Math.min(18, Math.round(cols * cell.width / (aspect * cell.height))));
-  const [thumb, setThumb] = (0, import_react40.useState)(void 0);
-  (0, import_react40.useEffect)(() => {
+  const [thumb, setThumb] = (0, import_react41.useState)(void 0);
+  (0, import_react41.useEffect)(() => {
     const controller = new AbortController();
     let cancelled = false;
     void (async () => {
@@ -96873,7 +97168,7 @@ function CoverArt({ candidates, cols, square }) {
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexShrink: 0, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Thumbnail, { grid: thumb.grid, png: thumb.png, rgba: thumb.rgba, cols, rows }) });
 }
 function MediaHeader({ info, platform: platform2, contentWidth, audioMode }) {
-  const candidates = (0, import_react40.useMemo)(() => thumbnailCandidates(info), [info]);
+  const candidates = (0, import_react41.useMemo)(() => thumbnailCandidates(info), [info]);
   const gap = 2;
   const minMeta = 24;
   const square = Boolean(audioMode && hasCompleteMusicMeta(info));
@@ -96910,9 +97205,9 @@ function ModernProgressBar({ percent, width = 40 }) {
 }
 function TipDisplay({ maxWidth }) {
   const theme = useTheme();
-  const s2 = t();
-  const [tip, setTip] = (0, import_react40.useState)(randomTip);
-  (0, import_react40.useEffect)(() => {
+  const s2 = useT();
+  const [tip, setTip] = (0, import_react41.useState)(randomTip);
+  (0, import_react41.useEffect)(() => {
     const interval = setInterval(() => {
       setTip(nextTip());
     }, TIP_INTERVAL_MS);
@@ -96925,8 +97220,8 @@ function TipDisplay({ maxWidth }) {
   ] }, i2)) });
 }
 function App2({ initialThemeMode = "system", ...props }) {
-  const [themeMode, setThemeMode] = (0, import_react40.useState)(initialThemeMode);
-  const cycleTheme = (0, import_react40.useCallback)(() => {
+  const [themeMode, setThemeMode] = (0, import_react41.useState)(initialThemeMode);
+  const cycleTheme = (0, import_react41.useCallback)(() => {
     setThemeMode(nextThemeMode);
   }, []);
   return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AppContent, { ...props, cycleTheme }) });
@@ -96937,21 +97232,21 @@ function AppContent({
   cycleTheme
 }) {
   const theme = useTheme();
-  const s2 = t();
+  const s2 = useT();
   const { exit } = use_app_default();
   const { stdout } = use_stdout_default();
-  const [url, setUrl] = (0, import_react40.useState)(initialUrl ?? "");
-  const [urlInput, setUrlInput] = (0, import_react40.useState)("");
-  const [history, setHistory] = (0, import_react40.useState)(loadHistory);
-  const [platform2, setPlatform] = (0, import_react40.useState)();
-  const [info, setInfo] = (0, import_react40.useState)();
-  const downloadUrlRef = (0, import_react40.useRef)("");
-  const [wizard, setWizard] = (0, import_react40.useState)({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
-  const ytdlpRef = (0, import_react40.useRef)("");
-  const abortRef = (0, import_react40.useRef)(void 0);
-  const [phase, setPhase] = (0, import_react40.useState)(initialUrl ? { name: "probing", status: s2.warmingUp } : { name: "input" });
-  const [updateInfo, setUpdateInfo] = (0, import_react40.useState)(null);
-  (0, import_react40.useEffect)(() => {
+  const [url, setUrl] = (0, import_react41.useState)(initialUrl ?? "");
+  const [urlInput, setUrlInput] = (0, import_react41.useState)("");
+  const [history, setHistory] = (0, import_react41.useState)(loadHistory);
+  const [platform2, setPlatform] = (0, import_react41.useState)();
+  const [info, setInfo] = (0, import_react41.useState)();
+  const downloadUrlRef = (0, import_react41.useRef)("");
+  const [wizard, setWizard] = (0, import_react41.useState)({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
+  const ytdlpRef = (0, import_react41.useRef)("");
+  const abortRef = (0, import_react41.useRef)(void 0);
+  const [phase, setPhase] = (0, import_react41.useState)(initialUrl ? { name: "probing", status: s2.warmingUp } : { name: "input" });
+  const [updateInfo, setUpdateInfo] = (0, import_react41.useState)(null);
+  (0, import_react41.useEffect)(() => {
     let cancelled = false;
     void checkForUpdate().then((info2) => {
       if (!cancelled) setUpdateInfo(info2);
@@ -96964,7 +97259,7 @@ function AppContent({
   const rows = stdout?.rows && stdout.rows > 0 ? stdout.rows : 24;
   const boxWidth = Math.max(14, Math.min(64, columns - 6));
   const contentWidth = Math.max(10, Math.min(columns - 4, 78));
-  const startProbe = (0, import_react40.useCallback)(async (targetUrl) => {
+  const startProbe = (0, import_react41.useCallback)(async (targetUrl) => {
     const controller = new AbortController();
     abortRef.current = controller;
     setPlatform(detectPlatform(targetUrl));
@@ -97006,10 +97301,10 @@ function AppContent({
       setPhase({ name: "error", message: error instanceof Error ? error.message : String(error) });
     }
   }, []);
-  (0, import_react40.useEffect)(() => {
+  (0, import_react41.useEffect)(() => {
     if (initialUrl) void startProbe(initialUrl);
   }, [initialUrl, startProbe]);
-  const resetToInput = (0, import_react40.useCallback)(() => {
+  const resetToInput = (0, import_react41.useCallback)(() => {
     setUrl("");
     setUrlInput("");
     setPlatform(void 0);
@@ -97017,7 +97312,7 @@ function AppContent({
     setWizard({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
     setPhase({ name: "input" });
   }, []);
-  const cancelRun = (0, import_react40.useCallback)(() => {
+  const cancelRun = (0, import_react41.useCallback)(() => {
     abortRef.current?.abort();
     resetToInput();
     setUrlInput(url);
@@ -97026,6 +97321,14 @@ function AppContent({
     (input, key) => {
       if (key.ctrl && input === "t") {
         cycleTheme();
+        return;
+      }
+      if (key.ctrl && input === "l" && phase.name !== "language-picker") {
+        setPhase({ name: "language-picker", previousPhase: phase });
+        return;
+      }
+      if (key.escape && phase.name === "language-picker") {
+        setPhase(phase.previousPhase);
         return;
       }
       if (key.escape && phase.name === "wizard") {
@@ -97051,7 +97354,7 @@ function AppContent({
     setUrl(trimmed);
     void startProbe(trimmed);
   };
-  const startDownload = (0, import_react40.useCallback)(
+  const startDownload = (0, import_react41.useCallback)(
     (choice) => {
       const controller = new AbortController();
       abortRef.current = controller;
@@ -97178,8 +97481,9 @@ function AppContent({
     value: f2.id
   }));
   const hints = (() => {
-    const base = phase.name === "input" ? [["\u21B5", s2.grab], ["^c", s2.quit]] : phase.name === "probing" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "wizard" ? [["\u2191\u2193", s2.choose], ["\u21B5", s2.select], ["esc", s2.back], ["^c", s2.quit]] : phase.name === "downloading" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "done" ? [["^c", s2.quit]] : [["\u21B5", s2.tryAgain], ["^c", s2.quit]];
-    const withTheme = [...base, ["^t", `${s2.theme}:${theme.mode}`]];
+    const base = phase.name === "input" ? [["\u21B5", s2.grab], ["^c", s2.quit]] : phase.name === "probing" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "wizard" ? [["\u2191\u2193", s2.choose], ["\u21B5", s2.select], ["esc", s2.back], ["^c", s2.quit]] : phase.name === "downloading" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "done" ? [["^c", s2.quit]] : phase.name === "language-picker" ? [["esc", s2.back], ["^c", s2.quit]] : [["\u21B5", s2.tryAgain], ["^c", s2.quit]];
+    const extras = phase.name === "language-picker" ? [] : [["^t", `${s2.theme}:${theme.mode}`], ["^l", s2.lang ?? "language"]];
+    const withTheme = [...base, ...extras];
     if (phase.name === "input" && history.length > 0) {
       return [withTheme[0], ["\u2191", s2.history], ...withTheme.slice(1)];
     }
@@ -97379,6 +97683,21 @@ function AppContent({
           "\u2717 ",
           phase.message
         ] }) }),
+        phase.name === "language-picker" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          LanguagePicker,
+          {
+            onPick: (code) => {
+              setLanguage(code);
+              const prev = phase.previousPhase;
+              if (prev.name === "probing") setPhase({ ...prev });
+              else if (prev.name === "wizard") setPhase({ ...prev });
+              else if (prev.name === "downloading") setPhase({ ...prev });
+              else setPhase(prev);
+            },
+            onCancel: () => setPhase(phase.previousPhase),
+            boxWidth
+          }
+        ),
         hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, { lines: 2 }),
           /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
