@@ -13,7 +13,7 @@ import {AUDIO_FORMATS, FPS_OPTIONS, RESOLUTIONS, VIDEO_FORMATS, bitrateItems, fm
 import {addToHistory, loadHistory} from './lib/history.js'
 import {detectPlatform, isProbablyUrl, type Platform} from './lib/platforms.js'
 import {nextThemeMode, ThemeProvider, type ThemeMode, useTheme} from './theme.js'
-import {t, getLanguage} from './lib/i18n.js'
+import {getLanguage, languageDisplayName, setLanguage, supportedLanguages, t, useT} from './lib/i18n.js'
 import {nextTip, randomTip, TIP_INTERVAL_MS} from './lib/tips.js'
 import {checkForUpdate, type UpdateInfo} from './lib/update-check.js'
 import {
@@ -53,7 +53,7 @@ function debugLog(msg: string): void {
 
 function UpdateBadge({info}: {info: UpdateInfo | null}) {
   const theme = useTheme()
-  const s = t()
+  const s = useT()
   if (!info?.hasUpdate) return null
   return (
     <Box position="absolute" top={0} right={1}>
@@ -79,7 +79,7 @@ const Gap = ({lines = 1}: {lines?: number}) => (
  */
 function BrandLine() {
   const theme = useTheme()
-  const s = t()
+  const s = useT()
   return (
     <Box flexDirection="row" flexShrink={0}>
       <Text color={theme.accent ?? theme.primary} bold>◈ CARBON</Text>
@@ -108,12 +108,76 @@ function ChoiceItem({isSelected, label}: ItemProps) {
 }
 
 /**
+ * Language picker overlay — opens with ctrl+l from any phase, paused over the
+ * previous phase so it resumes seamlessly when the user picks or cancels.
+ * Searchable list of 80+ supported languages. Selecting one calls
+ * setLanguage() which broadcasts to every useT() subscriber and re-renders
+ * the entire UI in the new language instantly.
+ */
+function LanguagePicker({onPick, onCancel, boxWidth}: {onPick: (code: string) => void; onCancel: () => void; boxWidth: number}) {
+  const {stdout} = useStdout()
+  const theme = useTheme()
+  const s = useT()
+  const [query, setQuery] = useState('')
+  const all = supportedLanguages()
+  const q = query.trim().toLowerCase()
+  const items = q
+    ? all.filter(code => {
+        const name = languageDisplayName(code).toLowerCase()
+        return name.includes(q) || code.toLowerCase().includes(q)
+      })
+    : all
+  // If the filter narrows to nothing, fall back to the full list so the user
+  // can always reach a selection (and clear the query).
+  const visible = items.length > 0 ? items : all
+  const current = getLanguage()
+  const listLimit = Math.max(8, Math.min(14, (stdout?.rows ? stdout.rows - 14 : 12)))
+
+  return (
+    <Box flexDirection="column" alignItems="center">
+      <BrandLine />
+      <Gap />
+      <Panel title={s.langPickerTitle ?? 'Choose language'} width={boxWidth}>
+        <Box flexDirection="column">
+          <Box flexDirection="row">
+            <Text color={theme.accent ?? theme.primary}>⌕ </Text>
+            <TextInput
+              value={query}
+              onChange={setQuery}
+              placeholder={s.langPickerSearch ?? 'search…'}
+              width={boxWidth - 12}
+            />
+          </Box>
+          <Gap />
+          <SelectInput
+            indicatorComponent={ChoiceIndicator}
+            itemComponent={ChoiceItem}
+            limit={listLimit}
+            items={visible.map(code => {
+              const isCurrent = code === current
+              const label = `${languageDisplayName(code)}  · ${code}${isCurrent ? '  ✓' : ''}`
+              return {key: code, label, value: code}
+            })}
+            onSelect={item => onPick(item.value)}
+          />
+          {items.length === 0 ? (
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>{s.langPickerHint ?? 'type to filter'}</Text>
+          ) : null}
+        </Box>
+      </Panel>
+      <Gap />
+      <Text color={theme.gray} dimColor={theme.dimSecondary}>^l {s.langPickerHint ?? 'type to filter'} · esc {s.back}</Text>
+    </Box>
+  )
+}
+
+/**
  * Media metadata block — Title / Artist / Album / Release / Time / Source.
  * All fields always shown; missing values display "-".
  */
 function MetadataBlock({info, platform, maxWidth}: {info: VideoInfo; platform?: Platform; maxWidth: number}) {
   const theme = useTheme()
-  const s = t()
+  const s = useT()
   const artist = artistOf(info)
   const release = formatReleaseDate(info.release_date)
   const labelW = 9
@@ -275,7 +339,7 @@ function ModernProgressBar({percent, width = 40}: {percent: number; width?: numb
  */
 function TipDisplay({maxWidth}: {maxWidth: number}) {
   const theme = useTheme()
-  const s = t()
+  const s = useT()
   const [tip, setTip] = useState(randomTip)
 
   useEffect(() => {
@@ -315,6 +379,7 @@ type Phase =
     }
   | {name: 'done'; filepath: string}
   | {name: 'error'; message: string}
+  | {name: 'language-picker'; previousPhase: Phase}
 
 type WizardState = {
   kind: 'video' | 'audio' | null
@@ -354,7 +419,7 @@ function AppContent({
   cycleTheme: () => void
 }) {
   const theme = useTheme()
-  const s = t()
+  const s = useT()
   const {exit} = useApp()
   const {stdout} = useStdout()
   const [url, setUrl] = useState(initialUrl ?? '')
@@ -456,6 +521,14 @@ function AppContent({
     (input, key) => {
       if (key.ctrl && input === 't') {
         cycleTheme()
+        return
+      }
+      if (key.ctrl && input === 'l' && phase.name !== 'language-picker') {
+        setPhase({name: 'language-picker', previousPhase: phase})
+        return
+      }
+      if (key.escape && phase.name === 'language-picker') {
+        setPhase(phase.previousPhase)
         return
       }
       if (key.escape && phase.name === 'wizard') {
@@ -647,8 +720,13 @@ function AppContent({
               ? [['esc', s.cancel], ['^c', s.quit]]
               : phase.name === 'done'
                 ? [['^c', s.quit]]
-                : [['↵', s.tryAgain], ['^c', s.quit]]
-    const withTheme: Array<[string, string]> = [...base, ['^t', `${s.theme}:${theme.mode}`]]
+                : phase.name === 'language-picker'
+                  ? [['esc', s.back], ['^c', s.quit]]
+                  : [['↵', s.tryAgain], ['^c', s.quit]]
+    const extras: Array<[string, string]> = phase.name === 'language-picker'
+      ? []
+      : [['^t', `${s.theme}:${theme.mode}`], ['^l', s.lang ?? 'language']]
+    const withTheme: Array<[string, string]> = [...base, ...extras]
     if (phase.name === 'input' && history.length > 0) {
       return [withTheme[0]!, ['↑', s.history], ...withTheme.slice(1)]
     }
@@ -871,6 +949,24 @@ function AppContent({
         <Box flexDirection="column" alignItems="center" width={Math.max(10, Math.min(columns - 6, 72))}>
           <Text bold color={theme.danger ?? theme.primary}>✗ {phase.message}</Text>
         </Box>
+      )}
+
+      {phase.name === 'language-picker' && (
+        <LanguagePicker
+          onPick={code => {
+            setLanguage(code)
+            const prev = phase.previousPhase
+            // Preserve object identity where possible so React doesn't unmount
+            // the underlying phase; for object-typed phases, refresh status
+            // strings so they re-render in the new language.
+            if (prev.name === 'probing') setPhase({...prev})
+            else if (prev.name === 'wizard') setPhase({...prev})
+            else if (prev.name === 'downloading') setPhase({...prev})
+            else setPhase(prev)
+          }}
+          onCancel={() => setPhase(phase.previousPhase)}
+          boxWidth={boxWidth}
+        />
       )}
 
       {hints.length > 0 ? (
