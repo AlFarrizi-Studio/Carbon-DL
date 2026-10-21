@@ -1,6 +1,13 @@
-#!/usr/bin/env bash
-# Carbon installer for Linux & macOS
+#!/bin/sh
+# Carbon installer for Linux, macOS & Termux (Android)
 # Usage: curl -fsSL https://raw.githubusercontent.com/AlFarrizi-Studio/Carbon-DL/main/install.sh -o install.sh && bash install.sh
+#
+# The shebang is /bin/sh (not /usr/bin/env bash) because Android/Termux has no
+# /usr directory at all. If this file is started by a POSIX shell, re-exec it
+# with bash so the rest of the script can use bash features.
+if [ -z "${BASH_VERSION:-}" ]; then
+    exec bash "$0" "$@"
+fi
 
 set -e
 
@@ -378,6 +385,8 @@ fi
 chmod +x "$LAUNCHER"
 
 # --- Add to PATH in shell profile ---
+# Pick an existing profile, or create one — a fresh Linux/macOS/Termux box may
+# have none of them, and without a profile the launcher would never be found.
 PROFILE=""
 if [ -f "$HOME/.bashrc" ]; then
     PROFILE="$HOME/.bashrc"
@@ -385,10 +394,14 @@ elif [ -f "$HOME/.zshrc" ]; then
     PROFILE="$HOME/.zshrc"
 elif [ -f "$HOME/.profile" ]; then
     PROFILE="$HOME/.profile"
-elif [ "$IS_TERMUX" -eq 1 ]; then
-    # Fresh Termux installs may not have a profile yet — create one so the
-    # launcher is on PATH for the next session.
-    PROFILE="$HOME/.bashrc"
+elif [ -f "$HOME/.bash_profile" ]; then
+    PROFILE="$HOME/.bash_profile"
+else
+    # No profile at all — create the one that matches the current shell.
+    case "${SHELL:-}" in
+        *zsh) PROFILE="$HOME/.zshrc" ;;
+        *)    PROFILE="$HOME/.bashrc" ;;
+    esac
     touch "$PROFILE"
 fi
 

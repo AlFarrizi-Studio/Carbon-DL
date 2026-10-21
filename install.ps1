@@ -1,15 +1,14 @@
-﻿# Carbon installer for Windows (PowerShell)
+# Carbon installer for Windows (PowerShell)
 # Usage: irm https://raw.githubusercontent.com/AlFarrizi-Studio/Carbon-DL/main/install.ps1 | iex
 
 $ErrorActionPreference = 'Stop'
 
 Write-Host ''
-Write-Host '  ██████╗ █████╗ ██████╗ ██████╗  ██████╗ ███╗   ██╗' -ForegroundColor Cyan
-Write-Host ' ██╔════╝██╔══██╗██╔══██╗██╔══██╗██╔═══██╗████╗  ██║' -ForegroundColor Cyan
-Write-Host ' ██║     ███████║██████╔╝██████╔╝██║   ██║██╔██╗ ██║' -ForegroundColor Cyan
-Write-Host ' ██║     ██╔══██║██╔══██╗██╔══██╗██║   ██║██║╚██╗██║' -ForegroundColor Cyan
-Write-Host ' ╚██████╗██║  ██║██║  ██║██████╔╝╚██████╔╝██║ ╚████║' -ForegroundColor Cyan
-Write-Host '  ╚═════╝╚═╝  ╚═╝╚═╝  ╚═╝╚═╝      ╚═════╝ ╚═╝  ╚═══╝' -ForegroundColor Cyan
+Write-Host '   ____   ____  ____  ____  _____  ___   ___' -ForegroundColor Cyan
+Write-Host '  / ___| |  _ \|  _ \|  _ \|  ___| |   | |_ _|' -ForegroundColor Cyan
+Write-Host '  | |    | | | | | | | | | |_   | |   |  | |' -ForegroundColor Cyan
+Write-Host '  | |___ | |_| | |_| | |_| |  _|  | |___|  | |' -ForegroundColor Cyan
+Write-Host '   \____|\____/ \____/ \____/ |_|   \____/\_,_|' -ForegroundColor Cyan
 Write-Host ''
 Write-Host ' Installing Carbon...' -ForegroundColor White
 Write-Host ''
@@ -20,7 +19,7 @@ $INSTALL_DIR = Join-Path $env:LOCALAPPDATA 'Carbon'
 # --- Check / install Node.js ---
 $node = Get-Command node -ErrorAction SilentlyContinue
 if (-not $node) {
-    Write-Host ' → Node.js not found. Downloading and installing automatically...' -ForegroundColor Yellow
+    Write-Host ' -> Node.js not found. Downloading and installing automatically...' -ForegroundColor Yellow
 
     $nodeVersion = 'v20.18.1'
     $arch = if ([Environment]::Is64BitOperatingSystem) { 'x64' } else { 'x86' }
@@ -31,7 +30,7 @@ if (-not $node) {
     try {
         Invoke-WebRequest -Uri $msiUrl -OutFile $msiPath -UseBasicParsing
     } catch {
-        Write-Host ' ✗ Failed to download Node.js.' -ForegroundColor Red
+        Write-Host ' x Failed to download Node.js.' -ForegroundColor Red
         Write-Host '   Please install Node.js manually from https://nodejs.org and re-run this script.' -ForegroundColor Yellow
         exit 1
     }
@@ -39,7 +38,7 @@ if (-not $node) {
     Write-Host '   Installing Node.js (this may take a moment)...' -ForegroundColor White
     $process = Start-Process msiexec.exe -ArgumentList "/i `"$msiPath`" /qn /norestart" -Wait -PassThru
     if ($process.ExitCode -ne 0) {
-        Write-Host ' ✗ Node.js installation failed.' -ForegroundColor Red
+        Write-Host ' x Node.js installation failed.' -ForegroundColor Red
         Write-Host '   Please install Node.js manually from https://nodejs.org and re-run this script.' -ForegroundColor Yellow
         exit 1
     }
@@ -51,13 +50,13 @@ if (-not $node) {
     $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
     $env:Path = "$machinePath;$userPath"
 
-    Write-Host ' ✓ Node.js installed.' -ForegroundColor Green
+    Write-Host ' + Node.js installed.' -ForegroundColor Green
 }
 
 # Verify node is now available
 $node = Get-Command node -ErrorAction SilentlyContinue
 if (-not $node) {
-    Write-Host ' ✗ Node.js was installed but is not found in PATH.' -ForegroundColor Red
+    Write-Host ' x Node.js was installed but is not found in PATH.' -ForegroundColor Red
     Write-Host '   Please open a new terminal and re-run this script.' -ForegroundColor Yellow
     exit 1
 }
@@ -65,14 +64,14 @@ if (-not $node) {
 $nodeVersion = (node --version) -replace '^v', ''
 $major = [int]($nodeVersion.Split('.')[0])
 if ($major -lt 18) {
-    Write-Host " ✗ Node.js v$nodeVersion found, but v18+ is required." -ForegroundColor Red
+    Write-Host " x Node.js v$nodeVersion found, but v18+ is required." -ForegroundColor Red
     Write-Host '   Update Node.js from https://nodejs.org, then re-run this script.' -ForegroundColor Yellow
     exit 1
 }
-Write-Host " ✓ Node.js v$nodeVersion" -ForegroundColor Green
+Write-Host " + Node.js v$nodeVersion" -ForegroundColor Green
 
 # --- Download Carbon from GitHub ---
-Write-Host ' → Downloading Carbon from GitHub...' -ForegroundColor White
+Write-Host ' -> Downloading Carbon from GitHub...' -ForegroundColor White
 
 # Get latest release tag (for display only)
 $tagName = 'latest'
@@ -83,7 +82,7 @@ try {
 
 Write-Host "   Version: $tagName" -ForegroundColor White
 
-# Always download from main branch — dist/cli.js there is the latest build
+# Always download from main branch - dist/cli.js there is the latest build
 $cliUrl = "https://raw.githubusercontent.com/$GITHUB_REPO/main/dist/cli.js"
 $cliPath = Join-Path $INSTALL_DIR 'cli.js'
 
@@ -96,7 +95,7 @@ Write-Host "   Downloading cli.js..." -ForegroundColor White
 try {
     Invoke-WebRequest -Uri $cliUrl -OutFile $cliPath -UseBasicParsing
 } catch {
-    Write-Host ' ✗ Failed to download Carbon.' -ForegroundColor Red
+    Write-Host ' x Failed to download Carbon.' -ForegroundColor Red
     Write-Host "   URL: $cliUrl" -ForegroundColor Yellow
     exit 1
 }
@@ -109,23 +108,23 @@ if (-not (Test-Path $BIN_DIR)) {
 
 $ytdlpPath = Join-Path $BIN_DIR 'yt-dlp.exe'
 if (-not (Test-Path $ytdlpPath)) {
-    Write-Host ' → Downloading yt-dlp...' -ForegroundColor White
+    Write-Host ' -> Downloading yt-dlp...' -ForegroundColor White
     $ytdlpUrl = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download/yt-dlp.exe'
     try {
         Invoke-WebRequest -Uri $ytdlpUrl -OutFile $ytdlpPath -UseBasicParsing
-        Write-Host ' ✓ yt-dlp downloaded.' -ForegroundColor Green
+        Write-Host ' + yt-dlp downloaded.' -ForegroundColor Green
     } catch {
-        Write-Host ' ⚠ Failed to download yt-dlp (will be downloaded on first run).' -ForegroundColor Yellow
+        Write-Host ' ! Failed to download yt-dlp (will be downloaded on first run).' -ForegroundColor Yellow
     }
 } else {
-    Write-Host ' ✓ yt-dlp already present.' -ForegroundColor Green
+    Write-Host ' + yt-dlp already present.' -ForegroundColor Green
 }
 
 # --- Download and extract ffmpeg ---
 $ffmpegPath = Join-Path $BIN_DIR 'ffmpeg.exe'
 $ffprobePath = Join-Path $BIN_DIR 'ffprobe.exe'
 if (-not (Test-Path $ffmpegPath)) {
-    Write-Host ' → Downloading ffmpeg (~170 MB, this may take a while)...' -ForegroundColor White
+    Write-Host ' -> Downloading ffmpeg (~170 MB, this may take a while)...' -ForegroundColor White
     $ffmpegUrl = 'https://github.com/BtbN/FFmpeg-Builds/releases/latest/download/ffmpeg-master-latest-win64-gpl.zip'
     $ffmpegZip = Join-Path $env:TEMP 'ffmpeg-carbon.zip'
     $ffmpegExtract = Join-Path $env:TEMP 'ffmpeg-carbon-extract'
@@ -162,19 +161,19 @@ if (-not (Test-Path $ffmpegPath)) {
             $foundFfprobe = Get-ChildItem -Path $ffmpegExtract -Recurse -Filter 'ffprobe.exe' | Select-Object -First 1
             if ($foundFfmpeg) { Copy-Item $foundFfmpeg.FullName $ffmpegPath -Force }
             if ($foundFfprobe) { Copy-Item $foundFfprobe.FullName $ffprobePath -Force }
-            Write-Host ' ✓ ffmpeg downloaded and extracted.' -ForegroundColor Green
+            Write-Host ' + ffmpeg downloaded and extracted.' -ForegroundColor Green
         } catch {
-            Write-Host " ⚠ Failed to extract ffmpeg: $_" -ForegroundColor Yellow
+            Write-Host " ! Failed to extract ffmpeg: $_" -ForegroundColor Yellow
         }
     } else {
-        Write-Host ' ⚠ Failed to download ffmpeg (will be downloaded on first run).' -ForegroundColor Yellow
+        Write-Host ' ! Failed to download ffmpeg (will be downloaded on first run).' -ForegroundColor Yellow
     }
 
     # Cleanup
     Remove-Item $ffmpegZip -Force -ErrorAction SilentlyContinue
     Remove-Item $ffmpegExtract -Recurse -Force -ErrorAction SilentlyContinue
 } else {
-    Write-Host ' ✓ ffmpeg already present.' -ForegroundColor Green
+    Write-Host ' + ffmpeg already present.' -ForegroundColor Green
 }
 
 # --- Download notification sounds ---
@@ -196,9 +195,9 @@ foreach ($n in 1..3) {
     }
 }
 if ($soundsOk) {
-    Write-Host ' ✓ Notification sounds ready.' -ForegroundColor Green
+    Write-Host ' + Notification sounds ready.' -ForegroundColor Green
 } else {
-    Write-Host ' ⚠ Could not download notification sounds (they are optional).' -ForegroundColor Yellow
+    Write-Host ' ! Could not download notification sounds (they are optional).' -ForegroundColor Yellow
 }
 
 # --- Create launcher script ---
@@ -213,11 +212,11 @@ $userPath = [Environment]::GetEnvironmentVariable('Path', 'User')
 if ($userPath -notlike "*$INSTALL_DIR*") {
     [Environment]::SetEnvironmentVariable('Path', "$userPath;$INSTALL_DIR", 'User')
     $env:Path = "$env:Path;$INSTALL_DIR"
-    Write-Host ' ✓ Added Carbon to PATH.' -ForegroundColor Green
+    Write-Host ' + Added Carbon to PATH.' -ForegroundColor Green
 }
 
 Write-Host ''
-Write-Host ' ✓ Carbon installed successfully!' -ForegroundColor Green
+Write-Host ' + Carbon installed successfully!' -ForegroundColor Green
 Write-Host ''
 Write-Host ' Run it with:' -ForegroundColor White
 Write-Host '   carbon-dl' -ForegroundColor Cyan
