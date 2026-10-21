@@ -96448,8 +96448,8 @@ function randomTip() {
 
 // src/lib/update-check.ts
 var GITHUB_REPO = "AlFarrizi-Studio/Carbon-DL";
-var CURRENT_VERSION = "1.1.2";
-var BUILD_ID = "2026-10-21 17:17";
+var CURRENT_VERSION = "1.1.4";
+var BUILD_ID = "2026-10-21 17:24";
 function isNewerVersion(a2, b) {
   const parse = (v) => {
     const clean = v.replace(/^v/, "");
