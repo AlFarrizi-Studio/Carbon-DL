@@ -25,3 +25,12 @@ export function addToHistory(url: string): string[] {
   }
   return next
 }
+
+/** Remove every remembered url. */
+export function clearHistory(): void {
+  try {
+    fs.rmSync(HISTORY_FILE, {force: true})
+  } catch {
+    // ignore
+  }
+}

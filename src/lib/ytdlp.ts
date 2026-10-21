@@ -7,6 +7,15 @@ import {Readable} from 'node:stream'
 import {pipeline} from 'node:stream/promises'
 import {formatBytes} from './format.js'
 import type {AudioFormat, VideoFormat} from './formats.js'
+import {
+  findPython,
+  hasPkg,
+  isAndroid,
+  pkgInstall,
+  pythonHasModule,
+  runCommand,
+  writeYtDlpShim,
+} from './termux.js'
 import {searchYtMusic, ytmTrackUrl} from './ytmusic.js'
 import {downloadArtwork, loadSharp} from './thumbnail.js'
 
@@ -19,9 +28,13 @@ function debugLog(msg: string): void {
 }
 const RELEASE_BASE = 'https://github.com/yt-dlp/yt-dlp/releases/latest/download'
 
-function ytDlpAssetName(): string {
+function ytDlpAssetName(): string | undefined {
   if (process.platform === 'win32') return 'yt-dlp.exe'
   if (process.platform === 'darwin') return 'yt-dlp_macos'
+  // Android (Termux) uses Bionic, not glibc — the Linux release binaries
+  // cannot run there, so yt-dlp is resolved through Termux's packages
+  // instead (see ensureAndroidYtDlp).
+  if (isAndroid()) return undefined
   return process.arch === 'arm64' ? 'yt-dlp_linux_aarch64' : 'yt-dlp_linux'
 }
 
@@ -49,10 +62,23 @@ export async function ensureYtDlp(onStatus: (message: string) => void, signal?: 
   const local = path.join(CARBON_DIR, process.platform === 'win32' ? 'yt-dlp.exe' : 'yt-dlp')
   if (await commandWorks(local, ['--version'])) return local
 
+  // Android (Termux): no glibc binaries available → use Termux's packages.
+  if (isAndroid()) return ensureAndroidYtDlp(local, onStatus)
+
+  const asset = ytDlpAssetName()
+  if (!asset) {
+    throw new Error(
+      'yt-dlp is not available on this device.\n' +
+      'Install it in Termux:\n' +
+      '  pkg install python python-pip\n' +
+      '  pip install -U "yt-dlp[default]"',
+    )
+  }
+
   onStatus('first run: fetching yt-dlp…')
   await fs.mkdir(CARBON_DIR, {recursive: true})
 
-  const url = `${RELEASE_BASE}/${ytDlpAssetName()}`
+  const url = `${RELEASE_BASE}/${asset}`
   const response = await fetch(url, {signal})
   if (!response.ok || !response.body) {
     throw new Error(`Could not download yt-dlp (${response.status}). Check your connection and try again.`)
@@ -63,6 +89,67 @@ export async function ensureYtDlp(onStatus: (message: string) => void, signal?: 
   if (process.platform !== 'win32') await fs.chmod(tmp, 0o755)
   await fs.rename(tmp, local)
   return local
+}
+
+/** Instructions shown when yt-dlp cannot be provisioned on Android. */
+const ANDROID_YTDLP_HELP =
+  'yt-dlp is not available on this Android device.\n\n' +
+  'Install it inside Termux:\n' +
+  '  pkg install python python-pip\n' +
+  '  pip install -U "yt-dlp[default]"\n\n' +
+  'Then run carbon-dl again.'
+
+/**
+ * Resolve yt-dlp on Android / Termux.
+ *
+ * Termux cannot run the official (glibc) release binaries, but it ships
+ * yt-dlp as a Python package. This helper:
+ *   1. makes sure a Python interpreter exists (installing it via `pkg` when
+ *      Termux's package manager is available),
+ *   2. makes sure the `yt_dlp` module is importable (installing it via pip),
+ *   3. writes a small shim that runs `python -m yt_dlp` and returns its path.
+ */
+async function ensureAndroidYtDlp(local: string, onStatus: (message: string) => void): Promise<string> {
+  let python = findPython()
+  if (!python && (await hasPkg())) {
+    onStatus('termux: installing python…')
+    await pkgInstall(['python', 'python-pip'])
+    python = findPython()
+  }
+
+  if (!python) {
+    throw new Error(ANDROID_YTDLP_HELP)
+  }
+
+  if (!(await pythonHasModule(python, 'yt_dlp'))) {
+    onStatus('termux: installing yt-dlp (pip, may take a minute)…')
+    const installed = await pipInstallYtDlp(python)
+    if (!installed && !(await pythonHasModule(python, 'yt_dlp'))) {
+      throw new Error(ANDROID_YTDLP_HELP)
+    }
+  }
+
+  const shim = await writeYtDlpShim(local, python)
+  if (await commandWorks(shim, ['--version'])) return shim
+
+  throw new Error(
+    'yt-dlp could not be started on this Android device.\n' +
+    `Tried: ${python} -m yt_dlp\n\n` +
+    ANDROID_YTDLP_HELP,
+  )
+}
+
+/** Install yt-dlp (and its JS runtime component) through pip. */
+async function pipInstallYtDlp(python: string): Promise<boolean> {
+  const attempts = [
+    ['-m', 'pip', 'install', '-U', '--no-input', 'yt-dlp[default]', 'yt-dlp-ejs'],
+    ['-m', 'pip', 'install', '-U', '--no-input', 'yt-dlp'],
+  ]
+  for (const args of attempts) {
+    const result = await runCommand(python, args, {timeoutMs: 15 * 60_000})
+    if (result.code === 0) return true
+  }
+  return false
 }
 
 /**
@@ -79,14 +166,31 @@ export async function ensureFfmpeg(onStatus?: (message: string) => void, signal?
   // 1. System ffmpeg
   if (await commandWorks('ffmpeg', ['-version'])) return undefined
 
-  // 2. Previously downloaded
   const ffmpegName = process.platform === 'win32' ? 'ffmpeg.exe' : 'ffmpeg'
   const ffprobeName = process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe'
   const localFfmpeg = path.join(CARBON_DIR, ffmpegName)
   const localFfprobe = path.join(CARBON_DIR, ffprobeName)
+
+  // 2. Previously downloaded
   if (await commandWorks(localFfmpeg, ['-version'])) return CARBON_DIR
 
-  // 3. Download ffmpeg
+  // 3. Android (Termux): the release builds are glibc-linked and cannot run
+  //    here — install Termux's own ffmpeg build instead.
+  if (isAndroid()) {
+    if (await hasPkg()) {
+      onStatus?.('termux: installing ffmpeg…')
+      await pkgInstall(['ffmpeg'])
+      if (await commandWorks('ffmpeg', ['-version'])) return undefined
+    }
+    throw new Error(
+      'ffmpeg is not available on this Android device.\n\n' +
+      'Install it inside Termux:\n' +
+      '  pkg install ffmpeg\n\n' +
+      'ffmpeg is required to merge video + audio streams and to convert formats.',
+    )
+  }
+
+  // 4. Download ffmpeg
   onStatus?.('first run: fetching ffmpeg…')
   await fs.mkdir(CARBON_DIR, {recursive: true})
 
@@ -634,7 +738,11 @@ function hashCode(str: string): number {
 
 /** Detect available browser for cookies extraction.
  *  Cookies can bypass age restrictions and some DRM requirements. */
-async function detectBrowser(): Promise<string | undefined> {
+async function detectBrowser(ytdlp: string): Promise<string | undefined> {
+  // Android (Termux) has no desktop browsers to read cookies from — skip the
+  // detection entirely (each attempt costs a yt-dlp startup).
+  if (isAndroid()) return undefined
+
   const browsers = process.platform === 'win32'
     ? ['chrome', 'edge', 'firefox', 'brave']
     : process.platform === 'darwin'
@@ -642,7 +750,7 @@ async function detectBrowser(): Promise<string | undefined> {
       : ['chrome', 'firefox', 'chromium', 'brave']
 
   for (const browser of browsers) {
-    if (await commandWorks('yt-dlp', ['--cookies-from-browser', browser, '--simulate', 'https://www.youtube.com/watch?v=jNQXAC9IVRw'])) {
+    if (await commandWorks(ytdlp, ['--cookies-from-browser', browser, '--simulate', 'https://www.youtube.com/watch?v=jNQXAC9IVRw'])) {
       return browser
     }
   }
@@ -651,17 +759,19 @@ async function detectBrowser(): Promise<string | undefined> {
 
 let cachedBrowser: string | undefined | null = null
 
-/** Get browser for cookies (cached after first detection). */
-export async function getBrowserForCookies(): Promise<string | undefined> {
+/** Get browser for cookies (cached after first detection).
+ *  `ytdlp` is the resolved yt-dlp command — on Android it may be a shim that
+ *  is not on `$PATH`, so the hardcoded name would not work. */
+export async function getBrowserForCookies(ytdlp = 'yt-dlp'): Promise<string | undefined> {
   if (cachedBrowser === null) {
-    cachedBrowser = await detectBrowser()
+    cachedBrowser = await detectBrowser(ytdlp)
   }
   return cachedBrowser ?? undefined
 }
 
 export async function probe(ytdlp: string, url: string, signal?: AbortSignal, useCookies = false): Promise<ProbeResult> {
   const doProbe = async (targetUrl: string, strong = false, withCookies = false, tiktokHostIndex = 0): Promise<VideoInfo> => {
-    const browser = withCookies ? await getBrowserForCookies() : undefined
+    const browser = withCookies ? await getBrowserForCookies(ytdlp) : undefined
     const cookies = browser ? ['--cookies-from-browser', browser] : []
     const stdout = await new Promise<string>((resolve, reject) => {
       const child = spawn(ytdlp, ['-J', '--no-playlist', '--no-warnings', ...bypassArgsFor(targetUrl, strong, tiktokHostIndex), ...cookies, targetUrl], {signal})
@@ -783,7 +893,7 @@ export async function probe(ytdlp: string, url: string, signal?: AbortSignal, us
 
     if (needsCookies) {
       try {
-        const browser = await getBrowserForCookies()
+        const browser = await getBrowserForCookies(ytdlp)
         if (browser) {
           const info = await doProbe(url, true, true)
           return {info}
@@ -848,6 +958,43 @@ export function maxHeight(info: VideoInfo): number {
   return videos.reduce((max, f) => Math.max(max, f.height ?? 0), 0)
 }
 
+/**
+ * Every distinct video height the source actually offers, highest first.
+ *
+ * Used to mark the resolutions that can be forced — picking one of them makes
+ * Carbon request that exact height instead of "the best one below it".
+ */
+export function availableHeights(info: VideoInfo): number[] {
+  const heights = new Set<number>()
+  for (const f of info.formats ?? []) {
+    if (!f.vcodec || f.vcodec === 'none') continue
+    const h = f.height ?? 0
+    if (h > 0) heights.add(h)
+  }
+  return [...heights].sort((a, b) => b - a)
+}
+
+/**
+ * Frame rates available for a given height.
+ *
+ * YouTube often offers 1080p only at 60 fps while 480p exists at 30 fps — so
+ * the frame-rate list has to be relative to the resolution that was picked,
+ * otherwise "30 fps" would be offered next to a 1080p-only source and quietly
+ * hand back 60 fps.
+ */
+export function fpsForHeight(info: VideoInfo, height: number, force: boolean): number[] {
+  const videos = (info.formats ?? []).filter(f => f.vcodec && f.vcodec !== 'none' && f.fps)
+  const pool =
+    height <= 0
+      ? videos
+      : videos.filter(f => {
+          const h = f.height ?? 0
+          return force ? h === height : h <= height
+        })
+  const set = new Set(pool.map(f => Math.round(f.fps ?? 0)).filter(f => f > 0))
+  return [...set].sort((a, b) => b - a)
+}
+
 /** Distinct frame rates the source offers, descending. */
 export function availableFps(info: VideoInfo): number[] {
   const videos = (info.formats ?? []).filter(f => f.vcodec && f.vcodec !== 'none' && f.fps)
@@ -874,14 +1021,66 @@ export type DownloadChoice = {
   kind: 'video' | 'audio'
   args: string[]
   detail: string
+  /** Set when a resolution was forced — used to explain a failure clearly. */
+  forcedResolution?: number
+  /** The height that was asked for (0 = best available). */
+  requestedHeight?: number
 }
 
-/** Build yt-dlp args for a video download with chosen container, resolution and fps. */
-export function buildVideoArgs(format: VideoFormat, resolution: number, fps: number): string[] {
-  const heightFilter = resolution > 0 ? `[height<=${resolution}]` : ''
-  const fpsFilter = fps > 0 ? `[fps<=${fps}]` : ''
-  const selector = `bv*${heightFilter}${fpsFilter}+ba/b${heightFilter}${fpsFilter}/bv*${heightFilter}+ba/b`
-  return ['-f', selector, '--merge-output-format', format.ext]
+/** Video quality options for the download selector. */
+export type VideoQuality = {
+  /** Pixel height, 0 = best available. */
+  resolution: number
+  /** Frame rate, 0 = source frame rate. */
+  fps: number
+  /** Request the exact height — never silently downgrade. */
+  forceResolution?: boolean
+  /** Request the exact frame rate — never silently downgrade. */
+  forceFps?: boolean
+}
+
+/**
+ * Build yt-dlp args for a video download with chosen container, resolution and fps.
+ *
+ * yt-dlp's `=` operator is a strict float comparison, so `[fps=60]` does NOT
+ * match a stream that reports 59.94 fps (very common on YouTube). Frame rates
+ * are therefore forced with a narrow ±0.5 window, which still excludes the
+ * neighbouring rates (50, 24, …) but accepts 59.94 / 29.97 / 23.98.
+ *
+ * "Force" also means the *exact* value — `[height=2160]`, never "the best one
+ * below it" — so a 4K source can never quietly land on 1080p.
+ */
+export function buildVideoArgs(format: VideoFormat, quality: VideoQuality): string[] {
+  const {resolution, fps, forceResolution, forceFps} = quality
+
+  // Height: exact when forced, otherwise a ceiling.
+  const height = resolution <= 0 ? '' : forceResolution ? `height=${resolution}` : `height<=${resolution}`
+
+  // Frame rate: a narrow window when forced, otherwise a ceiling.
+  const fpsFilter = fps <= 0 ? '' : forceFps ? `fps>=${fps - 0.5}][fps<=${fps + 0.5}` : `fps<=${fps}`
+
+  // Best available — best video stream + best audio, with the best pre-merged
+  // format as a fallback for sites that have no separate streams.
+  if (resolution <= 0 && fps <= 0) {
+    return ['-f', 'bv*+ba/b', '--merge-output-format', format.ext]
+  }
+
+  const video = (h: string, f: string) => (h && f ? `bv*[${h}][${f}]+ba` : h ? `bv*[${h}]+ba` : f ? `bv*[${f}]+ba` : 'bv*+ba')
+  const merged = (h: string, f: string) => (h && f ? `b[${h}][${f}]` : h ? `b[${h}]` : 'b')
+
+  // 1. exact height + exact fps
+  // 2. exact height, any fps (the source may not have that frame rate)
+  // 3. best height + exact fps
+  // 4. best height, any fps
+  const chain = [
+    video(height, fpsFilter),
+    height ? video(height, '') : '',
+    resolution > 0 && !forceResolution ? video(`height<=${resolution}`, fpsFilter) : '',
+    resolution > 0 && !forceResolution ? video(`height<=${resolution}`, '') : '',
+    merged(height, fpsFilter),
+  ].filter(Boolean)
+
+  return ['-f', chain.join('/'), '--merge-output-format', format.ext]
 }
 
 /** Build yt-dlp args for an audio-only extraction.
@@ -931,103 +1130,232 @@ export async function download(
   handlers: DownloadHandlers,
   signal?: AbortSignal,
 ): Promise<string> {
-  const browser = opts.useCookies ? await getBrowserForCookies() : undefined
-  const cookieArgs = browser ? ['--cookies-from-browser', browser] : []
-  // ffmpeg unavailable → skip postprocessing features that require it
-  const hasFfmpeg = opts.ffmpegLocation !== null
-  const args = [
-    opts.url,
-    ...opts.choice.args,
-    '--no-playlist',
-    '--no-warnings',
-    '--newline',
-    '--no-quiet',
-    '--progress',
-    '--progress-template',
-    `download:${PROGRESS_TEMPLATE}`,
-    '--print',
-    'after_move:filepath',
-    '--no-simulate',
-    // DRM/restriction bypass (strong args only on retry to preserve quality)
-    ...bypassArgsFor(opts.url, opts.strongBypass),
-    // Cookies for age restriction / DRM bypass
-    ...cookieArgs,
-    // Embed metadata (title, artist, album, date…) into the final file so
-    // media players can display them during playback.
-    // NOTE: --embed-thumbnail is intentionally NOT used here. yt-dlp's internal
-    // thumbnail embedding (via ffmpeg post-processing) can corrupt the audio
-    // stream for certain videos, producing files with no playable audio.
-    // Instead, we embed the cover art ourselves after download using
-    // embedSquareCover() which has proper safety checks.
-    ...(hasFfmpeg ? ['--embed-metadata'] : []),
-    '-o',
-    path.join(opts.outDir, '%(title).80s.%(ext)s'),
-  ]
-  if (opts.ffmpegLocation) args.push('--ffmpeg-location', opts.ffmpegLocation)
+  const run = async (extraArgs: string[] = []): Promise<string> => {
+    const browser = opts.useCookies ? await getBrowserForCookies(opts.ytdlp) : undefined
+    const cookieArgs = browser ? ['--cookies-from-browser', browser] : []
+    // ffmpeg unavailable → skip postprocessing features that require it
+    const hasFfmpeg = opts.ffmpegLocation !== null
+    const args = [
+      opts.url,
+      ...opts.choice.args,
+      '--no-playlist',
+      '--no-warnings',
+      '--newline',
+      '--no-quiet',
+      '--progress',
+      '--progress-template',
+      `download:${PROGRESS_TEMPLATE}`,
+      '--print',
+      'after_move:filepath',
+      '--no-simulate',
+      // Overwrite an existing file with the same name. Without this, yt-dlp sees
+      // "Title.mp4" already on disk and SKIPS the download — so asking for
+      // 4K after a 1080p download would silently keep the old 1080p file.
+      '--force-overwrites',
+      // Android shared storage is FAT32/exFAT — characters like ":" or "?" are
+      // illegal in file names there, so let yt-dlp sanitize them.
+      ...(isAndroid() ? ['--windows-filenames'] : []),
+      // DRM/restriction bypass (strong args only on retry to preserve quality)
+      ...bypassArgsFor(opts.url, opts.strongBypass),
+      // Cookies for age restriction / DRM bypass
+      ...cookieArgs,
+      // Extra args used by the escalation retry (cookies, alternate clients).
+      ...extraArgs,
+      // Embed metadata (title, artist, album, date…) into the final file so
+      // media players can display it during playback.
+      // NOTE: --embed-thumbnail is intentionally NOT used here. yt-dlp's internal
+      // thumbnail embedding (via ffmpeg post-processing) can corrupt the audio
+      // stream for certain videos, producing files with no playable audio.
+      // Instead, we embed the cover art ourselves after download using
+      // embedSquareCover() which has proper safety checks.
+      ...(hasFfmpeg ? ['--embed-metadata'] : []),
+      '-o',
+      path.join(opts.outDir, '%(title).80s.%(ext)s'),
+    ]
+    if (opts.ffmpegLocation) args.push('--ffmpeg-location', opts.ffmpegLocation)
 
-  return new Promise((resolve, reject) => {
-    const child = spawn(opts.ytdlp, args, {signal})
-    activeChild = child
+    // Make sure the destination folder exists (Android's shared storage path
+    // may not have been created yet, and some Linux setups lack ~/Downloads).
+    await fs.mkdir(opts.outDir, {recursive: true}).catch(() => {})
 
-    let stderr = ''
-    let filepath = ''
-    let part = 0
-    let totalParts = 1
-    let lastDownloaded = 0
-    let buffer = ''
-    const destinations: string[] = []
-
-    child.stdout.on('data', (chunk: Buffer) => {
-      buffer += chunk.toString()
-      const lines = buffer.split('\n')
-      buffer = lines.pop() ?? ''
-      for (const rawLine of lines) {
-        const line = rawLine.trim()
-        if (!line) continue
-        if (line.startsWith(PROGRESS_PREFIX)) {
-          const [downloaded, total, totalEstimate, speed, eta] = line.slice(PROGRESS_PREFIX.length).split('|')
-          const downloadedBytes = toNumber(downloaded) ?? 0
-          if (downloadedBytes < lastDownloaded) part++
-          lastDownloaded = downloadedBytes
-          handlers.onProgress({
-            downloadedBytes,
-            totalBytes: toNumber(total) ?? toNumber(totalEstimate),
-            speed: toNumber(speed),
-            eta: toNumber(eta),
-            part,
-            totalParts,
-          })
-        } else if (line.includes('Downloading 1 format(s):')) {
-          totalParts = (line.split('format(s):')[1] ?? '').trim().split('+').length
-        } else if (line.includes('[Merger]') || line.includes('[ExtractAudio]') || line.includes('[VideoConvert]')) {
-          const merging = /^\[Merger\] Merging formats into "(.+)"$/.exec(line)?.[1]
-          const extracting = /^\[ExtractAudio\] Destination: (.+)$/.exec(line)?.[1]
-          const target = merging ?? extracting
-          if (target) destinations.push(target)
-          handlers.onProcessing()
-        } else if (line.startsWith('[download] Destination: ')) {
-          destinations.push(line.slice('[download] Destination: '.length))
-        } else if (path.isAbsolute(line)) {
-          filepath = line
-        }
-      }
-    })
-    child.stderr.on('data', chunk => (stderr += chunk))
-    child.on('error', reject)
-    child.on('close', code => {
-      activeChild = undefined
+    return new Promise((resolve, reject) => {
       if (signal?.aborted) {
-        void removePartials(destinations)
         reject(new Error('Download cancelled.'))
         return
       }
-      if (code === 0 && filepath) {
-        resolve(filepath)
-      } else {
-        reject(new Error(cleanYtDlpError(stderr) || `Download failed (yt-dlp exit code ${code}).`))
+
+      // NOTE: the abort signal is deliberately NOT handed to spawn(). Node
+      // would kill only the direct child, and on Windows yt-dlp.exe is a
+      // PyInstaller bundle whose real process keeps running and keeps the
+      // .part file locked. We kill the whole tree ourselves instead.
+      const child = spawn(opts.ytdlp, args)
+      activeChild = child
+
+      let stderr = ''
+      let filepath = ''
+      let part = 0
+      let totalParts = 1
+      let lastDownloaded = 0
+      let buffer = ''
+      const destinations: string[] = []
+      let cleaned = false
+
+      /** Stop the download and take the partial file with it. */
+      const cleanup = async (includeFinal: boolean): Promise<void> => {
+        if (cleaned) return
+        cleaned = true
+        killTree(child.pid)
+        await removePartials(destinations, includeFinal)
+        await removeStrayPartials(opts.outDir)
       }
+
+      // ESC → abort: kill the whole process tree right away so Windows
+      // releases the lock on the .part file.
+      const onAbort = (): void => {
+        killTree(child.pid)
+      }
+      signal?.addEventListener('abort', onAbort, {once: true})
+
+      child.stdout.on('data', (chunk: Buffer) => {
+        buffer += chunk.toString()
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const rawLine of lines) {
+          const line = rawLine.trim()
+          if (!line) continue
+          if (line.startsWith(PROGRESS_PREFIX)) {
+            const [downloaded, total, totalEstimate, speed, eta] = line.slice(PROGRESS_PREFIX.length).split('|')
+            const downloadedBytes = toNumber(downloaded) ?? 0
+            if (downloadedBytes < lastDownloaded) part++
+            lastDownloaded = downloadedBytes
+            handlers.onProgress({
+              downloadedBytes,
+              totalBytes: toNumber(total) ?? toNumber(totalEstimate),
+              speed: toNumber(speed),
+              eta: toNumber(eta),
+              part,
+              totalParts,
+            })
+          } else if (line.includes('Downloading 1 format(s):')) {
+            totalParts = (line.split('format(s):')[1] ?? '').trim().split('+').length
+          } else if (line.includes('[Merger]') || line.includes('[ExtractAudio]') || line.includes('[VideoConvert]')) {
+            const merging = /^\[Merger\] Merging formats into "(.+)"$/.exec(line)?.[1]
+            const extracting = /^\[ExtractAudio\] Destination: (.+)$/.exec(line)?.[1]
+            const target = merging ?? extracting
+            if (target) destinations.push(target)
+            handlers.onProcessing()
+          } else if (line.startsWith('[download] Destination: ')) {
+            destinations.push(line.slice('[download] Destination: '.length))
+          } else if (path.isAbsolute(line)) {
+            filepath = line
+          }
+        }
+      })
+      child.stderr.on('data', chunk => (stderr += chunk))
+
+      child.on('error', async err => {
+        // An aborted spawn reports an AbortError here — clean up the partial
+        // file before rejecting, otherwise it stays on disk.
+        if (signal?.aborted) {
+          await cleanup(true)
+          reject(new Error('Download cancelled.'))
+          return
+        }
+        reject(err)
+      })
+
+      child.on('close', async code => {
+        activeChild = undefined
+        signal?.removeEventListener('abort', onAbort)
+        if (signal?.aborted) {
+          // Cancelled by the user (ESC): stop the download and take the
+          // partial file with it. A file that was already finished stays.
+          await cleanup(code !== 0)
+          reject(new Error('Download cancelled.'))
+          return
+        }
+        if (code === 0 && filepath) {
+          resolve(filepath)
+        } else {
+          reject(new Error(cleanYtDlpError(stderr) || `Download failed (yt-dlp exit code ${code}).`))
+        }
+      })
     })
-  })
+  }
+
+  try {
+    return await run()
+  } catch (err) {
+    // The requested quality was not offered by the default player client.
+    // YouTube only exposes 4K/8K to Premium (or otherwise authenticated)
+    // sessions, so escalate: retry with browser cookies and other clients
+    // before giving up.
+    const message = err instanceof Error ? err.message : String(err)
+    if (!/requested format is not available|no video formats found/i.test(message)) throw err
+    if (opts.choice.kind !== 'video' || opts.useCookies) throw err
+
+    const browser = await getBrowserForCookies(opts.ytdlp)
+    if (!browser) throw err
+
+    debugLog(`download: escalating with cookies from ${browser} — ${message}`)
+    return run([
+      '--cookies-from-browser',
+      browser,
+      '--extractor-args',
+      'youtube:player_client=tv,web_safari,ios,default',
+    ])
+  }
+}
+
+/** Verified properties of a finished media file. */
+export type DownloadedMedia = {
+  height?: number
+  fps?: number
+  width?: number
+  hasAudio: boolean
+}
+
+/**
+ * Read the real properties of a finished file with ffprobe.
+ *
+ * This is what the user actually got — not what was requested. YouTube
+ * Premium sessions, age gates and per-client format lists can silently limit
+ * the available quality, so Carbon shows the truth instead of the request.
+ */
+export async function inspectMediaFile(filepath: string, ffmpegLocation?: string): Promise<DownloadedMedia | undefined> {
+  const ffprobeBin = ffmpegLocation
+    ? path.join(ffmpegLocation, process.platform === 'win32' ? 'ffprobe.exe' : 'ffprobe')
+    : 'ffprobe'
+  try {
+    const stdout = await new Promise<string>((resolve, reject) => {
+      const child = spawn(
+        ffprobeBin,
+        [
+          '-v', 'error',
+          '-select_streams', 'v:0',
+          '-show_entries', 'stream=height,width,avg_frame_rate',
+          '-of', 'json',
+          filepath,
+        ],
+        {stdio: ['ignore', 'pipe', 'ignore'], timeout: 20_000},
+      )
+      let out = ''
+      child.stdout?.on('data', (chunk: Buffer) => {
+        out += chunk.toString()
+      })
+      child.on('error', reject)
+      child.on('close', code => (code === 0 ? resolve(out) : reject(new Error(`ffprobe exit ${code}`))))
+    })
+
+    const parsed = JSON.parse(stdout) as {streams?: Array<{height?: number; width?: number; avg_frame_rate?: string}>}
+    const stream = parsed.streams?.[0]
+    if (!stream) return undefined
+    const [num, den] = (stream.avg_frame_rate ?? '0/1').split('/').map(Number)
+    const fps = num && den ? Math.round((num / den) * 100) / 100 : undefined
+    return {height: stream.height, width: stream.width, fps, hasAudio: true}
+  } catch {
+    return undefined
+  }
 }
 
 /** Verify that a media file contains at least one audio stream using ffprobe.
@@ -1190,12 +1518,61 @@ export async function embedSquareCover(
   }
 }
 
-function removePartials(destinations: string[]): Promise<unknown> {
+function removePartials(destinations: string[], includeFinal = true): Promise<unknown> {
   return Promise.allSettled(
     destinations
-      .flatMap(dest => [dest, `${dest}.part`, `${dest}.ytdl`])
+      .flatMap(dest => (includeFinal ? [dest, `${dest}.part`, `${dest}.ytdl`] : [`${dest}.part`, `${dest}.ytdl`]))
       .map(file => fs.rm(file, {force: true})),
   )
+}
+
+/**
+ * Remove every leftover partial file in the output folder.
+ *
+ * yt-dlp writes `<name>.part` while downloading and renames it at the end. If
+ * the download is cancelled the partial must not stay behind — the user
+ * expects the file to disappear when they press ESC. On Windows the file can
+ * still be locked by the (just killed) player, so the removal is retried.
+ */
+async function removeStrayPartials(outDir: string, attempts = 6): Promise<void> {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      const entries = await fs.readdir(outDir, {withFileTypes: true})
+      const strays = entries.filter(e => e.isFile() && (e.name.endsWith('.part') || e.name.endsWith('.ytdl')))
+      if (strays.length === 0) return
+      await Promise.allSettled(
+        strays.map(e => fs.rm(path.join(outDir, e.name), {force: true, maxRetries: 3, retryDelay: 200})),
+      )
+    } catch {
+      // folder may not exist — nothing to clean
+      return
+    }
+    await new Promise(r => setTimeout(r, 300))
+  }
+}
+
+/**
+ * Kill a process and all of its children.
+ *
+ * On Windows yt-dlp.exe is a PyInstaller bundle that spawns a child
+ * process; killing only the parent leaves the child holding the .part file
+ * open, which makes the cleanup fail with EPERM.
+ */
+function killTree(pid: number | undefined): void {
+  if (!pid) return
+  try {
+    if (process.platform === 'win32') {
+      spawn('taskkill', ['/PID', String(pid), '/T', '/F'], {stdio: 'ignore', windowsHide: true})
+    } else {
+      try {
+        process.kill(-pid, 'SIGKILL')
+      } catch {
+        process.kill(pid, 'SIGKILL')
+      }
+    }
+  } catch {
+    // best effort
+  }
 }
 
 function toNumber(value: string | undefined): number | undefined {

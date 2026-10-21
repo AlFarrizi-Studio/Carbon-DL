@@ -8,7 +8,8 @@
     "carbon-dl": "dist/cli.js"
   },
   "files": [
-    "dist"
+    "dist",
+    "sound"
   ],
   "engines": {
     "node": ">=18"

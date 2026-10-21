@@ -1,4 +1,4 @@
-# Carbon installer for Windows (PowerShell)
+﻿# Carbon installer for Windows (PowerShell)
 # Usage: irm https://raw.githubusercontent.com/AlFarrizi-Studio/Carbon-DL/main/install.ps1 | iex
 
 $ErrorActionPreference = 'Stop'
@@ -175,6 +175,30 @@ if (-not (Test-Path $ffmpegPath)) {
     Remove-Item $ffmpegExtract -Recurse -Force -ErrorAction SilentlyContinue
 } else {
     Write-Host ' ✓ ffmpeg already present.' -ForegroundColor Green
+}
+
+# --- Download notification sounds ---
+# 1.mp3 = success, 2.mp3 = update available, 3.mp3 = error
+$soundDir = Join-Path $env:USERPROFILE '.carbon\sounds'
+if (-not (Test-Path $soundDir)) {
+    New-Item -ItemType Directory -Path $soundDir -Force | Out-Null
+}
+$soundBase = "https://raw.githubusercontent.com/$GITHUB_REPO/main/sound"
+$soundsOk = $true
+foreach ($n in 1..3) {
+    $target = Join-Path $soundDir "$n.mp3"
+    if (-not (Test-Path $target)) {
+        try {
+            Invoke-WebRequest -Uri "$soundBase/$n.mp3" -OutFile $target -UseBasicParsing
+        } catch {
+            $soundsOk = $false
+        }
+    }
+}
+if ($soundsOk) {
+    Write-Host ' ✓ Notification sounds ready.' -ForegroundColor Green
+} else {
+    Write-Host ' ⚠ Could not download notification sounds (they are optional).' -ForegroundColor Yellow
 }
 
 # --- Create launcher script ---

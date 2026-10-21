@@ -7,6 +7,8 @@ const GITHUB_REPO = 'AlFarrizi-Studio/Carbon-DL'
 // Injected at build time from package.json via tsup define.
 // Falls back to '0.0.0' when running from source without a build.
 const CURRENT_VERSION = process.env.CARBON_VERSION ?? '0.0.0'
+// Build timestamp — shows which build is actually running.
+const BUILD_ID = process.env.CARBON_BUILD ?? 'dev'
 
 export type UpdateInfo = {
   hasUpdate: boolean
@@ -78,4 +80,4 @@ export async function checkForUpdate(signal?: AbortSignal): Promise<UpdateInfo |
   }
 }
 
-export {CURRENT_VERSION}
+export {CURRENT_VERSION, BUILD_ID}

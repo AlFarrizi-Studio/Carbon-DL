@@ -131,13 +131,19 @@ export async function selfUninstall(): Promise<UninstallResult> {
     if (rmDir(binDir)) removed.push(binDir)
   }
 
-  // 3. Remove config/history
+  // 3. Remove notification sounds
+  const soundDir = path.join(home, '.carbon', 'sounds')
+  if (fs.existsSync(soundDir)) {
+    if (rmDir(soundDir)) removed.push(soundDir)
+  }
+
+  // 4. Remove config/history
   const configDir = path.join(home, '.config', 'carbon')
   if (fs.existsSync(configDir)) {
     if (rmDir(configDir)) removed.push(configDir)
   }
 
-  // 4. Remove debug log if exists
+  // 5. Remove debug log if exists
   const debugLog = path.join(os.tmpdir(), 'carbon-debug.log')
   if (fs.existsSync(debugLog)) {
     if (rmFile(debugLog)) removed.push(debugLog)

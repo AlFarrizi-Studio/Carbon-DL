@@ -9,6 +9,7 @@
  */
 
 import {useEffect, useState} from 'react'
+import {EXTRA_LANGUAGE_NAMES, EXTRA_LOCALES} from './locales.js'
 
 export type LangCode = string
 
@@ -93,6 +94,18 @@ export type Strings = {
   langPickerTitle?: string
   langPickerHint?: string
   langPickerSearch?: string
+  // Settings panel
+  settings?: string
+  settingsHint?: string
+  settingTheme?: string
+  settingSound?: string
+  settingVolume?: string
+  settingLanguage?: string
+  settingClearHistory?: string
+  settingOn?: string
+  settingOff?: string
+  settingPreview?: string
+  historyCleared?: string
   // Shortcut label for the language switcher
   lang?: string
   // Allow additional keys for extensibility
@@ -180,6 +193,18 @@ const en: Strings = {
   langPickerTitle: 'Choose language',
   langPickerHint: 'type to filter',
   langPickerSearch: 'search…',
+  // Settings panel
+  settings: 'Settings',
+  settingsHint: '↑↓ select · ←→ change · ↵ change · esc close',
+  settingTheme: 'Theme',
+  settingSound: 'Notification sound',
+  settingVolume: 'Volume',
+  settingLanguage: 'Language',
+  settingClearHistory: 'Clear history',
+  settingOn: 'on',
+  settingOff: 'off',
+  settingPreview: 'preview',
+  historyCleared: 'History cleared',
   lang: 'language',
 }
 
@@ -264,6 +289,18 @@ const id: Strings = {
   langPickerTitle: "Pilih bahasa",
   langPickerHint: "ketik untuk memfilter",
   langPickerSearch: "cari…",
+  // Settings panel
+  settings: "Pengaturan",
+  settingsHint: "↑↓ pilih · ←→ ubah · ↵ ubah · esc tutup",
+  settingTheme: "Tema",
+  settingSound: "Suara notifikasi",
+  settingVolume: "Volume",
+  settingLanguage: "Bahasa",
+  settingClearHistory: "Bersihkan riwayat",
+  settingOn: "nyala",
+  settingOff: "mati",
+  settingPreview: "pratinjau",
+  historyCleared: "Riwayat dibersihkan",
   lang: "bahasa",
 }
 
@@ -317,6 +354,16 @@ const es: Strings = {
   langPickerTitle: "Elegir idioma",
   langPickerHint: "escribe para filtrar",
   langPickerSearch: "buscar…",
+  settings: 'Ajustes',
+  settingsHint: '↑↓ seleccionar · ←→ cambiar · ↵ cambiar · esc cerrar',
+  settingTheme: 'Tema',
+  settingSound: 'Sonido de notificación',
+  settingVolume: 'Volumen',
+  settingLanguage: 'Idioma',
+  settingClearHistory: 'Borrar historial',
+  settingOn: 'activado',
+  settingOff: 'desactivado',
+  historyCleared: 'Historial borrado',
   lang: "idioma",
 }
 
@@ -370,6 +417,16 @@ const fr: Strings = {
   langPickerTitle: "Choisir la langue",
   langPickerHint: "tapez pour filtrer",
   langPickerSearch: "rechercher…",
+  settings: 'Réglages',
+  settingsHint: '↑↓ choisir · ←→ changer · ↵ changer · esc fermer',
+  settingTheme: 'Thème',
+  settingSound: 'Son de notification',
+  settingVolume: 'Volume',
+  settingLanguage: 'Langue',
+  settingClearHistory: 'Effacer l\'historique',
+  settingOn: 'activé',
+  settingOff: 'désactivé',
+  historyCleared: 'Historique effacé',
   lang: "langue",
 }
 
@@ -423,6 +480,16 @@ const de: Strings = {
   langPickerTitle: "Sprache wählen",
   langPickerHint: "tippen zum filtern",
   langPickerSearch: "suchen…",
+  settings: 'Einstellungen',
+  settingsHint: '↑↓ wählen · ←→ ändern · ↵ ändern · esc schließen',
+  settingTheme: 'Design',
+  settingSound: 'Benachrichtigungston',
+  settingVolume: 'Lautstärke',
+  settingLanguage: 'Sprache',
+  settingClearHistory: 'Verlauf löschen',
+  settingOn: 'an',
+  settingOff: 'aus',
+  historyCleared: 'Verlauf gelöscht',
   lang: "sprache",
 }
 
@@ -476,6 +543,16 @@ const pt: Strings = {
   langPickerTitle: "Escolher idioma",
   langPickerHint: "digite para filtrar",
   langPickerSearch: "pesquisar…",
+  settings: 'Configurações',
+  settingsHint: '↑↓ selecionar · ←→ alterar · ↵ alterar · esc fechar',
+  settingTheme: 'Tema',
+  settingSound: 'Som de notificação',
+  settingVolume: 'Volume',
+  settingLanguage: 'Idioma',
+  settingClearHistory: 'Limpar histórico',
+  settingOn: 'ligado',
+  settingOff: 'desligado',
+  historyCleared: 'Histórico limpo',
   lang: "idioma",
 }
 
@@ -529,6 +606,16 @@ const it: Strings = {
   langPickerTitle: "Scegli lingua",
   langPickerHint: "digita per filtrare",
   langPickerSearch: "cerca…",
+  settings: 'Impostazioni',
+  settingsHint: '↑↓ seleziona · ←→ cambia · ↵ cambia · esc chiudi',
+  settingTheme: 'Tema',
+  settingSound: 'Suono di notifica',
+  settingVolume: 'Volume',
+  settingLanguage: 'Lingua',
+  settingClearHistory: 'Cancella cronologia',
+  settingOn: 'attivo',
+  settingOff: 'disattivo',
+  historyCleared: 'Cronologia cancellata',
   lang: "lingua",
 }
 
@@ -582,6 +669,16 @@ const ru: Strings = {
   langPickerTitle: "Выбрать язык",
   langPickerHint: "наберите для фильтрации",
   langPickerSearch: "поиск…",
+  settings: 'Настройки',
+  settingsHint: '↑↓ выбрать · ←→ изменить · ↵ изменить · esc закрыть',
+  settingTheme: 'Тема',
+  settingSound: 'Звук уведомления',
+  settingVolume: 'Громкость',
+  settingLanguage: 'Язык',
+  settingClearHistory: 'Очистить историю',
+  settingOn: 'вкл',
+  settingOff: 'выкл',
+  historyCleared: 'История очищена',
   lang: "язык",
 }
 
@@ -635,6 +732,16 @@ const ja: Strings = {
   langPickerTitle: "言語を選択",
   langPickerHint: "入力で絞り込み",
   langPickerSearch: "検索…",
+  settings: '設定',
+  settingsHint: '↑↓ 選択 · ←→ 変更 · ↵ 変更 · esc 閉じる',
+  settingTheme: 'テーマ',
+  settingSound: '通知音',
+  settingVolume: '音量',
+  settingLanguage: '言語',
+  settingClearHistory: '履歴を消去',
+  settingOn: 'オン',
+  settingOff: 'オフ',
+  historyCleared: '履歴を消去しました',
   lang: "言語",
 }
 
@@ -688,6 +795,16 @@ const ko: Strings = {
   langPickerTitle: "언어 선택",
   langPickerHint: "입력하여 필터링",
   langPickerSearch: "검색…",
+  settings: '설정',
+  settingsHint: '↑↓ 선택 · ←→ 변경 · ↵ 변경 · esc 닫기',
+  settingTheme: '테마',
+  settingSound: '알림 소리',
+  settingVolume: '볼륨',
+  settingLanguage: '언어',
+  settingClearHistory: '기록 지우기',
+  settingOn: '켜짐',
+  settingOff: '꺼짐',
+  historyCleared: '기록을 지웠습니다',
   lang: "언어",
 }
 
@@ -741,6 +858,16 @@ const zh: Strings = {
   langPickerTitle: "选择语言",
   langPickerHint: "输入以筛选",
   langPickerSearch: "搜索…",
+  settings: '设置',
+  settingsHint: '↑↓ 选择 · ←→ 更改 · ↵ 更改 · esc 关闭',
+  settingTheme: '主题',
+  settingSound: '通知声音',
+  settingVolume: '音量',
+  settingLanguage: '语言',
+  settingClearHistory: '清除历史记录',
+  settingOn: '开启',
+  settingOff: '关闭',
+  historyCleared: '历史记录已清除',
   lang: "语言",
 }
 
@@ -794,6 +921,16 @@ const zhTW: Strings = {
   langPickerTitle: "選擇語言",
   langPickerHint: "輸入以篩選",
   langPickerSearch: "搜尋…",
+  settings: '設定',
+  settingsHint: '↑↓ 選擇 · ←→ 更改 · ↵ 更改 · esc 關閉',
+  settingTheme: '主題',
+  settingSound: '通知音效',
+  settingVolume: '音量',
+  settingLanguage: '語言',
+  settingClearHistory: '清除歷史紀錄',
+  settingOn: '開啟',
+  settingOff: '關閉',
+  historyCleared: '歷史紀錄已清除',
   lang: "語言",
 }
 
@@ -847,6 +984,16 @@ const ar: Strings = {
   langPickerTitle: "اختر اللغة",
   langPickerHint: "اكتب للتصفية",
   langPickerSearch: "بحث…",
+  settings: 'الإعدادات',
+  settingsHint: '↑↓ اختيار · ←→ تغيير · ↵ تغيير · esc إغلاق',
+  settingTheme: 'المظهر',
+  settingSound: 'صوت التنبيه',
+  settingVolume: 'مستوى الصوت',
+  settingLanguage: 'اللغة',
+  settingClearHistory: 'مسح السجل',
+  settingOn: 'مفعّل',
+  settingOff: 'معطّل',
+  historyCleared: 'تم مسح السجل',
   lang: "لغة",
 }
 
@@ -900,6 +1047,16 @@ const hi: Strings = {
   langPickerTitle: "भाषा चुनें",
   langPickerHint: "फ़िल्टर करने के लिए टाइप करें",
   langPickerSearch: "खोजें…",
+  settings: 'सेटिंग्स',
+  settingsHint: '↑↓ चुनें · ←→ बदलें · ↵ बदलें · esc बंद करें',
+  settingTheme: 'थीम',
+  settingSound: 'सूचना ध्वनि',
+  settingVolume: 'आवाज़',
+  settingLanguage: 'भाषा',
+  settingClearHistory: 'इतिहास साफ़ करें',
+  settingOn: 'चालू',
+  settingOff: 'बंद',
+  historyCleared: 'इतिहास साफ़ कर दिया गया',
   lang: "भाषा",
 }
 
@@ -953,6 +1110,16 @@ const tr: Strings = {
   langPickerTitle: "Dil seçin",
   langPickerHint: "filtrelemek için yazın",
   langPickerSearch: "ara…",
+  settings: 'Ayarlar',
+  settingsHint: '↑↓ seç · ←→ değiştir · ↵ değiştir · esc kapat',
+  settingTheme: 'Tema',
+  settingSound: 'Bildirim sesi',
+  settingVolume: 'Ses seviyesi',
+  settingLanguage: 'Dil',
+  settingClearHistory: 'Geçmişi temizle',
+  settingOn: 'açık',
+  settingOff: 'kapalı',
+  historyCleared: 'Geçmiş temizlendi',
   lang: "dil",
 }
 
@@ -1006,6 +1173,16 @@ const vi: Strings = {
   langPickerTitle: "Chọn ngôn ngữ",
   langPickerHint: "gõ để lọc",
   langPickerSearch: "tìm…",
+  settings: 'Cài đặt',
+  settingsHint: '↑↓ chọn · ←→ đổi · ↵ đổi · esc đóng',
+  settingTheme: 'Giao diện',
+  settingSound: 'Âm thanh thông báo',
+  settingVolume: 'Âm lượng',
+  settingLanguage: 'Ngôn ngữ',
+  settingClearHistory: 'Xóa lịch sử',
+  settingOn: 'bật',
+  settingOff: 'tắt',
+  historyCleared: 'Đã xóa lịch sử',
   lang: "ngôn ngữ",
 }
 
@@ -1059,6 +1236,16 @@ const th: Strings = {
   langPickerTitle: "เลือกภาษา",
   langPickerHint: "พิมพ์เพื่อกรอง",
   langPickerSearch: "ค้นหา…",
+  settings: 'การตั้งค่า',
+  settingsHint: '↑↓ เลือก · ←→ เปลี่ยน · ↵ เปลี่ยน · esc ปิด',
+  settingTheme: 'ธีม',
+  settingSound: 'เสียงแจ้งเตือน',
+  settingVolume: 'ระดับเสียง',
+  settingLanguage: 'ภาษา',
+  settingClearHistory: 'ล้างประวัติ',
+  settingOn: 'เปิด',
+  settingOff: 'ปิด',
+  historyCleared: 'ล้างประวัติแล้ว',
   lang: "ภาษา",
 }
 
@@ -1112,6 +1299,16 @@ const ms: Strings = {
   langPickerTitle: "Pilih bahasa",
   langPickerHint: "taip untuk tapis",
   langPickerSearch: "cari…",
+  settings: 'Tetapan',
+  settingsHint: '↑↓ pilih · ←→ tukar · ↵ tukar · esc tutup',
+  settingTheme: 'Tema',
+  settingSound: 'Bunyi notifikasi',
+  settingVolume: 'Kelantangan',
+  settingLanguage: 'Bahasa',
+  settingClearHistory: 'Padam sejarah',
+  settingOn: 'hidup',
+  settingOff: 'mati',
+  historyCleared: 'Sejarah dipadamkan',
   lang: "bahasa",
 }
 
@@ -1165,6 +1362,16 @@ const nl: Strings = {
   langPickerTitle: "Kies taal",
   langPickerHint: "typ om te filteren",
   langPickerSearch: "zoeken…",
+  settings: 'Instellingen',
+  settingsHint: '↑↓ kiezen · ←→ wijzigen · ↵ wijzigen · esc sluiten',
+  settingTheme: 'Thema',
+  settingSound: 'Meldingsgeluid',
+  settingVolume: 'Volume',
+  settingLanguage: 'Taal',
+  settingClearHistory: 'Geschiedenis wissen',
+  settingOn: 'aan',
+  settingOff: 'uit',
+  historyCleared: 'Geschiedenis gewist',
   lang: "taal",
 }
 
@@ -1218,6 +1425,16 @@ const pl: Strings = {
   langPickerTitle: "Wybierz język",
   langPickerHint: "wpisz aby filtrować",
   langPickerSearch: "szukaj…",
+  settings: 'Ustawienia',
+  settingsHint: '↑↓ wybierz · ←→ zmień · ↵ zmień · esc zamknij',
+  settingTheme: 'Motyw',
+  settingSound: 'Dźwięk powiadomienia',
+  settingVolume: 'Głośność',
+  settingLanguage: 'Język',
+  settingClearHistory: 'Wyczyść historię',
+  settingOn: 'wł.',
+  settingOff: 'wył.',
+  historyCleared: 'Historia wyczyszczona',
   lang: "język",
 }
 
@@ -1271,6 +1488,16 @@ const uk: Strings = {
   langPickerTitle: "Вибрати мову",
   langPickerHint: "введіть для фільтрації",
   langPickerSearch: "пошук…",
+  settings: 'Налаштування',
+  settingsHint: '↑↓ вибрати · ←→ змінити · ↵ змінити · esc закрити',
+  settingTheme: 'Тема',
+  settingSound: 'Звук сповіщення',
+  settingVolume: 'Гучність',
+  settingLanguage: 'Мова',
+  settingClearHistory: 'Очистити історію',
+  settingOn: 'увімк.',
+  settingOff: 'вимк.',
+  historyCleared: 'Історію очищено',
   lang: "мова",
 }
 
@@ -1324,6 +1551,16 @@ const fil: Strings = {
   langPickerTitle: "Pumili ng wika",
   langPickerHint: "mag-type para i-filter",
   langPickerSearch: "maghanap…",
+  settings: 'Mga setting',
+  settingsHint: '↑↓ pumili · ←→ baguhin · ↵ baguhin · esc isara',
+  settingTheme: 'Tema',
+  settingSound: 'Tunog ng abiso',
+  settingVolume: 'Lakas ng tunog',
+  settingLanguage: 'Wika',
+  settingClearHistory: 'Burahin ang kasaysayan',
+  settingOn: 'naka-on',
+  settingOff: 'naka-off',
+  historyCleared: 'Naburahin ang kasaysayan',
   lang: "wika",
 }
 
@@ -1422,7 +1659,20 @@ function merge(base: Strings, override: Partial<Strings>): Strings {
   return {...base, ...override}
 }
 
+// Fully translated languages also fall back to English for any key that was
+// added later (e.g. the settings panel) — so nothing is ever blank.
+for (const code of Object.keys(table)) {
+  table[code] = merge(en, table[code])
+}
+
 for (const [code, p] of Object.entries(partial)) {
+  table[code] = merge(en, p)
+}
+
+// The long tail — another 80+ languages (regional variants, minority
+// languages, and the locales that actually show up on Windows / macOS /
+// Linux / Termux). Kept in a separate module so this file stays readable.
+for (const [code, p] of Object.entries(EXTRA_LOCALES)) {
   table[code] = merge(en, p)
 }
 
@@ -1492,7 +1742,11 @@ export function useT(): Strings {
 }
 
 export function supportedLanguages(): string[] {
-  return Object.keys(table).sort()
+  // Sort by the native display name so the picker is browsable — with 180+
+  // languages, an alphabetical-by-code list is very hard to scan.
+  return Object.keys(table).sort((a, b) =>
+    languageDisplayName(a).localeCompare(languageDisplayName(b), undefined, {sensitivity: 'base'}),
+  )
 }
 
 /**
@@ -1607,6 +1861,8 @@ export const LANGUAGE_NAMES: Record<string, string> = {
   sm: 'Gagana Sāmoa',
   to: 'Lea Faka-Tonga',
   fj: 'Vosa Vakaviti',
+  // Extra language packs (see locales.ts)
+  ...EXTRA_LANGUAGE_NAMES,
 }
 
 export function languageDisplayName(code: string): string {

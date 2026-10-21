@@ -8,11 +8,17 @@ export type ParsedArgs = {
   force: boolean
   initialUrl?: string
   themeMode?: ThemeMode
+  /** Whether notification sounds are enabled (default true). */
+  sound: boolean
+  /** True when --sound / --no-sound was passed explicitly. */
+  soundExplicit: boolean
+  /** Play the three notification clips and exit (for testing). */
+  testSound: boolean
   error?: string
 }
 
 export function parseArgs(argv: string[]): ParsedArgs {
-  const result: ParsedArgs = {help: false, version: false, update: false, uninstall: false, force: false}
+  const result: ParsedArgs = {help: false, version: false, update: false, uninstall: false, force: false, sound: true, soundExplicit: false, testSound: false}
   const rest: string[] = []
 
   for (let i = 0; i < argv.length; i++) {
@@ -27,6 +33,14 @@ export function parseArgs(argv: string[]): ParsedArgs {
       result.uninstall = true
     } else if (arg === '--force' || arg === '-f') {
       result.force = true
+    } else if (arg === '--test-sound' || arg === '--test-sounds') {
+      result.testSound = true
+    } else if (arg === '--no-sound' || arg === '--no-sounds') {
+      result.sound = false
+      result.soundExplicit = true
+    } else if (arg === '--sound' || arg === '--sounds') {
+      result.sound = true
+      result.soundExplicit = true
     } else if (arg === '--theme') {
       const value = argv[++i]
       if (!value || value.startsWith('-')) {

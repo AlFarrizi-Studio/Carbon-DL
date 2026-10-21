@@ -3,9 +3,12 @@ import {render} from 'ink'
 import {App, type Outcome} from './app.js'
 import {parseArgs} from './lib/args.js'
 import {queryTerminal, setProtocol, setCellPixelSize} from './lib/image-protocol.js'
-import {CURRENT_VERSION as VERSION} from './lib/update-check.js'
+import {resolveDownloadDir} from './lib/paths.js'
+import {CURRENT_VERSION as VERSION, BUILD_ID} from './lib/update-check.js'
 import {selfUpdate} from './lib/self-update.js'
 import {selfUninstall} from './lib/self-uninstall.js'
+import {playSound, setSoundEnabled, setSoundVolume, findSoundDir, type SoundKind} from './lib/sound.js'
+import {loadSettings} from './lib/settings.js'
 
 const HELP = `
   ◈ Carbon — grab any video or music. pick. download. done.
@@ -26,14 +29,28 @@ const HELP = `
 
   Options
     --theme <mode>  use system, dark, or light for this run
+    --no-sound      disable notification sounds
+    --test-sound    play the notification clips and exit
     -h, --help      show this help
     -v, --version   show version
 
-  Downloads are saved to ~/Downloads.
+  Downloads are saved to ${resolveDownloadDir()}.
   Powered by yt-dlp — YouTube, TikTok, Instagram, X, SoundCloud & 1800+ sites.
 `
 
 const args = parseArgs(process.argv.slice(2))
+
+// Notification sounds — precedence: CARBON_SOUND env var > CLI flag > saved
+// setting. Volume always comes from the saved settings.
+const saved = loadSettings()
+const envSound = process.env.CARBON_SOUND
+const soundOn = envSound !== undefined
+  ? envSound !== '0' && envSound.toLowerCase() !== 'false' && envSound.toLowerCase() !== 'off'
+  : args.soundExplicit
+    ? args.sound
+    : saved.sound
+setSoundEnabled(soundOn)
+setSoundVolume(saved.volume)
 
 if (args.error) {
   console.error(`carbon: ${args.error}\nTry "carbon --help" for usage.`)
@@ -46,16 +63,36 @@ if (args.help) {
 }
 
 if (args.version) {
-  console.log(VERSION)
+  console.log(`${VERSION}  (build ${BUILD_ID})`)
   process.exit(0)
 }
 
 // Self-update: `carbon-dl update [--force]`. Runs outside the TUI so it works
 // in any terminal and never needs raw mode.
-if (args.update) {
+if (args.testSound) {
+  // Smoke test for the notification clips: success → update → error.
+  const dir = findSoundDir()
+  console.log(dir ? `Sound folder: ${dir}` : 'Sound folder not found — run the installer to download the clips.')
+  console.log(args.sound ? 'Notifications: ON' : 'Notifications: MUTED (--no-sound / CARBON_SOUND=0)')
+  const clips: Array<[SoundKind, number]> = [
+    ['success', 0],
+    ['update', 2200],
+    ['error', 3600],
+  ]
+  for (const [kind, delay] of clips) {
+    setTimeout(() => {
+      console.log(`  ▶ ${kind}`)
+      playSound(kind)
+    }, delay)
+  }
+  await new Promise(resolve => setTimeout(resolve, 6000))
+  console.log('Done.')
+  process.exitCode = 0
+} else if (args.update) {
   console.log(`Carbon v${VERSION} — checking for updates...`)
   const result = await selfUpdate(args.force)
   console.log(result.updated ? `✓ ${result.message}` : result.message)
+  playSound(result.ok ? 'success' : 'error')
   // Use exitCode (not process.exit) so pending sockets from the update fetch
   // can close cleanly — process.exit while handles are open triggers a libuv
   // assertion crash on Windows. The process exits once the loop drains.
@@ -64,6 +101,7 @@ if (args.update) {
   console.log(`Carbon v${VERSION} — uninstalling...`)
   const result = await selfUninstall()
   console.log(result.message)
+  playSound(result.ok ? 'success' : 'error')
   process.exitCode = result.ok ? 0 : 1
 } else {
   await runTui()

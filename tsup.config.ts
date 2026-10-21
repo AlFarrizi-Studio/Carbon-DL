@@ -33,9 +33,12 @@ export default defineConfig({
       'react-devtools-core': path.join(__dirname, 'scripts', 'empty-devtools.js'),
     }
     // Inject the version from package.json at build time so it's always in sync.
+    // The build id makes it obvious which build is actually running (there can
+    // be an older copy installed system-wide).
     options.define = {
       ...options.define,
       'process.env.CARBON_VERSION': JSON.stringify(pkg.version),
+      'process.env.CARBON_BUILD': JSON.stringify(new Date().toISOString().slice(0, 16).replace('T', ' ')),
     }
   },
 })

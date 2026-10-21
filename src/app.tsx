@@ -9,17 +9,22 @@ import {Panel} from './components/panel.js'
 import {Shortcuts} from './components/shortcuts.js'
 import {TextInput} from './components/text-input.js'
 import {formatBytes, formatDuration, formatEta, formatSpeed, shortenPath, truncate, wrapText} from './lib/format.js'
-import {AUDIO_FORMATS, FPS_OPTIONS, RESOLUTIONS, VIDEO_FORMATS, bitrateItems, fmtDesc, hasBitrateOptions, type AudioFormat, type VideoFormat} from './lib/formats.js'
-import {addToHistory, loadHistory} from './lib/history.js'
+import {AUDIO_FORMATS, FPS_OPTIONS, RESOLUTIONS, VIDEO_FORMATS, bitrateItems, fmtDesc, fpsChoices, hasBitrateOptions, heightLabel, resolutionChoices, type AudioFormat, type VideoFormat} from './lib/formats.js'
+import {addToHistory, clearHistory, loadHistory} from './lib/history.js'
 import {detectPlatform, isProbablyUrl, type Platform} from './lib/platforms.js'
+import {ensureDownloadDir, resolveDownloadDir} from './lib/paths.js'
 import {nextThemeMode, ThemeProvider, type ThemeMode, useTheme} from './theme.js'
 import {getLanguage, languageDisplayName, setLanguage, supportedLanguages, t, useT} from './lib/i18n.js'
 import {nextTip, randomTip, TIP_INTERVAL_MS} from './lib/tips.js'
 import {checkForUpdate, type UpdateInfo} from './lib/update-check.js'
 import {
   thumbnailCandidates,
+  availableHeights,
   buildAudioArgs,
   buildVideoArgs,
+  fpsForHeight,
+  inspectMediaFile,
+  type DownloadedMedia,
   download,
   embedSquareCover,
   ensureYtDlp,
@@ -38,9 +43,15 @@ import {
 import {Thumbnail} from './components/thumbnail.js'
 import {fetchThumbnail, type ThumbResult} from './lib/thumbnail.js'
 import {detectProtocol, getCellPixelSize} from './lib/image-protocol.js'
+import {playSound, setSoundEnabled, setSoundVolume} from './lib/sound.js'
+import {loadSettings, saveSettings, type CarbonSettings} from './lib/settings.js'
+import {SettingsPanel} from './components/settings-panel.js'
 import fs from 'node:fs'
 
-const OUT_DIR = path.join(os.homedir(), 'Downloads')
+// Where downloads land. On desktop that's ~/Downloads; on Android (Termux)
+// it's the phone's shared Download folder when `termux-setup-storage` has
+// been run, so the files are visible in the Android gallery / file manager.
+const OUT_DIR = ensureDownloadDir(resolveDownloadDir())
 
 const DEBUG = process.env.CARBON_DEBUG === '1' || process.env.CARBON_DEBUG === 'true'
 const DEBUG_LOG = path.join(os.tmpdir(), 'carbon-debug.log')
@@ -71,7 +82,6 @@ const Gap = ({lines = 1}: {lines?: number}) => (
     ))}
   </Box>
 )
-
 /**
  * Compact brand line: "◈ CARBON · tagline".
  * Shown during probing, wizard, and downloading phases so the identity
@@ -110,7 +120,7 @@ function ChoiceItem({isSelected, label}: ItemProps) {
 /**
  * Language picker overlay — opens with ctrl+l from any phase, paused over the
  * previous phase so it resumes seamlessly when the user picks or cancels.
- * Searchable list of 80+ supported languages. Selecting one calls
+ * Searchable list of 180+ supported languages. Selecting one calls
  * setLanguage() which broadcasts to every useT() subscriber and re-renders
  * the entire UI in the new language instantly.
  */
@@ -364,6 +374,21 @@ function TipDisplay({maxWidth}: {maxWidth: number}) {
 
 export type Outcome = {filepath?: string}
 
+/**
+ * Make a download failure easier to understand.
+ *
+ * A forced resolution that the source simply does not have produces yt-dlp's
+ * raw "Requested format is not available" — which reads like a bug. Turn it
+ * into something actionable.
+ */
+function explainDownloadError(message: string, choice: DownloadChoice): string {
+  if (choice.forcedResolution && /requested format is not available/i.test(message)) {
+    return `The source has no ${choice.forcedResolution}p version of this video.\n\n` +
+      'Pick a resolution marked ★ (the ones the source really provides), or use "Best available".'
+  }
+  return message
+}
+
 type Step = 'type' | 'format' | 'resolution' | 'fps' | 'bitrate'
 
 type Phase =
@@ -377,16 +402,21 @@ type Phase =
       processing: boolean
       refreshing?: boolean
     }
-  | {name: 'done'; filepath: string}
+  | {name: 'done'; filepath: string; actual?: DownloadedMedia; requestedHeight?: number}
   | {name: 'error'; message: string}
   | {name: 'language-picker'; previousPhase: Phase}
+  | {name: 'settings'; previousPhase: Phase}
 
 type WizardState = {
   kind: 'video' | 'audio' | null
   videoFormat: VideoFormat | null
   audioFormat: AudioFormat | null
   resolution: number
+  /** Force the exact resolution height (never silently downgrade). */
+  force: boolean
   fps: number
+  /** Force the exact frame rate (never silently downgrade). */
+  forceFps: boolean
   bitrate: number
 }
 
@@ -397,14 +427,28 @@ type AppProps = {
 }
 
 export function App({initialThemeMode = 'system', ...props}: AppProps) {
-  const [themeMode, setThemeMode] = useState(initialThemeMode)
+  // Settings win over the built-in default, but an explicit --theme wins over
+  // the saved preference.
+  const [settings] = useState<CarbonSettings>(() => loadSettings())
+  const [themeMode, setThemeMode] = useState<ThemeMode>(
+    initialThemeMode === 'system' ? settings.themeMode : initialThemeMode,
+  )
+
   const cycleTheme = useCallback(() => {
-    setThemeMode(nextThemeMode)
+    setThemeMode(prev => {
+      const next = nextThemeMode(prev)
+      saveSettings({...loadSettings(), themeMode: next})
+      return next
+    })
+  }, [])
+
+  const setTheme = useCallback((mode: ThemeMode) => {
+    setThemeMode(mode)
   }, [])
 
   return (
     <ThemeProvider mode={themeMode}>
-      <AppContent {...props} cycleTheme={cycleTheme} />
+      <AppContent {...props} cycleTheme={cycleTheme} setTheme={setTheme} settings={settings} />
     </ThemeProvider>
   )
 }
@@ -413,10 +457,14 @@ function AppContent({
   initialUrl,
   onOutcome,
   cycleTheme,
+  setTheme,
+  settings,
 }: {
   initialUrl?: string
   onOutcome: (outcome: Outcome) => void
   cycleTheme: () => void
+  setTheme: (mode: ThemeMode) => void
+  settings: CarbonSettings
 }) {
   const theme = useTheme()
   const s = useT()
@@ -429,16 +477,39 @@ function AppContent({
   const [info, setInfo] = useState<VideoInfo>()
   /** Actual URL to download (may differ from `url` when Spotify fallback is used) */
   const downloadUrlRef = useRef<string>('')
-  const [wizard, setWizard] = useState<WizardState>({kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0})
+  const [wizard, setWizard] = useState<WizardState>({kind: null, videoFormat: null, audioFormat: null, resolution: 0, force: false, fps: 0, forceFps: false, bitrate: 0})
   const ytdlpRef = useRef('')
   const abortRef = useRef<AbortController | undefined>(undefined)
   const [phase, setPhase] = useState<Phase>(initialUrl ? {name: 'probing', status: s.warmingUp} : {name: 'input'})
   const [updateInfo, setUpdateInfo] = useState<UpdateInfo | null>(null)
+  /** User preferences (sound, volume, theme, language). */
+  const [prefs, setPrefs] = useState<CarbonSettings>(settings)
+
+  // Apply the saved sound preferences.
+  useEffect(() => {
+    setSoundEnabled(prefs.sound)
+    setSoundVolume(prefs.volume)
+  }, [prefs.sound, prefs.volume])
+
+  // Restore the saved UI language.
+  useEffect(() => {
+    if (prefs.language) setLanguage(prefs.language)
+  }, [prefs.language])
+
+  const updatePrefs = useCallback((next: CarbonSettings) => {
+    setPrefs(next)
+    saveSettings(next)
+    setSoundEnabled(next.sound)
+    setSoundVolume(next.volume)
+  }, [])
 
   useEffect(() => {
     let cancelled = false
     void checkForUpdate().then(info => {
-      if (!cancelled) setUpdateInfo(info)
+      if (cancelled) return
+      setUpdateInfo(info)
+      // Notification sound when a newer release is available.
+      if (info?.hasUpdate) playSound('update')
     })
     return () => {
       cancelled = true
@@ -490,10 +561,11 @@ function AppContent({
       downloadUrlRef.current = downloadUrl
       if (controller.signal.aborted) return
       setInfo(videoInfo)
-      setWizard({kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0})
+      setWizard({kind: null, videoFormat: null, audioFormat: null, resolution: 0, force: false, fps: 0, forceFps: false, bitrate: 0})
       setPhase({name: 'wizard', step: 'type'})
     } catch (error) {
       if (controller.signal.aborted) return
+      playSound('error')
       setPhase({name: 'error', message: error instanceof Error ? error.message : String(error)})
     }
   }, [])
@@ -507,7 +579,7 @@ function AppContent({
     setUrlInput('')
     setPlatform(undefined)
     setInfo(undefined)
-    setWizard({kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0})
+    setWizard({kind: null, videoFormat: null, audioFormat: null, resolution: 0, force: false, fps: 0, forceFps: false, bitrate: 0})
     setPhase({name: 'input'})
   }, [])
 
@@ -523,8 +595,16 @@ function AppContent({
         cycleTheme()
         return
       }
+      if (key.ctrl && input === 's' && phase.name !== 'settings') {
+        setPhase({name: 'settings', previousPhase: phase})
+        return
+      }
       if (key.ctrl && input === 'l' && phase.name !== 'language-picker') {
         setPhase({name: 'language-picker', previousPhase: phase})
+        return
+      }
+      if (key.escape && phase.name === 'settings') {
+        setPhase(phase.previousPhase)
         return
       }
       if (key.escape && phase.name === 'language-picker') {
@@ -600,10 +680,17 @@ function AppContent({
           }
           onOutcome({filepath})
           setHistory(addToHistory(url))
-          setPhase({name: 'done', filepath})
+          // Read back what was really downloaded — YouTube can silently hand
+          // out a lower quality than the one that was asked for.
+          const actual = choice.kind === 'video' ? await inspectMediaFile(filepath, ffmpegLocation ?? undefined) : undefined
+          setPhase({name: 'done', filepath, actual, requestedHeight: choice.requestedHeight})
+          // Notification sound: the download finished.
+          playSound('success')
         } catch (error) {
           if (controller.signal.aborted) return
-          setPhase({name: 'error', message: error instanceof Error ? error.message : String(error)})
+          playSound('error')
+          const raw = error instanceof Error ? error.message : String(error)
+          setPhase({name: 'error', message: explainDownloadError(raw, choice)})
         }
       })()
     },
@@ -653,22 +740,29 @@ function AppContent({
     startDownload(choice)
   }
 
-  const handleResolutionPick = (item: {value: number}) => {
-    setWizard(w => ({...w, resolution: item.value}))
+  const handleResolutionPick = (item: {value: number; force?: boolean}) => {
+    setWizard(w => ({...w, resolution: item.value, force: Boolean(item.force)}))
     setPhase({name: 'wizard', step: 'fps'})
   }
 
-  const handleFpsPick = (item: {value: number}) => {
+  const handleFpsPick = (item: {value: number; force?: boolean}) => {
     const fmt = wizard.videoFormat
     if (!fmt) return
-    setWizard(w => ({...w, fps: item.value}))
+    setWizard(w => ({...w, fps: item.value, forceFps: Boolean(item.force)}))
     const resLabel = wizard.resolution > 0 ? `${wizard.resolution}p` : 'best'
     const fpsLabel = item.value > 0 ? `${item.value}fps` : t().sourceFps
     const choice: DownloadChoice = {
       kind: 'video',
       label: `video · ${fmt.label} · ${resLabel} · ${fpsLabel}`,
       detail: fmtDesc(fmt.descKey),
-      args: buildVideoArgs(fmt, wizard.resolution, item.value),
+      args: buildVideoArgs(fmt, {
+        resolution: wizard.resolution,
+        fps: item.value,
+        forceResolution: wizard.force,
+        forceFps: Boolean(item.force),
+      }),
+      forcedResolution: wizard.force ? wizard.resolution : undefined,
+      requestedHeight: wizard.resolution,
     }
     startDownload(choice)
   }
@@ -681,20 +775,42 @@ function AppContent({
     ...(sourceHasAudio || !sourceHasVideo ? [{key: 'audio', label: `♪  ${t().audioOption}`, value: 'audio'}] : []),
   ]
 
-  // Always show ALL resolution options — let yt-dlp handle what's actually available.
-  // Filtering by source maxHeight was too aggressive and hid valid options.
-  const resolutionItems = RESOLUTIONS.map(r => ({
-    key: String(r.value),
-    label: `${r.label}  ${fmtDesc(r.descKey)}`,
-    value: r.value,
-  }))
+  // Resolution list is built from what the source ACTUALLY offers, so a 4K
+  // video shows 4K (and 8K when the source has it) instead of a generic list.
+  const sourceHeights = info ? availableHeights(info) : []
+  const resolutionItems = [
+    {
+      key: 'best',
+      label: `${RESOLUTIONS[0].label}  ${fmtDesc(RESOLUTIONS[0].descKey)}`,
+      value: 0,
+      force: false,
+    },
+    ...resolutionChoices(sourceHeights).map(choice => ({
+      key: `h${choice.value}`,
+      label: heightLabel(choice.value),
+      value: choice.value,
+      force: choice.exact,
+    })),
+  ]
 
-  // Always show ALL FPS options — let yt-dlp handle what's actually available.
-  const fpsItems = FPS_OPTIONS.map(f => ({
-    key: String(f.value),
-    label: `${f.label}  ${fmtDesc(f.descKey)}`,
-    value: f.value,
-  }))
+  // Frame-rate list is built from what the source offers **at the chosen
+  // resolution** (YouTube often has 1080p only at 60 fps while 480p exists at
+  // 30 fps).
+  const sourceFps = info ? fpsForHeight(info, wizard.resolution, wizard.force) : []
+  const fpsItems = [
+    {
+      key: 'src',
+      label: `${FPS_OPTIONS[0].label}  ${fmtDesc(FPS_OPTIONS[0].descKey)}`,
+      value: 0,
+      force: false,
+    },
+    ...fpsChoices(sourceFps).map(choice => ({
+      key: `f${choice.value}`,
+      label: `${choice.value} FPS`,
+      value: choice.value,
+      force: choice.exact,
+    })),
+  ]
 
   const videoFormatItems = VIDEO_FORMATS.map(f => ({
     key: f.id,
@@ -722,10 +838,13 @@ function AppContent({
                 ? [['^c', s.quit]]
                 : phase.name === 'language-picker'
                   ? [['esc', s.back], ['^c', s.quit]]
-                  : [['↵', s.tryAgain], ['^c', s.quit]]
-    const extras: Array<[string, string]> = phase.name === 'language-picker'
-      ? []
-      : [['^t', `${s.theme}:${theme.mode}`], ['^l', s.lang ?? 'language']]
+                  : phase.name === 'settings'
+                    ? [['↑↓', s.choose], ['←→', s.select], ['esc', s.back], ['^c', s.quit]]
+                    : [['↵', s.tryAgain], ['^c', s.quit]]
+    const extras: Array<[string, string]> =
+      phase.name === 'language-picker' || phase.name === 'settings'
+        ? []
+        : [['^t', `${s.theme}:${theme.mode}`], ['^l', s.lang ?? 'language'], ['^s', s.settings ?? 'settings']]
     const withTheme: Array<[string, string]> = [...base, ...extras]
     if (phase.name === 'input' && history.length > 0) {
       return [withTheme[0]!, ['↑', s.history], ...withTheme.slice(1)]
@@ -844,7 +963,7 @@ function AppContent({
                 indicatorComponent={ChoiceIndicator}
                 itemComponent={ChoiceItem}
                 items={resolutionItems}
-                onSelect={handleResolutionPick}
+                onSelect={item => handleResolutionPick(item as unknown as {value: number; force: boolean})}
               />
             )}
             {phase.step === 'fps' && (
@@ -852,7 +971,7 @@ function AppContent({
                 indicatorComponent={ChoiceIndicator}
                 itemComponent={ChoiceItem}
                 items={fpsItems}
-                onSelect={handleFpsPick}
+                onSelect={item => handleFpsPick(item as unknown as {value: number; force: boolean})}
               />
             )}
             {phase.step === 'bitrate' && wizard.audioFormat && (
@@ -934,6 +1053,18 @@ function AppContent({
             <Text color={theme.primary}>{s.savedTo}</Text>
           </Text>
           <Text color={theme.gray} dimColor={theme.dimSecondary}>{shortenPath(phase.filepath, os.homedir(), 60)}</Text>
+          {phase.actual?.height ? (
+            <Text color={theme.gray} dimColor={theme.dimSecondary}>
+              {phase.actual.height}p
+              {phase.actual.fps ? ` · ${phase.actual.fps}fps` : ''}
+              {phase.actual.width ? ` · ${phase.actual.width}px` : ''}
+            </Text>
+          ) : null}
+          {phase.requestedHeight && phase.actual?.height && phase.actual.height < phase.requestedHeight ? (
+            <Text color={theme.warning ?? theme.accent ?? theme.primary}>
+              ⚠ source has no {phase.requestedHeight}p — got {phase.actual.height}p
+            </Text>
+          ) : null}
           <Gap />
           <Box
             borderStyle="double"
@@ -955,6 +1086,7 @@ function AppContent({
         <LanguagePicker
           onPick={code => {
             setLanguage(code)
+            updatePrefs({...prefs, language: code})
             const prev = phase.previousPhase
             // Preserve object identity where possible so React doesn't unmount
             // the underlying phase; for object-typed phases, refresh status
@@ -966,6 +1098,22 @@ function AppContent({
           }}
           onCancel={() => setPhase(phase.previousPhase)}
           boxWidth={boxWidth}
+        />
+      )}
+
+      {phase.name === 'settings' && (
+        <SettingsPanel
+          settings={prefs}
+          onChange={updatePrefs}
+          onClose={() => setPhase(phase.previousPhase)}
+          onPickLanguage={() => setPhase({name: 'language-picker', previousPhase: phase})}
+          onClearHistory={() => {
+            clearHistory()
+            setHistory([])
+          }}
+          themeMode={theme.mode === 'system' ? 'system' : theme.mode}
+          onThemeMode={setTheme}
+          languageName={languageDisplayName(getLanguage())}
         />
       )}
 

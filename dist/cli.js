@@ -56,6 +56,7 @@ var require_react_production = __commonJS({
     var REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo");
     var REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
     var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
+    var REACT_VIEW_TRANSITION_TYPE = /* @__PURE__ */ Symbol.for("react.view_transition");
     var MAYBE_ITERATOR_SYMBOL = Symbol.iterator;
     function getIteratorFn(maybeIterable) {
       if (null === maybeIterable || "object" !== typeof maybeIterable) return null;
@@ -243,19 +244,18 @@ var require_react_production = __commonJS({
     }
     function lazyInitializer(payload) {
       if (-1 === payload._status) {
-        var ctor = payload._result;
-        ctor = ctor();
-        ctor.then(
+        var ctor = payload._result, thenable = ctor();
+        thenable.then(
           function(moduleObject) {
             if (0 === payload._status || -1 === payload._status)
-              payload._status = 1, payload._result = moduleObject;
+              payload._status = 1, payload._result = moduleObject, void 0 === thenable.status && (thenable.status = "fulfilled", thenable.value = moduleObject);
           },
           function(error) {
             if (0 === payload._status || -1 === payload._status)
-              payload._status = 2, payload._result = error;
+              payload._status = 2, payload._result = error, void 0 === thenable.status && (thenable.status = "rejected", thenable.reason = error);
           }
         );
-        -1 === payload._status && (payload._status = 0, payload._result = ctor);
+        -1 === payload._status && (payload._status = 0, payload._result = thenable);
       }
       if (1 === payload._status) return payload._result.default;
       throw payload._result;
@@ -275,6 +275,27 @@ var require_react_production = __commonJS({
       }
       console.error(error);
     };
+    function startTransition(scope) {
+      var prevTransition = ReactSharedInternals.T, currentTransition = {};
+      currentTransition.types = null !== prevTransition ? prevTransition.types : null;
+      ReactSharedInternals.T = currentTransition;
+      try {
+        var returnValue = scope(), onStartTransitionFinish = ReactSharedInternals.S;
+        null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
+        "object" === typeof returnValue && null !== returnValue && "function" === typeof returnValue.then && returnValue.then(noop2, reportGlobalError);
+      } catch (error) {
+        reportGlobalError(error);
+      } finally {
+        null !== prevTransition && null !== currentTransition.types && (prevTransition.types = currentTransition.types), ReactSharedInternals.T = prevTransition;
+      }
+    }
+    function addTransitionType(type) {
+      var transition = ReactSharedInternals.T;
+      if (null !== transition) {
+        var transitionTypes = transition.types;
+        null === transitionTypes ? transition.types = [type] : -1 === transitionTypes.indexOf(type) && transitionTypes.push(type);
+      } else startTransition(addTransitionType.bind(null, type));
+    }
     var Children = {
       map: mapChildren,
       forEach: function(children2, forEachFunc, forEachContext) {
@@ -314,6 +335,7 @@ var require_react_production = __commonJS({
     exports.PureComponent = PureComponent2;
     exports.StrictMode = REACT_STRICT_MODE_TYPE;
     exports.Suspense = REACT_SUSPENSE_TYPE;
+    exports.ViewTransition = REACT_VIEW_TRANSITION_TYPE;
     exports.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE = ReactSharedInternals;
     exports.__COMPILER_RUNTIME = {
       __proto__: null,
@@ -321,6 +343,7 @@ var require_react_production = __commonJS({
         return ReactSharedInternals.H.useMemoCache(size);
       }
     };
+    exports.addTransitionType = addTransitionType;
     exports.cache = function(fn2) {
       return function() {
         return fn2.apply(null, arguments);
@@ -401,19 +424,7 @@ var require_react_production = __commonJS({
         compare: void 0 === compare ? null : compare
       };
     };
-    exports.startTransition = function(scope) {
-      var prevTransition = ReactSharedInternals.T, currentTransition = {};
-      ReactSharedInternals.T = currentTransition;
-      try {
-        var returnValue = scope(), onStartTransitionFinish = ReactSharedInternals.S;
-        null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
-        "object" === typeof returnValue && null !== returnValue && "function" === typeof returnValue.then && returnValue.then(noop2, reportGlobalError);
-      } catch (error) {
-        reportGlobalError(error);
-      } finally {
-        null !== prevTransition && null !== currentTransition.types && (prevTransition.types = currentTransition.types), ReactSharedInternals.T = prevTransition;
-      }
-    };
+    exports.startTransition = startTransition;
     exports.unstable_useCacheRefresh = function() {
       return ReactSharedInternals.H.useCacheRefresh();
     };
@@ -477,7 +488,7 @@ var require_react_production = __commonJS({
     exports.useTransition = function() {
       return ReactSharedInternals.H.useTransition();
     };
-    exports.version = "19.2.8";
+    exports.version = "19.3.1";
   }
 });
 
@@ -568,6 +579,8 @@ var require_react_development = __commonJS({
             return "SuspenseList";
           case REACT_ACTIVITY_TYPE:
             return "Activity";
+          case REACT_VIEW_TRANSITION_TYPE:
+            return "ViewTransition";
         }
         if ("object" === typeof type)
           switch ("number" === typeof type.tag && console.error(
@@ -824,8 +837,11 @@ var require_react_development = __commonJS({
       }
       function lazyInitializer(payload) {
         if (-1 === payload._status) {
-          var ioInfo = payload._ioInfo;
-          null != ioInfo && (ioInfo.start = ioInfo.end = performance.now());
+          var resolveDebugValue = null, rejectDebugValue = null, ioInfo = payload._ioInfo;
+          null != ioInfo && (ioInfo.start = ioInfo.end = performance.now(), ioInfo.value = new Promise(function(resolve, reject) {
+            resolveDebugValue = resolve;
+            rejectDebugValue = reject;
+          }));
           ioInfo = payload._result;
           var thenable = ioInfo();
           thenable.then(
@@ -834,7 +850,13 @@ var require_react_development = __commonJS({
                 payload._status = 1;
                 payload._result = moduleObject;
                 var _ioInfo = payload._ioInfo;
-                null != _ioInfo && (_ioInfo.end = performance.now());
+                if (null != _ioInfo) {
+                  _ioInfo.end = performance.now();
+                  var debugValue = null == moduleObject ? void 0 : moduleObject.default;
+                  resolveDebugValue(debugValue);
+                  _ioInfo.value.status = "fulfilled";
+                  _ioInfo.value.value = debugValue;
+                }
                 void 0 === thenable.status && (thenable.status = "fulfilled", thenable.value = moduleObject);
               }
             },
@@ -843,14 +865,13 @@ var require_react_development = __commonJS({
                 payload._status = 2;
                 payload._result = error;
                 var _ioInfo2 = payload._ioInfo;
-                null != _ioInfo2 && (_ioInfo2.end = performance.now());
+                null != _ioInfo2 && (_ioInfo2.end = performance.now(), _ioInfo2.value.then(noop2, noop2), rejectDebugValue(error), _ioInfo2.value.status = "rejected", _ioInfo2.value.reason = error);
                 void 0 === thenable.status && (thenable.status = "rejected", thenable.reason = error);
               }
             }
           );
           ioInfo = payload._ioInfo;
           if (null != ioInfo) {
-            ioInfo.value = thenable;
             var displayName = thenable.displayName;
             "string" === typeof displayName && (ioInfo.name = displayName);
           }
@@ -875,6 +896,35 @@ var require_react_development = __commonJS({
       }
       function releaseAsyncTransition() {
         ReactSharedInternals.asyncTransitions--;
+      }
+      function startTransition(scope) {
+        var prevTransition = ReactSharedInternals.T, currentTransition = {};
+        currentTransition.types = null !== prevTransition ? prevTransition.types : null;
+        currentTransition._updatedFibers = /* @__PURE__ */ new Set();
+        ReactSharedInternals.T = currentTransition;
+        try {
+          var returnValue = scope(), onStartTransitionFinish = ReactSharedInternals.S;
+          null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
+          "object" === typeof returnValue && null !== returnValue && "function" === typeof returnValue.then && (ReactSharedInternals.asyncTransitions++, returnValue.then(releaseAsyncTransition, releaseAsyncTransition), returnValue.then(noop2, reportGlobalError));
+        } catch (error) {
+          reportGlobalError(error);
+        } finally {
+          null === prevTransition && currentTransition._updatedFibers && (scope = currentTransition._updatedFibers.size, currentTransition._updatedFibers.clear(), 10 < scope && console.warn(
+            "Detected a large number of updates inside startTransition. If this is due to a subscription please re-write it to use React provided hooks. Otherwise concurrent mode guarantees are off the table."
+          )), null !== prevTransition && null !== currentTransition.types && (null !== prevTransition.types && prevTransition.types !== currentTransition.types && console.error(
+            "We expected inner Transitions to have transferred the outer types set and that you cannot add to the outer Transition while inside the inner.This is a bug in React."
+          ), prevTransition.types = currentTransition.types), ReactSharedInternals.T = prevTransition;
+        }
+      }
+      function addTransitionType(type) {
+        var transition = ReactSharedInternals.T;
+        if (null !== transition) {
+          var transitionTypes = transition.types;
+          null === transitionTypes ? transition.types = [type] : -1 === transitionTypes.indexOf(type) && transitionTypes.push(type);
+        } else
+          0 === ReactSharedInternals.asyncTransitions && console.error(
+            "addTransitionType can only be called inside a `startTransition()` callback. It must be associated with a specific Transition."
+          ), startTransition(addTransitionType.bind(null, type));
       }
       function enqueueTask(task) {
         if (null === enqueueTaskImpl)
@@ -950,7 +1000,7 @@ var require_react_development = __commonJS({
         }
       }
       "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStart(Error());
-      var REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), MAYBE_ITERATOR_SYMBOL = Symbol.iterator, didWarnStateUpdateForUnmountedComponent = {}, ReactNoopUpdateQueue = {
+      var REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_VIEW_TRANSITION_TYPE = /* @__PURE__ */ Symbol.for("react.view_transition"), MAYBE_ITERATOR_SYMBOL = Symbol.iterator, didWarnStateUpdateForUnmountedComponent = {}, ReactNoopUpdateQueue = {
         isMounted: function() {
           return false;
         },
@@ -1085,6 +1135,7 @@ var require_react_development = __commonJS({
       exports.PureComponent = PureComponent2;
       exports.StrictMode = REACT_STRICT_MODE_TYPE;
       exports.Suspense = REACT_SUSPENSE_TYPE;
+      exports.ViewTransition = REACT_VIEW_TRANSITION_TYPE;
       exports.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE = ReactSharedInternals;
       exports.__COMPILER_RUNTIME = deprecatedAPIs;
       exports.act = function(callback) {
@@ -1164,6 +1215,7 @@ var require_react_development = __commonJS({
           }
         };
       };
+      exports.addTransitionType = addTransitionType;
       exports.cache = function(fn2) {
         return function() {
           return fn2.apply(null, arguments);
@@ -1240,6 +1292,7 @@ var require_react_development = __commonJS({
       exports.createElement = function(type, config, children2) {
         for (var i2 = 2; i2 < arguments.length; i2++)
           validateChildKeys(arguments[i2]);
+        var propName;
         i2 = {};
         var key = null;
         if (null != config)
@@ -1262,13 +1315,13 @@ var require_react_development = __commonJS({
           i2,
           "function" === typeof type ? type.displayName || type.name || "Unknown" : type
         );
-        var propName = 1e4 > ReactSharedInternals.recentlyCreatedOwnerStacks++;
+        (propName = 1e4 > ReactSharedInternals.recentlyCreatedOwnerStacks++) ? (childArray = Error.stackTraceLimit, Error.stackTraceLimit = 10, childrenLength = Error("react-stack-top-frame"), Error.stackTraceLimit = childArray) : childrenLength = unknownOwnerDebugStack;
         return ReactElement(
           type,
           key,
           i2,
           getOwner(),
-          propName ? Error("react-stack-top-frame") : unknownOwnerDebugStack,
+          childrenLength,
           propName ? createTask(getTaskName(type)) : unknownOwnerDebugTask
         );
       };
@@ -1348,24 +1401,7 @@ var require_react_development = __commonJS({
         });
         return compare;
       };
-      exports.startTransition = function(scope) {
-        var prevTransition = ReactSharedInternals.T, currentTransition = {};
-        currentTransition._updatedFibers = /* @__PURE__ */ new Set();
-        ReactSharedInternals.T = currentTransition;
-        try {
-          var returnValue = scope(), onStartTransitionFinish = ReactSharedInternals.S;
-          null !== onStartTransitionFinish && onStartTransitionFinish(currentTransition, returnValue);
-          "object" === typeof returnValue && null !== returnValue && "function" === typeof returnValue.then && (ReactSharedInternals.asyncTransitions++, returnValue.then(releaseAsyncTransition, releaseAsyncTransition), returnValue.then(noop2, reportGlobalError));
-        } catch (error) {
-          reportGlobalError(error);
-        } finally {
-          null === prevTransition && currentTransition._updatedFibers && (scope = currentTransition._updatedFibers.size, currentTransition._updatedFibers.clear(), 10 < scope && console.warn(
-            "Detected a large number of updates inside startTransition. If this is due to a subscription please re-write it to use React provided hooks. Otherwise concurrent mode guarantees are off the table."
-          )), null !== prevTransition && null !== currentTransition.types && (null !== prevTransition.types && prevTransition.types !== currentTransition.types && console.error(
-            "We expected inner Transitions to have transferred the outer types set and that you cannot add to the outer Transition while inside the inner.This is a bug in React."
-          ), prevTransition.types = currentTransition.types), ReactSharedInternals.T = prevTransition;
-        }
-      };
+      exports.startTransition = startTransition;
       exports.unstable_useCacheRefresh = function() {
         return resolveDispatcher().useCacheRefresh();
       };
@@ -1447,7 +1483,7 @@ var require_react_development = __commonJS({
       exports.useTransition = function() {
         return resolveDispatcher().useTransition();
       };
-      exports.version = "19.2.8";
+      exports.version = "19.3.1";
       "undefined" !== typeof __REACT_DEVTOOLS_GLOBAL_HOOK__ && "function" === typeof __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop && __REACT_DEVTOOLS_GLOBAL_HOOK__.registerInternalModuleStop(Error());
     })();
   }
@@ -9633,14 +9669,14 @@ var require_react_reconciler_production = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React19 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React20 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React19.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React20.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -10430,10 +10466,10 @@ var require_react_reconciler_development = __commonJS({
           fiber = fiber.next, id2--;
         return fiber;
       }
-      function copyWithSetImpl(obj, path9, index2, value) {
-        if (index2 >= path9.length) return value;
-        var key = path9[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        updated[key] = copyWithSetImpl(obj[key], path9, index2 + 1, value);
+      function copyWithSetImpl(obj, path13, index2, value) {
+        if (index2 >= path13.length) return value;
+        var key = path13[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        updated[key] = copyWithSetImpl(obj[key], path13, index2 + 1, value);
         return updated;
       }
       function copyWithRename(obj, oldPath, newPath) {
@@ -10460,11 +10496,11 @@ var require_react_reconciler_development = __commonJS({
         );
         return updated;
       }
-      function copyWithDeleteImpl(obj, path9, index2) {
-        var key = path9[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
-        if (index2 + 1 === path9.length)
+      function copyWithDeleteImpl(obj, path13, index2) {
+        var key = path13[index2], updated = isArrayImpl(obj) ? obj.slice() : assign({}, obj);
+        if (index2 + 1 === path13.length)
           return isArrayImpl(updated) ? updated.splice(key, 1) : delete updated[key], updated;
-        updated[key] = copyWithDeleteImpl(obj[key], path9, index2 + 1);
+        updated[key] = copyWithDeleteImpl(obj[key], path13, index2 + 1);
         return updated;
       }
       function shouldSuspendImpl() {
@@ -22233,14 +22269,14 @@ var require_react_reconciler_development = __commonJS({
       }
       var exports2 = {};
       "use strict";
-      var React19 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
+      var React20 = require_react(), Scheduler2 = require_scheduler(), assign = Object.assign, REACT_LEGACY_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.element"), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy");
       /* @__PURE__ */ Symbol.for("react.scope");
       var REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity");
       /* @__PURE__ */ Symbol.for("react.legacy_hidden");
       /* @__PURE__ */ Symbol.for("react.tracing_marker");
       var REACT_MEMO_CACHE_SENTINEL = /* @__PURE__ */ Symbol.for("react.memo_cache_sentinel");
       /* @__PURE__ */ Symbol.for("react.view_transition");
-      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React19.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
+      var MAYBE_ITERATOR_SYMBOL = Symbol.iterator, REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), isArrayImpl = Array.isArray, ReactSharedInternals = React20.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, rendererVersion = $$$config.rendererVersion, rendererPackageName = $$$config.rendererPackageName, extraDevToolsConfig = $$$config.extraDevToolsConfig, getPublicInstance = $$$config.getPublicInstance, getRootHostContext = $$$config.getRootHostContext, getChildHostContext = $$$config.getChildHostContext, prepareForCommit = $$$config.prepareForCommit, resetAfterCommit = $$$config.resetAfterCommit, createInstance = $$$config.createInstance;
       $$$config.cloneMutableInstance;
       var appendInitialChild = $$$config.appendInitialChild, finalizeInitialChildren = $$$config.finalizeInitialChildren, shouldSetTextContent = $$$config.shouldSetTextContent, createTextInstance = $$$config.createTextInstance;
       $$$config.cloneMutableTextInstance;
@@ -23741,29 +23777,29 @@ var require_react_reconciler_development = __commonJS({
       var didWarnAboutNestedUpdates = false;
       var didWarnAboutFindNodeInStrictMode = {};
       var overrideHookState = null, overrideHookStateDeletePath = null, overrideHookStateRenamePath = null, overrideProps = null, overridePropsDeletePath = null, overridePropsRenamePath = null, scheduleUpdate = null, scheduleRetry = null, setErrorHandler = null, setSuspenseHandler = null;
-      overrideHookState = function(fiber, id2, path9, value) {
+      overrideHookState = function(fiber, id2, path13, value) {
         id2 = findHook(fiber, id2);
-        null !== id2 && (path9 = copyWithSetImpl(id2.memoizedState, path9, 0, value), id2.memoizedState = path9, id2.baseState = path9, fiber.memoizedProps = assign({}, fiber.memoizedProps), path9 = enqueueConcurrentRenderForLane(fiber, 2), null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2));
+        null !== id2 && (path13 = copyWithSetImpl(id2.memoizedState, path13, 0, value), id2.memoizedState = path13, id2.baseState = path13, fiber.memoizedProps = assign({}, fiber.memoizedProps), path13 = enqueueConcurrentRenderForLane(fiber, 2), null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2));
       };
-      overrideHookStateDeletePath = function(fiber, id2, path9) {
+      overrideHookStateDeletePath = function(fiber, id2, path13) {
         id2 = findHook(fiber, id2);
-        null !== id2 && (path9 = copyWithDeleteImpl(id2.memoizedState, path9, 0), id2.memoizedState = path9, id2.baseState = path9, fiber.memoizedProps = assign({}, fiber.memoizedProps), path9 = enqueueConcurrentRenderForLane(fiber, 2), null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2));
+        null !== id2 && (path13 = copyWithDeleteImpl(id2.memoizedState, path13, 0), id2.memoizedState = path13, id2.baseState = path13, fiber.memoizedProps = assign({}, fiber.memoizedProps), path13 = enqueueConcurrentRenderForLane(fiber, 2), null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2));
       };
       overrideHookStateRenamePath = function(fiber, id2, oldPath, newPath) {
         id2 = findHook(fiber, id2);
         null !== id2 && (oldPath = copyWithRename(id2.memoizedState, oldPath, newPath), id2.memoizedState = oldPath, id2.baseState = oldPath, fiber.memoizedProps = assign({}, fiber.memoizedProps), oldPath = enqueueConcurrentRenderForLane(fiber, 2), null !== oldPath && scheduleUpdateOnFiber(oldPath, fiber, 2));
       };
-      overrideProps = function(fiber, path9, value) {
-        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path9, 0, value);
+      overrideProps = function(fiber, path13, value) {
+        fiber.pendingProps = copyWithSetImpl(fiber.memoizedProps, path13, 0, value);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path9 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2);
+        path13 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2);
       };
-      overridePropsDeletePath = function(fiber, path9) {
-        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path9, 0);
+      overridePropsDeletePath = function(fiber, path13) {
+        fiber.pendingProps = copyWithDeleteImpl(fiber.memoizedProps, path13, 0);
         fiber.alternate && (fiber.alternate.pendingProps = fiber.pendingProps);
-        path9 = enqueueConcurrentRenderForLane(fiber, 2);
-        null !== path9 && scheduleUpdateOnFiber(path9, fiber, 2);
+        path13 = enqueueConcurrentRenderForLane(fiber, 2);
+        null !== path13 && scheduleUpdateOnFiber(path13, fiber, 2);
       };
       overridePropsRenamePath = function(fiber, oldPath, newPath) {
         fiber.pendingProps = copyWithRename(
@@ -26500,11 +26536,23 @@ var require_websocket = __commonJS({
           this._isServer = false;
           this._redirects = 0;
           if (protocols === void 0) {
-            protocols = [];
+            if (!options || options.protocols === void 0) {
+              protocols = [];
+            } else if (Array.isArray(options.protocols)) {
+              protocols = options.protocols;
+            } else {
+              protocols = [options.protocols];
+            }
           } else if (!Array.isArray(protocols)) {
             if (typeof protocols === "object" && protocols !== null) {
               options = protocols;
-              protocols = [];
+              if (options.protocols === void 0) {
+                protocols = [];
+              } else if (Array.isArray(options.protocols)) {
+                protocols = options.protocols;
+              } else {
+                protocols = [options.protocols];
+              }
             } else {
               protocols = [protocols];
             }
@@ -26701,7 +26749,6 @@ var require_websocket = __commonJS({
           }
           return;
         }
-        this._readyState = _WebSocket.CLOSING;
         this._sender.close(code, data, !this._isServer, (err) => {
           if (err) return;
           this._closeFrameSent = true;
@@ -26709,6 +26756,7 @@ var require_websocket = __commonJS({
             this._socket.end();
           }
         });
+        this._readyState = _WebSocket.CLOSING;
         setCloseTimer(this);
       }
       /**
@@ -26933,6 +26981,7 @@ var require_websocket = __commonJS({
         socketPath: void 0,
         hostname: void 0,
         protocol: void 0,
+        protocols: void 0,
         timeout: void 0,
         method: "GET",
         host: void 0,
@@ -30019,6 +30068,8 @@ var require_react_jsx_runtime_development = __commonJS({
             return "SuspenseList";
           case REACT_ACTIVITY_TYPE:
             return "Activity";
+          case REACT_VIEW_TRANSITION_TYPE:
+            return "ViewTransition";
         }
         if ("object" === typeof type)
           switch ("number" === typeof type.tag && console.error(
@@ -30210,18 +30261,18 @@ var require_react_jsx_runtime_development = __commonJS({
       function isValidElement(object2) {
         return "object" === typeof object2 && null !== object2 && object2.$$typeof === REACT_ELEMENT_TYPE;
       }
-      var React19 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React19.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
+      var React20 = require_react(), REACT_ELEMENT_TYPE = /* @__PURE__ */ Symbol.for("react.transitional.element"), REACT_PORTAL_TYPE = /* @__PURE__ */ Symbol.for("react.portal"), REACT_FRAGMENT_TYPE = /* @__PURE__ */ Symbol.for("react.fragment"), REACT_STRICT_MODE_TYPE = /* @__PURE__ */ Symbol.for("react.strict_mode"), REACT_PROFILER_TYPE = /* @__PURE__ */ Symbol.for("react.profiler"), REACT_CONSUMER_TYPE = /* @__PURE__ */ Symbol.for("react.consumer"), REACT_CONTEXT_TYPE = /* @__PURE__ */ Symbol.for("react.context"), REACT_FORWARD_REF_TYPE = /* @__PURE__ */ Symbol.for("react.forward_ref"), REACT_SUSPENSE_TYPE = /* @__PURE__ */ Symbol.for("react.suspense"), REACT_SUSPENSE_LIST_TYPE = /* @__PURE__ */ Symbol.for("react.suspense_list"), REACT_MEMO_TYPE = /* @__PURE__ */ Symbol.for("react.memo"), REACT_LAZY_TYPE = /* @__PURE__ */ Symbol.for("react.lazy"), REACT_ACTIVITY_TYPE = /* @__PURE__ */ Symbol.for("react.activity"), REACT_VIEW_TRANSITION_TYPE = /* @__PURE__ */ Symbol.for("react.view_transition"), REACT_CLIENT_REFERENCE = /* @__PURE__ */ Symbol.for("react.client.reference"), ReactSharedInternals = React20.__CLIENT_INTERNALS_DO_NOT_USE_OR_WARN_USERS_THEY_CANNOT_UPGRADE, hasOwnProperty = Object.prototype.hasOwnProperty, isArrayImpl = Array.isArray, createTask = console.createTask ? console.createTask : function() {
         return null;
       };
-      React19 = {
+      React20 = {
         react_stack_bottom_frame: function(callStackForError) {
           return callStackForError();
         }
       };
       var specialPropKeyWarningShown;
       var didWarnAboutElementRef = {};
-      var unknownOwnerDebugStack = React19.react_stack_bottom_frame.bind(
-        React19,
+      var unknownOwnerDebugStack = React20.react_stack_bottom_frame.bind(
+        React20,
         UnknownOwner
       )();
       var unknownOwnerDebugTask = createTask(getTaskName(UnknownOwner));
@@ -30229,23 +30280,35 @@ var require_react_jsx_runtime_development = __commonJS({
       exports.Fragment = REACT_FRAGMENT_TYPE;
       exports.jsx = function(type, config, maybeKey) {
         var trackActualOwner = 1e4 > ReactSharedInternals.recentlyCreatedOwnerStacks++;
+        if (trackActualOwner) {
+          var previousStackTraceLimit = Error.stackTraceLimit;
+          Error.stackTraceLimit = 10;
+          var debugStackDEV = Error("react-stack-top-frame");
+          Error.stackTraceLimit = previousStackTraceLimit;
+        } else debugStackDEV = unknownOwnerDebugStack;
         return jsxDEVImpl(
           type,
           config,
           maybeKey,
           false,
-          trackActualOwner ? Error("react-stack-top-frame") : unknownOwnerDebugStack,
+          debugStackDEV,
           trackActualOwner ? createTask(getTaskName(type)) : unknownOwnerDebugTask
         );
       };
       exports.jsxs = function(type, config, maybeKey) {
         var trackActualOwner = 1e4 > ReactSharedInternals.recentlyCreatedOwnerStacks++;
+        if (trackActualOwner) {
+          var previousStackTraceLimit = Error.stackTraceLimit;
+          Error.stackTraceLimit = 10;
+          var debugStackDEV = Error("react-stack-top-frame");
+          Error.stackTraceLimit = previousStackTraceLimit;
+        } else debugStackDEV = unknownOwnerDebugStack;
         return jsxDEVImpl(
           type,
           config,
           maybeKey,
           true,
-          trackActualOwner ? Error("react-stack-top-frame") : unknownOwnerDebugStack,
+          debugStackDEV,
           trackActualOwner ? createTask(getTaskName(type)) : unknownOwnerDebugTask
         );
       };
@@ -32685,9 +32748,16 @@ var init_is = __esm({
     integer = (val) => Number.isInteger(val);
     inRange = (val, min, max) => val >= min && val <= max;
     inArray = (val, list) => list.includes(val);
-    invalidParameterError = (name, expected, actual) => new Error(
-      `Expected ${expected} for ${name} but received ${actual} of type ${typeof actual}`
-    );
+    invalidParameterError = (name, expected, actual) => {
+      let actualString;
+      try {
+        actualString = String(actual).slice(0, 100);
+      } catch {
+      }
+      return new Error(
+        `Expected ${expected} for ${name} but received ${actualString} of type ${typeof actual}`
+      );
+    };
     nativeError = (native, context) => {
       context.message = native.message;
       return context;
@@ -32739,27 +32809,27 @@ var require_process = __commonJS({
 var require_filesystem = __commonJS({
   "node_modules/detect-libc/lib/filesystem.js"(exports, module) {
     "use strict";
-    var fs11 = __require("fs");
+    var fs16 = __require("fs");
     var LDD_PATH = "/usr/bin/ldd";
     var SELF_PATH = "/proc/self/exe";
     var MAX_LENGTH = 2048;
-    var readFileSync2 = (path9) => {
-      const fd = fs11.openSync(path9, "r");
+    var readFileSync2 = (path13) => {
+      const fd = fs16.openSync(path13, "r");
       const buffer2 = Buffer.alloc(MAX_LENGTH);
-      const bytesRead = fs11.readSync(fd, buffer2, 0, MAX_LENGTH, 0);
-      fs11.close(fd, () => {
+      const bytesRead = fs16.readSync(fd, buffer2, 0, MAX_LENGTH, 0);
+      fs16.close(fd, () => {
       });
       return buffer2.subarray(0, bytesRead);
     };
-    var readFile2 = (path9) => new Promise((resolve, reject) => {
-      fs11.open(path9, "r", (err, fd) => {
+    var readFile2 = (path13) => new Promise((resolve, reject) => {
+      fs16.open(path13, "r", (err, fd) => {
         if (err) {
           reject(err);
         } else {
           const buffer2 = Buffer.alloc(MAX_LENGTH);
-          fs11.read(fd, buffer2, 0, MAX_LENGTH, 0, (_, bytesRead) => {
+          fs16.read(fd, buffer2, 0, MAX_LENGTH, 0, (_, bytesRead) => {
             resolve(buffer2.subarray(0, bytesRead));
-            fs11.close(fd, () => {
+            fs16.close(fd, () => {
             });
           });
         }
@@ -32871,11 +32941,11 @@ var require_detect_libc = __commonJS({
       }
       return null;
     };
-    var familyFromInterpreterPath = (path9) => {
-      if (path9) {
-        if (path9.includes("/ld-musl-")) {
+    var familyFromInterpreterPath = (path13) => {
+      if (path13) {
+        if (path13.includes("/ld-musl-")) {
           return MUSL;
-        } else if (path9.includes("/ld-linux-")) {
+        } else if (path13.includes("/ld-linux-")) {
           return GLIBC;
         }
       }
@@ -32922,8 +32992,8 @@ var require_detect_libc = __commonJS({
       cachedFamilyInterpreter = null;
       try {
         const selfContent = await readFile2(SELF_PATH);
-        const path9 = interpreterPath(selfContent);
-        cachedFamilyInterpreter = familyFromInterpreterPath(path9);
+        const path13 = interpreterPath(selfContent);
+        cachedFamilyInterpreter = familyFromInterpreterPath(path13);
       } catch (e2) {
       }
       return cachedFamilyInterpreter;
@@ -32935,8 +33005,8 @@ var require_detect_libc = __commonJS({
       cachedFamilyInterpreter = null;
       try {
         const selfContent = readFileSync2(SELF_PATH);
-        const path9 = interpreterPath(selfContent);
-        cachedFamilyInterpreter = familyFromInterpreterPath(path9);
+        const path13 = interpreterPath(selfContent);
+        cachedFamilyInterpreter = familyFromInterpreterPath(path13);
       } catch (e2) {
       }
       return cachedFamilyInterpreter;
@@ -33916,10 +33986,10 @@ var require_truncate = __commonJS({
   "node_modules/semver/functions/truncate.js"(exports, module) {
     "use strict";
     var parse = require_parse();
-    var constants3 = require_constants3();
+    var constants4 = require_constants3();
     var SemVer = require_semver();
     var truncate2 = (version2, truncation, options) => {
-      if (!constants3.RELEASE_TYPES.includes(truncation)) {
+      if (!constants4.RELEASE_TYPES.includes(truncation)) {
         return null;
       }
       const clonedVersion = cloneInputVersion(version2, options);
@@ -34968,7 +35038,7 @@ var require_semver2 = __commonJS({
   "node_modules/semver/index.js"(exports, module) {
     "use strict";
     var internalRe = require_re();
-    var constants3 = require_constants3();
+    var constants4 = require_constants3();
     var SemVer = require_semver();
     var identifiers = require_identifiers();
     var parse = require_parse();
@@ -35052,8 +35122,8 @@ var require_semver2 = __commonJS({
       re: internalRe.re,
       src: internalRe.src,
       tokens: internalRe.t,
-      SEMVER_SPEC_VERSION: constants3.SEMVER_SPEC_VERSION,
-      RELEASE_TYPES: constants3.RELEASE_TYPES,
+      SEMVER_SPEC_VERSION: constants4.SEMVER_SPEC_VERSION,
+      RELEASE_TYPES: constants4.RELEASE_TYPES,
       compareIdentifiers: identifiers.compareIdentifiers,
       rcompareIdentifiers: identifiers.rcompareIdentifiers
     };
@@ -35067,7 +35137,7 @@ var init_package = __esm({
     package_default = {
       name: "sharp",
       description: "High performance Node.js image processing, the fastest module to resize JPEG, PNG, WebP, GIF, AVIF and TIFF images",
-      version: "0.35.4",
+      version: "0.35.5",
       author: "Lovell Fuller <npm@lovell.info>",
       homepage: "https://sharp.pixelplumbing.com",
       contributors: [
@@ -35229,31 +35299,31 @@ var init_package = __esm({
         semver: "^7.8.5"
       },
       optionalDependencies: {
-        "@img/sharp-darwin-arm64": "0.35.4",
-        "@img/sharp-darwin-x64": "0.35.4",
-        "@img/sharp-freebsd-wasm32": "0.35.4",
-        "@img/sharp-libvips-darwin-arm64": "1.3.3",
-        "@img/sharp-libvips-darwin-x64": "1.3.3",
-        "@img/sharp-libvips-linux-arm": "1.3.3",
-        "@img/sharp-libvips-linux-arm64": "1.3.3",
-        "@img/sharp-libvips-linux-ppc64": "1.3.3",
-        "@img/sharp-libvips-linux-riscv64": "1.3.3",
-        "@img/sharp-libvips-linux-s390x": "1.3.3",
-        "@img/sharp-libvips-linux-x64": "1.3.3",
-        "@img/sharp-libvips-linuxmusl-arm64": "1.3.3",
-        "@img/sharp-libvips-linuxmusl-x64": "1.3.3",
-        "@img/sharp-linux-arm": "0.35.4",
-        "@img/sharp-linux-arm64": "0.35.4",
-        "@img/sharp-linux-ppc64": "0.35.4",
-        "@img/sharp-linux-riscv64": "0.35.4",
-        "@img/sharp-linux-s390x": "0.35.4",
-        "@img/sharp-linux-x64": "0.35.4",
-        "@img/sharp-linuxmusl-arm64": "0.35.4",
-        "@img/sharp-linuxmusl-x64": "0.35.4",
-        "@img/sharp-webcontainers-wasm32": "0.35.4",
-        "@img/sharp-win32-arm64": "0.35.4",
-        "@img/sharp-win32-ia32": "0.35.4",
-        "@img/sharp-win32-x64": "0.35.4"
+        "@img/sharp-darwin-arm64": "0.35.5",
+        "@img/sharp-darwin-x64": "0.35.5",
+        "@img/sharp-freebsd-wasm32": "0.35.5",
+        "@img/sharp-libvips-darwin-arm64": "1.3.4",
+        "@img/sharp-libvips-darwin-x64": "1.3.4",
+        "@img/sharp-libvips-linux-arm": "1.3.4",
+        "@img/sharp-libvips-linux-arm64": "1.3.4",
+        "@img/sharp-libvips-linux-ppc64": "1.3.4",
+        "@img/sharp-libvips-linux-riscv64": "1.3.4",
+        "@img/sharp-libvips-linux-s390x": "1.3.4",
+        "@img/sharp-libvips-linux-x64": "1.3.4",
+        "@img/sharp-libvips-linuxmusl-arm64": "1.3.4",
+        "@img/sharp-libvips-linuxmusl-x64": "1.3.4",
+        "@img/sharp-linux-arm": "0.35.5",
+        "@img/sharp-linux-arm64": "0.35.5",
+        "@img/sharp-linux-ppc64": "0.35.5",
+        "@img/sharp-linux-riscv64": "0.35.5",
+        "@img/sharp-linux-s390x": "0.35.5",
+        "@img/sharp-linux-x64": "0.35.5",
+        "@img/sharp-linuxmusl-arm64": "0.35.5",
+        "@img/sharp-linuxmusl-x64": "0.35.5",
+        "@img/sharp-webcontainers-wasm32": "0.35.5",
+        "@img/sharp-win32-arm64": "0.35.5",
+        "@img/sharp-win32-ia32": "0.35.5",
+        "@img/sharp-win32-x64": "0.35.5"
       },
       peerDependenciesMeta: {
         "@types/node": {
@@ -35261,31 +35331,31 @@ var init_package = __esm({
         }
       },
       devDependencies: {
-        "@biomejs/biome": "^2.5.10",
+        "@biomejs/biome": "^2.5.14",
         "@cpplint/cli": "^0.1.0",
         "@emnapi/runtime": "^1.11.3",
-        "@img/sharp-libvips-dev": "1.3.3",
-        "@img/sharp-libvips-dev-wasm32": "1.3.3",
-        "@img/sharp-libvips-win32-arm64": "1.3.3",
-        "@img/sharp-libvips-win32-ia32": "1.3.3",
-        "@img/sharp-libvips-win32-x64": "1.3.3",
+        "@img/sharp-libvips-dev": "1.3.4",
+        "@img/sharp-libvips-dev-wasm32": "1.3.4",
+        "@img/sharp-libvips-win32-arm64": "1.3.4",
+        "@img/sharp-libvips-win32-ia32": "1.3.4",
+        "@img/sharp-libvips-win32-x64": "1.3.4",
         "@types/node": "*",
         emnapi: "^1.11.3",
         "exif-reader": "^2.0.3",
-        yauzl: "^3.4.0",
         icc: "^4.0.0",
         "node-addon-api": "^8.9.2",
         "node-gyp": "^12.4.0",
         publint: "^0.3.24",
         "tar-fs": "^3.1.3",
-        tsd: "^0.33.0"
+        tsd: "^0.33.0",
+        yauzl: "^3.4.0"
       },
       license: "Apache-2.0",
       engines: {
         node: ">=20.9.0"
       },
       config: {
-        libvips: ">=8.18.6"
+        libvips: ">=8.18.7"
       },
       funding: {
         url: "https://opencollective.com/libvips"
@@ -35591,11 +35661,11 @@ var init_sharp = __esm({
       }
     }
     if (!sharp) {
-      const [isLinux2, isMacOs2, isWindows3] = ["linux", "darwin", "win32"].map((os8) => runtimePlatform.startsWith(os8));
+      const [isLinux2, isMacOs2, isWindows3] = ["linux", "darwin", "win32"].map((os11) => runtimePlatform.startsWith(os11));
       const help = [`Could not load the "sharp" module using the ${runtimePlatform} runtime`];
       errors.forEach((err) => {
-        if (!err.code.endsWith("MODULE_NOT_FOUND")) {
-          help.push(`${err.code}: ${err.message}`);
+        if (!err.code?.endsWith("MODULE_NOT_FOUND")) {
+          help.push(err.code ? `${err.code}: ${err.message}` : err.message);
         }
       });
       const messages = errors.map((err) => err.message).join(" ");
@@ -35603,16 +35673,16 @@ var init_sharp = __esm({
       if (isUnsupportedNodeRuntime2()) {
         const { found, expected } = isUnsupportedNodeRuntime2();
         help.push("- Please upgrade Node.js:", `    Found ${found}`, `    Requires ${expected}`);
-      } else if (prebuiltPlatforms2.includes(runtimePlatform)) {
-        const [os8, cpu] = runtimePlatform.split("-");
-        const libc = os8.endsWith("musl") ? " --libc=musl" : "";
+      } else if (prebuiltPlatforms2.includes(runtimePlatform) && !/libstdc\+\+\.so/.test(messages)) {
+        const [os11, cpu] = runtimePlatform.split("-");
+        const libc = os11.endsWith("musl") ? " --libc=musl" : "";
         help.push(
           "- Ensure optional dependencies can be installed:",
           "    npm install --include=optional sharp",
           "- Ensure your package manager supports multi-platform installation:",
           "    See https://sharp.pixelplumbing.com/install#cross-platform",
           "- Add platform-specific dependencies:",
-          `    npm install --os=${os8.replace("musl", "")}${libc} --cpu=${cpu} sharp`
+          `    npm install --os=${os11.replace("musl", "")}${libc} --cpu=${cpu} sharp`
         );
       } else {
         help.push(
@@ -36606,41 +36676,41 @@ function resize2(widthOrOptions, height, options) {
 }
 function extend(extend2) {
   if (is_default.integer(extend2)) {
-    if (is_default.inRange(extend2, 1, 1e4)) {
+    if (is_default.inRange(extend2, 1, 1e8)) {
       this.options.extendTop = extend2;
       this.options.extendBottom = extend2;
       this.options.extendLeft = extend2;
       this.options.extendRight = extend2;
     } else {
-      throw is_default.invalidParameterError("extend", "integer between 1 and 10000", extend2);
+      throw is_default.invalidParameterError("extend", "integer between 1 and 100000000", extend2);
     }
   } else if (is_default.object(extend2)) {
     if (is_default.defined(extend2.top)) {
-      if (is_default.integer(extend2.top) && is_default.inRange(extend2.top, 0, 1e4)) {
+      if (is_default.integer(extend2.top) && is_default.inRange(extend2.top, 0, 1e8)) {
         this.options.extendTop = extend2.top;
       } else {
-        throw is_default.invalidParameterError("top", "integer between 0 and 10000", extend2.top);
+        throw is_default.invalidParameterError("top", "integer between 0 and 100000000", extend2.top);
       }
     }
     if (is_default.defined(extend2.bottom)) {
-      if (is_default.integer(extend2.bottom) && is_default.inRange(extend2.bottom, 0, 1e4)) {
+      if (is_default.integer(extend2.bottom) && is_default.inRange(extend2.bottom, 0, 1e8)) {
         this.options.extendBottom = extend2.bottom;
       } else {
-        throw is_default.invalidParameterError("bottom", "integer between 0 and 10000", extend2.bottom);
+        throw is_default.invalidParameterError("bottom", "integer between 0 and 100000000", extend2.bottom);
       }
     }
     if (is_default.defined(extend2.left)) {
-      if (is_default.integer(extend2.left) && is_default.inRange(extend2.left, 0, 1e4)) {
+      if (is_default.integer(extend2.left) && is_default.inRange(extend2.left, 0, 1e8)) {
         this.options.extendLeft = extend2.left;
       } else {
-        throw is_default.invalidParameterError("left", "integer between 0 and 10000", extend2.left);
+        throw is_default.invalidParameterError("left", "integer between 0 and 100000000", extend2.left);
       }
     }
     if (is_default.defined(extend2.right)) {
-      if (is_default.integer(extend2.right) && is_default.inRange(extend2.right, 0, 1e4)) {
+      if (is_default.integer(extend2.right) && is_default.inRange(extend2.right, 0, 1e8)) {
         this.options.extendRight = extend2.right;
       } else {
-        throw is_default.invalidParameterError("right", "integer between 0 and 10000", extend2.right);
+        throw is_default.invalidParameterError("right", "integer between 0 and 100000000", extend2.right);
       }
     }
     this._setBackgroundColourOption("extendBackground", extend2.background);
@@ -37248,7 +37318,7 @@ function linear(a2, b) {
     this.options.linearA = [];
   } else if (is_default.number(a2)) {
     this.options.linearA = [a2];
-  } else if (Array.isArray(a2) && a2.length && a2.every(is_default.number)) {
+  } else if (Array.isArray(a2) && is_default.inRange(a2.length, 1, 1e6) && a2.every(is_default.number)) {
     this.options.linearA = a2;
   } else {
     throw is_default.invalidParameterError("a", "number or array of numbers", a2);
@@ -37257,7 +37327,7 @@ function linear(a2, b) {
     this.options.linearB = [];
   } else if (is_default.number(b)) {
     this.options.linearB = [b];
-  } else if (Array.isArray(b) && b.length && b.every(is_default.number)) {
+  } else if (Array.isArray(b) && is_default.inRange(b.length, 1, 1e6) && b.every(is_default.number)) {
     this.options.linearB = b;
   } else {
     throw is_default.invalidParameterError("b", "number or array of numbers", b);
@@ -38487,15 +38557,15 @@ var require_color = __commonJS({
       };
     }
     function wrapConversion(toModel, graph) {
-      const path9 = [graph[toModel].parent, toModel];
+      const path13 = [graph[toModel].parent, toModel];
       let fn2 = conversions_default[graph[toModel].parent][toModel];
       let cur = graph[toModel].parent;
       while (graph[cur].parent) {
-        path9.unshift(graph[cur].parent);
+        path13.unshift(graph[cur].parent);
         fn2 = link2(conversions_default[graph[cur].parent][cur], fn2);
         cur = graph[cur].parent;
       }
-      fn2.conversion = path9;
+      fn2.conversion = path13;
       return fn2;
     }
     function route(fromModel) {
@@ -39115,14 +39185,14 @@ var init_channel = __esm({
 });
 
 // node_modules/sharp/dist/output.mjs
-import path2 from "path";
+import path4 from "path";
 function toFile(fileOut, callback) {
   let err;
   if (!is_default.string(fileOut)) {
     err = new Error("Missing output file path");
-  } else if (is_default.string(this.options.input.file) && path2.resolve(this.options.input.file) === path2.resolve(fileOut)) {
+  } else if (is_default.string(this.options.input.file) && path4.resolve(this.options.input.file) === path4.resolve(fileOut)) {
     err = new Error("Cannot use same file for input and output");
-  } else if (jp2Regex.test(path2.extname(fileOut)) && !this.constructor.format.jp2.output.file) {
+  } else if (jp2Regex.test(path4.extname(fileOut)) && !this.constructor.format.jp2.output.file) {
     err = errJp2Save();
   }
   if (err) {
@@ -39558,7 +39628,7 @@ function trySetAnimationOptions(source, target) {
   if (is_default.object(source) && is_default.defined(source.delay)) {
     if (is_default.integer(source.delay) && is_default.inRange(source.delay, 0, 65535)) {
       target.delay = [source.delay];
-    } else if (Array.isArray(source.delay) && source.delay.every(is_default.integer) && source.delay.every((v) => is_default.inRange(v, 0, 65535))) {
+    } else if (Array.isArray(source.delay) && is_default.inRange(source.delay.length, 1, 1e6) && source.delay.every(is_default.integer) && source.delay.every((v) => is_default.inRange(v, 0, 65535))) {
       target.delay = source.delay;
     } else {
       throw is_default.invalidParameterError("delay", "integer or an array of integers between 0 and 65535", source.delay);
@@ -45811,7 +45881,7 @@ var require_gifframe = __commonJS({
 var require_gifutil = __commonJS({
   "node_modules/gifwrap/src/gifutil.js"(exports) {
     "use strict";
-    var fs11 = __require("fs");
+    var fs16 = __require("fs");
     var ImageQ = require_image_q();
     var BitmapImage2 = require_bitmapimage();
     var { GifFrame: GifFrame2 } = require_gifframe();
@@ -45926,14 +45996,14 @@ var require_gifutil = __commonJS({
       jimpImage.bitmap.data = bitmapImageToShare.bitmap.data;
       return jimpImage;
     };
-    exports.write = function(path9, frames, spec, encoder) {
+    exports.write = function(path13, frames, spec, encoder) {
       encoder = encoder || defaultCodec;
-      const matches = path9.match(/\.[a-zA-Z]+$/);
+      const matches = path13.match(/\.[a-zA-Z]+$/);
       if (matches !== null && INVALID_SUFFIXES.includes(matches[0].toLowerCase())) {
-        throw new Error(`GIF '${path9}' has an unexpected suffix`);
+        throw new Error(`GIF '${path13}' has an unexpected suffix`);
       }
       return encoder.encodeGif(frames, spec).then((gif3) => {
-        return _writeBinary(path9, gif3.buffer).then(() => {
+        return _writeBinary(path13, gif3.buffer).then(() => {
           return gif3;
         });
       });
@@ -46005,9 +46075,9 @@ var require_gifutil = __commonJS({
         }
       }
     }
-    function _readBinary(path9) {
+    function _readBinary(path13) {
       return new Promise((resolve, reject) => {
-        fs11.readFile(path9, (err, buffer2) => {
+        fs16.readFile(path13, (err, buffer2) => {
           if (err) {
             return reject(err);
           }
@@ -46015,9 +46085,9 @@ var require_gifutil = __commonJS({
         });
       });
     }
-    function _writeBinary(path9, buffer2) {
+    function _writeBinary(path13, buffer2) {
       return new Promise((resolve, reject) => {
-        fs11.writeFile(path9, buffer2, (err) => {
+        fs16.writeFile(path13, buffer2, (err) => {
           if (err) {
             return reject(err);
           }
@@ -48031,9 +48101,9 @@ var require_decoder = __commonJS({
         return a2 < 0 ? 0 : a2 > 255 ? 255 : a2;
       }
       constructor.prototype = {
-        load: function load(path9) {
+        load: function load(path13) {
           var xhr = new XMLHttpRequest();
-          xhr.open("GET", path9, true);
+          xhr.open("GET", path13, true);
           xhr.responseType = "arraybuffer";
           xhr.onload = (function() {
             var data = new Uint8Array(xhr.response || xhr.mozResponseArrayBuffer);
@@ -49103,7 +49173,7 @@ var require_crc = __commonJS({
 var require_parser = __commonJS({
   "node_modules/pngjs/lib/parser.js"(exports, module) {
     "use strict";
-    var constants3 = require_constants4();
+    var constants4 = require_constants4();
     var CrcCalculator = require_crc();
     var Parser = module.exports = function(options, dependencies) {
       this._options = options;
@@ -49114,12 +49184,12 @@ var require_parser = __commonJS({
       this._palette = [];
       this._colorType = 0;
       this._chunks = {};
-      this._chunks[constants3.TYPE_IHDR] = this._handleIHDR.bind(this);
-      this._chunks[constants3.TYPE_IEND] = this._handleIEND.bind(this);
-      this._chunks[constants3.TYPE_IDAT] = this._handleIDAT.bind(this);
-      this._chunks[constants3.TYPE_PLTE] = this._handlePLTE.bind(this);
-      this._chunks[constants3.TYPE_tRNS] = this._handleTRNS.bind(this);
-      this._chunks[constants3.TYPE_gAMA] = this._handleGAMA.bind(this);
+      this._chunks[constants4.TYPE_IHDR] = this._handleIHDR.bind(this);
+      this._chunks[constants4.TYPE_IEND] = this._handleIEND.bind(this);
+      this._chunks[constants4.TYPE_IDAT] = this._handleIDAT.bind(this);
+      this._chunks[constants4.TYPE_PLTE] = this._handlePLTE.bind(this);
+      this._chunks[constants4.TYPE_tRNS] = this._handleTRNS.bind(this);
+      this._chunks[constants4.TYPE_gAMA] = this._handleGAMA.bind(this);
       this.read = dependencies.read;
       this.error = dependencies.error;
       this.metadata = dependencies.metadata;
@@ -49134,10 +49204,10 @@ var require_parser = __commonJS({
       };
     };
     Parser.prototype.start = function() {
-      this.read(constants3.PNG_SIGNATURE.length, this._parseSignature.bind(this));
+      this.read(constants4.PNG_SIGNATURE.length, this._parseSignature.bind(this));
     };
     Parser.prototype._parseSignature = function(data) {
-      let signature = constants3.PNG_SIGNATURE;
+      let signature = constants4.PNG_SIGNATURE;
       for (let i2 = 0; i2 < signature.length; i2++) {
         if (data[i2] !== signature[i2]) {
           this.error(new Error("Invalid file signature"));
@@ -49154,7 +49224,7 @@ var require_parser = __commonJS({
         name += String.fromCharCode(data[i2]);
       }
       let ancillary = Boolean(data[4] & 32);
-      if (!this._hasIHDR && type !== constants3.TYPE_IHDR) {
+      if (!this._hasIHDR && type !== constants4.TYPE_IHDR) {
         this.error(new Error("Expected IHDR on beggining"));
         return;
       }
@@ -49202,7 +49272,7 @@ var require_parser = __commonJS({
         this.error(new Error("Unsupported bit depth " + depth));
         return;
       }
-      if (!(colorType in constants3.COLORTYPE_TO_BPP_MAP)) {
+      if (!(colorType in constants4.COLORTYPE_TO_BPP_MAP)) {
         this.error(new Error("Unsupported color type"));
         return;
       }
@@ -49219,16 +49289,16 @@ var require_parser = __commonJS({
         return;
       }
       this._colorType = colorType;
-      let bpp = constants3.COLORTYPE_TO_BPP_MAP[this._colorType];
+      let bpp = constants4.COLORTYPE_TO_BPP_MAP[this._colorType];
       this._hasIHDR = true;
       this.metadata({
         width,
         height,
         depth,
         interlace: Boolean(interlace),
-        palette: Boolean(colorType & constants3.COLORTYPE_PALETTE),
-        color: Boolean(colorType & constants3.COLORTYPE_COLOR),
-        alpha: Boolean(colorType & constants3.COLORTYPE_ALPHA),
+        palette: Boolean(colorType & constants4.COLORTYPE_PALETTE),
+        color: Boolean(colorType & constants4.COLORTYPE_COLOR),
+        alpha: Boolean(colorType & constants4.COLORTYPE_ALPHA),
         bpp,
         colorType
       });
@@ -49252,7 +49322,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseTRNS = function(data) {
       this._crc.write(data);
-      if (this._colorType === constants3.COLORTYPE_PALETTE_COLOR) {
+      if (this._colorType === constants4.COLORTYPE_PALETTE_COLOR) {
         if (this._palette.length === 0) {
           this.error(new Error("Transparency chunk must be after palette"));
           return;
@@ -49266,10 +49336,10 @@ var require_parser = __commonJS({
         }
         this.palette(this._palette);
       }
-      if (this._colorType === constants3.COLORTYPE_GRAYSCALE) {
+      if (this._colorType === constants4.COLORTYPE_GRAYSCALE) {
         this.transColor([data.readUInt16BE(0)]);
       }
-      if (this._colorType === constants3.COLORTYPE_COLOR) {
+      if (this._colorType === constants4.COLORTYPE_COLOR) {
         this.transColor([
           data.readUInt16BE(0),
           data.readUInt16BE(2),
@@ -49283,7 +49353,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseGAMA = function(data) {
       this._crc.write(data);
-      this.gamma(data.readUInt32BE(0) / constants3.GAMMA_DIVISION);
+      this.gamma(data.readUInt32BE(0) / constants4.GAMMA_DIVISION);
       this._handleChunkEnd();
     };
     Parser.prototype._handleIDAT = function(length) {
@@ -49295,7 +49365,7 @@ var require_parser = __commonJS({
     };
     Parser.prototype._parseIDAT = function(length, data) {
       this._crc.write(data);
-      if (this._colorType === constants3.COLORTYPE_PALETTE_COLOR && this._palette.length === 0) {
+      if (this._colorType === constants4.COLORTYPE_PALETTE_COLOR && this._palette.length === 0) {
         throw new Error("Expected palette not found");
       }
       this.inflateData(data);
@@ -49783,9 +49853,9 @@ var require_parser_async = __commonJS({
 var require_bitpacker = __commonJS({
   "node_modules/pngjs/lib/bitpacker.js"(exports, module) {
     "use strict";
-    var constants3 = require_constants4();
+    var constants4 = require_constants4();
     module.exports = function(dataIn, width, height, options) {
-      let outHasAlpha = [constants3.COLORTYPE_COLOR_ALPHA, constants3.COLORTYPE_ALPHA].indexOf(
+      let outHasAlpha = [constants4.COLORTYPE_COLOR_ALPHA, constants4.COLORTYPE_ALPHA].indexOf(
         options.colorType
       ) !== -1;
       if (options.colorType === options.inputColorType) {
@@ -49805,11 +49875,11 @@ var require_bitpacker = __commonJS({
       }
       let data = options.bitDepth !== 16 ? dataIn : new Uint16Array(dataIn.buffer);
       let maxValue = 255;
-      let inBpp = constants3.COLORTYPE_TO_BPP_MAP[options.inputColorType];
+      let inBpp = constants4.COLORTYPE_TO_BPP_MAP[options.inputColorType];
       if (inBpp === 4 && !options.inputHasAlpha) {
         inBpp = 3;
       }
-      let outBpp = constants3.COLORTYPE_TO_BPP_MAP[options.colorType];
+      let outBpp = constants4.COLORTYPE_TO_BPP_MAP[options.colorType];
       if (options.bitDepth === 16) {
         maxValue = 65535;
         outBpp *= 2;
@@ -49833,24 +49903,24 @@ var require_bitpacker = __commonJS({
         let blue;
         let alpha = maxValue;
         switch (options.inputColorType) {
-          case constants3.COLORTYPE_COLOR_ALPHA:
+          case constants4.COLORTYPE_COLOR_ALPHA:
             alpha = data[inIndex + 3];
             red = data[inIndex];
             green = data[inIndex + 1];
             blue = data[inIndex + 2];
             break;
-          case constants3.COLORTYPE_COLOR:
+          case constants4.COLORTYPE_COLOR:
             red = data[inIndex];
             green = data[inIndex + 1];
             blue = data[inIndex + 2];
             break;
-          case constants3.COLORTYPE_ALPHA:
+          case constants4.COLORTYPE_ALPHA:
             alpha = data[inIndex + 1];
             red = data[inIndex];
             green = red;
             blue = red;
             break;
-          case constants3.COLORTYPE_GRAYSCALE:
+          case constants4.COLORTYPE_GRAYSCALE:
             red = data[inIndex];
             green = red;
             blue = red;
@@ -49883,8 +49953,8 @@ var require_bitpacker = __commonJS({
         for (let x2 = 0; x2 < width; x2++) {
           let rgba = getRGBA(data, inIndex);
           switch (options.colorType) {
-            case constants3.COLORTYPE_COLOR_ALPHA:
-            case constants3.COLORTYPE_COLOR:
+            case constants4.COLORTYPE_COLOR_ALPHA:
+            case constants4.COLORTYPE_COLOR:
               if (options.bitDepth === 8) {
                 outData[outIndex] = rgba.red;
                 outData[outIndex + 1] = rgba.green;
@@ -49901,8 +49971,8 @@ var require_bitpacker = __commonJS({
                 }
               }
               break;
-            case constants3.COLORTYPE_ALPHA:
-            case constants3.COLORTYPE_GRAYSCALE: {
+            case constants4.COLORTYPE_ALPHA:
+            case constants4.COLORTYPE_GRAYSCALE: {
               let grayscale2 = (rgba.red + rgba.green + rgba.blue) / 3;
               if (options.bitDepth === 8) {
                 outData[outIndex] = grayscale2;
@@ -50075,7 +50145,7 @@ var require_filter_pack = __commonJS({
 var require_packer = __commonJS({
   "node_modules/pngjs/lib/packer.js"(exports, module) {
     "use strict";
-    var constants3 = require_constants4();
+    var constants4 = require_constants4();
     var CrcStream = require_crc();
     var bitPacker = require_bitpacker();
     var filter = require_filter_pack();
@@ -50088,23 +50158,23 @@ var require_packer = __commonJS({
       options.inputHasAlpha = options.inputHasAlpha != null ? options.inputHasAlpha : true;
       options.deflateFactory = options.deflateFactory || zlib.createDeflate;
       options.bitDepth = options.bitDepth || 8;
-      options.colorType = typeof options.colorType === "number" ? options.colorType : constants3.COLORTYPE_COLOR_ALPHA;
-      options.inputColorType = typeof options.inputColorType === "number" ? options.inputColorType : constants3.COLORTYPE_COLOR_ALPHA;
+      options.colorType = typeof options.colorType === "number" ? options.colorType : constants4.COLORTYPE_COLOR_ALPHA;
+      options.inputColorType = typeof options.inputColorType === "number" ? options.inputColorType : constants4.COLORTYPE_COLOR_ALPHA;
       if ([
-        constants3.COLORTYPE_GRAYSCALE,
-        constants3.COLORTYPE_COLOR,
-        constants3.COLORTYPE_COLOR_ALPHA,
-        constants3.COLORTYPE_ALPHA
+        constants4.COLORTYPE_GRAYSCALE,
+        constants4.COLORTYPE_COLOR,
+        constants4.COLORTYPE_COLOR_ALPHA,
+        constants4.COLORTYPE_ALPHA
       ].indexOf(options.colorType) === -1) {
         throw new Error(
           "option color type:" + options.colorType + " is not supported at present"
         );
       }
       if ([
-        constants3.COLORTYPE_GRAYSCALE,
-        constants3.COLORTYPE_COLOR,
-        constants3.COLORTYPE_COLOR_ALPHA,
-        constants3.COLORTYPE_ALPHA
+        constants4.COLORTYPE_GRAYSCALE,
+        constants4.COLORTYPE_COLOR,
+        constants4.COLORTYPE_COLOR_ALPHA,
+        constants4.COLORTYPE_ALPHA
       ].indexOf(options.inputColorType) === -1) {
         throw new Error(
           "option input color type:" + options.inputColorType + " is not supported at present"
@@ -50128,7 +50198,7 @@ var require_packer = __commonJS({
     };
     Packer.prototype.filterData = function(data, width, height) {
       let packedData = bitPacker(data, width, height, this._options);
-      let bpp = constants3.COLORTYPE_TO_BPP_MAP[this._options.colorType];
+      let bpp = constants4.COLORTYPE_TO_BPP_MAP[this._options.colorType];
       let filteredData = filter(packedData, width, height, this._options, bpp);
       return filteredData;
     };
@@ -50148,8 +50218,8 @@ var require_packer = __commonJS({
     };
     Packer.prototype.packGAMA = function(gamma2) {
       let buf = Buffer.alloc(4);
-      buf.writeUInt32BE(Math.floor(gamma2 * constants3.GAMMA_DIVISION), 0);
-      return this._packChunk(constants3.TYPE_gAMA, buf);
+      buf.writeUInt32BE(Math.floor(gamma2 * constants4.GAMMA_DIVISION), 0);
+      return this._packChunk(constants4.TYPE_gAMA, buf);
     };
     Packer.prototype.packIHDR = function(width, height) {
       let buf = Buffer.alloc(13);
@@ -50160,13 +50230,13 @@ var require_packer = __commonJS({
       buf[10] = 0;
       buf[11] = 0;
       buf[12] = 0;
-      return this._packChunk(constants3.TYPE_IHDR, buf);
+      return this._packChunk(constants4.TYPE_IHDR, buf);
     };
     Packer.prototype.packIDAT = function(data) {
-      return this._packChunk(constants3.TYPE_IDAT, data);
+      return this._packChunk(constants4.TYPE_IDAT, data);
     };
     Packer.prototype.packIEND = function() {
-      return this._packChunk(constants3.TYPE_IEND, null);
+      return this._packChunk(constants4.TYPE_IEND, null);
     };
   }
 });
@@ -50177,7 +50247,7 @@ var require_packer_async = __commonJS({
     "use strict";
     var util3 = __require("util");
     var Stream2 = __require("stream");
-    var constants3 = require_constants4();
+    var constants4 = require_constants4();
     var Packer = require_packer();
     var PackerAsync = module.exports = function(opt) {
       Stream2.call(this);
@@ -50188,7 +50258,7 @@ var require_packer_async = __commonJS({
     };
     util3.inherits(PackerAsync, Stream2);
     PackerAsync.prototype.pack = function(data, width, height, gamma2) {
-      this.emit("data", Buffer.from(constants3.PNG_SIGNATURE));
+      this.emit("data", Buffer.from(constants4.PNG_SIGNATURE));
       this.emit("data", this._packer.packIHDR(width, height));
       if (gamma2) {
         this.emit("data", this._packer.packGAMA(gamma2));
@@ -50516,7 +50586,7 @@ var require_packer_sync = __commonJS({
     if (!zlib.deflateSync) {
       hasSyncZlib = false;
     }
-    var constants3 = require_constants4();
+    var constants4 = require_constants4();
     var Packer = require_packer();
     module.exports = function(metaData, opt) {
       if (!hasSyncZlib) {
@@ -50527,7 +50597,7 @@ var require_packer_sync = __commonJS({
       let options = opt || {};
       let packer = new Packer(options);
       let chunks = [];
-      chunks.push(Buffer.from(constants3.PNG_SIGNATURE));
+      chunks.push(Buffer.from(constants4.PNG_SIGNATURE));
       chunks.push(packer.packIHDR(metaData.width, metaData.height));
       if (metaData.gamma) {
         chunks.push(packer.packGAMA(metaData.gamma));
@@ -54982,9 +55052,9 @@ var require_pako = __commonJS({
     var assign = require_common().assign;
     var deflate = require_deflate2();
     var inflate = require_inflate2();
-    var constants3 = require_constants5();
+    var constants4 = require_constants5();
     var pako2 = {};
-    assign(pako2, deflate, inflate, constants3);
+    assign(pako2, deflate, inflate, constants4);
     module.exports = pako2;
   }
 });
@@ -58947,8 +59017,8 @@ var init_parseUtil = __esm({
     init_errors();
     init_en();
     makeIssue = (params) => {
-      const { data, path: path9, errorMaps, issueData } = params;
-      const fullPath = [...path9, ...issueData.path || []];
+      const { data, path: path13, errorMaps, issueData } = params;
+      const fullPath = [...path13, ...issueData.path || []];
       const fullIssue = {
         ...issueData,
         path: fullPath
@@ -59259,11 +59329,11 @@ var init_types2 = __esm({
     init_parseUtil();
     init_util();
     ParseInputLazyPath = class {
-      constructor(parent, value, path9, key) {
+      constructor(parent, value, path13, key) {
         this._cachedPath = [];
         this.parent = parent;
         this.data = value;
-        this._path = path9;
+        this._path = path13;
         this._key = key;
       }
       get path() {
@@ -64214,14 +64284,14 @@ var init_await_to_js_es5 = __esm({
 });
 
 // node_modules/@jimp/file-ops/dist/esm/index.js
-import { promises as fs4 } from "fs";
+import { promises as fs6 } from "fs";
 import { existsSync as existsSync2 } from "fs";
 var readFile, writeFile;
 var init_esm13 = __esm({
   "node_modules/@jimp/file-ops/dist/esm/index.js"() {
     "use strict";
-    readFile = fs4.readFile;
-    writeFile = fs4.writeFile;
+    readFile = fs6.readFile;
+    writeFile = fs6.writeFile;
   }
 });
 
@@ -64263,11 +64333,11 @@ var require_Mime = __commonJS({
         }
       }
     };
-    Mime.prototype.getType = function(path9) {
-      path9 = String(path9);
-      let last = path9.replace(/^.*[/\\]/, "").toLowerCase();
+    Mime.prototype.getType = function(path13) {
+      path13 = String(path13);
+      let last = path13.replace(/^.*[/\\]/, "").toLowerCase();
       let ext = last.replace(/^.*\./, "").toLowerCase();
-      let hasPath = last.length < path9.length;
+      let hasPath = last.length < path13.length;
       let hasDot = ext.length < last.length - 1;
       return (hasDot || !hasPath) && this._types[ext] || null;
     };
@@ -65936,19 +66006,42 @@ var init_Errors = __esm({
   }
 });
 
-// node_modules/strtok3/lib/stream/Deferred.js
-var Deferred;
-var init_Deferred = __esm({
-  "node_modules/strtok3/lib/stream/Deferred.js"() {
+// node_modules/strtok3/lib/AbortSignal.js
+function throwIfAborted(signal) {
+  if (signal?.aborted) {
+    throw new AbortError();
+  }
+}
+var init_AbortSignal = __esm({
+  "node_modules/strtok3/lib/AbortSignal.js"() {
     "use strict";
-    Deferred = class {
-      constructor() {
-        this.resolve = () => null;
-        this.reject = () => null;
-        this.promise = new Promise((resolve, reject) => {
-          this.reject = reject;
-          this.resolve = resolve;
-        });
+    init_Errors();
+  }
+});
+
+// node_modules/strtok3/lib/BufferSizeError.js
+function getMaxBufferSize(options) {
+  const limit = options?.maxBufferSize ?? Number.POSITIVE_INFINITY;
+  if (limit !== Number.POSITIVE_INFINITY && (!Number.isSafeInteger(limit) || limit <= 0)) {
+    throw new RangeError("maxBufferSize must be a positive safe integer or Infinity");
+  }
+  return limit;
+}
+var BufferSizeError;
+var init_BufferSizeError = __esm({
+  "node_modules/strtok3/lib/BufferSizeError.js"() {
+    "use strict";
+    BufferSizeError = class extends RangeError {
+      /**
+       * Create an error describing an allocation that exceeds the configured limit.
+       * @param requestedSize - Requested buffer size in bytes
+       * @param maxBufferSize - Configured maximum buffer size in bytes
+       */
+      constructor(requestedSize, maxBufferSize) {
+        super(`Requested buffer size ${requestedSize} exceeds maxBufferSize ${maxBufferSize}`);
+        this.requestedSize = requestedSize;
+        this.maxBufferSize = maxBufferSize;
+        this.name = "BufferSizeError";
       }
     };
   }
@@ -65994,8 +66087,9 @@ var init_AbstractStreamReader = __esm({
         let bytesRead = 0;
         while (this.peekQueue.length > 0 && remaining > 0) {
           const peekData = this.peekQueue.pop();
-          if (!peekData)
+          if (!peekData) {
             throw new Error("peekData should be defined");
+          }
           const lenCopy = Math.min(peekData.length, remaining);
           buffer2.set(peekData.subarray(0, lenCopy), bytesRead);
           bytesRead += lenCopy;
@@ -66013,8 +66107,9 @@ var init_AbstractStreamReader = __esm({
             throw new AbortError();
           }
           const chunkLen = await this.readFromStream(buffer2.subarray(bytesRead), mayBeLess);
-          if (chunkLen === 0)
+          if (chunkLen === 0) {
             break;
+          }
           bytesRead += chunkLen;
         }
         if (!mayBeLess && bytesRead < buffer2.length) {
@@ -66026,30 +66121,53 @@ var init_AbstractStreamReader = __esm({
   }
 });
 
+// node_modules/strtok3/lib/stream/Deferred.js
+var Deferred;
+var init_Deferred = __esm({
+  "node_modules/strtok3/lib/stream/Deferred.js"() {
+    "use strict";
+    Deferred = class {
+      constructor() {
+        this.resolve = () => null;
+        this.reject = () => null;
+        this.promise = new Promise((resolve, reject) => {
+          this.reject = reject;
+          this.resolve = resolve;
+        });
+      }
+    };
+  }
+});
+
 // node_modules/strtok3/lib/stream/StreamReader.js
 var StreamReader;
 var init_StreamReader = __esm({
   "node_modules/strtok3/lib/stream/StreamReader.js"() {
     "use strict";
-    init_Errors();
-    init_Deferred();
     init_AbstractStreamReader();
+    init_Deferred();
+    init_Errors();
     StreamReader = class extends AbstractStreamReader {
       constructor(s2) {
         super();
         this.s = s2;
-        this.deferred = null;
+        this.pendingRequests = /* @__PURE__ */ new Set();
         if (!s2.read || !s2.once) {
           throw new Error("Expected an instance of stream.Readable");
         }
         this.s.once("end", () => {
           this.endOfStream = true;
-          if (this.deferred) {
-            this.deferred.resolve(0);
+          for (const request of this.pendingRequests) {
+            this.removeRequest(request);
+            request.deferred.resolve(0);
           }
         });
         this.s.once("error", (err) => this.reject(err));
-        this.s.once("close", () => this.abort());
+        this.s.once("close", () => {
+          if (!this.endOfStream) {
+            void this.abort();
+          }
+        });
       }
       /**
        * Read chunk from stream
@@ -66058,8 +66176,9 @@ var init_StreamReader = __esm({
        * @returns Number of bytes read
        */
       async readFromStream(buffer2, mayBeLess) {
-        if (buffer2.length === 0)
+        if (buffer2.length === 0) {
           return 0;
+        }
         const readBuffer = this.s.read(buffer2.length);
         if (readBuffer) {
           buffer2.set(readBuffer);
@@ -66068,12 +66187,11 @@ var init_StreamReader = __esm({
         const request = {
           buffer: buffer2,
           mayBeLess,
-          deferred: new Deferred()
+          deferred: new Deferred(),
+          onReadable: () => this.readDeferred(request)
         };
-        this.deferred = request.deferred;
-        this.s.once("readable", () => {
-          this.readDeferred(request);
-        });
+        this.pendingRequests.add(request);
+        this.s.once("readable", request.onReadable);
         return request.deferred.promise;
       }
       /**
@@ -66081,22 +66199,35 @@ var init_StreamReader = __esm({
        * @param request Deferred read request
        */
       readDeferred(request) {
-        const readBuffer = this.s.read(request.buffer.length);
-        if (readBuffer) {
-          request.buffer.set(readBuffer);
-          request.deferred.resolve(readBuffer.length);
-          this.deferred = null;
-        } else {
-          this.s.once("readable", () => {
-            this.readDeferred(request);
-          });
+        if (this.interrupted || !this.pendingRequests.has(request)) {
+          return;
         }
+        try {
+          const readBuffer = this.s.read(request.buffer.length);
+          if (!this.pendingRequests.has(request)) {
+            return;
+          }
+          if (readBuffer) {
+            request.buffer.set(readBuffer);
+            this.removeRequest(request);
+            request.deferred.resolve(readBuffer.length);
+          } else {
+            this.s.once("readable", request.onReadable);
+          }
+        } catch (error) {
+          this.reject(error instanceof Error ? error : new Error(String(error)));
+        }
+      }
+      removeRequest(request) {
+        this.s.removeListener("readable", request.onReadable);
+        this.pendingRequests.delete(request);
       }
       reject(err) {
         this.interrupted = true;
-        if (this.deferred) {
-          this.deferred.reject(err);
-          this.deferred = null;
+        this.peekQueue = [];
+        for (const request of this.pendingRequests) {
+          this.removeRequest(request);
+          request.deferred.reject(err);
         }
       }
       async abort() {
@@ -66144,9 +66275,12 @@ var init_WebStreamByobReader = __esm({
        * @protected Bytes read
        */
       async readFromStream(buffer2, mayBeLess) {
-        if (buffer2.length === 0)
+        if (buffer2.length === 0) {
           return 0;
-        const result = await this.reader.read(new Uint8Array(buffer2.length), { min: mayBeLess ? void 0 : buffer2.length });
+        }
+        const result = await this.reader.read(new Uint8Array(buffer2.length), {
+          min: mayBeLess ? void 0 : buffer2.length
+        });
         if (result.done) {
           this.endOfStream = result.done;
         }
@@ -66165,8 +66299,8 @@ var WebStreamDefaultReader;
 var init_WebStreamDefaultReader = __esm({
   "node_modules/strtok3/lib/stream/WebStreamDefaultReader.js"() {
     "use strict";
-    init_Errors();
     init_AbstractStreamReader();
+    init_Errors();
     WebStreamDefaultReader = class extends AbstractStreamReader {
       constructor(reader) {
         super();
@@ -66193,8 +66327,9 @@ var init_WebStreamDefaultReader = __esm({
        * @protected Bytes read
        */
       async readFromStream(buffer2, mayBeLess) {
-        if (buffer2.length === 0)
+        if (buffer2.length === 0) {
           return 0;
+        }
         let totalBytesRead = 0;
         if (this.buffer) {
           totalBytesRead += this.writeChunk(buffer2, this.buffer);
@@ -66219,8 +66354,11 @@ var init_WebStreamDefaultReader = __esm({
         return this.reader.cancel();
       }
       async close() {
-        await this.abort();
-        this.reader.releaseLock();
+        try {
+          await this.abort();
+        } finally {
+          this.reader.releaseLock();
+        }
       }
     };
   }
@@ -66266,6 +66404,8 @@ var AbstractTokenizer;
 var init_AbstractTokenizer = __esm({
   "node_modules/strtok3/lib/AbstractTokenizer.js"() {
     "use strict";
+    init_AbortSignal();
+    init_BufferSizeError();
     init_stream();
     AbstractTokenizer = class {
       /**
@@ -66276,12 +66416,27 @@ var init_AbstractTokenizer = __esm({
       constructor(options) {
         this.numBuffer = new Uint8Array(8);
         this.position = 0;
+        this.maxBufferSize = getMaxBufferSize(options);
+        throwIfAborted(options?.abortSignal);
         this.onClose = options?.onClose;
         if (options?.abortSignal) {
-          options.abortSignal.addEventListener("abort", () => {
-            this.abort();
+          this.addAbortListener(options.abortSignal, () => {
+            void this.abort().catch(() => {
+            });
           });
         }
+      }
+      addAbortListener(signal, listener) {
+        this.abortSignal = signal;
+        this.abortListener = listener;
+        signal.addEventListener("abort", listener, { once: true });
+      }
+      removeAbortListener() {
+        if (this.abortListener) {
+          this.abortSignal?.removeEventListener("abort", this.abortListener);
+        }
+        this.abortSignal = void 0;
+        this.abortListener = void 0;
       }
       /**
        * Read a token from the tokenizer-stream
@@ -66290,10 +66445,12 @@ var init_AbstractTokenizer = __esm({
        * @returns Promise with token data
        */
       async readToken(token, position2 = this.position) {
+        this.validateTokenRead(token.len, position2);
         const uint8Array = new Uint8Array(token.len);
         const len = await this.readBuffer(uint8Array, { position: position2 });
-        if (len < token.len)
+        if (len < token.len) {
           throw new EndOfStreamError();
+        }
         return token.get(uint8Array, 0);
       }
       /**
@@ -66303,10 +66460,13 @@ var init_AbstractTokenizer = __esm({
        * @returns Promise with token data
        */
       async peekToken(token, position2 = this.position) {
+        const peekPosition = position2 ?? this.position;
+        this.validateTokenRead(token.len, peekPosition, true);
         const uint8Array = new Uint8Array(token.len);
-        const len = await this.peekBuffer(uint8Array, { position: position2 });
-        if (len < token.len)
+        const len = await this.peekBuffer(uint8Array, { position: peekPosition });
+        if (len < token.len) {
           throw new EndOfStreamError();
+        }
         return token.get(uint8Array, 0);
       }
       /**
@@ -66316,8 +66476,9 @@ var init_AbstractTokenizer = __esm({
        */
       async readNumber(token) {
         const len = await this.readBuffer(this.numBuffer, { length: token.len });
-        if (len < token.len)
+        if (len < token.len) {
           throw new EndOfStreamError();
+        }
         return token.get(this.numBuffer, 0);
       }
       /**
@@ -66327,8 +66488,9 @@ var init_AbstractTokenizer = __esm({
        */
       async peekNumber(token) {
         const len = await this.peekBuffer(this.numBuffer, { length: token.len });
-        if (len < token.len)
+        if (len < token.len) {
           throw new EndOfStreamError();
+        }
         return token.get(this.numBuffer, 0);
       }
       /**
@@ -66340,6 +66502,8 @@ var init_AbstractTokenizer = __esm({
         if (length < 0) {
           throw new RangeError("ignore length must be \u2265 0 bytes");
         }
+        this.validateLength(length, "ignore length");
+        this.validateLength(this.position + length, "end position");
         if (this.fileInfo.size !== void 0) {
           const bytesLeft = this.fileInfo.size - this.position;
           if (length > bytesLeft) {
@@ -66351,38 +66515,217 @@ var init_AbstractTokenizer = __esm({
         return length;
       }
       async close() {
+        this.removeAbortListener();
         await this.abort();
         await this.onClose?.();
       }
-      normalizeOptions(uint8Array, options) {
-        if (!this.supportsRandomAccess() && options && options.position !== void 0 && options.position < this.position) {
+      /**
+       * Validate a byte length or position before using it in buffer calculations.
+       * @param value - Value that must be a non-negative safe integer
+       * @param name - Label used in the validation error
+       * @throws RangeError if the value is negative or not a safe integer
+       */
+      validateLength(value, name) {
+        if (!Number.isSafeInteger(value) || value < 0) {
+          throw new RangeError(`${name} must be a non-negative safe integer`);
+        }
+      }
+      /**
+       * Validate a requested buffer size against the configured allocation limit.
+       * @param length - Requested buffer size in bytes
+       * @throws RangeError if the length is negative or not a safe integer
+       * @throws BufferSizeError if the length exceeds maxBufferSize
+       */
+      validateBufferSize(length) {
+        this.validateLength(length, "buffer length");
+        if (length > this.maxBufferSize) {
+          throw new BufferSizeError(length, this.maxBufferSize);
+        }
+      }
+      /**
+       * Validate a token request before allocating a buffer or consuming input.
+       * @param length - Token length in bytes
+       * @param position - Byte offset where the token starts
+       * @param peek - Whether to include skipped stream bytes in the lookahead limit
+       * @throws RangeError if a length or position is negative or not a safe integer
+       * @throws BufferSizeError if the token buffer or stream lookahead exceeds maxBufferSize
+       * @throws Error if a stream request starts before the current position
+       * @throws EndOfStreamError if the token extends beyond the known input size
+       */
+      validateTokenRead(length, position2, peek = false) {
+        this.validateBufferSize(length);
+        this.validateLength(position2, "position");
+        this.validateLength(position2 + length, "end position");
+        if (!this.supportsRandomAccess() && position2 < this.position) {
           throw new Error("`options.position` must be equal or greater than `tokenizer.position`");
         }
-        return {
-          ...{
-            mayBeLess: false,
-            offset: 0,
-            length: uint8Array.length,
-            position: this.position
-          },
-          ...options
-        };
+        if (peek && !this.supportsRandomAccess()) {
+          this.validateBufferSize(length + position2 - this.position);
+        }
+        if (this.fileInfo.size !== void 0 && length > this.fileInfo.size - position2) {
+          throw new EndOfStreamError();
+        }
+      }
+      /**
+       * Apply defaults and validate buffer read or peek options.
+       * @param uint8Array - Target buffer whose length is the default read length
+       * @param options - Requested length, position and partial-read behavior
+       * @returns Validated options with an explicit length, position and mayBeLess flag
+       * @throws RangeError if a length or position is invalid, or the length exceeds the target buffer
+       * @throws Error if a stream request starts before the current position
+       */
+      normalizeOptions(uint8Array, options) {
+        const length = options?.length ?? uint8Array.length;
+        const position2 = options?.position ?? this.position;
+        this.validateLength(length, "length");
+        this.validateLength(position2, "position");
+        this.validateLength(position2 + length, "end position");
+        if (length > uint8Array.length) {
+          throw new RangeError("length must not exceed the target buffer length");
+        }
+        if (!this.supportsRandomAccess() && position2 < this.position) {
+          throw new Error("`options.position` must be equal or greater than `tokenizer.position`");
+        }
+        return { length, position: position2, mayBeLess: options?.mayBeLess ?? false };
       }
       abort() {
+        this.removeAbortListener();
         return Promise.resolve();
       }
     };
   }
 });
 
+// node_modules/strtok3/lib/BlobTokenizer.js
+var BlobTokenizer;
+var init_BlobTokenizer = __esm({
+  "node_modules/strtok3/lib/BlobTokenizer.js"() {
+    "use strict";
+    init_AbstractTokenizer();
+    init_stream();
+    BlobTokenizer = class extends AbstractTokenizer {
+      /**
+       * Construct BufferTokenizer
+       * @param blob - Uint8Array to tokenize
+       * @param options Tokenizer options
+       */
+      constructor(blob, options) {
+        super(options);
+        this.blob = blob;
+        this.fileInfo = { ...options?.fileInfo ?? {}, ...{ size: blob.size, mimeType: blob.type } };
+      }
+      /**
+       * Read buffer from tokenizer
+       * @param uint8Array - Uint8Array to tokenize
+       * @param options - Read behaviour options
+       * @returns {Promise<number>}
+       */
+      async readBuffer(uint8Array, options) {
+        const normOptions = this.normalizeOptions(uint8Array, options);
+        const bytesRead = await this.peekBuffer(uint8Array, normOptions);
+        this.position = normOptions.position + bytesRead;
+        return bytesRead;
+      }
+      /**
+       * Peek (read ahead) buffer from tokenizer
+       * @param buffer
+       * @param options - Read behaviour options
+       * @returns {Promise<number>}
+       */
+      async peekBuffer(buffer2, options) {
+        const normOptions = this.normalizeOptions(buffer2, options);
+        const bytes2read = Math.max(0, Math.min(this.blob.size - normOptions.position, normOptions.length));
+        if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
+          throw new EndOfStreamError();
+        }
+        for (let offset = 0; offset < bytes2read; ) {
+          const chunkLength = Math.min(this.maxBufferSize, bytes2read - offset);
+          const position2 = normOptions.position + offset;
+          const arrayBuffer2 = await this.blob.slice(position2, position2 + chunkLength).arrayBuffer();
+          buffer2.set(new Uint8Array(arrayBuffer2), offset);
+          offset += chunkLength;
+        }
+        return bytes2read;
+      }
+      close() {
+        return super.close();
+      }
+      supportsRandomAccess() {
+        return true;
+      }
+      setPosition(position2) {
+        this.position = position2;
+      }
+    };
+  }
+});
+
+// node_modules/strtok3/lib/BufferTokenizer.js
+var BufferTokenizer;
+var init_BufferTokenizer = __esm({
+  "node_modules/strtok3/lib/BufferTokenizer.js"() {
+    "use strict";
+    init_AbstractTokenizer();
+    init_stream();
+    BufferTokenizer = class extends AbstractTokenizer {
+      /**
+       * Construct BufferTokenizer
+       * @param uint8Array - Uint8Array to tokenize
+       * @param options Tokenizer options
+       */
+      constructor(uint8Array, options) {
+        super(options);
+        this.uint8Array = uint8Array;
+        this.fileInfo = { ...options?.fileInfo ?? {}, ...{ size: uint8Array.length } };
+      }
+      /**
+       * Read buffer from tokenizer
+       * @param uint8Array - Uint8Array to tokenize
+       * @param options - Read behaviour options
+       * @returns {Promise<number>}
+       */
+      async readBuffer(uint8Array, options) {
+        const normOptions = this.normalizeOptions(uint8Array, options);
+        const bytesRead = await this.peekBuffer(uint8Array, normOptions);
+        this.position = normOptions.position + bytesRead;
+        return bytesRead;
+      }
+      /**
+       * Peek (read ahead) buffer from tokenizer
+       * @param uint8Array
+       * @param options - Read behaviour options
+       * @returns {Promise<number>}
+       */
+      async peekBuffer(uint8Array, options) {
+        const normOptions = this.normalizeOptions(uint8Array, options);
+        const bytes2read = Math.max(0, Math.min(this.uint8Array.length - normOptions.position, normOptions.length));
+        if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
+          throw new EndOfStreamError();
+        }
+        uint8Array.set(this.uint8Array.subarray(normOptions.position, normOptions.position + bytes2read));
+        return bytes2read;
+      }
+      close() {
+        return super.close();
+      }
+      supportsRandomAccess() {
+        return true;
+      }
+      setPosition(position2) {
+        this.position = position2;
+      }
+    };
+  }
+});
+
 // node_modules/strtok3/lib/ReadStreamTokenizer.js
-var maxBufferSize, ReadStreamTokenizer;
+var ignoreChunkSize, ReadStreamTokenizer;
 var init_ReadStreamTokenizer = __esm({
   "node_modules/strtok3/lib/ReadStreamTokenizer.js"() {
     "use strict";
     init_AbstractTokenizer();
     init_stream();
-    maxBufferSize = 256e3;
+    ignoreChunkSize = 256e3;
     ReadStreamTokenizer = class extends AbstractTokenizer {
       /**
        * Constructor
@@ -66413,9 +66756,17 @@ var init_ReadStreamTokenizer = __esm({
         if (normOptions.length === 0) {
           return 0;
         }
-        const bytesRead = await this.streamReader.read(uint8Array.subarray(0, normOptions.length), normOptions.mayBeLess);
-        this.position += bytesRead;
-        if ((!options || !options.mayBeLess) && bytesRead < normOptions.length) {
+        let bytesRead = 0;
+        while (bytesRead < normOptions.length) {
+          const chunkLength = Math.min(this.maxBufferSize, normOptions.length - bytesRead);
+          const count = await this.streamReader.read(uint8Array.subarray(bytesRead, bytesRead + chunkLength), true);
+          bytesRead += count;
+          this.position += count;
+          if (count < chunkLength) {
+            break;
+          }
+        }
+        if (!normOptions.mayBeLess && bytesRead < normOptions.length) {
           throw new EndOfStreamError();
         }
         return bytesRead;
@@ -66428,14 +66779,20 @@ var init_ReadStreamTokenizer = __esm({
        */
       async peekBuffer(uint8Array, options) {
         const normOptions = this.normalizeOptions(uint8Array, options);
+        if (normOptions.length === 0) {
+          return 0;
+        }
+        const lookaheadSize = normOptions.length + normOptions.position - this.position;
+        this.validateBufferSize(lookaheadSize);
         let bytesRead = 0;
         if (normOptions.position) {
           const skipBytes = normOptions.position - this.position;
           if (skipBytes > 0) {
             const skipBuffer = new Uint8Array(normOptions.length + skipBytes);
             bytesRead = await this.peekBuffer(skipBuffer, { mayBeLess: normOptions.mayBeLess });
-            uint8Array.set(skipBuffer.subarray(skipBytes));
-            return bytesRead - skipBytes;
+            const bytesPeeked = Math.max(0, bytesRead - skipBytes);
+            uint8Array.set(skipBuffer.subarray(skipBytes, skipBytes + bytesPeeked));
+            return bytesPeeked;
           }
           if (skipBytes < 0) {
             throw new Error("Cannot peek from a negative offset in a stream");
@@ -66443,7 +66800,9 @@ var init_ReadStreamTokenizer = __esm({
         }
         if (normOptions.length > 0) {
           try {
-            bytesRead = await this.streamReader.peek(uint8Array.subarray(0, normOptions.length), normOptions.mayBeLess);
+            const peekBuffer = new Uint8Array(normOptions.length);
+            bytesRead = await this.streamReader.peek(peekBuffer, true);
+            uint8Array.set(peekBuffer.subarray(0, bytesRead));
           } catch (err) {
             if (options?.mayBeLess && err instanceof EndOfStreamError) {
               return 0;
@@ -66463,7 +66822,9 @@ var init_ReadStreamTokenizer = __esm({
         if (length < 0) {
           throw new RangeError("ignore length must be \u2265 0 bytes");
         }
-        const bufSize = Math.min(maxBufferSize, length);
+        this.validateLength(length, "ignore length");
+        this.validateLength(this.position + length, "end position");
+        const bufSize = Math.min(ignoreChunkSize, this.maxBufferSize, length);
         const buf = new Uint8Array(bufSize);
         let totBytesRead = 0;
         while (totBytesRead < length) {
@@ -66477,9 +66838,11 @@ var init_ReadStreamTokenizer = __esm({
         return totBytesRead;
       }
       abort() {
+        this.removeAbortListener();
         return this.streamReader.abort();
       }
       async close() {
+        this.removeAbortListener();
         return this.streamReader.close();
       }
       supportsRandomAccess() {
@@ -66489,151 +66852,42 @@ var init_ReadStreamTokenizer = __esm({
   }
 });
 
-// node_modules/strtok3/lib/BufferTokenizer.js
-var BufferTokenizer;
-var init_BufferTokenizer = __esm({
-  "node_modules/strtok3/lib/BufferTokenizer.js"() {
+// node_modules/strtok3/lib/isRandomAccessTokenizer.js
+var init_isRandomAccessTokenizer = __esm({
+  "node_modules/strtok3/lib/isRandomAccessTokenizer.js"() {
     "use strict";
-    init_stream();
-    init_AbstractTokenizer();
-    BufferTokenizer = class extends AbstractTokenizer {
-      /**
-       * Construct BufferTokenizer
-       * @param uint8Array - Uint8Array to tokenize
-       * @param options Tokenizer options
-       */
-      constructor(uint8Array, options) {
-        super(options);
-        this.uint8Array = uint8Array;
-        this.fileInfo = { ...options?.fileInfo ?? {}, ...{ size: uint8Array.length } };
-      }
-      /**
-       * Read buffer from tokenizer
-       * @param uint8Array - Uint8Array to tokenize
-       * @param options - Read behaviour options
-       * @returns {Promise<number>}
-       */
-      async readBuffer(uint8Array, options) {
-        if (options?.position) {
-          this.position = options.position;
-        }
-        const bytesRead = await this.peekBuffer(uint8Array, options);
-        this.position += bytesRead;
-        return bytesRead;
-      }
-      /**
-       * Peek (read ahead) buffer from tokenizer
-       * @param uint8Array
-       * @param options - Read behaviour options
-       * @returns {Promise<number>}
-       */
-      async peekBuffer(uint8Array, options) {
-        const normOptions = this.normalizeOptions(uint8Array, options);
-        const bytes2read = Math.min(this.uint8Array.length - normOptions.position, normOptions.length);
-        if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
-          throw new EndOfStreamError();
-        }
-        uint8Array.set(this.uint8Array.subarray(normOptions.position, normOptions.position + bytes2read));
-        return bytes2read;
-      }
-      close() {
-        return super.close();
-      }
-      supportsRandomAccess() {
-        return true;
-      }
-      setPosition(position2) {
-        this.position = position2;
-      }
-    };
   }
 });
 
-// node_modules/strtok3/lib/BlobTokenizer.js
-var BlobTokenizer;
-var init_BlobTokenizer = __esm({
-  "node_modules/strtok3/lib/BlobTokenizer.js"() {
+// node_modules/strtok3/lib/TokenizerBoundaryError.js
+var init_TokenizerBoundaryError = __esm({
+  "node_modules/strtok3/lib/TokenizerBoundaryError.js"() {
     "use strict";
+  }
+});
+
+// node_modules/strtok3/lib/TokenizerView.js
+var init_TokenizerView = __esm({
+  "node_modules/strtok3/lib/TokenizerView.js"() {
+    "use strict";
+    init_isRandomAccessTokenizer();
     init_stream();
-    init_AbstractTokenizer();
-    BlobTokenizer = class extends AbstractTokenizer {
-      /**
-       * Construct BufferTokenizer
-       * @param blob - Uint8Array to tokenize
-       * @param options Tokenizer options
-       */
-      constructor(blob, options) {
-        super(options);
-        this.blob = blob;
-        this.fileInfo = { ...options?.fileInfo ?? {}, ...{ size: blob.size, mimeType: blob.type } };
-      }
-      /**
-       * Read buffer from tokenizer
-       * @param uint8Array - Uint8Array to tokenize
-       * @param options - Read behaviour options
-       * @returns {Promise<number>}
-       */
-      async readBuffer(uint8Array, options) {
-        if (options?.position) {
-          this.position = options.position;
-        }
-        const bytesRead = await this.peekBuffer(uint8Array, options);
-        this.position += bytesRead;
-        return bytesRead;
-      }
-      /**
-       * Peek (read ahead) buffer from tokenizer
-       * @param buffer
-       * @param options - Read behaviour options
-       * @returns {Promise<number>}
-       */
-      async peekBuffer(buffer2, options) {
-        const normOptions = this.normalizeOptions(buffer2, options);
-        const bytes2read = Math.min(this.blob.size - normOptions.position, normOptions.length);
-        if (!normOptions.mayBeLess && bytes2read < normOptions.length) {
-          throw new EndOfStreamError();
-        }
-        const arrayBuffer2 = await this.blob.slice(normOptions.position, normOptions.position + bytes2read).arrayBuffer();
-        buffer2.set(new Uint8Array(arrayBuffer2));
-        return bytes2read;
-      }
-      close() {
-        return super.close();
-      }
-      supportsRandomAccess() {
-        return true;
-      }
-      setPosition(position2) {
-        this.position = position2;
-      }
-    };
+    init_TokenizerBoundaryError();
   }
 });
 
 // node_modules/strtok3/lib/core.js
 function fromStream(stream2, options) {
+  getMaxBufferSize(options);
+  throwIfAborted(options?.abortSignal);
   const streamReader = new StreamReader(stream2);
-  const _options = options ?? {};
-  const chainedClose = _options.onClose;
-  _options.onClose = async () => {
-    await streamReader.close();
-    if (chainedClose) {
-      return chainedClose();
-    }
-  };
-  return new ReadStreamTokenizer(streamReader, _options);
+  return new ReadStreamTokenizer(streamReader, options);
 }
 function fromWebStream(webStream, options) {
+  getMaxBufferSize(options);
+  throwIfAborted(options?.abortSignal);
   const webStreamReader = makeWebStreamReader(webStream);
-  const _options = options ?? {};
-  const chainedClose = _options.onClose;
-  _options.onClose = async () => {
-    await webStreamReader.close();
-    if (chainedClose) {
-      return chainedClose();
-    }
-  };
-  return new ReadStreamTokenizer(webStreamReader, _options);
+  return new ReadStreamTokenizer(webStreamReader, options);
 }
 function fromBuffer(uint8Array, options) {
   return new BufferTokenizer(uint8Array, options);
@@ -66644,32 +66898,72 @@ function fromBlob(blob, options) {
 var init_core = __esm({
   "node_modules/strtok3/lib/core.js"() {
     "use strict";
-    init_stream();
-    init_ReadStreamTokenizer();
-    init_BufferTokenizer();
+    init_AbortSignal();
     init_BlobTokenizer();
+    init_BufferSizeError();
+    init_BufferTokenizer();
+    init_ReadStreamTokenizer();
     init_stream();
     init_AbstractTokenizer();
+    init_BufferSizeError();
+    init_isRandomAccessTokenizer();
+    init_stream();
+    init_TokenizerBoundaryError();
+    init_TokenizerView();
+  }
+});
+
+// node_modules/strtok3/lib/NotRegularFileError.js
+var NotRegularFileError;
+var init_NotRegularFileError = __esm({
+  "node_modules/strtok3/lib/NotRegularFileError.js"() {
+    "use strict";
+    NotRegularFileError = class extends Error {
+      constructor(path13) {
+        super(`Not a regular file: ${path13}`);
+        this.path = path13;
+        this.name = "NotRegularFileError";
+      }
+    };
   }
 });
 
 // node_modules/strtok3/lib/FileTokenizer.js
-import { open as fsOpen } from "fs/promises";
+import { constants as constants3 } from "fs";
+import fs7, {} from "fs/promises";
 var FileTokenizer;
 var init_FileTokenizer = __esm({
   "node_modules/strtok3/lib/FileTokenizer.js"() {
     "use strict";
+    init_AbortSignal();
     init_AbstractTokenizer();
+    init_BufferSizeError();
+    init_NotRegularFileError();
     init_stream();
     FileTokenizer = class _FileTokenizer extends AbstractTokenizer {
       /**
        * Create tokenizer from provided file path
        * @param sourceFilePath File path
+       * @param options Tokenizer options
        */
-      static async fromFile(sourceFilePath) {
-        const fileHandle = await fsOpen(sourceFilePath, "r");
-        const stat = await fileHandle.stat();
-        return new _FileTokenizer(fileHandle, { fileInfo: { path: sourceFilePath, size: stat.size } });
+      static async fromFile(sourceFilePath, options) {
+        getMaxBufferSize(options);
+        throwIfAborted(options?.abortSignal);
+        const flags = options?.regularFileOnly ? constants3.O_RDONLY | constants3.O_NONBLOCK : "r";
+        const fileHandle = await fs7.open(sourceFilePath, flags);
+        try {
+          const stat = await fileHandle.stat();
+          if (options?.regularFileOnly && !stat.isFile()) {
+            throw new NotRegularFileError(sourceFilePath);
+          }
+          return new _FileTokenizer(fileHandle, {
+            ...options,
+            fileInfo: { ...options?.fileInfo, path: sourceFilePath, size: stat.size }
+          });
+        } catch (error) {
+          await fileHandle.close();
+          throw error;
+        }
       }
       constructor(fileHandle, options) {
         super(options);
@@ -66685,8 +66979,9 @@ var init_FileTokenizer = __esm({
       async readBuffer(uint8Array, options) {
         const normOptions = this.normalizeOptions(uint8Array, options);
         this.position = normOptions.position;
-        if (normOptions.length === 0)
+        if (normOptions.length === 0) {
           return 0;
+        }
         const res = await this.fileHandle.read(uint8Array, 0, normOptions.length, normOptions.position);
         this.position += res.bytesRead;
         if (res.bytesRead < normOptions.length && (!options || !options.mayBeLess)) {
@@ -66709,6 +67004,7 @@ var init_FileTokenizer = __esm({
         return res.bytesRead;
       }
       async close() {
+        this.removeAbortListener();
         await this.fileHandle.close();
         return super.close();
       }
@@ -66739,8 +67035,9 @@ var init_lib = __esm({
     "use strict";
     init_core();
     init_FileTokenizer();
-    init_FileTokenizer();
     init_core();
+    init_FileTokenizer();
+    init_NotRegularFileError();
     fromFile = FileTokenizer.fromFile;
   }
 });
@@ -70842,7 +71139,7 @@ __export(file_type_exports, {
 });
 import { ReadableStream as WebReadableStream } from "stream/web";
 import { pipeline, PassThrough as PassThrough2, Readable } from "stream";
-import fs5 from "fs/promises";
+import fs8 from "fs/promises";
 import { constants as fileSystemConstants } from "fs";
 function isTokenizerStreamBoundsError(error) {
   if (!(error instanceof RangeError) || error.message !== "offset is out of bounds" || typeof error.stack !== "string") {
@@ -70850,8 +71147,8 @@ function isTokenizerStreamBoundsError(error) {
   }
   return /strtok3[/\\]lib[/\\]stream[/\\]/.test(error.stack);
 }
-async function fileTypeFromFile(path9, options) {
-  return new FileTypeParser2(options).fromFile(path9, options);
+async function fileTypeFromFile(path13, options) {
+  return new FileTypeParser2(options).fromFile(path13, options);
 }
 async function fileTypeFromStream(stream2, options) {
   return new FileTypeParser2(options).fromStream(stream2);
@@ -70883,9 +71180,9 @@ var init_file_type = __esm({
           }
         }
       }
-      async fromFile(path9) {
+      async fromFile(path13) {
         this.options.signal?.throwIfAborted();
-        const fileHandle = await fs5.open(path9, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
+        const fileHandle = await fs8.open(path13, fileSystemConstants.O_RDONLY | fileSystemConstants.O_NONBLOCK);
         const fileStat = await fileHandle.stat();
         if (!fileStat.isFile()) {
           await fileHandle.close();
@@ -70894,7 +71191,7 @@ var init_file_type = __esm({
         const tokenizer = new FileTokenizer(fileHandle, {
           ...this.getTokenizerOptions(),
           fileInfo: {
-            path: path9,
+            path: path13,
             size: fileStat.size
           }
         });
@@ -71229,9 +71526,9 @@ function createJimp({ plugins: pluginsArg, formats: formatsArg } = {}) {
      * await image.write("test/output.png");
      * ```
      */
-    async write(path9, options) {
-      const mimeType = import_lite.default.getType(path9);
-      await writeFile(path9, await this.getBuffer(mimeType, options));
+    async write(path13, options) {
+      const mimeType = import_lite.default.getType(path13);
+      await writeFile(path13, await this.getBuffer(mimeType, options));
     }
     /**
      * Clone the image into a new Jimp instance.
@@ -82725,7 +83022,7 @@ var init_simpleXmlToJson_min = __esm({
 });
 
 // node_modules/@jimp/plugin-print/dist/esm/load-bitmap-font.js
-import path3 from "path";
+import path5 from "path";
 function isBinary(buf) {
   if (typeof buf === "string") {
     return buf.substring(0, 3) === "BMF";
@@ -82816,7 +83113,7 @@ async function processBitmapFont(file, font) {
     ...font,
     chars,
     kernings,
-    pages: await Promise.all(font.pages.map(async (page) => CharacterJimp.read(path3.join(path3.dirname(file), page))))
+    pages: await Promise.all(font.pages.map(async (page) => CharacterJimp.read(path5.join(path5.dirname(file), page))))
   };
 }
 var import_parse_bmfont_ascii, import_parse_bmfont_xml, import_parse_bmfont_binary, convertXML, isWebWorker2, CharacterJimp, HEADER;
@@ -82840,9 +83137,9 @@ var init_load_bitmap_font = __esm({
 async function loadFont(file) {
   let fileOrBuffer = file;
   if (typeof window === "undefined" && !isWebWorker2) {
-    const { existsSync: existsSync3, promises: fs11 } = await import("fs");
+    const { existsSync: existsSync3, promises: fs16 } = await import("fs");
     if (existsSync3(file)) {
-      fileOrBuffer = await fs11.readFile(file);
+      fileOrBuffer = await fs16.readFile(file);
     }
   }
   const data = await loadBitmapFontData(fileOrBuffer);
@@ -85113,7 +85410,7 @@ var src_default = Yoga;
 // node_modules/ansi-regex/index.js
 function ansiRegex({ onlyFirst = false } = {}) {
   const ST = "(?:\\u0007|\\u001B\\u005C|\\u009C)";
-  const osc = `(?:\\u001B\\][^\\u0007\\u001B\\u009C]*${ST})`;
+  const osc = `(?:(?:\\u001B\\]|\\u009D)[^\\u0007\\u001B\\u009C\\u009D]*${ST})`;
   const csi = "[\\u001B\\u009B][[\\]()#;?]*(?:\\d{1,4}(?:[;:]\\d{0,4})*)?[\\dA-PR-TZcf-nq-uy=><~]";
   const pattern = `${osc}|${csi}`;
   return new RegExp(pattern, onlyFirst ? void 0 : "g");
@@ -85140,7 +85437,7 @@ var fullwidthMaximumCodePoint = 65510;
 var fullwidthRanges = [12288, 12288, 65281, 65376, 65504, 65510];
 var wideMinimalCodePoint = 4352;
 var wideMaximumCodePoint = 262141;
-var wideRanges = [4352, 4447, 8986, 8987, 9001, 9002, 9193, 9196, 9200, 9200, 9203, 9203, 9725, 9726, 9748, 9749, 9776, 9783, 9800, 9811, 9855, 9855, 9866, 9871, 9875, 9875, 9889, 9889, 9898, 9899, 9917, 9918, 9924, 9925, 9934, 9934, 9940, 9940, 9962, 9962, 9970, 9971, 9973, 9973, 9978, 9978, 9981, 9981, 9989, 9989, 9994, 9995, 10024, 10024, 10060, 10060, 10062, 10062, 10067, 10069, 10071, 10071, 10133, 10135, 10160, 10160, 10175, 10175, 11035, 11036, 11088, 11088, 11093, 11093, 11904, 11929, 11931, 12019, 12032, 12245, 12272, 12287, 12289, 12350, 12353, 12438, 12441, 12543, 12549, 12591, 12593, 12686, 12688, 12773, 12783, 12830, 12832, 12871, 12880, 42124, 42128, 42182, 43360, 43388, 44032, 55203, 63744, 64255, 65040, 65049, 65072, 65106, 65108, 65126, 65128, 65131, 94176, 94180, 94192, 94198, 94208, 101589, 101631, 101662, 101760, 101874, 110576, 110579, 110581, 110587, 110589, 110590, 110592, 110882, 110898, 110898, 110928, 110930, 110933, 110933, 110948, 110951, 110960, 111355, 119552, 119638, 119648, 119670, 126980, 126980, 127183, 127183, 127374, 127374, 127377, 127386, 127488, 127490, 127504, 127547, 127552, 127560, 127568, 127569, 127584, 127589, 127744, 127776, 127789, 127797, 127799, 127868, 127870, 127891, 127904, 127946, 127951, 127955, 127968, 127984, 127988, 127988, 127992, 128062, 128064, 128064, 128066, 128252, 128255, 128317, 128331, 128334, 128336, 128359, 128378, 128378, 128405, 128406, 128420, 128420, 128507, 128591, 128640, 128709, 128716, 128716, 128720, 128722, 128725, 128728, 128732, 128735, 128747, 128748, 128756, 128764, 128992, 129003, 129008, 129008, 129292, 129338, 129340, 129349, 129351, 129535, 129648, 129660, 129664, 129674, 129678, 129734, 129736, 129736, 129741, 129756, 129759, 129770, 129775, 129784, 131072, 196605, 196608, 262141];
+var wideRanges = [4352, 4447, 8986, 8987, 9001, 9002, 9193, 9196, 9200, 9200, 9203, 9203, 9725, 9726, 9748, 9749, 9776, 9783, 9800, 9811, 9855, 9855, 9866, 9871, 9875, 9875, 9889, 9889, 9898, 9899, 9917, 9918, 9924, 9925, 9934, 9934, 9940, 9940, 9962, 9962, 9970, 9971, 9973, 9973, 9978, 9978, 9981, 9981, 9989, 9989, 9994, 9995, 10024, 10024, 10060, 10060, 10062, 10062, 10067, 10069, 10071, 10071, 10133, 10135, 10160, 10160, 10175, 10175, 11035, 11036, 11088, 11088, 11093, 11093, 11904, 11929, 11931, 12019, 12032, 12245, 12272, 12287, 12289, 12350, 12353, 12438, 12441, 12543, 12549, 12591, 12593, 12686, 12688, 12773, 12783, 12830, 12832, 12871, 12880, 42124, 42128, 42182, 43360, 43388, 44032, 55203, 63744, 64255, 65040, 65049, 65072, 65106, 65108, 65126, 65128, 65131, 94176, 94180, 94192, 94198, 94208, 101594, 101631, 101664, 101760, 101874, 101888, 102801, 102816, 102866, 110576, 110579, 110581, 110587, 110589, 110590, 110592, 110888, 110898, 110898, 110928, 110930, 110933, 110933, 110948, 110952, 110960, 111355, 119552, 119638, 119648, 119670, 126980, 126980, 127183, 127183, 127374, 127374, 127377, 127386, 127406, 127406, 127488, 127490, 127504, 127547, 127552, 127560, 127568, 127569, 127584, 127589, 127744, 127776, 127789, 127797, 127799, 127868, 127870, 127891, 127904, 127946, 127951, 127955, 127968, 127984, 127988, 127988, 127992, 128062, 128064, 128064, 128066, 128252, 128255, 128317, 128331, 128334, 128336, 128359, 128378, 128378, 128405, 128406, 128420, 128420, 128507, 128591, 128640, 128709, 128716, 128716, 128720, 128722, 128725, 128729, 128732, 128735, 128747, 128748, 128756, 128764, 128986, 128986, 128992, 129003, 129008, 129008, 129292, 129338, 129340, 129349, 129351, 129535, 129648, 129660, 129664, 129734, 129736, 129736, 129740, 129757, 129759, 129771, 129775, 129786, 131072, 196605, 196608, 262141];
 
 // node_modules/get-east-asian-width/utilities.js
 var isInRange = (ranges, codePoint) => {
@@ -85185,7 +85482,7 @@ var isAmbiguous = (codePoint) => {
   }
   return isInRange(ambiguousRanges, codePoint);
 };
-var isFullWidth = (codePoint) => {
+var isFullwidth = (codePoint) => {
   if (codePoint < fullwidthMinimalCodePoint || codePoint > fullwidthMaximumCodePoint) {
     return false;
   }
@@ -85209,7 +85506,7 @@ function validate(codePoint) {
 }
 function eastAsianWidth(codePoint, { ambiguousAsWide = false } = {}) {
   validate(codePoint);
-  if (isFullWidth(codePoint) || isWide(codePoint) || ambiguousAsWide && isAmbiguous(codePoint)) {
+  if (isFullwidth(codePoint) || isWide(codePoint) || ambiguousAsWide && isAmbiguous(codePoint)) {
     return 2;
   }
   return 1;
@@ -85217,8 +85514,7 @@ function eastAsianWidth(codePoint, { ambiguousAsWide = false } = {}) {
 
 // node_modules/string-width/index.js
 var segmenter = new Intl.Segmenter();
-var zeroWidthClusterRegex = new RegExp("^(?:\\p{Default_Ignorable_Code_Point}|\\p{Control}|\\p{Format}|\\p{Nonspacing_Mark}|\\p{Enclosing_Mark}|\\p{Surrogate})+$", "v");
-var leadingNonPrintingRegex = new RegExp("^[\\p{Default_Ignorable_Code_Point}\\p{Control}\\p{Format}\\p{Nonspacing_Mark}\\p{Enclosing_Mark}\\p{Surrogate}]+", "v");
+var visibleCharacterRegex = new RegExp("[^\\p{Default_Ignorable_Code_Point}\\p{Control}\\p{Format}\\p{Nonspacing_Mark}\\p{Enclosing_Mark}\\p{Surrogate}]", "v");
 var spacingMarkRegex = new RegExp("\\p{Spacing_Mark}", "v");
 var rgiEmojiRegex = new RegExp("^\\p{RGI_Emoji}$", "v");
 var unqualifiedKeycapRegex = /^[\d#*]\u20E3$/;
@@ -85237,10 +85533,8 @@ function isDoubleWidthNonRgiEmojiSequence(segment) {
   return false;
 }
 function baseVisible(segment) {
-  return segment.replace(leadingNonPrintingRegex, "");
-}
-function isZeroWidthCluster(segment) {
-  return zeroWidthClusterRegex.test(segment);
+  const index2 = segment.search(visibleCharacterRegex);
+  return index2 === -1 ? void 0 : segment.slice(index2);
 }
 function isHangulLeadingJamo(codePoint) {
   return codePoint >= 4352 && codePoint <= 4447 || codePoint >= 43360 && codePoint <= 43388;
@@ -85257,7 +85551,7 @@ function isHangulJamo(codePoint) {
 function hangulClusterWidth(visibleSegment, eastAsianWidthOptions) {
   const codePoints = [];
   for (const character of visibleSegment) {
-    if (zeroWidthClusterRegex.test(character)) {
+    if (!visibleCharacterRegex.test(character)) {
       continue;
     }
     codePoints.push(character.codePointAt(0));
@@ -85321,14 +85615,14 @@ function stringWidth(input, options = {}) {
   let width = 0;
   const eastAsianWidthOptions = { ambiguousAsWide: !ambiguousIsNarrow };
   for (const { segment } of segmenter.segment(string2)) {
-    if (isZeroWidthCluster(segment)) {
+    const visibleSegment = baseVisible(segment);
+    if (visibleSegment === void 0) {
       continue;
     }
     if (rgiEmojiRegex.test(segment) || isDoubleWidthNonRgiEmojiSequence(segment)) {
       width += 2;
       continue;
     }
-    const visibleSegment = baseVisible(segment);
     const hangulWidth = hangulClusterWidth(visibleSegment, eastAsianWidthOptions);
     if (hangulWidth !== void 0) {
       width += hangulWidth;
@@ -86002,8 +86296,17 @@ var exec = (string2, columns, options = {}) => {
   }
   return restoreStylesAcrossRows(rows.join("\n"));
 };
+var normalizeText = (string2) => {
+  let normalizedString = "";
+  forEachSegment(string2, (plainText) => {
+    normalizedString += plainText.normalize();
+  }, (escape3) => {
+    normalizedString += escape3;
+  });
+  return normalizedString;
+};
 function wrapAnsi(string2, columns, options) {
-  return String(string2).normalize().replaceAll("\r\n", "\n").split("\n").map((line) => exec(expandTabs(line), columns, options)).join("\n");
+  return normalizeText(String(string2)).replaceAll("\r\n", "\n").split("\n").map((line) => exec(expandTabs(line), columns, options)).join("\n");
 }
 
 // node_modules/terminal-size/index.js
@@ -86167,7 +86470,7 @@ function isFullwidthCodePoint(codePoint) {
   if (!Number.isInteger(codePoint)) {
     return false;
   }
-  return isFullWidth(codePoint) || isWide(codePoint);
+  return isFullwidth(codePoint) || isWide(codePoint);
 }
 
 // node_modules/slice-ansi/tokenize-ansi.js
@@ -86827,82 +87130,88 @@ function shouldIncludeSgrAfterEnd(token, activeStyles) {
 function hasSgrStartFragment(token) {
   return token.fragments.some((fragment) => fragment.type === "start");
 }
-function discardPendingHyperlink(parameters) {
-  if (parameters.activeHyperlink && !parameters.activeHyperlinkHasVisibleText && parameters.activeHyperlinkOutputIndex !== void 0) {
-    const openCodeLength = parameters.activeHyperlink.code.length;
-    parameters.returnValue = parameters.returnValue.slice(0, parameters.activeHyperlinkOutputIndex) + parameters.returnValue.slice(parameters.activeHyperlinkOutputIndex + openCodeLength);
-    if (parameters.pendingSgrOutputIndex !== void 0 && parameters.pendingSgrOutputIndex > parameters.activeHyperlinkOutputIndex) {
-      parameters.pendingSgrOutputIndex -= openCodeLength;
+function discardPendingHyperlink(state) {
+  if (state.activeHyperlink && !state.activeHyperlinkHasVisibleText && state.activeHyperlinkOutputIndex !== void 0) {
+    const openCodeLength = state.activeHyperlink.code.length;
+    state.returnValue = state.returnValue.slice(0, state.activeHyperlinkOutputIndex) + state.returnValue.slice(state.activeHyperlinkOutputIndex + openCodeLength);
+    if (state.pendingSgrOutputIndex !== void 0 && state.pendingSgrOutputIndex > state.activeHyperlinkOutputIndex) {
+      state.pendingSgrOutputIndex -= openCodeLength;
     }
   }
-  parameters.activeHyperlink = void 0;
-  parameters.activeHyperlinkHasVisibleText = false;
-  parameters.activeHyperlinkOutputIndex = void 0;
+  state.activeHyperlink = void 0;
+  state.activeHyperlinkHasVisibleText = false;
+  state.activeHyperlinkOutputIndex = void 0;
 }
-function applySgrToken2(parameters) {
-  if (parameters.isPastEnd && !shouldIncludeSgrAfterEnd(parameters.token, parameters.activeStyles)) {
-    return parameters;
+function settleActiveHyperlink(state) {
+  if (state.activeHyperlinkHasVisibleText) {
+    state.returnValue += closeHyperlink(state.activeHyperlink);
+  } else {
+    discardPendingHyperlink(state);
   }
-  if (parameters.include && hasSgrStartFragment(parameters.token) && parameters.pendingSgrOutputIndex === void 0) {
-    parameters.pendingSgrOutputIndex = parameters.returnValue.length;
-    parameters.pendingSgrActiveStyles = new Map(parameters.activeStyles);
-  }
-  parameters.activeStyles = applySgrFragments(parameters.activeStyles, parameters.token.fragments);
-  if (parameters.include) {
-    parameters.returnValue += parameters.token.code;
-  }
-  return parameters;
 }
-function applyHyperlinkToken(parameters) {
-  if (parameters.isPastEnd && (parameters.token.action !== "close" || !parameters.activeHyperlink)) {
-    return parameters;
+function applySgrToken2(state) {
+  if (state.isPastEnd && !shouldIncludeSgrAfterEnd(state.token, state.activeStyles)) {
+    return;
   }
-  if (parameters.token.action === "open") {
-    parameters.activeHyperlink = parameters.token;
-    parameters.activeHyperlinkHasVisibleText = false;
-    parameters.activeHyperlinkOutputIndex = void 0;
-    if (parameters.include) {
-      parameters.activeHyperlinkOutputIndex = parameters.returnValue.length;
-    }
-  } else if (parameters.token.action === "close") {
-    if (parameters.include && parameters.activeHyperlink && !parameters.activeHyperlinkHasVisibleText) {
-      discardPendingHyperlink(parameters);
-      return parameters;
-    }
-    parameters.activeHyperlink = void 0;
-    parameters.activeHyperlinkHasVisibleText = false;
-    parameters.activeHyperlinkOutputIndex = void 0;
+  if (state.include && hasSgrStartFragment(state.token) && state.pendingSgrOutputIndex === void 0) {
+    state.pendingSgrOutputIndex = state.returnValue.length;
+    state.pendingSgrActiveStyles = new Map(state.activeStyles);
   }
-  if (parameters.include) {
-    parameters.returnValue += parameters.token.code;
+  state.activeStyles = applySgrFragments(state.activeStyles, state.token.fragments);
+  if (state.include) {
+    state.returnValue += state.token.code;
   }
-  return parameters;
 }
-function applyControlToken(parameters) {
-  if (!parameters.isPastEnd && parameters.include) {
-    parameters.returnValue += parameters.token.code;
+function applyHyperlinkToken(state) {
+  if (state.isPastEnd && (state.token.action !== "close" || !state.activeHyperlink)) {
+    return;
   }
-  return parameters;
+  if (state.token.action === "open") {
+    if (state.activeHyperlink) {
+      settleActiveHyperlink(state);
+    }
+    state.activeHyperlink = state.token;
+    state.activeHyperlinkHasVisibleText = false;
+    state.activeHyperlinkOutputIndex = void 0;
+    if (state.include) {
+      state.activeHyperlinkOutputIndex = state.returnValue.length;
+    }
+  } else if (state.token.action === "close") {
+    if (state.include && state.activeHyperlink && !state.activeHyperlinkHasVisibleText) {
+      discardPendingHyperlink(state);
+      return;
+    }
+    state.activeHyperlink = void 0;
+    state.activeHyperlinkHasVisibleText = false;
+    state.activeHyperlinkOutputIndex = void 0;
+  }
+  if (state.include) {
+    state.returnValue += state.token.code;
+  }
 }
-function applyCharacterToken(parameters) {
-  if (!parameters.include && parameters.position >= parameters.start && !parameters.token.isGraphemeContinuation) {
-    parameters.include = true;
-    parameters.returnValue = [...parameters.activeStyles.values()].join("");
-    if (parameters.activeHyperlink) {
-      parameters.activeHyperlinkOutputIndex = parameters.returnValue.length;
-      parameters.returnValue += parameters.activeHyperlink.code;
+function applyControlToken(state) {
+  if (!state.isPastEnd && state.include) {
+    state.returnValue += state.token.code;
+  }
+}
+function applyCharacterToken(state) {
+  if (!state.include && state.position >= state.start && !state.token.isGraphemeContinuation) {
+    state.include = true;
+    state.returnValue = [...state.activeStyles.values()].join("");
+    if (state.activeHyperlink) {
+      state.activeHyperlinkOutputIndex = state.returnValue.length;
+      state.returnValue += state.activeHyperlink.code;
     }
   }
-  if (parameters.include) {
-    parameters.returnValue += parameters.token.value;
-    parameters.pendingSgrOutputIndex = void 0;
-    parameters.pendingSgrActiveStyles = void 0;
-    if (parameters.activeHyperlink) {
-      parameters.activeHyperlinkHasVisibleText = true;
+  if (state.include) {
+    state.returnValue += state.token.value;
+    state.pendingSgrOutputIndex = void 0;
+    state.pendingSgrActiveStyles = void 0;
+    if (state.activeHyperlink) {
+      state.activeHyperlinkHasVisibleText = true;
     }
   }
-  parameters.position += parameters.token.visibleWidth;
-  return parameters;
+  state.position += state.token.visibleWidth;
 }
 var tokenHandlers = {
   sgr: applySgrToken2,
@@ -86910,12 +87219,8 @@ var tokenHandlers = {
   control: applyControlToken,
   character: applyCharacterToken
 };
-function applyToken(parameters) {
-  const tokenHandler = tokenHandlers[parameters.token.type];
-  if (!tokenHandler) {
-    return parameters;
-  }
-  return tokenHandler(parameters);
+function applyToken(state) {
+  tokenHandlers[state.token.type]?.(state);
 }
 function createHasContinuationAheadMap(tokens) {
   const hasContinuationAhead = Array.from({ length: tokens.length }, () => false);
@@ -86941,69 +87246,49 @@ function isPastEndBoundary(token, position2, end) {
 function sliceAnsi(string2, start, end) {
   const tokens = tokenizeAnsi(string2, { endCharacter: end });
   const hasContinuationAhead = createHasContinuationAheadMap(tokens);
-  let activeStyles = /* @__PURE__ */ new Map();
-  let activeHyperlink;
-  let activeHyperlinkHasVisibleText = false;
-  let activeHyperlinkOutputIndex;
-  let pendingSgrOutputIndex;
-  let pendingSgrActiveStyles;
-  let position2 = 0;
-  let returnValue = "";
-  let include = false;
+  const state = {
+    start,
+    token: void 0,
+    isPastEnd: false,
+    activeStyles: /* @__PURE__ */ new Map(),
+    activeHyperlink: void 0,
+    activeHyperlinkHasVisibleText: false,
+    activeHyperlinkOutputIndex: void 0,
+    pendingSgrOutputIndex: void 0,
+    pendingSgrActiveStyles: void 0,
+    position: 0,
+    returnValue: "",
+    include: false
+  };
   for (const [tokenIndex, token] of tokens.entries()) {
-    let isPastEnd = isPastEndBoundary(token, position2, end);
+    let isPastEnd = isPastEndBoundary(token, state.position, end);
     if (isPastEnd && token.type !== "character" && hasContinuationAhead[tokenIndex]) {
       isPastEnd = false;
     }
     if (isPastEnd && token.type === "character" && !token.isGraphemeContinuation) {
-      if (activeHyperlink && !activeHyperlinkHasVisibleText) {
-        const hyperlinkState = {
-          activeHyperlink,
-          activeHyperlinkHasVisibleText,
-          activeHyperlinkOutputIndex,
-          pendingSgrOutputIndex,
-          returnValue
-        };
-        discardPendingHyperlink(hyperlinkState);
-        ({
-          activeHyperlink,
-          activeHyperlinkHasVisibleText,
-          activeHyperlinkOutputIndex,
-          pendingSgrOutputIndex,
-          returnValue
-        } = hyperlinkState);
+      if (state.activeHyperlink && !state.activeHyperlinkHasVisibleText) {
+        discardPendingHyperlink(state);
       }
-      if (pendingSgrOutputIndex !== void 0) {
-        returnValue = returnValue.slice(0, pendingSgrOutputIndex);
-        activeStyles = pendingSgrActiveStyles;
-        pendingSgrOutputIndex = void 0;
-        pendingSgrActiveStyles = void 0;
+      if (state.pendingSgrOutputIndex !== void 0) {
+        state.returnValue = state.returnValue.slice(0, state.pendingSgrOutputIndex);
+        state.activeStyles = state.pendingSgrActiveStyles;
+        state.pendingSgrOutputIndex = void 0;
+        state.pendingSgrActiveStyles = void 0;
       }
       break;
     }
-    ({ activeStyles, activeHyperlink, activeHyperlinkHasVisibleText, activeHyperlinkOutputIndex, pendingSgrOutputIndex, pendingSgrActiveStyles, position: position2, returnValue, include } = applyToken({
-      token,
-      isPastEnd,
-      start,
-      activeStyles,
-      activeHyperlink,
-      activeHyperlinkHasVisibleText,
-      activeHyperlinkOutputIndex,
-      pendingSgrOutputIndex,
-      pendingSgrActiveStyles,
-      position: position2,
-      returnValue,
-      include
-    }));
+    state.token = token;
+    state.isPastEnd = isPastEnd;
+    applyToken(state);
   }
-  if (!include) {
+  if (!state.include) {
     return "";
   }
-  if (activeHyperlink) {
-    returnValue += closeHyperlink(activeHyperlink);
+  if (state.activeHyperlink) {
+    settleActiveHyperlink(state);
   }
-  returnValue += undoAnsiCodes(activeStyles);
-  return returnValue;
+  state.returnValue += undoAnsiCodes(state.activeStyles);
+  return state.returnValue;
 }
 
 // node_modules/cli-truncate/index.js
@@ -87993,8 +88278,8 @@ var cleanupYogaNode = (node) => {
 var currentUpdatePriority = import_constants.NoEventPriority;
 var currentRootNode;
 async function loadPackageJson() {
-  const fs11 = await import("fs");
-  const content = fs11.readFileSync(new URL("../package.json", import.meta.url), "utf8");
+  const fs16 = await import("fs");
+  const content = fs16.readFileSync(new URL("../package.json", import.meta.url), "utf8");
   const parsedContent = JSON.parse(content);
   return {
     name: parsedContent?.name,
@@ -89131,6 +89416,9 @@ for (const [start, end] of ansi_styles_default.codes) {
   endCodesSet.add(ansi_styles_default.color.ansi(end));
   endCodesMap.set(ansi_styles_default.color.ansi(start), ansi_styles_default.color.ansi(end));
 }
+endCodesSet.add(linkEndCode);
+endCodesSet.add(linkEndCodeST);
+endCodesSet.add(linkEndCodeC1ST);
 function getEndCode(code) {
   if (endCodesSet.has(code))
     return code;
@@ -90390,8 +90678,8 @@ function Text({ color: color2, backgroundColor, dimColor = false, bold = false, 
 }
 
 // node_modules/ink/build/components/ErrorOverview.js
-var cleanupPath = (path9) => {
-  return path9?.replace(`file://${cwd()}/`, "");
+var cleanupPath = (path13) => {
+  return path13?.replace(`file://${cwd()}/`, "");
 };
 var stackUtils = new import_stack_utils.default({
   cwd: cwd(),
@@ -92479,9 +92767,9 @@ var import_react32 = __toESM(require_react(), 1);
 var import_react33 = __toESM(require_react(), 1);
 
 // src/app.tsx
-var import_react41 = __toESM(require_react(), 1);
-import os6 from "os";
-import path6 from "path";
+var import_react42 = __toESM(require_react(), 1);
+import os9 from "os";
+import path10 from "path";
 
 // node_modules/ink-select-input/build/Indicator.js
 var import_react34 = __toESM(require_react(), 1);
@@ -93184,6 +93472,281 @@ function wrapText2(text, width) {
 
 // src/lib/i18n.ts
 var import_react39 = __toESM(require_react(), 1);
+
+// src/lib/locales.ts
+var EXTRA_LOCALES = {
+  // ── Celtic & regional Romance ────────────────────────────────────────
+  gd: { tagline: "grab uair de bhidial no ce\xF2l. tagh. grab. de\xE0n.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 eile", pasteLink: "Cuir a-steach ceangal", supportsLine: "bidhial agus ce\xF2l o 1800+ l\xE0rahan", notUrl: "chan e a' cheangal sin \u2014 cuir a-steach url l\xE0n", analyzing: "A' sgr\xF9dadh", warmingUp: "a' ch\xF2rasachadh\u2026", fetchingInfo: "a' thogail faisg air mh\xE8idia\u2026", stepType: "Ceum 1/3 \xB7 D\xE8 a thogas tu?", stepVideoFormat: "Ceum 2/3 \xB7 Foirm bhidial", stepAudioFormat: "Ceum 2/3 \xB7 Foirm \xE8isteachd", stepResolution: "Ceum 3/3 \xB7 R\xF9n", stepFps: "Ceum 3/3 \xB7 Fr\xE8am-rate", stepBitrate: "Ceum 3/3 \xB7 Bitrate \xE8isteachd", videoOption: "Bhidial", audioOption: "\xC8isteachd", recommended: "molt ath", bestQuality: "an \xE0irde as motha", grab: "thog", history: "eachdraidh", quit: "f\xE0g", cancel: "cuireil \xE0ra", choose: "tagh", select: "tagh", back: "air ais", theme: "dath", downloading: "a' th\xF2gadh\u2026", processing: "a' ghiosadh\u2026", starting: "a' churairt an luchdach\u2026", grabbed: "thogadh!", savedTo: "s\xE0idhichte ann an:", grabAnother: "\u21B5 thog eile", tryAgain: "feuch a-rithist", tip: "Molaidh", lblTitle: "Tiotal", lblArtist: "Ealadair", lblAlbum: "Albam", lblRelease: "Foillsiadh", lblTime: "Uair", lblSource: "T\xF9s", updateAvailable: "\xD9rachadh Carbon ri fhaot", langPickerTitle: "Tagh c\xE0nan", langPickerSearch: "cuardaich\u2026", lang: "c\xE0nan" },
+  br: { tagline: "pellit video pe sonerez. dibabit. pellit. graet.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 all", pasteLink: "Peglit al liien", supportsLine: "video ha soner eus 1800+ lec'hien", notUrl: "hann n'eus ket ul liadenn \u2014 peglit urlevad urvat", analyzing: "Ozela\xF1", warmingUp: "o tomi\xF1\u2026", fetchingInfo: "o tave\xF1 medias\u2026", stepType: "Pevenn 1/3 \xB7 Pegoulz da?", stepVideoFormat: "Pevenn 2/3 \xB7 Format video", stepAudioFormat: "Pevenn 2/3 \xB7 Format son", stepResolution: "Pevenn 3/3 \xB7 Rezolution", stepFps: "Pevenn 3/3 \xB7 Kementad fram", stepBitrate: "Pevenn 3/3 \xB7 Bitrate son", videoOption: "Video", audioOption: "Son", recommended: "reet", bestQuality: "ar gwella\xF1 kalite", grab: "pellit", history: "istor", quit: "kuitaat", cancel: "nulla\xF1", choose: "dibab", select: "dibab", back: "distro", theme: "tema", downloading: "o pellet\u2026", processing: "o ober\u2026", starting: "o grog\u2026", grabbed: "pellet!", savedTo: "roachet e:", grabAnother: "\u21B5 pellit all", tryAgain: "klask en-dro", tip: "Troidig", lblTitle: "Titel", lblArtist: "Artist", lblAlbum: "Albom", lblRelease: "Digar", lblTime: "Pad", lblSource: "Tarzh", updateAvailable: "Hadden adlakaat Carbon", langPickerTitle: "Dibab yezh", langPickerSearch: "klask\u2026", lang: "yezh" },
+  oc: { tagline: "telem un vid\xE8u o una musica. causiss\xE8tz. tel\xE8mat. es fait.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 autras", pasteLink: "Colatz un ligam", supportsLine: "sup\xF2rta vid\xE8us e musica de 1800+ sites", notUrl: "aqu\xF2 es pas un ligam \u2014 colatz una URL compl\xE8ta", analyzing: "Analisi", warmingUp: "s'\xE8srbeja\u2026", fetchingInfo: "recup\xE8ra las infos\u2026", stepType: "Pas 1/3 \xB7 Que vol\xE8tz prendre?", stepVideoFormat: "Pas 2/3 \xB7 Format vid\xE8u", stepAudioFormat: "Pas 2/3 \xB7 Format audio", stepResolution: "Pas 3/3 \xB7 Resolucion", stepFps: "Pas 3/3 \xB7 Cad\xE9ncia", stepBitrate: "Pas 3/3 \xB7 Debit audio", videoOption: "Vid\xE8u", audioOption: "Audio", recommended: "recomandat", bestQuality: "melhora qualitat", grab: "prend\xE8r", history: "istoric", quit: "sortir", cancel: "anullar", choose: "causir", select: "validar", back: "retorn", theme: "t\xE8ma", downloading: "tel\xE8m\u2026", processing: "tractament\u2026", starting: "comen\xE7a lo telecargament\u2026", grabbed: "pr\xE8s!", savedTo: "guardat dins:", grabAnother: "\u21B5 prene un autre", tryAgain: "tornar testar", tip: "Conselh", lblTitle: "T\xEDtol", lblArtist: "Artista", lblAlbum: "Albom", lblRelease: "Publicacion", lblTime: "Durada", lblSource: "Font", updateAvailable: "Una version nov\xE8la de Carbon es disponibla", langPickerTitle: "Causir la lengua", langPickerSearch: "cercar\u2026", lang: "lenga" },
+  ast: { tagline: "ba\xF1a un v\xEDdeo o m\xFAsica. escoyer. ba\xF1a. fech.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 m\xE1s", pasteLink: "Pega un enllaz", supportsLine: "supports v\xEDdeo y audio de m\xE1s de 1800 sitios", notUrl: "esto nun ye un enllaz \u2014 pega una url completa", analyzing: "Analizando", warmingUp: "calentando\u2026", fetchingInfo: "sacando la informaci\xF3n\u2026", stepType: "Pasu 1/3 \xB7 \xBFQu\xE9 ba\xF1as?", stepVideoFormat: "Pasu 2/3 \xB7 Formatu de v\xEDdeo", stepAudioFormat: "Pasu 2/3 \xB7 Formatu de sonid\xE1", stepResolution: "Pasu 3/3 \xB7 Resoluci\xF3n", stepFps: "Pasu 3/3 \xB7 Fotogramas por segundu", stepBitrate: "Pasu 3/3 \xB7 Tasa de sonid\xE1", videoOption: "V\xEDdeo", audioOption: "S\xF3nidu", recommended: "recomend\xE1u", bestQuality: "la meyor calid\xE1", grab: "ba\xF1\xE1r", history: "historia", quit: "salir", cancel: "cancelar", choose: "escoyer", select: "aceptar", back: "atr\xE1s", theme: "tema", downloading: "ba\xF1ando\u2026", processing: "procesando\u2026", starting: "empezando la descarga\u2026", grabbed: "\xA1ba\xF1\xE1u!", savedTo: "guard\xE1u en:", grabAnother: "\u21B5 ba\xF1a otru", tryAgain: "int\xE9ntalo de nuevu", tip: "Conseyu", lblTitle: "T\xEDtulu", lblArtist: "Artista", lblAlbum: "\xC1lbum", lblRelease: "Publicaci\xF3n", lblTime: "Duraci\xF3n", lblSource: "Fonte", updateAvailable: "Actualizaci\xF3n de Carbon disponible", langPickerTitle: "Escoyer llingua", langPickerSearch: "buscar\u2026", lang: "llengua" },
+  an: { tagline: "baixa un video u m\xFAsica. eleg\xED. baixa. feito.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 m\xE9s", pasteLink: "Pega un enlace", supportsLine: "soporta video y audio de m\xE1s de 1800 sitios", notUrl: "isto no ye un enlace \u2014 pega una url completa", analyzing: "Analizando", warmingUp: "calentando\u2026", fetchingInfo: "trayendo la informaci\xF3n\u2026", stepType: "Paso 1/3 \xB7 \xBFQu\xE9 baix\xE1s?", stepVideoFormat: "Paso 2/3 \xB7 Formato de video", stepAudioFormat: "Paso 2/3 \xB7 Formato de audio", stepResolution: "Paso 3/3 \xB7 Resoluci\xF3n", stepFps: "Paso 3/3 \xB7 Fotogramas por segundo", stepBitrate: "Paso 3/3 \xB7 Tasa de audio", videoOption: "V\xEDdeo", audioOption: "\xC1udio", recommended: "recomendau", bestQuality: "la mejor calid\xE1", grab: "baixar", history: "historia", quit: "salir", cancel: "cancelar", choose: "elegir", select: "aceptar", back: "atr\xE1s", theme: "tema", downloading: "baixando\u2026", processing: "procesando\u2026", starting: "empezando la descarga\u2026", grabbed: "\xA1baixau!", savedTo: "guardau en:", grabAnother: "\u21B5 baixa otro", tryAgain: "intenta de nuevo", tip: "Truco", lblTitle: "Tt\xEDtulo", lblArtist: "Artista", lblAlbum: "\xC1lbum", lblRelease: "Publicaci\xF3n", lblTime: "Duraci\xF3n", lblSource: "Fuente", updateAvailable: "Actualizaci\xF3n de Carbon disponible", langPickerTitle: "Elegir luenga", langPickerSearch: "buscar\u2026", lang: "luenga" },
+  co: { tagline: "scarica un video o una musica. scegli. scarica. fattu.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 d'altri", pasteLink: "Incolla un ligame", supportsLine: "supporta video \xE8 audio da 1800+ siti", notUrl: "questu \xF9n h\xE8 micca un ligame \u2014 incolla un url cumplitu", analyzing: "Analisendu", warmingUp: "chjudendu\u2026", fetchingInfo: "cogliendu l'infu\u2026", stepType: "Passu 1/3 \xB7 Ch\xEC pigli?", stepVideoFormat: "Passu 2/3 \xB7 Formatu video", stepAudioFormat: "Passu 2/3 \xB7 Formatu audio", stepResolution: "Passu 3/3 \xB7 Risoluzzioni", stepFps: "Passu 3/3 \xB7 Fotogrammi \xE0 u secundu", stepBitrate: "Passu 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "cunsigliatu", bestQuality: "a megliore qualit\xE0", grab: "piglia", history: "storia", quit: "esci", cancel: "annulla", choose: "scegli", select: "accetta", back: "indietru", theme: "temu", downloading: "scaricendu\u2026", processing: "processendu\u2026", starting: "principiandu u scaricamentu\u2026", grabbed: "pigliatu!", savedTo: "guardatu in:", grabAnother: "\u21B5 piglia unu altru", tryAgain: "prova un'altra volta", tip: "Cunsigliu", lblTitle: "Titulu", lblArtist: "Artistu", lblAlbum: "Album", lblRelease: "Publicazione", lblTime: "Durata", lblSource: "Sorgente", updateAvailable: "Aggiornamentu di Carbon dispunibile", langPickerTitle: "Scegli a lingua", langPickerSearch: "cerc\xE0\u2026", lang: "lingua" },
+  sc: { tagline: "disc\xE0ra un video o una musica. isseberra. disc\xE0ra. fint.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7soundcloud \xB7 +1800 \xE0tzos", pasteLink: "Incolla unu ligame", supportsLine: "supportat videos e audios de 1800+ sitos", notUrl: "custu no est unu ligame \u2014 incolla un url completu", analyzing: "Analisende", warmingUp: "calientes\u2026", fetchingInfo: "recolliende sas infos\u2026", stepType: "Passu 1/3 \xB7 Ite to pigiare?", stepVideoFormat: "Passu 2/3 \xB7 Formatu de video", stepAudioFormat: "Passu 2/3 \xB7 Formatu de audio", stepResolution: "Passu 3/3 \xB7 Resoluzzione", stepFps: "Passu 3/3 \xB7 Fotogrammi in s", stepBitrate: "Passu 3/3 \xB7 Bitrate de audio", videoOption: "Video", audioOption: "Audio", recommended: "recomendadu", bestQuality: "sa qualidadi superiore", grab: "pigiare", history: "istoria", quit: "essire", cancel: "annullare", choose: "isseberra", select: "accettare", back: "indighetu", theme: "tema", downloading: "disc\xE0rendu\u2026", processing: "processendu\u2026", starting: "incaminziendu su scaricamentu\u2026", grabbed: "pigiatu!", savedTo: "guardatu in:", grabAnother: "\u21B5 pigia unu alteru", tryAgain: "prova torra", tip: "Consigliu", lblTitle: "T\xEDtulu", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Publicatzione", lblTime: "Durata", lblSource: "Fonte", updateAvailable: "Actualizatzione de Carbon disponibile", langPickerTitle: "Issu a limba", langPickerSearch: "chirca\u2026", lang: "limba" },
+  nap: { tagline: "scarica nu video o nu m\xFAsica. scarche. scarica. fatto.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \xE0ntere", pasteLink: "Incolla nu link", supportsLine: "supporta video e audio da 1800+ site", notUrl: "chestu cc'\xE8 nu link \u2014 incolla nu url completo", analyzing: "Sta analizzando", warmingUp: "sta scaldando\u2026", fetchingInfo: "sta pigliando'e info\u2026", stepType: "Passo 1/3 \xB7 Cu'\xE8 ca vu\xF2 scaric\xE0?", stepVideoFormat: "Passo 2/3 \xB7 Formato video", stepAudioFormat: "Passo 2/3 \xB7 Formato audio", stepResolution: "Passo 3/3 \xB7 Risoluzione", stepFps: "Passo 3/3 \xB7 Frame al secondo", stepBitrate: "Passo 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "cunsigliato", bestQuality: "a qualit\xE0 cchi\xF9 alta", grab: "scaric\xE0", history: "storico", quit: "asc\xEC", cancel: "annulla", choose: "scarche", select: "accetta", back: "arr\xE8", theme: "tema", downloading: "sta scaricando\u2026", processing: "sta processando\u2026", starting: "sta accuminciando\u2026", grabbed: "scaricato!", savedTo: "salvato a:", grabAnother: "\u21B5 scaric'a n'ato", tryAgain: "prova arreto", tip: "Suggerimento", lblTitle: "Titolo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Pubblicazione", lblTime: "Durata", lblSource: "Fonte", updateAvailable: "Aggiornamento de Carbon disponibile", langPickerTitle: "Sceglie a lingua", langPickerSearch: "cerca\u2026", lang: "lingua" },
+  vec: { tagline: "scarica un video o una musica. scegli. scarica. fato.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 altri", pasteLink: "Incolla un link", supportsLine: "supporta video e audio da 1800+ siti", notUrl: "questo no xe un link \u2014 incolla un url completo", analyzing: "Analizzando", warmingUp: "sta scaldando\u2026", fetchingInfo: "sta prendendo le info\u2026", stepType: "Passo 1/3 \xB7 Cosa te voi scaricar?", stepVideoFormat: "Passo 2/3 \xB7 Formato video", stepAudioFormat: "Passo 2/3 \xB7 Formato audio", stepResolution: "Passo 3/3 \xB7 Risoluzione", stepFps: "Passo 3/3 \xB7 Frame al secondo", stepBitrate: "Passo 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "consigli\xE0", bestQuality: "la qualit\xE0 pi\xF9 alta", grab: "scaricar", history: "storico", quit: "esci", cancel: "annulla", choose: "scegli", select: "accetta", back: "indr\xE8", theme: "tema", downloading: "sta scaricando\u2026", processing: "sta elaborando\u2026", starting: "sta iniziando\u2026", grabbed: "scaric\xE0!", savedTo: "salv\xE0 in:", grabAnother: "\u21B5 scaric'a un altro", tryAgain: "prova de novo", tip: "Suggerimento", lblTitle: "Titolo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Pubblicazione", lblTime: "Durata", lblSource: "Fonte", updateAvailable: "Aggiornamento de Carbon disponibile", langPickerTitle: "Scegli la lingua", langPickerSearch: "cerca\u2026", lang: "lingua" },
+  lmo: { tagline: "scarica un video o una musica. scegl. scarica. fatt.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 alter", pasteLink: "Incolla un lecc", supportsLine: "supporta video e audio da 1800+ sit", notUrl: "quest no l'\xE8 un lecc \u2014 incolla un url complet", analyzing: "Analizzando", warmingUp: "sc'aldand\u2026", fetchingInfo: "prendend le inf\xF2\u2026", stepType: "Pass 1/3 \xB7 Cosa v\xF6et scaric\xE0?", stepVideoFormat: "Pass 2/3 \xB7 Form\xE0t video", stepAudioFormat: "Pass 2/3 \xB7 Form\xE0t audio", stepResolution: "Pass 3/3 \xB7 Risoluzion", stepFps: "Pass 3/3 \xB7 Frame al secun", stepBitrate: "Pass 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "consigli\xE0", bestQuality: "la qualit\xE0 pi\xF9 alta", grab: "scaric\xE0", history: "storia", quit: "esci", cancel: "annulla", choose: "scegl", select: "accetta", back: "indr\xE8", theme: "tema", downloading: "scaricand\u2026", processing: "elaborand\u2026", starting: "comenzand\u2026", grabbed: "scaric\xE0!", savedTo: "salv\xE0 in:", grabAnother: "\u21B5 scaric\xE0 on'alter", tryAgain: "prova de noeuv", tip: "Suggeriment", lblTitle: "T\xECtol", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Pubblicazion", lblTime: "Durada", lblSource: "F\xF2nt", updateAvailable: "Aggiornament de Carbon disponibil", langPickerTitle: "Scegl la lingua", langPickerSearch: "cerca\u2026", lang: "lingua" },
+  pms: { tagline: "scarica un video \xF2h na musica. ch\xE9ic. scarica. fat.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \xE0utri", pasteLink: "Incolla un li\xE0", supportsLine: "suporta video e audio da 1800+ sit", notUrl: "cost l'\xE8 nen un li\xE0 \u2014 incolla un url complet", analyzing: "Analisand", warmingUp: "a scaldasse\u2026", fetchingInfo: "a raccol\xE9 le info\u2026", stepType: "Pas 1/3 \xB7 C\xF2sa v\xF2i scaric\xE0?", stepVideoFormat: "Pas 2/3 \xB7 Form\xE0t video", stepAudioFormat: "Pas 2/3 \xB7 Form\xE0t audio", stepResolution: "Pas 3/3 \xB7 Risoluzion", stepFps: "Pas 3/3 \xB7 Frame al second", stepBitrate: "Pas 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "consiglj\xE0", bestQuality: "la qualit\xE0 pi\xF9 alta", grab: "scaric\xE0", history: "storia", quit: "esci", cancel: "annulla", choose: "ch\xE9ic", select: "accetta", back: "indr\xE9", theme: "tema", downloading: "a scaric\xE0\u2026", processing: "a elabor\xE0\u2026", starting: "a cominci\xE0\u2026", grabbed: "scaric\xE0!", savedTo: "salv\xE0 an:", grabAnother: "\u21B5 scaric\xE0 un \xE0utr", tryAgain: "prov\xE0 ancor", tip: "Suggeriment", lblTitle: "T\xECtol", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Pubblicazion", lblTime: "Durada", lblSource: "F\xF2nt", updateAvailable: "Aggiornament \xEBd Carbon disponibil", langPickerTitle: "Ch\xE9ic la lingua", langPickerSearch: "s\xE8rca\u2026", lang: "lingua" },
+  rm: { tagline: "download\xE0 un video u una musica. Tschernir. download\xE0. fat.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 auters", pasteLink: "Colli\xE0 in link", supportsLine: "supporta video e audio da 1800+ websites", notUrl: "quai \xE8 betg in link \u2014 colli\xE0 in url complett", analyzing: "Analisar", warmingUp: "s'chasclar\u2026", fetchingInfo: "recuperar las informaziuns\u2026", stepType: "Pass 1/3 \xB7 Co pertge ti?", stepVideoFormat: "Pass 2/3 \xB7 Format video", stepAudioFormat: "Pass 2/3 \xB7 Format audio", stepResolution: "Pass 3/3 \xB7 Resoluziun", stepFps: "Pass 3/3 \xB7 Frames per secund", stepBitrate: "Pass 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "recumand\xE0", bestQuality: "la quaialta qualit\xE0", grab: "download\xE0", history: "istoria", quit: "esci", cancel: "annullar", choose: "tschernir", select: "acceptar", back: "enavos", theme: "tema", downloading: "download\xE0\u2026", processing: "processar\u2026", starting: "cumenzar\u2026", grabbed: "download\xE0!", savedTo: "sauzi\xE0 in:", grabAnother: "\u21B5 download\xE0 in auter", tryAgain: "provar danovamain", tip: "Consigl", lblTitle: "Titel", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Publicaziun", lblTime: "Durada", lblSource: "Funta", updateAvailable: "Actualisaziun da Carbon disponibla", langPickerTitle: "Tschernir la lingua", langPickerSearch: "tschertcha\u2026", lang: "lingua" },
+  fur: { tagline: "discjaria un video o une musiche. scljide. discjaria. fat.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 others", pasteLink: "Incolle un link", supportsLine: "supporte videos e audios di 1800+ sit", notUrl: "chest al \xE8 no un link \u2014 incolle un url complet", analyzing: "Analizint", warmingUp: "a scald\xE2\u2026", fetchingInfo: "a cjap\xE2 lis infos\u2026", stepType: "Pass 1/3 \xB7 Ce vutis tu a discrimin\xE2?", stepVideoFormat: "Pass 2/3 \xB7 Form\xE2t video", stepAudioFormat: "Pass 2/3 \xB7 Form\xE2t audio", stepResolution: "Pass 3/3 \xB7 Risoluzion", stepFps: "Pass 3/3 \xB7 Frames al secun", stepBitrate: "Pass 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "cjonsigl\xE2t", bestQuality: "la pi\xF9 alte qualit\xE2t", grab: "discjari\xE2", history: "storje", quit: "jess\xEE", cancel: "annul\xE2", choose: "scljide", select: "acett\xE2", back: "indr\xEA", theme: "teme", downloading: "a discrimin\xE2\u2026", processing: "a proces\xE2\u2026", starting: "a cumenz\xE2\u2026", grabbed: "discjari\xE2t!", savedTo: "sauzi\xE2t in:", grabAnother: "\u21B5 discrimin\xE2 un alt", tryAgain: "prova di gn\xFBf", tip: "Sugjeriment", lblTitle: "Titel", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Publicazion", lblTime: "Durade", lblSource: "Fonte", updateAvailable: "Inzornament di Carbon dispunibil", langPickerTitle: "Scljide la lenghe", langPickerSearch: "cirche\u2026", lang: "lenghe" },
+  gsw: { tagline: "vide oder musik ufe lade. usw\xE4hle. ufe lade. fertig.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 meh", pasteLink: "Link iitlegte", supportsLine: "suppportiert Video und Audio us 1800+ Websites", notUrl: "das isch kei Link \u2014 leg es vollst\xE4ndigi Url ii", analyzing: "Analysiere", warmingUp: "w\xE4rmt uff\u2026", fetchingInfo: "holt M\xE4di\xE4-Infos\u2026", stepType: "Schritt 1/3 \xB7 Was willsch herunterlade?", stepVideoFormat: "Schritt 2/3 \xB7 Video-Format", stepAudioFormat: "Schritt 2/3 \xB7 Audio-Format", stepResolution: "Schritt 3/3 \xB7 Aufl\xF6sung", stepFps: "Schritt 3/3 \xB7 Bildrate", stepBitrate: "Schritt 3/3 \xB7 Audio-Bitrate", videoOption: "Video", audioOption: "Audio", recommended: "empfohle", bestQuality: "b\xE4schti Qualit\xE4t", grab: "herunterlade", history: "Verlauf", quit: "beenden", cancel: "abbr\xE4che", choose: "usw\xE4hle", select: "best\xE4tige", back: "zrug", theme: "Design", downloading: "lade herunter\u2026", processing: "verarbeite\u2026", starting: "starte Download\u2026", grabbed: "heruntergeloade!", savedTo: "gspeichert in:", grabAnother: "\u21B5 no es Download", tryAgain: "probier s widder", tip: "Tipp", lblTitle: "Titel", lblArtist: "K\xFCnstler", lblAlbum: "Album", lblRelease: "Ver\xF6ffentlichung", lblTime: "Dauer", lblSource: "Quelle", updateAvailable: "Carbon-Update verf\xFCgbar", langPickerTitle: "Sprache w\xE4hle", langPickerSearch: "suche\u2026", lang: "Sprache" },
+  nds: { tagline: "video oder musik downloaden. uts\xF6ken. downloaden. fertig.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 mehr", pasteLink: "Link inf\xF6gen", supportsLine: "unterst\xFCtt Video un Audio ut 1800+ Sieten", notUrl: "dat is keen Link \u2014 f\xF6er de fullst\xE4ndige URL in", analyzing: "Analyseer", warmingUp: "warm up\u2026", fetchingInfo: "holt Medieninfos\u2026", stepType: "Schritt 1/3 \xB7 Wat willst du downloaden?", stepVideoFormat: "Schritt 2/3 \xB7 Videoformat", stepAudioFormat: "Schritt 2/3 \xB7 Audioformat", stepResolution: "Schritt 3/3 \xB7 Opl\xF6sung", stepFps: "Schritt 3/3 \xB7 Bildrate", stepBitrate: "Schritt 3/3 \xB7 Audio-Bitrate", videoOption: "Video", audioOption: "Audio", recommended: "empfohlen", bestQuality: "beste Qualiteit", grab: "downloaden", history: "Verlauf", quit: "beenden", cancel: "abbr\xF6ken", choose: "uts\xF6ken", select: "best\xE4tigen", back: "tr\xFCck", theme: "Design", downloading: "warrt downloade\u2026", processing: "warrt verarbeiden\u2026", starting: "Download startet\u2026", grabbed: "downloade!", savedTo: "speichert in:", grabAnother: "\u21B5 noch een downloaden", tryAgain: "probeer dat noch een Mal", tip: "Tipp", lblTitle: "Titel", lblArtist: "K\xFCnstler", lblAlbum: "Album", lblRelease: "Ver\xF6ffentlichung", lblTime: "Dauer", lblSource: "Quelle", updateAvailable: "Carbon-Update verf\xFCgbar", langPickerTitle: "Sprach uts\xF6ken", langPickerSearch: "s\xF6ken\u2026", lang: "Sprach" },
+  vls: { tagline: "download 'n video of muziek. kies. download. klaar.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 miejer", pasteLink: "Plak 'n link", supportsLine: "ondersteunt video en audio van 1800+ websites", notUrl: "dat is gie'n link \u2014 plak 'n volledige url", analyzing: "Analyzere", warmingUp: "opswarmen\u2026", fetchingInfo: "media-info ophaole\u2026", stepType: "Stap 1/3 \xB7 Wat wils de downloade?", stepVideoFormat: "Stap 2/3 \xB7 Videoformaat", stepAudioFormat: "Stap 2/3 \xB7 Audioformaat", stepResolution: "Stap 3/3 \xB7 Resolutie", stepFps: "Stap 3/3 \xB7 Framerate", stepBitrate: "Stap 3/3 \xB7 Audiobitrate", videoOption: "Video", audioOption: "Audio", recommended: "aanbevolen", bestQuality: "beste kwaliteit", grab: "downloade", history: "Geschiedenis", quit: "ofloupe", cancel: "annulere", choose: "kieze", select: "bevestige", back: "truk", theme: "Thema", downloading: "an t download\u2026", processing: "an t verwerke\u2026", starting: "download start\u2026", grabbed: "downgeloade!", savedTo: "opslage in:", grabAnother: "\u21B5 nog 'n download", tryAgain: "probier nog 'n keer", tip: "Tip", lblTitle: "Titel", lblArtist: "Artiest", lblAlbum: "Album", lblRelease: "Uitbreng", lblTime: "Duur", lblSource: "Bron", updateAvailable: "Carbon-update beskikbaar", langPickerTitle: "Taal kieze", langPickerSearch: "zoeke\u2026", lang: "Taal" },
+  fo: { tagline: "download eina video ella musik. vel. download. kl\xE1rat.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 onnur", pasteLink: "Set ein leys inn", supportsLine: "vi\xF0ger\xF0ur video og lj\xF3\xF0 fr\xE1 1800+ felagum", notUrl: "hatta er ikki ein leys \u2014 set inn eina fulla url", analyzing: "Analyseri\xF0", warmingUp: "warmar upp\u2026", fetchingInfo: "s\xE6r eina uppl\xFDsingar\u2026", stepType: "Skref 1/3 \xB7 Hvat vill t\xFA ni\xF0urhalda?", stepVideoFormat: "Skref 2/3 \xB7 Videoform\xE1t", stepAudioFormat: "Skref 2/3 \xB7 Lj\xF3\xF0sform\xE1t", stepResolution: "Skref 3/3 \xB7 Uppl\xFDsing", stepFps: "Skref 3/3 \xB7 Rammuh\xF0", stepBitrate: "Skref 3/3 \xB7 Lj\xF3\xF0bitrate", videoOption: "Video", audioOption: "Lj\xF3\xF0", recommended: "\xE1hending", bestQuality: "besti g\xF3\xF0a", grab: "ni\xF0urhalda", history: "S\xF8ga", quit: "far", cancel: "avbryt", choose: "vel", select: "\xF3gv", back: "aftur", theme: "Tema", downloading: "ni\xF0urhalar\u2026", processing: "vi\xF0gerir\u2026", starting: "byrjar ni\xF0urhal\u2026", grabbed: "ni\xF0urhala\xF0!", savedTo: "vista\xF0 \xED:", grabAnother: "\u21B5 ni\xF0urhal anna\xF0", tryAgain: "roynd enn eina fer\xF0", tip: "\xC1bending", lblTitle: "Heiti", lblArtist: "H\xF8ggari", lblAlbum: "Albom", lblRelease: "\xDAtg\xE1va", lblTime: "Lengd", lblSource: "Kelda", updateAvailable: "Carbon uppdateringar t\xF8k", langPickerTitle: "Vel m\xE1l", langPickerSearch: "leita\u2026", lang: "m\xE1l" },
+  kl: { tagline: "video- taama musigi- nunguuk. vali. nunguuk. naammatigut.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800(all)", pasteLink: "Innita oqaasi", supportsLine: "video- taama musigi- 1800(all) websteder- mi", notUrl: "taanna una uanga oqaasi \u2014 innita oqaatsigut", analyzing: "Qarakit", warmingUp: "qaqqus\u2026", fetchingInfo: "media- qaarisinneq\u2026", stepType: "Aneq 1/3 \xB7 Qaanna t takusassat?", stepVideoFormat: "Aneq 2/3 \xB7 Video-formaat", stepAudioFormat: "Aneq 2/3 \xB7 Musigi-formaat", stepResolution: "Aneq 3/3 \xB7 Resolutioon", stepFps: "Aneq 3/3 \xB7 Frame-rate", stepBitrate: "Aneq 3/3 \xB7 Musigi-bitrate", videoOption: "Video", audioOption: "Musigi", recommended: "siunnersuutigut", bestQuality: "nunnersuisutut", grab: "nunguuk", history: "Katkuffik", quit: "anerru", cancel: "allattuuk", choose: "vali", select: "aalaak", back: "u-turn", theme: "Tema", downloading: "nunguuk\u2026", processing: "allattuuk\u2026", starting: "nunguuk aallaa\u2026", grabbed: "nunguuk!", savedTo: "allattut:", grabAnother: "\u21B5 nunguuk allats", tryAgain: "uangulersuit", tip: "Siunnersuut", lblTitle: "Taaguut", lblArtist: "Kunstner", lblAlbum: "Albom", lblRelease: "Uagannguaq", lblTime: "Pitsa", lblSource: "Kinqarneq", updateAvailable: "Carbon-n nutarpoq", langPickerTitle: "Oqaatsi vali", langPickerSearch: "najukaq\u2026", lang: "Oqaatsi" },
+  se: { tagline: "deadda video ja muusika. v\xE1llje. deadda. d\xE1s.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 eai", pasteLink: "M\xE1rksa li\u014Bka", supportsLine: "video ja muusika 1800+ sajjis", notUrl: "Ii leat li\u014Bka \u2014 m\xE1rksa olles URL", analyzing: "Analizere", warmingUp: "boa\u0111e\u2026", fetchingInfo: "g\xE1vdn\xE1 mediainfo\u2026", stepType: "L\xE1vka 1/3 \xB7 Mii h\xE1ldat?", stepVideoFormat: "L\xE1vka 2/3 \xB7 Video formaat", stepAudioFormat: "L\xE1vka 2/3 \xB7 Muusika formaat", stepResolution: "L\xE1vka 3/3 \xB7 Resolusjon", stepFps: "L\xE1vka 3/3 \xB7 Frekvensa", stepBitrate: "L\xE1vka 3/3 \xB7 Muusika bitrate", videoOption: "Video", audioOption: "Muusika", recommended: "m\xE1rkomus", bestQuality: "bu\u0111e\u0161", grab: "deadda", history: "Historie", quit: "gol\xE1hppu", cancel: "g\xE1ldu", choose: "v\xE1llje", select: "v\xE1llje", back: "du\u0161\u0161e", theme: "Motta", downloading: "deadda\u2026", processing: "\xE1\u014Bg\xE1\u2026", starting: "deaddin lea\u2026", grabbed: "deaddje!", savedTo: "S\xE6llojuvvon:", grabAnother: "\u21B5 deadda eannod", tryAgain: "gaskavduaton", tip: "R\xE1hkistu", lblTitle: "Namma", lblArtist: "L\xE1vkkist", lblAlbum: "Albom", lblRelease: "Albmusd\xE1vjjit", lblTime: "Aigi", lblSource: "Vuo\u0111\u0111u", updateAvailable: "Carbon beaivvahus o\u0111\u0111os", langPickerTitle: "V\xE1llje giella", langPickerSearch: "o\u010D\u0123a\u2026", lang: "Giella" },
+  sma: { tagline: "deadda video ja musihke. v\xE4lje. deadda. ij jimie.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 ij", pasteLink: "M\xE4rkke l\xEFnk", supportsLine: "video ja musihke 1800+ saejhtie", notUrl: "Ii leat l\xEFnk \u2014 m\xE4rkke olles URL", analyzing: "Analisere", warmingUp: "gaskav\u2026", fetchingInfo: "j\xE5\xE5dt mediainfo\u2026", stepType: "Bajjah 1/3 \xB7 Mij haalleh?", stepVideoFormat: "Bajjah 2/3 \xB7 Video form\xE5t", stepAudioFormat: "Bajjah 2/3 \xB7 Musihke form\xE5t", stepResolution: "Bajjah 3/3 \xB7 Reolusjon", stepFps: "Bajjah 3/3 \xB7 Frekvens", stepBitrate: "Bajjah 3/3 \xB7 Musihke bitrate", videoOption: "Video", audioOption: "Musihke", recommended: "rekomma", bestQuality: "b\xE5htes", grab: "deadda", history: "Historie", quit: "j\xE5kedh", cancel: "gask\xE5", choose: "v\xE4lje", select: "v\xE4lje", back: "\xE5ts\xE5", theme: "Motta", downloading: "deadda\u2026", processing: "\xE5tta\u2026", starting: "deadda\u2026", grabbed: "deaddje!", savedTo: "J\xE5kedh:", grabAnother: "\u21B5 deadda eno", tryAgain: "gaskavtuata", tip: "Tjhobde", lblTitle: "Nemm", lblArtist: "Aejg", lblAlbum: "Albom", lblRelease: "Almama", lblTime: "Tjie", lblSource: "Vuo\u0111e", updateAvailable: "Carbon beaivvahus o\u0111\u0111os", langPickerTitle: "V\xE4lje giele", langPickerSearch: "soejkie\u2026", lang: "Giele" },
+  rom: { tagline: "download le video ma te muzika. choos. download. oaj vo.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 veh", pasteLink: "Kopalipe le link", supportsLine: "suporta video te muzika de 1800+ sajtove", notUrl: "o na link si \u2014 kopalipe URL kompleto", analyzing: "Analizando", warmingUp: "o soa e\u2026", fetchingInfo: "oprime le informacije\u2026", stepType: "Pas 1/3 \xB7 So a soleh?", stepVideoFormat: "Pas 2/3 \xB7 Format video", stepAudioFormat: "Pas 2/3 \xB7 Format audio", stepResolution: "Pas 3/3 \xB7 Rezoluzija", stepFps: "Pas 3/3 \xB7 Frekvenca de kadri", stepBitrate: "Pas 3/3 \xB7 Bitrate audio", videoOption: "Video", audioOption: "Audio", recommended: "rekomandato", bestQuality: "ma buthi kvaliteta", grab: "download", history: "Istorik", quit: "nikalja", cancel: "anulir", choose: "choos", select: "akcepti", back: "pej khutra", theme: "Tema", downloading: "o download\u2026", processing: "o procesir\u2026", starting: "o starti le download\u2026", grabbed: "download le!", savedTo: "salvato te:", grabAnother: "\u21B5 download\u7CD5 aro", tryAgain: "probavi mall", tip: "Konsilha", lblTitle: "Titlo", lblArtist: "Artisto", lblAlbum: "Album", lblRelease: "Publikacia", lblTime: "Durata", lblSource: "Izvor", updateAvailable: "Carbon ma le nov version", langPickerTitle: "Choos le lingva", langPickerSearch: "iskripe\u2026", lang: "lingva" },
+  hsb: {
+    tagline: "video a nebo hud\u017Amu stahny. wubjer. stahny. hot.",
+    sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 druhe",
+    pasteLink: "Link mudej",
+    supportsLine: "podporuje video a hud\u017Abu z 1800+ sydow",
+    notUrl: "to ni\u0161\u0107e link \u2014 mudej cy\u0142u URL",
+    analyzing: "Analyz\u011Bru",
+    warmingUp: "sobuj\u2026",
+    fetchingInfo: "\u010Ditajo informacije\u2026",
+    stepType: "Krok 1/3 \xB7 Ha\u010D so chce\u0107e stahny?",
+    stepVideoFormat: "Krok 2/3 \xB7 Format wideo",
+    stepAudioFormat: "Krok 2/3 \xB7 Format audio",
+    stepResolution: "Krok 3/3 \xB7 Rozli\u0161enje",
+    stepFps: "Krok 3/3 \xB7 Sn\xEDmkov\xE1 frekwenz",
+    stepBitrate: "Krok 3/3 \xB7 Bitrate audio",
+    videoOption: "Wideo",
+    audioOption: "Audio",
+    recommended: "doporu\u010Dene",
+    bestQuality: "nejwj\u0161\u0161a kvalita",
+    grab: "stahny",
+    history: "D\u017A\u011Bnik",
+    quit: "sk\xF3n\u010Dit",
+    cancel: "p\u0159etorhnje",
+    choose: "wubjer",
+    select: "akceptuj",
+    back: "wr\u011Bdo",
+    theme: "T\xE9ma",
+    downloading: "stahny\u2026",
+    processing: "zpracowava\u2026",
+    starting: "startuje download\u2026",
+    grabbed: "sta\u017Eeno!",
+    savedTo: "sklado w:",
+    grabAnother: "\u21B5 stahny druhi",
+    tryAgain: "probaj\u0107e hi\u0161\u0107e",
+    tip: "Tip",
+    lblTitle: "Titul",
+    lblArtist: "Artist",
+    lblAlbum: "Album",
+    lblRelease: "Wydawa",
+    lblTime: "Trjeba",
+    lblSource: "Zrjadylo",
+    updateAvailable: "Aktualizacija Carbon k dispoziciji",
+    langPickerTitle: "Wubjer r\u011B\u010D",
+    langPickerSearch: "hleda\u0107\u2026",
+    lang: "r\u011B\u010D"
+  },
+  dsb: {
+    tagline: "wideo anbo hud\u017Any stahny. wubjer. stahny. hot.",
+    sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 druhe",
+    pasteLink: "Link mudej",
+    supportsLine: "podporuje wideo an hud\u017Abu z 1800+ sydow",
+    notUrl: "to ni link \u2014 mudej cy\u0142u URL",
+    analyzing: "Analyz\u011Bru",
+    warmingUp: "sobujo\u2026",
+    fetchingInfo: "\u010Ditajo informacije\u2026",
+    stepType: "Krok 1/3 \xB7 Co chce\u0107e stahny?",
+    stepVideoFormat: "Krok 2/3 \xB7 Format wideo",
+    stepAudioFormat: "Krok 2/3 \xB7 Format audio",
+    stepResolution: "Krok 3/3 \xB7 Rozli\u0161enje",
+    stepFps: "Krok 3/3 \xB7 Sn\xEDmkov\xE1 frekwenz",
+    stepBitrate: "Krok 3/3 \xB7 Bitrate audio",
+    videoOption: "Wideo",
+    audioOption: "Audio",
+    recommended: "doporu\u010Dene",
+    bestQuality: "nejwj\u0161\u0161a kwalita",
+    grab: "stahny",
+    history: "D\u017A\u011Bnik",
+    quit: "sk\xF3n\u010Dit",
+    cancel: "p\u0159etorhnje",
+    choose: "wubjer",
+    select: "akceptuj",
+    back: "wr\u011Bdo",
+    theme: "T\xE9ma",
+    downloading: "stahny\u2026",
+    processing: "zpracowava\u2026",
+    starting: "startuje download\u2026",
+    grabbed: "sta\u017Eeno!",
+    savedTo: "sklado w:",
+    grabAnother: "\u21B5 stahny druhi",
+    tryAgain: "probaj\u0107e hi\u0161\u0107e",
+    tip: "Tip",
+    lblTitle: "Titul",
+    lblArtist: "Artist",
+    lblAlbum: "Album",
+    lblRelease: "Wydawa",
+    lblTime: "Trjeba",
+    lblSource: "Zrjadylo",
+    updateAvailable: "Aktualizacija Carbon k dispoziciji",
+    langPickerTitle: "Wubjer r\u011B\u010D",
+    langPickerSearch: "hleda\u0107\u2026",
+    lang: "r\u011B\u010D"
+  },
+  be: { tagline: "\u0441\u043F\u0430\u043C\u043B\u044F\u0439\u0446\u0435 \u0432\u0456\u0434\u044D\u0430 \u0430\u0431\u043E \u043C\u0443\u0437\u044B\u043A\u0443. \u0432\u044B\u0431\u0435\u0440\u044B. \u0441\u043F\u0430\u043C\u043B\u044F\u0439\u0446\u0435. \u0433\u0430\u0442\u043E\u0432\u0430.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0456\u043D\u0448\u044B\u0445", pasteLink: "\u0423\u0441\u0442\u0430\u045E\u0446\u0435 \u0441\u043F\u0430\u0441\u044B\u043B\u043A\u0443", supportsLine: "\u043F\u0430\u0434\u0442\u0440\u044B\u043C\u043B\u0456\u0432\u0430\u0435 \u0432\u0456\u0434\u044D\u0430 \u0456 \u0430\u045E\u0434\u044B\u0451 \u0437 1800+ \u0441\u0430\u0439\u0442\u0430\u045E", notUrl: "\u0433\u044D\u0442\u0430 \u043D\u0435 \u0441\u043F\u0430\u0441\u044B\u043B\u043A\u0430 \u2014 \u0443\u0441\u0442\u0430\u045E\u0446\u0435 \u043F\u043E\u045E\u043D\u044B URL", analyzing: "\u0410\u043D\u0430\u043B\u0456\u0437\u0443\u0435\u043C", warmingUp: "\u0440\u0430\u0437\u043E\u0433\u0440\u044D\u0432\u0430\u0435\u043C\u2026", fetchingInfo: "\u0430\u0442\u0440\u044B\u043C\u043B\u0456\u0432\u0430\u0435\u043C \u0437\u0432\u0435\u0441\u0442\u043A\u0456\u2026", stepType: "\u041A\u0440\u043E\u043A 1/3 \xB7 \u0428\u0442\u043E \u0431\u0435\u0440\u0430\u0446\u0435?", stepVideoFormat: "\u041A\u0440\u043E\u043A 2/3 \xB7 \u0424\u0430\u0440\u043C\u0430\u0442 \u0432\u0456\u0434\u044D\u0430", stepAudioFormat: "\u041A\u0440\u043E\u043A 2/3 \xB7 \u0424\u0430\u0440\u043C\u0430\u0442 \u0430\u045E\u0434\u044B\u0451", stepResolution: "\u041A\u0440\u043E\u043A 3/3 \xB7 \u0420\u0430\u0437\u0434\u0437\u0435\u043B\u044C\u043D\u0430\u0441\u0446\u044C", stepFps: "\u041A\u0440\u043E\u043A 3/3 \xB7 \u041A\u0430\u0434\u0440\u044B \u045E \u0441\u0435\u043A\u0443\u043D\u0434\u0443", stepBitrate: "\u041A\u0440\u043E\u043A 3/3 \xB7 \u0411\u0456\u0442\u0440\u0435\u0439\u0442 \u0430\u045E\u0434\u044B\u0451", videoOption: "\u0412\u0456\u0434\u044D\u0430", audioOption: "\u0410\u045E\u0434\u044B\u0451", recommended: "\u0440\u044D\u043A\u0430\u043C\u0435\u043D\u0434\u0443\u0435\u043C", bestQuality: "\u043D\u0430\u0439\u0432\u044B\u0448\u044D\u0439\u0448\u0430\u044F \u044F\u043A\u0430\u0441\u0446\u044C", grab: "\u0441\u043F\u0430\u043C\u043B\u044F\u0446\u044C", history: "\u0413\u0456\u0441\u0442\u043E\u0440\u044B\u044F", quit: "\u0432\u044B\u0439\u0441\u0446\u0456", cancel: "\u0430\u0434\u043C\u0435\u043D\u0430", choose: "\u0432\u044B\u0431\u0440\u0430\u0446\u044C", select: "\u043F\u0440\u044B\u043D\u044F\u0446\u044C", back: "\u043D\u0430\u0437\u0430\u0434", theme: "\u0422\u044D\u043C\u0430", downloading: "\u0441\u043F\u0430\u043C\u043B\u044F\u0435\u043C\u2026", processing: "\u0430\u043F\u0440\u0430\u0446\u043E\u045E\u0432\u0430\u0435\u043C\u2026", starting: "\u043F\u0430\u0447\u044B\u043D\u0430\u0435\u043C \u0441\u043F\u0430\u043C\u043B\u044F\u0432\u0430\u043D\u043D\u0435\u2026", grabbed: "\u0441\u043F\u0430\u043C\u043B\u044F\u043D\u0430!", savedTo: "\u0437\u0430\u0445\u0430\u0432\u0430\u043D\u0430 \u045E:", grabAnother: "\u21B5 \u0441\u043F\u0430\u043C\u043B\u044F\u0446\u044C \u044F\u0448\u0447\u044D", tryAgain: "\u0441\u043F\u0440\u0430\u0431\u0430\u0432\u0430\u0446\u044C \u0437\u043D\u043E\u045E", tip: "\u041F\u0430\u0434\u043A\u0430\u0437\u043A\u0430", lblTitle: "\u041D\u0430\u0437\u0432\u0430", lblArtist: "\u0412\u044B\u043A\u0430\u043D\u0430\u045E\u0446\u0430", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0412\u044B\u043F\u0443\u0441\u043A", lblTime: "\u041F\u0440\u0430\u0446\u044F\u0433\u043B\u0430\u0441\u0446\u044C", lblSource: "\u041A\u0440\u044B\u043D\u0456\u0446\u0430", updateAvailable: "\u0414\u0430\u0441\u0442\u0443\u043F\u043D\u0430 \u0430\u0431\u043D\u0430\u045E\u043B\u0435\u043D\u043D\u0435 Carbon", langPickerTitle: "\u0412\u044B\u0431\u0435\u0440\u044B\u0446\u0435 \u043C\u043E\u0432\u0443", langPickerSearch: "\u043F\u043E\u0448\u0443\u043A\u2026", lang: "\u043C\u043E\u0432\u0430" },
+  ce: { tagline: "\u0441\u043A\u0430\u0447\u0430\u0442\u044C \u0432\u0438\u0434\u0435\u043E \u0439\u0438\u043B\u044A\u044B \u043C\u0443\u0437\u044B\u043A. \u0445\u0430\u0440\u043A\u04C0. \u0441\u043A\u0430\u0447\u0430\u0442\u044C. \u0433\u043E\u0442\u043E\u0432\u043E.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u043A\u0445\u044C\u0430", pasteLink: "\u041A\u044A\u0438\u043B\u043B\u0438\u043D \u0439\u0438\u043B\u044A\u0430", supportsLine: "\u0434\u04E9\u0437\u0434\u0435 \u0435 \u0438 \u043C\u0443\u0437\u044B\u043A 1800+ \u0441\u0430\u0439\u0442", notUrl: "\u044D\u0442\u043E \u043D\u0435 \u0441\u0441\u044B\u043B\u043A\u0430 \u2014 \u043A\u044A\u0438\u043B\u043B\u0438\u043D \u0434\u0430\u0434\u0438\u044A\u0445\u044C URL", analyzing: "\u0410\u043D\u0430\u043B\u0438\u0437\u0438\u0440\u0443", warmingUp: "\u0425\u044C\u0430\u0440\u0433\u044A\u0443\u2026", fetchingInfo: "\u0415\u0438\u0431\u0430\u0437\u0440\u0430 \u0445\u0430\u0444\u2026", stepType: "\u0428\u0430\u0433 1/3 \xB7 \u041C\u0445\u044C\u043E \u0445\u044C\u044D\u0441?", stepVideoFormat: "\u0428\u0430\u0433 2/3 \xB7 \u0424\u043E\u0440\u043C\u0430\u0442 \u0432\u0438\u0434\u0435\u043E", stepAudioFormat: "\u0428\u0430\u0433 2/3 \xB7 \u0424\u043E\u0440\u043C\u0430\u0442 \u0430\u0443\u0434\u0438\u043E", stepResolution: "\u0428\u0430\u0433 3/3 \xB7 \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438", stepFps: "\u0428\u0430\u0433 3/3 \xB7 \u041A\u0430\u0434\u0440\u043E\u0432 \u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "\u0428\u0430\u0433 3/3 \xB7 \u0411\u0438\u0442\u0440\u0435\u0439\u0442 \u0430\u0443\u0434\u0438\u043E", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u0442\u0443\u0445\u044C\u0443\u0449", bestQuality: "\u0430\u0440\u0442\u044B\u043D \u0448\u0435\u0444 \u0444\u043E\u0440\u043C\u0430\u0442", grab: "\u0441\u043A\u0430\u0447\u0430\u0442\u044C", history: "\u0422\u0430\u0440\u0438\u0445", quit: "\u0439\u044B\u0441", cancel: "\u042E\u043A\u044A\u0443", choose: "\u0425\u0430\u0440\u043A\u04C0", select: "\u0425\u044C\u0430\u0437\u0430", back: "\u042E\u043A\u044A\u0443", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0421\u043A\u0430\u0447\u0430\u2026", processing: "\u04C0\u0430\u0434\u0438\u043D\u2026", starting: "\u0421\u043A\u0430\u0447\u0430\u2026", grabbed: "\u0421\u043A\u0430\u0447\u0430\u043D\u0430!", savedTo: "\u0425\u044C\u0430\u043D\u0437\u0430\u0440:", grabAnother: "\u21B5 \u0421\u043A\u0430\u0447\u0430\u0442\u044C \u043A\u0445\u044C\u0430", tryAgain: "\u042E\u0445\u0430\u0442\u044C", tip: "\u041C\u0430\u0441\u043B", lblTitle: "\u041A\u044A\u0430\u0442", lblArtist: "\u0413\u04C0\u0430\u043B", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0411\u0430\u0440", lblTime: "\u041A\u044A\u0430\u0447", lblSource: "\u041A\u044A\u043E\u043B", updateAvailable: "\u0414\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438 Carbon", langPickerTitle: "\u041C\u043E\u0442\u0442", langPickerSearch: "\u0413\u0443\u0438\u0449\u2026", lang: "\u041C\u043E\u0442\u0442" },
+  os: { tagline: "\u0441\u043A\u0430\u0447\u0430\u0442\u044C \u0432\u0438\u0434\u0435\u043E \u0439\u0438\u043B\u0438 \u043C\u0443\u0437\u044B\u043A. \u0445\u0430\u0440\u043A\u04D5. \u0441\u043A\u0430\u0447\u0430\u0442\u044C. \u0433\u043E\u0442\u043E\u0432\u043E.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0438\u0443", pasteLink: "\u041A\u044A\u0443\u043B\u043B\u0438\u043D \u0445\u044A\u0443\u044B\u0437", supportsLine: "\u0434\u04D5\u0440\u0437\u04D5\u0434\u044B\u043D \u0432\u0438\u0434\u0435\u043E \u0439\u0438\u043B\u0438 \u043C\u0443\u0437\u044B\u043A 1800+ \u0441\u0430\u0439\u0442", notUrl: "\u044D\u0442\u043E \u043D\u0435 \u0441\u0441\u044B\u043B\u043A\u0430 \u2014 \u043A\u044A\u0443\u043B\u043B\u0438\u043D \u0434\u0430\u0434\u0438\u044A\u0445\u044C URL", analyzing: "\u0410\u043D\u0430\u043B\u0438\u0437\u0443", warmingUp: "\u0425\u044A\u0435\u0433\u044A\u0443\u2026", fetchingInfo: "\u0425\u044A\u0443\u044B\u0437 \u0445\u0430\u0444\u2026", stepType: "\u0428\u0430\u0433 1/3 \xB7 \u041C\u0445\u044C\u044B \u0445\u0443\u0435\u0439?", stepVideoFormat: "\u0428\u0430\u0433 2/3 \xB7 \u0424\u043E\u0440\u043C\u0430\u0442 \u0432\u0438\u0434\u0435\u043E", stepAudioFormat: "\u0428\u0430\u0433 2/3 \xB7 \u0424\u043E\u0440\u043C\u0430\u0442 \u0430\u0443\u0434\u0438\u043E", stepResolution: "\u0428\u0430\u0433 3/3 \xB7 \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438", stepFps: "\u0428\u0430\u0433 3/3 \xB7 \u041A\u0430\u0434\u0440\u043E\u0432 \u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "\u0428\u0430\u0433 3/3 \xB7 \u0411\u0438\u0442\u0440\u0435\u0439\u0442 \u0430\u0443\u0434\u0438\u043E", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u0442\u044B\u043C\u0434\u0437\u0443", bestQuality: "\u0430\u0440\u0442\u044B\u043D \u0432\u044B\u0441\u043E\u043A", grab: "\u0441\u043A\u0430\u0447\u0430\u0442\u044C", history: "\u0418\u0441\u0442\u043E\u0440\u0438", quit: "\u04D5\u0445\u044B\u0440", cancel: "\u041A\u044A\u043E\u043C", choose: "\u0425\u0430\u0440\u043A\u04D5", select: "\u0425\u044C\u0430\u0437\u0430", back: "\u041A\u044A\u043E\u043C", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0421\u043A\u0430\u0447\u0430\u2026", processing: "\u04C0\u0430\u0434\u0438\u043D\u2026", starting: "\u0421\u043A\u0430\u0447\u0430\u2026", grabbed: "\u0421\u043A\u0430\u0447\u0430\u043D\u0430!", savedTo: "\u0425\u044C\u0430\u043D\u0437\u0430\u0440:", grabAnother: "\u21B5 \u0421\u043A\u0430\u0447\u0430\u0442\u044C \u04D5\u0445\u044B\u0440", tryAgain: "\u042E\u0445\u0430\u0442\u044C", tip: "\u0421\u043E\u0432\u0435\u0442", lblTitle: "\u041A\u044A\u0430\u0442", lblArtist: "\u0425\u0443\u044B\u0441\u0430\u0433", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0411\u0430\u0440", lblTime: "\u041A\u044A\u0430\u0447", lblSource: "\u041A\u044A\u043E\u043B", updateAvailable: "\u0414\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0438 Carbon", langPickerTitle: "\u041C\u043E\u0442\u0442", langPickerSearch: "\u0413\u0443\u0438\u0449\u2026", lang: "\u041C\u043E\u0442\u0442" },
+  av: { tagline: "\u0433\u044A\u0443\u043B\u0430-\u0432\u0438\u0434\u0435\u043E \u044F \u043C\u0438\u043A\u04CF\u0430\u043C. \u0431\u0438\u0440\u0430. \u0433\u044A\u0443\u043B\u0430. \u0433\u043E\u0442\u043E\u0432\u043E.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0434\u0430\u0433\u044A\u0438", pasteLink: "\u0413\u044A\u0443 \u043B\u0443", supportsLine: "\u0432\u0438\u0434\u0435\u043E \u044F \u043C\u0438\u043A\u04CF\u0430\u043C 1800+ \u0441\u0430\u0439\u0442", notUrl: "\u044D\u0442\u043E \u043D\u0435 \u0441\u0441\u044B\u043B\u043A\u0430 \u2014 \u0433\u044A\u0443 \u043F\u043E\u043B\u043D\u044B\u0439 URL", analyzing: "\u0410\u043D\u0430\u043B\u0438\u0437", warmingUp: "\u0425\u044C\u0430\u0440\u0433\u044A\u0443\u2026", fetchingInfo: "\u0425\u044C\u0443\u044B\u0437 \u043C\u0430\u044A\u043B\u0443\u043C\u2026", stepType: "\u0428\u0430\u0433 1/3 \xB7 \u041C\u0445\u044C\u044B \u0445\u044C\u0443\u0435\u0439?", stepVideoFormat: "\u0428\u0430\u0433 2/3 \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepAudioFormat: "\u0428\u0430\u0433 2/3 \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepResolution: "\u0428\u0430\u0433 3/3 \xB7 \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438", stepFps: "\u0428\u0430\u0433 3/3 \xB7 \u041A\u0430\u0434\u0440\u043E\u0432 \u0441\u0435\u043A", stepBitrate: "\u0428\u0430\u0433 3/3 \xB7 \u0411\u0438\u0442\u0440\u0435\u0439\u0442", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u043A\u044A\u0430\u043B\u0430\u0445\u044C", bestQuality: "\u044F\u0433\u044C\u044B \u0435\u0446\u0435\u043D\u0442", grab: "\u0413\u044A\u0443", history: "\u0422\u0430\u0440\u0438\u0445", quit: "\u0413\u044A\u0443\u0442\u0430\u0437", cancel: "\u041A\u044A\u043E\u043C", choose: "\u0425\u0430\u0440\u043A\u04C0", select: "\u0425\u044C\u0430\u0437\u0430", back: "\u041A\u044A\u043E\u043C", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0413\u044A\u0443\u2026", processing: "\u0423\u0440\u0441\u2026", starting: "\u0413\u044A\u0443\u2026", grabbed: "\u0413\u044A\u0443\u043D!", savedTo: "\u0413\u044A\u0430\u043D\u0430 \u0445\u044C\u0430\u043D\u0430:", grabAnother: "\u21B5 \u0413\u044A\u0443 \u043A\u0445\u044C\u0430", tryAgain: "\u0426\u0443\u0432\u0435", tip: "\u0421\u043E\u0432\u0435\u0442", lblTitle: "\u041A\u044A\u0430\u0442", lblArtist: "\u0425\u0443\u044B\u0441\u0430\u0433", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0411\u0430\u0440", lblTime: "\u041C\u0443\u0433\u044A", lblSource: "\u041C\u0435\u043A\u044A", updateAvailable: "\u0414\u043E\u0441\u0442\u0443\u043F\u0435\u043D \u043E\u0431\u043D\u043E\u0432\u043B\u0435\u043D\u0435 Carbon", langPickerTitle: "\u041C\u043E\u0442\u0442", langPickerSearch: "\u0413\u0443\u0438\u0449\u2026", lang: "\u041C\u043E\u0442\u0442" },
+  tt: { tagline: "\u0432\u0438\u0434\u0435\u043E \u044F\u043A\u0438 \u043C\u0443\u0437\u044B\u043A\u0430\u043D\u044B \u0442\u04AF\u0448\u04E9\u0440. \u0441\u0430\u0439\u043B\u0430. \u0442\u04AF\u0448\u04E9\u0440. \u04D9\u0437\u0435\u0440\u043B\u0435.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0431\u0430\u0448\u043A\u0430", pasteLink: "\u0421\u044B\u043B\u0442\u0430\u043C\u0430\u043D\u044B \u043A\u0443\u0435\u0433\u044B\u0437", supportsLine: "1800+ \u0441\u0430\u0439\u0442\u0442\u0430\u043D \u0432\u0438\u0434\u0435\u043E \u04BB\u04D9\u043C \u0430\u0443\u0434\u0438\u043E \u0434\u04D9 \u044F\u0440\u044B\u0439", notUrl: "\u0431\u0443 \u0441\u044B\u043B\u0442\u0430\u043C\u0430 \u0442\u04AF\u0433\u0435\u043B \u2014 \u0442\u0443\u043B\u044B URL \u043A\u0443\u0435\u0433\u044B\u0437", analyzing: "\u0422\u0438\u043B\u043C\u04D9\u0448", warmingUp: "\u0496\u044B\u043B\u044B\u043D\u044B\u043F\u2026", fetchingInfo: "\u041C\u04D9\u043B\u0443\u043C\u0430\u0442 \u0430\u043B\u044B\u043D\u0430\u2026", stepType: "\u0410\u0434\u044B\u043C 1/3 \xB7 \u041D\u0438\u0447\u0435\u043A \u0430\u043B\u0430\u0441\u044B\u0437?", stepVideoFormat: "\u0410\u0434\u044B\u043C 2/3 \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442\u044B", stepAudioFormat: "\u0410\u0434\u044B\u043C 2/3 \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442\u044B", stepResolution: "\u0410\u0434\u044B\u043C 3/3 \xB7 \u0410\u043D\u044B\u043A\u043B\u044B\u043A", stepFps: "\u0410\u0434\u044B\u043C 3/3 \xB7 \u041A\u0430\u0434\u0440/\u0441\u0435\u043A", stepBitrate: "\u0410\u0434\u044B\u043C 3/3 \xB7 \u0410\u0443\u0434\u0438\u043E \u0431\u0438\u0442\u0440\u0435\u0439\u0442\u044B", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u043A\u0438\u04A3\u04D9\u0448 \u0438\u0442\u0435\u043B\u0433\u04D9\u043D", bestQuality: "\u0438\u04A3 \u044E\u0433\u0430\u0440\u044B \u0441\u044B\u0439\u0444\u0430\u0442", grab: "\u0442\u04AF\u0448\u04E9\u0440", history: "\u0422\u0430\u0440\u0438\u0445", quit: "\u0447\u044B\u0433\u0430\u0440\u0443", cancel: "\u0431\u0430\u0448 \u0442\u0430\u0440\u0442\u0443", choose: "\u0441\u0430\u0439\u043B\u0430", select: "\u043A\u0430\u0431\u0443\u043B", back: "\u043A\u0430\u0439\u0442\u0430\u0440\u0443", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0442\u04AF\u0448\u04E9\u0440\u04E9\u2026", processing: "\u044D\u0448\u043A\u04D9\u0440\u0442\u04D9\u2026", starting: "\u0442\u04AF\u0448\u04E9\u0440\u04AF \u0431\u0430\u0448\u043B\u0430\u043D\u0430\u2026", grabbed: "\u0442\u04AF\u0448\u04E9\u0440\u0435\u043B\u0434\u0435!", savedTo: "\u0441\u0430\u043A\u043B\u0430\u043D\u0433\u0430\u043D:", grabAnother: "\u21B5 \u0442\u0430\u0433\u044B\u043D \u0442\u04AF\u0448\u04E9\u0440", tryAgain: "\u043A\u0430\u0431\u0430\u0442 \u0442\u044B\u0448", tip: "\u041A\u0438\u04A3\u04D9\u0448", lblTitle: "\u0422\u0430\u043D\u044B\u0448", lblArtist: "\u0496\u044B\u0440\u0447\u044B", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0427\u044B\u0433\u0430\u0440\u0443", lblTime: "\u041E\u0437\u044B\u043D\u043B\u044B\u043A", lblSource: "\u0427\u044B\u0433\u0430\u043D\u0430\u043A", updateAvailable: "Carbon \u044F\u04A3\u0430\u0440\u0434\u044B\u0440\u0443\u044B \u0431\u0430\u0440", langPickerTitle: "\u0422\u0438\u043B \u0441\u0430\u0439\u043B\u0430", langPickerSearch: "\u044D\u0437\u043B\u04D9\u04AF\u2026", lang: "\u0422\u0435\u043B" },
+  krc: { tagline: "\u0432\u0438\u0434\u0435\u043E \u044F\u043A\u0438 \u043C\u0443\u0437\u044B\u043A\u0430 \u0442\u044E\u0436\u0435\u0440\u0435. \u0441\u0430\u0439\u043B\u0430. \u0442\u044E\u0436\u0435\u0440\u0435. \u0442\u0430\u0439\u044B\u043D.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0431\u0430\u0448\u0445\u0430", pasteLink: "\u0421\u0441\u044B\u043B\u043A\u0430 \u0436\u0443\u0430", supportsLine: "1800+ \u0441\u0430\u0439\u0442\u0442\u0435\u043D \u0432\u0438\u0434\u0435\u043E \u0430\u0443\u0434\u0438\u043E \u0430\u043B\u044B\u0440", notUrl: "\u0431\u0443 \u0441\u0441\u044B\u043B\u043A\u0430 \u044D\u043C\u0435\u0441 \u2014 \u0442\u043E\u043B\u0443 URL \u0436\u0443\u0430", analyzing: "\u0422\u0430\u043B\u043B\u0430\u0439", warmingUp: "\u0418\u0438\u0437\u0433\u0435\u043C\u2026", fetchingInfo: "\u041C\u0430\u0433\u044A\u043B\u0443\u043C\u0430\u0442 \u0430\u043B\u044B\u043D\u0430\u2026", stepType: "\u0410\u0434\u044B\u043C 1/3 \xB7 \u041D\u0438\u043C \u0430\u043B\u0430\u0441\u044B\u0437?", stepVideoFormat: "\u0410\u0434\u044B\u043C 2/3 \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepAudioFormat: "\u0410\u0434\u044B\u043C 2/3 \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepResolution: "\u0410\u0434\u044B\u043C 3/3 \xB7 \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u0435", stepFps: "\u0410\u0434\u044B\u043C 3/3 \xB7 \u041A\u0430\u0434\u0440/\u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "\u0410\u0434\u044B\u043C 3/3 \xB7 \u0410\u0443\u0434\u0438\u043E \u0431\u0438\u0442\u0440\u0435\u0439\u0442", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u0442\u0430\u0442\u043A\u044A\u044B\u043B\u0433\u044A\u0430\u043D", bestQuality: "\u044D\u04A3 \u044F\u0445\u044B \u0441\u0430\u043F\u0430", grab: "\u0442\u044E\u0436\u0435\u0440", history: "\u0422\u0430\u0440\u0438\u0445", quit: "\u0447\u044B\u0433\u044A\u0430\u0440", cancel: "\u0441\u044B\u0439\u043C\u0430", choose: "\u0441\u0430\u0439\u043B\u0430", select: "\u043A\u0430\u0431\u0443\u043B", back: "\u043A\u044A\u0430\u0439\u0442\u0430\u0440", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0442\u044E\u0436\u0435\u0440\u0435\u2026", processing: "\u044D\u0440\u043A\u0438\u043D\u2026", starting: "\u0442\u044E\u0436\u0435\u0440\u0443 \u0431\u0430\u0448\u043B\u0430\u043D\u0430\u2026", grabbed: "\u0442\u044E\u0436\u0435\u0440\u0435\u043B\u0434\u0438!", savedTo: "\u0441\u0430\u043A\u044A\u043B\u0430\u043D\u0433\u0430\u043D:", grabAnother: "\u21B5 \u0442\u0430\u0433\u044B\u043D \u0442\u044E\u0436\u0435\u0440", tryAgain: "\u043A\u0430\u0442\u0440\u0430\u043D \u043A\u04CF\u0443", tip: "\u041A\u044A\u0443\u0440\u0443\u043B", lblTitle: "\u0410\u0442\u0430", lblArtist: "\u0414\u0436\u0430\u043Duar", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0427\u044B\u0433\u044A\u0430\u0440\u044B\u0443", lblTime: "\u0423\u0437\u0430\u043A\u044A\u043B\u044B\u0433\u044A\u044B", lblSource: "\u0427\u044B\u0433\u044A\u0430\u043D\u0430\u043A\u044A", updateAvailable: "Carbon-\u043D\u044B \u0436\u0430\u04A3\u044B\u0440\u0442\u044B\u0443\u044B \u0431\u0430\u0440", langPickerTitle: "\u0422\u0438\u043B \u0441\u0430\u0439\u043B\u0430", langPickerSearch: "\u0438\u0437\u0434\u0435\u0443\u2026", lang: "\u0422\u0438\u043B" },
+  sah: { tagline: "\u0432\u0438\u0434\u0435\u043E \u044D\u0431\u044D \u044D\u0441 \u043C\u0443\u0437\u044B\u043A\u0430 \u0430\u043B\u044B\u044B. \u0442\u0430\u043B\u0430. \u0430\u043B\u044B\u044B. \u043A\u044D\u0442\u0438\u044D\u0442.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0434\u0430\u0433\u044A\u0438", pasteLink: "\u0421\u044B\u043B\u0442\u0430\u043C\u0430\u043D\u044B \u044B\u0439\u0430", supportsLine: "1800+ \u0441\u0430\u0439\u0442\u0442\u0430\u043D \u0432\u0438\u0434\u0435\u043E \u044D\u043C\u044D \u0445\u0443\u0495\u0443\u043E\u0440\u0443", notUrl: "\u0431\u0443 \u043B\u0438\u043D\u043A \u044D\u043C\u0435\u0441 \u2014 \u0442\u043E\u043B\u0443 URL \u0441\u0443\u043E\u043B\u0442\u0430", analyzing: "\u0410\u043D\u0430\u043B\u0438\u0437", warmingUp: "\u0425\u044B\u044F\u043B\u0430\u0430\u043D\u2026", fetchingInfo: "\u0418\u043D\u0444\u043E\u0440\u043C\u0430\u0446\u0438\u044F \u0445\u0430\u0495\u0430\u043B\u2026", stepType: "1-\u0440 \u0448\u044D\u043B\u044D\u0433 \xB7 \u0422\u04AF\u04BB\u044D\u0442\u044D\u0445 \u0445\u044D\u0440\u044D\u0433\u0442\u044D\u0439?", stepVideoFormat: "2-\u0440 \u0448\u044D\u043B\u044D\u0433 \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepAudioFormat: "2-\u0440 \u0448\u044D\u043B\u044D\u0433 \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepResolution: "3-\u0440 \u0448\u044D\u043B\u044D\u0433 \xB7 \u0425\u0430\u043D \u044D\u0440\u0445", stepFps: "3-\u0440 \u0448\u044D\u043B\u044D\u0433 \xB7 \u041A\u0430\u0434\u0440/\u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "3-\u0440 \u0448\u044D\u043B\u044D\u0433 \xB7 \u0410\u0443\u0434\u0438\u043E \u0431\u0438\u0442\u0440\u0435\u0439\u0442", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u0441\u04AF\u0433\u044D", bestQuality: "\u0438\u0439\u0433\u044D\u0440 \u0434\u044D\u044D\u0434 \u0447\u0430\u043D\u0430\u0440", grab: "\u0430\u043B\u044B\u044B", history: "\u0422\u04AF\u04AF\u0445", quit: "\u0442\u0430\u0441\u0430\u043B\u0434\u0430\u0430", cancel: "\u0446\u0443\u0446\u0430\u043B\u0433\u0430", choose: "\u0442\u0430\u043B\u0430", select: "\u0445\u044D\u043B\u044D\u0445\u044D", back: "\u0431\u0443\u0446\u0430\u0430", theme: "\u0417\u0430\u0433\u0432\u0430\u0440", downloading: "\u0430\u043B\u044B\u043D\u2026", processing: "\u0431\u043E\u043B\u043E\u0432\u0441\u0440\u0443\u0443\u043B\u2026", starting: "\u044D\u0445\u043B\u044D\u2026", grabbed: "\u0430\u0432\u0447!\u0430\u0448!", savedTo: "\u0445\u0430\u0495\u0430\u043D\u0430:", grabAnother: "\u21B5 \u0434\u0430\u0495\u0430 \u0430\u043B\u044B", tryAgain: "\u0434\u0430\u0495\u0430 \u043A\u044B\u0442\u0430\u0430", tip: "\u041A\u0435\u04A3\u0435\u0441", lblTitle: "\u0410\u0430\u0442", lblArtist: "\u04AE\u043D\u04AF\u0433\u04AF\u0441", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0422\u0430\u0495\u044B\u043B\u044B\u0431\u044B", lblTime: "\u0423\u0437\u0430\u0495\u0430", lblSource: "\u042D\u0440\u044D\u043C\u044D", updateAvailable: "Carbon-\u0443 \u044D\u0440\u044D\u044D\u043D\u0442\u044D", langPickerTitle: "\u0422\u044B\u043B \u0442\u0430\u043B\u0430", langPickerSearch: "\u042D\u04BB\u044D\u2026", lang: "\u0422\u044B\u043B" },
+  cv: { tagline: "\u0432\u0438\u0434\u0435\u043E \u0435 \u043C\u0115\u043B\u0445\u0435 \u0432\u0430\u043B\u043B\u0438. \u0441\u0443\u0439\u043B\u0430. \u0432\u0430\u043B\u043B\u0438. \u043F\u0115\u0440.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u044B\u0442\u043B\u0430", pasteLink: "\xC7\u0430\u043A \u0442\u0430\u0440\u0442", supportsLine: "1800+ \u0441\u0430\u0439\u0442\u0440\u0430\u043D \u0432\u0438\u0434\u0435\u043E \u0442\u0430\u0442\u0430 \u043C\u0115\u043B\u0445\u0435 \u043A\u0115\u0440\u0442", notUrl: "\u043A\u0443 \xE7\u0430\u043A \u0442\u0430 \u043C\u0430\u0440 \u2014 \u043F\u0115\u0442\u0115\u043C URL \u0442\u0430\u0440\u0442", analyzing: "\u04D6\xE7\u043B\u0435\u0432", warmingUp: "\u0114\xE7\u043B\u0435\u0442\u2026", fetchingInfo: "\u041F\u0443\u043B\u0103\u043D\u0447\u0103\u043D\u0430 \u043F\u0443\u043B\u0430\u0442\u044C\u2026", stepType: "1-\u043C\u0115\u0448 \u0115\xE7 \xB7 \u041C\u0115\u043D \u0438\u043B\u0115\u0440\u0115?", stepVideoFormat: "2-\u043C\u0115\u0448 \u0115\xE7 \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepAudioFormat: "2-\u043C\u0115\u0448 \u0115\xE7 \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepResolution: "3-\u043C\u0115\u0448 \u0115\xE7 \xB7 \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438", stepFps: "3-\u043C\u0115\u0448 \u0115\xE7 \xB7 \u041A\u0430\u0434\u0440/\u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "3-\u043C\u0115\u0448 \u0115\xE7 \xB7 \u0410\u0443\u0434\u0438\u043E \u0431\u0438\u0442\u0440\u0435\u0439\u0442", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u0441\u04D1\u043D\u04D1\u043B\u0430", bestQuality: "\u0438\u0115\u0440 \u043A\u0103\u043D\u0430", grab: "\u0432\u0430\u043B\u043B\u0438", history: "\u0418\u0441\u0442\u043E\u0440\u0438", quit: "\u0447\u04D7\u0440\u0442\u0435\u0445", cancel: "\u043F\u04D1\u0440\u0430\u0445\u04D1\u04AB\u043B\u0430", choose: "\u0441\u0443\u0439\u043B\u0430", select: "\u0441\u0443\u0439\u043B\u0430", back: "\u043A\u0430\u0439\u0442\u0430\u043B\u0430", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0432\u0430\u043B\u043B\u0430\u2026", processing: "\u04D7\xE7\u043B\u0435\u0432\u2026", starting: "\u04D7\xE7\u043B\u0435\u043D\u04D7\u2026", grabbed: "\u0432\u0430\u043B!", savedTo: "\u04D1\u0442\u04D7\u043D\u0435:", grabAnother: "\u21B5 \u0442\u0435\u043F\u04D7\u0440 \u0432\u0430\u043B", tryAgain: "\u0442\u0435\u043F\u04D7\u0440 \u0445\u04D1\u0448", tip: "\u041A\u0443\u0440\u0103\u043A", lblTitle: "\u042F\u0442", lblArtist: "\u0412\u0103\u043B\u0442\u0103\u0440", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u041A\u0103\u043B\u0430\u0440\u043D\u0438", lblTime: "\u0412\u0103\u0445\u0103\u0442", lblSource: "\u041F\u0443\xE7\u043B\u0430\u043C\u0103\u0448", updateAvailable: "Carbon \xE7\u0115\u043D\u0435\u0442\u0115\u043D\u0115 \u043F\u0443\u043B\u0442\u0103\u0440", langPickerTitle: "\u0427\u04D7\u043B\u0445\u0435 \u0441\u0443\u0439\u043B\u0430", langPickerSearch: "\u0428\u044B\u0440\u0430\u2026", lang: "\u0427\u04D7\u043B\u0445\u0435" },
+  udm: { tagline: "\u0432\u0438\u0434\u0435\u043E \u043D\u043E \u043C\u0443\u0437\u044B\u043A\u0430 \u0432\u0430\u043B\u0430. \u0448\u044B\u0440\u043D\u044B. \u0432\u0430\u043B\u0430. \u043B\u0443 \u043A\u0435\u043B\u044F\u043D.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u043A\u0435\u043B\u044F\u043D", pasteLink: "\u0421\u044B\u043B\u0442\u044B\u043C\u0435 \u043A\u0443\u0442", supportsLine: "1800+ \u0441\u0430\u0439\u0442\u043B\u0430\u0439 \u0432\u0438\u0434\u0435\u043E \u043D\u043E \u043C\u0443\u0437\u044B\u043A\u0430 \u0432\u0430\u043B\u0430", notUrl: "\u043A\u0443 \u043B\u0438\u043D\u043A \u0442\u044D\u043C\u0435 \u2014 \u043F\u043E\u043B\u043D\u0430 URL \u0441\u0451\u0442", analyzing: "\u0410\u043D\u0430\u043B\u0438\u0437\u0438\u0440\u0443", warmingUp: "\u0428\u044B\u0433\u044B\u0441\u0430\u2026", fetchingInfo: "\u041C\u0430\u043B\u044A\u0443\u043B\u0442 \u0433\u044B\u043B\u0430\u2026", stepType: "1-\u043B \u0448\u0430\u0433 \xB7 \u041A\u044B\u0434 \u0432\u0430\u043B\u0430?", stepVideoFormat: "2-\u043B \u0448\u0430\u0433 \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepAudioFormat: "2-\u043B \u0448\u0430\u0433 \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepResolution: "3-\u043B \u0448\u0430\u0433 \xB7 \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438", stepFps: "3-\u043B \u0448\u0430\u0433 \xB7 \u041A\u0430\u0434\u0440/\u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "3-\u043B \u0448\u0430\u0433 \xB7 \u0410\u0443\u0434\u0438\u043E \u0431\u0438\u0442\u0440\u0435\u0439\u0442", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u0441\u04E7\u043D\u0430\u043B", bestQuality: "\u0438\u043A \u0447\u0438\u0448 \u043A\u0103\u043D\u0430", grab: "\u0432\u0430\u043B\u0430", history: "\u041A\u0443\u044B\u043B\u044B\u043A", quit: "\u0448\u044B\u043A", cancel: "\u0437\u0433\u0430\u0440\u043D\u044B", choose: "\u0448\u044B\u0440\u043D\u044B", select: "\u0448\u044B\u0440\u043D\u044B", back: "\u043B\u0438\u043A\u0442\u044B", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0432\u0430\u043B\u0430\u2026", processing: "\u04E7\u0442\u043A\u04D9\u043D\u2026", starting: "\u04E7\u0436\u04D9\u2026", grabbed: "\u0432\u0430\u043B\u0435!", savedTo: "\u0441\u0430\u043A\u043B\u0430\u043D:", grabAnother: "\u21B5 \u0432\u0430\u043B\u0430 \u0442\u0430\u0440\u0430", tryAgain: "\u043D\u0438\u0433\u044B\u043B\u0435 \u0448\u0443", tip: "\u041A\u0443\u043B\u044E\u043A", lblTitle: "\u042F\u043B", lblArtist: "\u041A\u044B\u043B\u0431\u0443\u0440", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u041F\u0443\u043A", lblTime: "\u0423\u043A\u043E\u043D", lblSource: "\u0427\u044B\u043A\u044B\u0448", updateAvailable: "Carbon \u0448\u0443 \u043A\u0443\u0442\u0441\u043A\u044B\u043B\u0430", langPickerTitle: "\u041A\u044B\u043B \u0448\u044B\u0440\u043D\u044B", langPickerSearch: "\u041A\u044B\u043B\u044A\u044B\u2026", lang: "\u041A\u044B\u043B" },
+  bak: { tagline: "\u0432\u0438\u0434\u0435\u043E \u0439\u04D9\u043A\u0438 \u043C\u0443\u0437\u044B\u043A\u0430\u043D\u044B \u0442\u04AF\u0448\u04D9\u0440. \u04BB\u0430\u0439\u043B\u0430. \u0442\u04AF\u0448\u04D9\u0440. \u0442\u0430\u043C\u0430\u043C.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0431\u0430\u0448\u04A1\u0430", pasteLink: "\u04BA\u04E9\u043A\u04AF\u043C\u04D9\u0442 \u04BB\u04E9\u043A\u04AF\u043C\u0438\u0442\u0435", supportsLine: "1800+ \u0441\u0430\u0439\u0442\u0442\u0430\u043D \u0432\u0438\u0434\u0435\u043E \u04BB\u04D9\u043C \u0430\u0443\u0434\u0438\u043E \u0430\u043B\u0430", notUrl: "\u044D\u0442\u043E \u0441\u0441\u044B\u043B\u043A\u0430 \u0442\u04AF\u0433\u0435\u043B \u2014 \u0442\u0443\u043B\u044B URL \u043A\u0435\u0440\u0442\u0435\u0433\u0435\u0437", analyzing: "\u0422\u04D9\u04BB\u043B\u0438\u043A", warmingUp: "\u0419\u044B\u043B\u044B\u043D\u044B\u0443\u2026", fetchingInfo: "\u041C\u04D9\u04A1\u043B\u0443\u043C\u04D9\u0442 \u0430\u043B\u044B\u0443\u2026", stepType: "1-\u0441\u0435 \u04A1\u0430\u0434\u0430\u043C \xB7 \u041D\u0438 \u0430\u043B\u0430\u0441\u044B\u0499?", stepVideoFormat: "2-\u0441\u0435 \u04A1\u0430\u0434\u0430\u043C \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442\u044B", stepAudioFormat: "2-\u0441\u0435 \u04A1\u0430\u0434\u0430\u043C \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442\u044B", stepResolution: "3-\u0441\u0435 \u04A1\u0430\u0434\u0430\u043C \xB7 \u0420\u0430\u0437\u0440\u0435\u0448\u0435\u043D\u0438\u0435", stepFps: "3-\u0441\u0435 \u04A1\u0430\u0434\u0430\u043C \xB7 \u041A\u0430\u0434\u0440/\u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "3-\u0441\u0435 \u04A1\u0430\u0434\u0430\u043C \xB7 \u0410\u0443\u0434\u0438\u043E \u0431\u0438\u0442\u0440\u0435\u0439\u0442", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u04BB\u04D9\u0440\u04D9\u0439", bestQuality: "\u0438\u04A3 \u044E\u04A1\u0430\u0440\u044B \u0441\u0438\u0444\u0430\u0442", grab: "\u0442\u04AF\u0448\u04D9\u0440", history: "\u0422\u0430\u0440\u0438\u0445", quit: "\u0441\u044B\u0493\u044B\u0443", cancel: "\u04BB\u0443\u04A3\u0434\u044B\u0440\u044B\u0443", choose: "\u04BB\u0430\u0439\u043B\u0430", select: "\u04BB\u0430\u0439\u043B\u0430", back: "\u043A\u0430\u0439\u0442\u044B\u0443", theme: "\u0422\u0435\u043C\u0430", downloading: "\u0442\u04AF\u0448\u04D9\u0440\u04E9\u043C\u2026", processing: "\u044D\u0448\u043A\u04D9\u0440\u0442\u04D9\u043C\u2026", starting: "\u0431\u0430\u0448\u043B\u0430\u0439\u044B\u043C\u2026", grabbed: "\u0442\u04AF\u0448\u04D9\u0440\u0435\u043B\u0434\u0435!", savedTo: "\u04BB\u04D9\u0440\u04D9\u043B\u0433\u04D9\u043D\u0434\u04D9:", grabAnother: "\u21B5 \u0442\u0430\u0493\u044B \u043B\u0430 \u0442\u04AF\u0448\u04D9\u0440", tryAgain: "\u04A1\u0430\u0431\u0430\u0442\u0430\u043D \u0443\u0440\u044B\u043D\u0493\u0430", tip: "\u041A\u04D9\u04BB\u04D9\u0442", lblTitle: "\u0418\u0441\u0435\u043C", lblArtist: "\u0411\u0430\u0448\u04A1\u043E\u0440\u0442\u0441\u0430", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0421\u044B\u0493\u0430\u0440\u044B\u0443", lblTime: "\u041E\u0499\u04E9\u0442\u043A\u04E9\u043D", lblSource: "\u0421\u044B\u04A3\u0430\u043D\u04BB\u044B", updateAvailable: "Carbon \u044F\u04A3\u044B\u0440\u0442\u044B\u0443\u044B \u0431\u0430\u0440", langPickerTitle: "\u0422\u0435\u043B \u04BB\u0430\u0439\u043B\u0430", langPickerSearch: "\u042D\u0499\u2026", lang: "\u0422\u0435\u043B" },
+  ckb: { tagline: "\u06A4\u06CC\u062F\u06CC\u06C6 \u06CC\u0627\u0646 \u0645\u06C6\u0633\u06CC\u0642\u0627 \u062F\u0627\u06AF\u0631\u062A. \u0647\u06D5\u06B5\u0628\u0698\u06CE\u0631\u06D5. \u062F\u0627\u06AF\u0631\u062A. \u062A\u06D5\u0648\u0627\u0648.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0645\u0627\u06B5\u067E\u06D5\u0695", pasteLink: "\u0628\u06D5\u0633\u062A\u06D5\u0631\u06CC \u0628\u0646\u0627\u0633\u06D5", supportsLine: "\u067E\u0634\u062A\u06AF\u06CC\u0631\u06CC \u06A4\u06CC\u062F\u06CC\u06C6 \u0648 \u062F\u06D5\u0646\u06AF \u0644\u06D5 1800+ \u0645\u0627\u06B5\u067E\u06D5\u0695", notUrl: "\u0626\u06D5\u0645\u06D5 \u0628\u06D5\u0633\u062A\u06D5\u0631 \u0646\u06CC\u06CC\u06D5 \u2014 URL\u06CC \u062A\u06D5\u0648\u0627\u0648 \u062F\u0627\u0628\u0646\u06CE", analyzing: "\u0634\u06CC\u06A9\u0631\u062F\u0646\u06D5\u0648\u06D5", warmingUp: "\u06AF\u06D5\u0631\u0645\u06A9\u0631\u062F\u0646\u06D5\u0648\u06D5\u2026", fetchingInfo: "\u0648\u06D5\u0631\u06AF\u0631\u062A\u0646\u06CC \u0632\u0627\u0646\u06CC\u0627\u0631\u06CC\u2026", stepType: "\u0647\u06D5\u0646\u06AF\u06D5\u06CC 1/3 \xB7 \u0686\u06CC \u062F\u06D5\u062E\u06D5\u06CC\u061F", stepVideoFormat: "\u0647\u06D5\u0646\u06AF\u06D5\u06CC 2/3 \xB7 \u0641\u06C6\u0631\u0645\u0627\u062A\u06CC \u06A4\u06CC\u062F\u06CC\u06C6", stepAudioFormat: "\u0647\u06D5\u0646\u06AF\u06D5\u06CC 2/3 \xB7 \u0641\u06C6\u0631\u0645\u0627\u062A\u06CC \u062F\u06D5\u0646\u06AF", stepResolution: "\u0647\u06D5\u0646\u06AF\u06D5\u06CC 3/3 \xB7 \u0695\u0648\u0648\u0646\u06CC", stepFps: "\u0647\u06D5\u0646\u06AF\u06D5\u06CC 3/3 \xB7 \u0686\u06D5\u0631\u062E\u06D5 \u0644\u06D5 \u0686\u0631\u06A9\u06D5\u06CC\u06D5\u06A9", stepBitrate: "\u0647\u06D5\u0646\u06AF\u06D5\u06CC 3/3 \xB7 \u0628\u06CC\u062A\u200C\u0695\u06D5\u06CC\u062A\u06CC \u062F\u06D5\u0646\u06AF", videoOption: "\u06A4\u06CC\u062F\u06CC\u06C6", audioOption: "\u062F\u06D5\u0646\u06AF", recommended: "\u067E\u06CE\u0634\u0646\u06CC\u0627\u0631\u06A9\u0631\u0627\u0648", bestQuality: "\u0628\u0627\u0634\u062A\u0631\u06CC\u0646 \u06A9\u0648\u0627\u0644\u06CC\u062A\u06CC", grab: "\u062F\u0627\u06AF\u0631\u062A", history: "\u0645\u06CE\u0698\u0648\u0648", quit: "\u062F\u06D5\u0631\u0686\u0648\u0648\u0646", cancel: "\u0647\u06D5\u06B5\u0648\u06D5\u0634\u0627\u0646\u062F\u0646\u06D5\u0648\u06D5", choose: "\u0647\u06D5\u06B5\u0628\u0698\u0627\u0631\u062F\u0646", select: "\u067E\u0634\u062A\u0695\u0627\u0633\u062A\u06A9\u0631\u062F\u0646\u06D5\u0648\u06D5", back: "\u06AF\u06D5\u0695\u0627\u0646\u06D5\u0648\u06D5", theme: "\u062A\u06D5\u0645", downloading: "\u062F\u0627\u06AF\u0631\u062A\u0646\u2026", processing: "\u067E\u0631\u06C6\u0633\u06CE\u0633\u06A9\u0631\u062F\u0646\u2026", starting: "\u062F\u06D5\u0633\u062A\u067E\u06CE\u06A9\u0631\u062F\u0646\u2026", grabbed: "\u062F\u0627\u06AF\u06CC\u0631\u0627!", savedTo: "\u067E\u0627\u0634\u06D5\u06A9\u06D5\u0648\u062A\u06A9\u0631\u0627\u0648 \u0644\u06D5:", grabAnother: "\u21B5 \u0634\u062A\u06CE\u06A9\u06CC \u062A\u0631 \u062F\u0627\u06AF\u0631\u062A", tryAgain: "\u062A\u06A9\u0627\u06CC\u06D5 \u062F\u0648\u0648\u0628\u0627\u0631\u06D5", tip: "\u0626\u0627\u0645\u06C6\u0698\u06AF\u0627\u0631\u06CC", lblTitle: "\u0646\u0627\u0648\u06CC", lblArtist: "\u0647\u06D5\u06B5\u0633\u06D5\u0631", lblAlbum: "\u0626\u06D5\u0644\u0628\u06C6\u0645", lblRelease: "\u0628\u06B5\u0627\u0648\u06A9\u0631\u062F\u0646\u06D5\u0648\u06D5", lblTime: "\u0645\u0627\u0648\u06D5", lblSource: "\u0633\u06D5\u0631\u0686\u0627\u0648\u06D5", updateAvailable: "\u0646\u0648\u06CE\u06A9\u0631\u062F\u0646\u06D5\u0648\u06D5\u06CC Carbon \u0628\u06D5\u0631\u062F\u06D5\u0633\u062A\u06D5", langPickerTitle: "\u0632\u0645\u0627\u0646 \u0647\u06D5\u06B5\u0628\u0698\u06CE\u0631\u06D5", langPickerSearch: "\u06AF\u06D5\u0695\u0627\u0646\u2026", lang: "\u0632\u0645\u0627\u0646" },
+  kmr: { tagline: "v\xEEdyo an j\xEEr bajar bike. hilbij\xEAre. bajar bike. xerab.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 malper\xEA", pasteLink: "L\xEEnke bi\u015Fkope", supportsLine: "v\xEEdyo \xFB j\xEEr li 1800+ malper\xEA pi\u015Ftgir\xEE dike", notUrl: "ev l\xEEnke n\xEEn e \u2014 URLy tije bih\xFBve", analyzing: "Anal\xEEz dike", warmingUp: "Germkirin\u2026", fetchingInfo: "Agah\xEE bi\xE7\xFBka\u2026", stepType: "Gav 1/3 \xB7 \xC7i hilbij\xEAre?", stepVideoFormat: "Gav 2/3 \xB7 Formata v\xEEdyo", stepAudioFormat: "Gav 2/3 \xB7 Formata j\xEEr", stepResolution: "Gav 3/3 \xB7 Bih\xFBy\xEE", stepFps: "Gav 3/3 \xB7 \xC7ar\xE7ove di saniyek\xEA", stepBitrate: "Gav 3/3 \xB7 B\xEEtrayta j\xEEr", videoOption: "V\xEEdyo", audioOption: "J\xEEr", recommended: "t\xEA hem\xEEn", bestQuality: "ba\u015Ftir\xEEn kal\xEEte", grab: "bajar bike", history: "D\xEErok", quit: "derve", cancel: "rawer", choose: "hilbij\xEAre", select: "qeb\xFBl bike", back: "ziver", theme: "Tema", downloading: "bajar dike\u2026", processing: "dixebil\xEEne\u2026", starting: "destp\xEAkirin\u2026", grabbed: "hat bajar!", savedTo: "hat tom\xEEr kirin:", grabAnother: "\u21B5 yek din bajar bike", tryAgain: "d\xEEsa bicerib\xEEne", tip: "\u015E\xEErat", lblTitle: "Sernav", lblArtist: "\xC7\xEEmkar", lblAlbum: "Albom", lblRelease: "Derketin", lblTime: "Dem", lblSource: "\xC7avkan\xEE", updateAvailable: "Guhertovaniya Carbon heye", langPickerTitle: "Ziman hilbij\xEAre", langPickerSearch: "big l\xEA\u2026", lang: "Ziman" },
+  sd: { tagline: "\u0648\u068A\u064A\u0648 \u064A\u0627 \u0645\u0648\u0633\u064A\u0642\u064A \u068A\u0627\u06BB\u0648. \u0686\u0648\u0646\u068A\u064A\u0648. \u068A\u0627\u06BB\u0648. \u0645\u06A9\u0645\u0644.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u067B\u064A\u0627", pasteLink: "\u0644\u0646\u06AA \u06AA\u0627\u067E\u064A \u06AA\u0631\u064A\u0648", supportsLine: "1800+ \u0633\u0627\u0626\u064A\u067D\u0646 \u0645\u0627\u0646 \u0648\u068A\u064A\u0648 \u06FD \u0622\u068A\u064A\u0648 \u0633\u067E\u0648\u0631\u067D \u067F\u064A\u0646\u062F\u0648 \u0622\u0647\u064A", notUrl: "\u0647\u064A \u0644\u0646\u06AA \u0646\u0647 \u0622\u0647\u064A \u2014 \u0645\u06AA\u0645\u0644 URL \u06AA\u0627\u067E\u064A \u06AA\u0631\u064A\u0648", analyzing: "\u062A\u062C\u0632\u0626\u064A", warmingUp: "\u06AF\u0631\u0645 \u067F\u064A\u06BB\u2026", fetchingInfo: "\u0645\u0639\u0644\u0648\u0645\u0627\u062A \u06A9\u064A \u0648\u0683\u064A\u2026", stepType: "\u0645\u0631\u062D\u0644\u0648 1/3 \xB7 \u0687\u0627 \u068A\u0627\u06BB\u0648 \u067F\u0627\u064A\u0648\u061F", stepVideoFormat: "\u0645\u0631\u062D\u0644\u0648 2/3 \xB7 \u0648\u068A\u064A\u0648 \u0641\u0627\u0631\u0645\u064A\u067D", stepAudioFormat: "\u0645\u0631\u062D\u0644\u0648 2/3 \xB7 \u0622\u068A\u064A\u0648 \u0641\u0627\u0631\u0645\u064A\u067D", stepResolution: "\u0645\u0631\u062D\u0644\u0648 3/3 \xB7 \u0631\u064A\u0632\u0648\u0644\u0648\u0634\u0646", stepFps: "\u0645\u0631\u062D\u0644\u0648 3/3 \xB7 \u0641\u0631\u064A\u0645/\u0633\u064A\u06AA\u0646\u068A", stepBitrate: "\u0645\u0631\u062D\u0644\u0648 3/3 \xB7 \u0622\u068A\u064A\u0648 \u0628\u0650\u067D \u0631\u064A\u067D", videoOption: "\u0648\u068A\u064A\u0648", audioOption: "\u0622\u068A\u064A\u0648", recommended: "\u0680 geng", bestQuality: "\u0628\u0647\u062A\u0631\u064A\u0646 \u0645\u0639\u064A\u0627\u0631", grab: "\u068A\u0627\u06BB\u0648", history: "\u062A\u0627\u0631\u064A\u062E", quit: "\u0646\u06AA\u0631\u0627\u0626\u0648", cancel: "\u0631\u062F \u06AA\u0631\u064A\u0648", choose: "\u0686\u0648\u0646\u068A\u064A\u0648", select: "\u0642\u0628\u0648\u0644 \u06AA\u0631\u064A\u0648", back: "\u067E\u0648\u0626\u062A\u064A", theme: "\u062A\u064A\u0645", downloading: "\u068A\u0627\u06BB\u064A \u0631\u0647\u064A\u0648 \u0622\u0647\u064A\u2026", processing: "\u067E\u0631\u0648\u0633\u064A\u0633\u0646\u06AF\u2026", starting: "\u0634\u0631\u0648\u0639 \u068A\u0627\u06BB\u2026", grabbed: "\u068A\u0627\u06BB\u064A \u0648\u064A\u0648!", savedTo: "\u0645\u062D\u0641\u0648\u0638 \u06AA\u064A\u0648 \u0648\u064A\u0648:", grabAnother: "\u21B5 \u067B\u064A\u0648 \u068A\u0627\u06BB\u0648", tryAgain: "\u067B\u064A\u0647\u0631 \u06AA\u0648\u0634\u0634 \u06AA\u0631\u064A\u0648", tip: "\u067D\u067E", lblTitle: "\u0639\u0646\u0648\u0627\u0646", lblArtist: "\u0633inger", lblAlbum: "\u0627\u0644\u0628\u0645", lblRelease: "\u0631\u0644\u064A\u0632", lblTime: "\u0648\u0642\u062A", lblSource: "\u0645\u0627\u062E\u0630", updateAvailable: "Carbon \u0627\u067E\u068A\u064A\u067D \u0645\u0648\u062C\u0648\u062F \u0622\u0647\u064A", langPickerTitle: "\u067B\u0648\u0644\u064A \u0686\u0648\u0646\u068A\u064A\u0648", langPickerSearch: "\u06B3\u0648\u0644\u064A\u0648\u2026", lang: "\u067B\u0648\u0644\u064A" },
+  doi: { tagline: "\u0935\u0940\u0921\u093F\u092F\u094B \u091C\u093E\u0902 \u092E\u094D\u092F\u0942\u091C\u093F\u0915 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u094B\u0964 \u091A\u0941\u0928\u094B\u0964 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u094B\u0964 \u0939\u094B \u0917\u092F\u093E\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0938\u093E\u0907\u091F", pasteLink: "\u0932\u093F\u0902\u0915 \u092A\u093E\u0938\u094D\u0924 \u0915\u0930\u094B", supportsLine: "1800+ \u0938\u093E\u0907\u091F\u094B\u0902 \u0924\u094B\u091C\u093E\u0902 \u0935\u0940\u0921\u093F\u092F\u094B \u0910 \u0924\u0947 \u0906\u0909\u0921\u093F\u092F\u094B \u0938\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0926\u093E", notUrl: "\u0907\u092F\u0942\u0902 \u0932\u093F\u0902\u0915 \u0928\u0947\u0908\u0902 \u2014 \u092A\u0942\u0930\u093E URL \u092A\u093E\u0938\u094D\u0924 \u0915\u0930\u094B", analyzing: "\u091C\u093E\u0902\u091A\u0926\u093E", warmingUp: "\u0917\u0930\u092E \u0939\u094B\u0901\u0926\u093E\u2026", fetchingInfo: "\u091C\u093E\u0928\u0915\u093E\u0930\u0940 \u0932\u0948\u0902\u0926\u093E\u2026", stepType: "\u0938\u094D\u091F\u0947\u092A 1/3 \xB7 \u0915\u0940\u092F\u093E \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0928\u093E?", stepVideoFormat: "\u0938\u094D\u091F\u0947\u092A 2/3 \xB7 \u0935\u0940\u0921\u093F\u092F\u094B \u092B\u0949\u0930\u094D\u092E\u0948\u091F", stepAudioFormat: "\u0938\u094D\u091F\u0947\u092A 2/3 \xB7 \u0911\u0921\u093F\u092F\u094B \u092B\u0949\u0930\u094D\u092E\u0948\u091F", stepResolution: "\u0938\u094D\u091F\u0947\u092A 3/3 \xB7 \u0930\u093F\u091C\u093C\u0949\u0932\u094D\u092F\u0942\u0936\u0928", stepFps: "\u0938\u094D\u091F\u0947\u092A 3/3 \xB7 \u092B\u094D\u0930\u0947\u092E\u094D\u0938 \u092A\u094D\u0930\u0924\u093F \u0938\u0947\u0915\u0902\u0921", stepBitrate: "\u0938\u094D\u091F\u0947\u092A 3/3 \xB7 \u0911\u0921\u093F\u092F\u094B \u092C\u093F\u091F\u0930\u0947\u091F", videoOption: "\u0935\u0940\u0921\u093F\u092F\u094B", audioOption: "\u0911\u0921\u093F\u092F\u094B", recommended: "\u0938\u0941\u091D\u093E\u092F\u093E", bestQuality: "\u0938\u092C\u094D\u0924\u0947 \u092C\u0922\u093C\u093F\u092F\u093E \u0915\u094D\u0935\u093E\u0932\u093F\u091F\u0940", grab: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921", history: "\u0907\u0924\u093F\u0939\u093E\u0938", quit: "\u092C\u093E\u0939\u0930", cancel: "\u0930\u0926\u094D\u0926", choose: "\u091A\u0941\u0928\u094B", select: "\u091A\u0941\u0928\u094B", back: "\u092A\u0940\u091B\u0947", theme: "\u0925\u0940\u092E", downloading: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0939\u094B \u0930\u0939\u093E\u2026", processing: "\u092A\u094D\u0930\u094B\u0938\u0947\u0938 \u0939\u094B \u0930\u0939\u093E\u2026", starting: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0936\u0941\u0930\u0942\u2026", grabbed: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0939\u094B \u0917\u092F\u093E!", savedTo: "\u0938\u0947\u0935 \u0915\u093F\u092F\u093E:", grabAnother: "\u21B5 \u0914\u0930 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u094B", tryAgain: "\u092B\u093F\u0930 \u0915\u094B\u0936\u093F\u0936 \u0915\u0930\u094B", tip: "\u0938\u0941\u091D\u093E\u0935", lblTitle: "\u0936\u0940\u0930\u094D\u0937\u0915", lblArtist: "\u0915\u0932\u093E\u0915\u093E\u0930", lblAlbum: "\u090F\u0932\u094D\u092C\u092E", lblRelease: "\u0930\u093F\u0932\u0940\u091C\u093C", lblTime: "\u0905\u0935\u0927\u093F", lblSource: "\u0938\u094D\u0930\u094B\u0924", updateAvailable: "\u0915\u093E\u0930\u094D\u092C\u0928 \u0905\u092A\u0921\u0947\u091F \u0909\u092A\u0932\u092C\u094D\u0927 \u0939\u0948", langPickerTitle: "\u092D\u093E\u0937\u093E \u091A\u0941\u0928\u094B", langPickerSearch: "\u0916\u094B\u091C\u094B\u2026", lang: "\u092D\u093E\u0937\u093E" },
+  kok: { tagline: "\u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0915\u093F\u0902\u0935\u093E \u0938\u0902\u0917\u0940\u0924 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930. \u0928\u093F\u0935\u0921. \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930. \u091D\u093E\u0932\u0947\u0902.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0938\u0915\u091F", pasteLink: "\u0932\u093F\u0902\u0915 \u0932\u093E\u0917\u0935", supportsLine: "1800+ \u0938\u0915\u091F\u093E\u0902 \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0906\u0928\u093F \u0911\u0921\u093F\u0913 \u0938\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0924", notUrl: "\u0939\u0940 \u0932\u093F\u0902\u0915 \u0928\u094D\u0939\u092F \u2014 \u092A\u0942\u0930\u094D\u0923 URL \u0932\u093E\u0917\u0935", analyzing: "\u0924\u092A\u0938\u093E", warmingUp: "\u0917\u0930\u092E \u0915\u0930\u0924\u2026", fetchingInfo: "\u092E\u093E\u0939\u093F\u0924\u0940 \u0915\u093E\u0922\u0924\u2026", stepType: "\u092A\u093E\u0933\u093E\u0935 1/3 \xB7 \u0915\u093E\u092F \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u093E\u092F\u091A\u0947?", stepVideoFormat: "\u092A\u093E\u0933\u093E\u0935 2/3 \xB7 \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u092B\u0949\u0930\u092E\u0945\u091F", stepAudioFormat: "\u092A\u093E\u0933\u093E\u0935 2/3 \xB7 \u0911\u0921\u093F\u0913 \u092B\u0949\u0930\u092E\u0945\u091F", stepResolution: "\u092A\u093E\u0933\u093E\u0935 3/3 \xB7 \u0930\u093F\u091D\u094B\u0932\u094D\u092F\u0941\u0936\u0928", stepFps: "\u092A\u093E\u0933\u093E\u0935 3/3 \xB7 \u092B\u094D\u0930\u0947\u092E\u094D\u0938 \u092A\u094D\u0930\u0924\u093F \u0938\u0947\u0915\u0902\u0926", stepBitrate: "\u092A\u093E\u0933\u093E\u0935 3/3 \xB7 \u0911\u0921\u093F\u0913 \u092C\u093F\u091F\u0930\u0947\u091F", videoOption: "\u0935\u094D\u0939\u093F\u0921\u093F\u0913", audioOption: "\u0911\u0921\u093F\u0913", recommended: "\u0938\u0941\u091A\u0935\u0932\u0947\u0932\u0947\u0902", bestQuality: "\u0938\u0930\u094D\u0935\u094B\u0924\u094D\u0924\u092E \u0926\u0930\u094D\u091C\u093E", grab: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921", history: "\u0907\u0924\u093F\u0939\u093E\u0938", quit: "\u092C\u093E\u0939\u0947\u0930", cancel: "\u0930\u0926\u094D\u0926 \u0915\u0930", choose: "\u0928\u093F\u0935\u0921", select: "\u0928\u093F\u0935\u0921", back: "\u092B\u093E\u091F\u0940", theme: "\u0925\u0940\u092E", downloading: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0924\u092F\u2026", processing: "\u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u093E \u0915\u0930\u0924\u092F\u2026", starting: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0938\u0941\u0930\u0942\u2026", grabbed: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u091D\u093E\u0932\u0947\u0902!", savedTo: "\u091C\u0924\u094D\u0928 \u0915\u0947\u0932\u0947\u0902:", grabAnother: "\u21B5 \u0906\u0923\u0940\u0915 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930", tryAgain: "\u092A\u0941\u0928\u094D\u0939\u093E \u092A\u094D\u0930\u092F\u0924\u094D\u0928 \u0915\u0930", tip: "\u0938\u0942\u091A\u0928\u093E", lblTitle: "\u0936\u0940\u0930\u094D\u0937\u0915", lblArtist: "\u0915\u0932\u093E\u0915\u093E\u0930", lblAlbum: "\u0905\u0932\u094D\u092C\u092E", lblRelease: "\u0930\u093F\u0932\u0940\u091C", lblTime: "\u0915\u093E\u0932\u093E\u0935\u0927\u0940", lblSource: "\u0938\u094D\u0930\u094B\u0924", updateAvailable: "\u0915\u093E\u0930\u094D\u092C\u0928 \u0905\u0926\u094D\u092F\u0924\u0928 \u0909\u092A\u0932\u092C\u094D\u0927", langPickerTitle: "\u092D\u093E\u0938 \u0928\u093F\u0935\u0921", langPickerSearch: "\u0936\u094B\u0927\u2026", lang: "\u092D\u093E\u0938" },
+  mni: { tagline: "\u09AD\u09BF\u09A6\u09BF\u0993 \u09A8\u09BE\u0995\u09BF \u09AE\u09BF\u0989\u099C\u09BF\u0995 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u0995\u09B0\u09C1\u0995\u0964 \u09AC\u09BE\u099B\u09C1\u0995\u0964 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u0995\u09B0\u09C1\u0995\u0964 \u09B9\u0987\u09B2\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u099B\u09BE\u0987\u099F", pasteLink: "\u09B2\u09BF\u0982\u0995 \u09A6\u09BF\u09AF\u09BC\u09BE", supportsLine: "\u09E7\u09EE\u09E6\u09E6+ \u099B\u09BE\u0987\u099F\u09B8 \u09A5\u09C7\u0995\u09C7 \u09AD\u09BF\u09A6\u09BF\u0993 \u0985\u09AE\u09B8\u09CD\u09A4 \u0986\u0989\u09A1\u09BF\u0993 \u09B8\u09BE\u09AA\u09CB\u09B0\u09CD\u099F \u0995\u09B0\u09C7", notUrl: "\u0987\u09B9\u09BE\u09A8 \u09B2\u09BF\u0982\u0995 \u09A8\u0987 \u2014 \u09AA\u09C1\u09B0\u09BE URL \u09A6\u09BF\u09AF\u09BC\u09BE", analyzing: "\u09AC\u09BF\u09B6\u09CD\u09B2\u09C7\u09B7\u09A3 \u0995\u09B0\u09A4\u09C7", warmingUp: "\u0997\u09B0\u09AE \u09B9\u09AC\u09BF\u2026", fetchingInfo: "\u09A4\u09A5\u09CD\u09AF \u09B2\u09AC\u09BF\u2026", stepType: "\u09B8\u09CD\u099F\u09C7\u09AA \u09E7/\u09E9 \xB7 \u0995\u09C0 \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u0995\u09AC\u09BF?", stepVideoFormat: "\u09B8\u09CD\u099F\u09C7\u09AA \u09E8/\u09E9 \xB7 \u09AD\u09BF\u09A6\u09BF\u0993 \u09AB\u09B0\u09AE\u09CD\u09AF\u09BE\u099F", stepAudioFormat: "\u09B8\u09CD\u099F\u09C7\u09AA \u09E8/\u09E9 \xB7 \u0985\u09A1\u09BF\u0993 \u09AB\u09B0\u09AE\u09CD\u09AF\u09BE\u099F", stepResolution: "\u09B8\u09CD\u099F\u09C7\u09AA \u09E9/\u09E9 \xB7 \u09B0\u09C7\u099C\u09B2\u09CD\u09AF\u09C1\u09B6\u09A8", stepFps: "\u09B8\u09CD\u099F\u09C7\u09AA \u09E9/\u09E9 \xB7 \u09AA\u09CD\u09B0\u09A4\u09BF \u09B8\u09C7\u0995\u09C7\u09A3\u09CD\u09A1 \u09AB\u09CD\u09B0\u09C7\u09AE", stepBitrate: "\u09B8\u09CD\u099F\u09C7\u09AA \u09E9/\u09E9 \xB7 \u0985\u09A1\u09BF\u0993 \u09AC\u09BF\u099F\u09B0\u09C7\u099F", videoOption: "\u09AD\u09BF\u09A6\u09BF\u0993", audioOption: "\u0985\u09A1\u09BF\u0993", recommended: "\u09AA\u09B0\u09BE\u09AE\u09B0\u09CD\u09B6 \u0995\u09AC\u09BF", bestQuality: "\u09B8\u09B0\u09CD\u09AC\u09CB\u099A\u09CD\u099A \u09AE\u09BE\u09A8", grab: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1", history: "\u0987\u09A4\u09BF\u09B9\u09BE\u09B8", quit: "\u09AC\u09BE\u09B9\u09BF\u09B0 \u09B9\u09AC\u09BF", cancel: "\u09AC\u09BE\u09A4\u09BF\u09B2", choose: "\u09AC\u09BE\u099B\u09C1\u0995", select: "\u09A8\u09BF\u09B0\u09CD\u09AC\u09BE\u099A\u09A8", back: "\u09AB\u09BF\u09B0\u09C7", theme: "\u09A5\u09BF\u09AE", downloading: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u09B9\u09AC\u09BF\u2026", processing: "\u09AA\u09CD\u09B0\u09B8\u09C7\u09B8 \u09B9\u09AC\u09BF\u2026", starting: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u09B6\u09C1\u09B0\u09C1\u2026", grabbed: "\u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1 \u09B9\u0987\u09B2!", savedTo: "\u09B8\u09C7\u09AD \u09B9\u0987\u09B2:", grabAnother: "\u21B5 \u0986\u09B0\u09C7\u0995\u099F\u09BE \u09A1\u09BE\u0989\u09A8\u09B2\u09CB\u09A1", tryAgain: "\u09AA\u09C1\u09A8\u09B0\u09BE\u09AF\u09BC \u099A\u09C7\u09B7\u09CD\u099F\u09BE \u0995\u09F0\u09BE", tip: "\u099F\u09BF\u09AA", lblTitle: "\u09B6\u09BF\u09B0\u09CB\u09A8\u09BE\u09AE", lblArtist: "\u09B6\u09BF\u09B2\u09CD\u09AA\u09C0", lblAlbum: "\u0985\u09CD\u09AF\u09BE\u09B2\u09AC\u09BE\u09AE", lblRelease: "\u09B0\u09BF\u09B2\u09BF\u099C", lblTime: "\u09B8\u09AE\u09AF\u09BC", lblSource: "\u0989\u09CE\u09B8", updateAvailable: "\u0995\u09BE\u09B0\u09CD\u09AC\u09A8 \u0986\u09AA\u09A1\u09C7\u099F \u0989\u09AA\u09B2\u09AC\u09CD\u09A7", langPickerTitle: "\u09B2\u09BE\u0999\u09CD\u0997\u09C1 \u09AC\u09BE\u099B\u09C1\u0995", langPickerSearch: "\u09B8\u09A8\u09CD\u09A7\u09BE\u09A8\u2026", lang: "\u09B2\u09BE\u0999\u09CD\u0997\u09C1" },
+  ks: { tagline: "\u0648\u06CC\u0688\u06CC\u0648 \u06CC\u0627 \u0645\u06CC\u0648\u0632\u06A9 \u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u06A9\u0631\u06CC\u0648\u06D4 \u0686\u0648\u0646\u0688\u06CC\u0648\u06D4 \u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u06A9\u0631\u06CC\u0648\u06D4 \u0679\u06BE\u06CC\u06A9\u06D4", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0648\u06CC\u0628 \u0633\u0627\u0626\u0679\u0633", pasteLink: "\u0644\u0646\u06A9 \u06A9\u0627\u067E\u06CC \u06A9\u0631\u06CC\u0648", supportsLine: "1800+ \u0648\u06CC\u0628 \u0633\u0627\u0626\u0679\u0633 \u062A\u0648 \u0648\u06CC\u0688\u06CC\u0648 \u062A\u06D2 \u0622\u0688\u06CC\u0648 \u0633\u067E\u0648\u0631\u0679 \u06A9\u0631\u06CC", notUrl: "\u0627\u06CC\u06C1 \u0644\u0646\u06A9 \u0646\u06C1\u06CC\u06BA \u2014 \u0645\u06A9\u0645\u0644 \u0644\u0646\u06A9 \u06A9\u0627\u067E\u06CC \u06A9\u0631\u06CC\u0648", analyzing: "\u062A\u062C\u0632\u0626\u06C1 \u06A9\u0631\u06CC", warmingUp: "\u06AF\u0631\u0645 \u06C1\u0648\u062A\u06D2\u2026", fetchingInfo: "\u0645\u0639\u0644\u0648\u0645\u0627\u062A \u062D\u0627\u0635\u0644 \u06A9\u0631\u06CC\u2026", stepType: "\u0645\u0631\u062D\u0644\u06C1 1/3 \xB7 \u06A9\u06CC\u0627 \u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u06A9\u0631\u0646\u0627 \u06C1\u06D2\u061F", stepVideoFormat: "\u0645\u0631\u062D\u0644\u06C1 2/3 \xB7 \u0648\u06CC\u0688\u06CC\u0648 \u0641\u0627\u0631\u0645\u06CC\u0679", stepAudioFormat: "\u0645\u0631\u062D\u0644\u06C1 2/3 \xB7 \u0622\u0688\u06CC\u0648 \u0641\u0627\u0631\u0645\u06CC\u0679", stepResolution: "\u0645\u0631\u062D\u0644\u06C1 3/3 \xB7 \u0631\u06CC\u0632\u0648\u0644\u0648\u0634\u0646", stepFps: "\u0645\u0631\u062D\u0644\u06C1 3/3 \xB7 \u0641\u06CC\u0645 \u0641\u06CC \u0633\u06CC\u06A9\u0646\u0688", stepBitrate: "\u0645\u0631\u062D\u0644\u06C1 3/3 \xB7 \u0622\u0688\u06CC\u0648 \u0628\u0650\u0679 \u0631\u06CC\u0679", videoOption: "\u0648\u06CC\u0688\u06CC\u0648", audioOption: "\u0622\u0688\u06CC\u0648", recommended: "\u062A\u062C\u0648\u06CC\u0632 \u06A9\u0631\u062F\u06C1", bestQuality: "\u0628\u06C1\u062A\u0631\u06CC\u0646 \u0645\u0639\u06CC\u0627\u0631", grab: "\u0688\u0627\u0624\u0646 \u0644\u0648\u0688", history: "\u062A\u0627\u0631\u06CC\u062E", quit: "\u0628\u0627\u06C1\u0631", cancel: "\u0645\u0646\u0633\u0648\u062E", choose: "\u0686\u0648\u0646\u0688\u06CC\u0648", select: "\u0645\u0646\u062A\u062E\u0628", back: "\u0648\u0627\u067E\u0633", theme: "\u062A\u06BE\u06CC\u0645", downloading: "\u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u06C1\u0648 \u0631\u06C1\u0627\u2026", processing: "\u067E\u0631\u0627\u0633\u06CC\u0633\u0646\u06AF\u2026", starting: "\u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u0634\u0631\u0648\u0639\u2026", grabbed: "\u0688\u0627\u0624\u0646 \u0644\u0648\u0688 \u06C1\u0648 \u06AF\u06CC\u0627!", savedTo: "\u0645\u062D\u0641\u0648\u0638 \u06A9\u06CC\u0627:", grabAnother: "\u21B5 \u0645\u0632\u06CC\u062F \u0688\u0627\u0624\u0646 \u0644\u0648\u0688", tryAgain: "\u062F\u0648\u0628\u0627\u0631\u06C1 \u06A9\u0648\u0634\u0634", tip: "\u0679\u067E", lblTitle: "\u0639\u0646\u0648\u0627\u0646", lblArtist: "\u0641\u0646\u06A9\u0627\u0631", lblAlbum: "\u0627\u0644\u0628\u0645", lblRelease: "\u0631\u06CC\u0644\u06CC\u0632", lblTime: "\u062F\u0648\u0631\u0627\u0646\u06CC\u06C1", lblSource: "\u0645\u0627\u062E\u0630", updateAvailable: "\u06A9\u0627\u0631\u0628\u0646 \u0627\u067E \u0688\u06CC\u0679 \u062F\u0633\u062A\u06CC\u0627\u0628 \u06C1\u06D2", langPickerTitle: "\u0632\u0628\u0627\u0646 \u0686\u0648\u0646\u0688\u06CC\u0648", langPickerSearch: "\u062A\u0644\u0627\u0634\u2026", lang: "\u0632\u0628\u0627\u0646" },
+  bho: { tagline: "\u0935\u0940\u0921\u093F\u092F\u094B \u092F\u093E \u0938\u0902\u0917\u0940\u0924 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u094B\u0964 \u091A\u0941\u0928\u094B\u0964 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u094B\u0964 \u0939\u094B \u0917\u092F\u093E\u0964", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0938\u093E\u0907\u091F", pasteLink: "\u0932\u093F\u0902\u0915 \u092A\u0947\u0938\u094D\u091F \u0915\u0930\u094B", supportsLine: "1800+ \u0938\u093E\u0907\u091F\u094B\u0902 \u0938\u0947 \u0935\u0940\u0921\u093F\u092F\u094B \u0914\u0930 \u0911\u0921\u093F\u092F\u094B \u0938\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0924\u093E \u0939\u0948", notUrl: "\u092F\u0947 \u0932\u093F\u0902\u0915 \u0928\u0939\u0940\u0902 \u2014 \u092A\u0942\u0930\u093E URL \u092A\u0947\u0938\u094D\u091F \u0915\u0930\u094B", analyzing: "\u091C\u093E\u0901\u091A \u0930\u0939\u0947", warmingUp: "\u0917\u0930\u092E \u0939\u094B \u0930\u0939\u0947\u2026", fetchingInfo: "\u091C\u093E\u0928\u0915\u093E\u0930\u0940 \u0932\u093E \u0930\u0939\u0947\u2026", stepType: "\u0938\u094D\u091F\u0947\u092A 1/3 \xB7 \u0915\u093E \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0940?", stepVideoFormat: "\u0938\u094D\u091F\u0947\u092A 2/3 \xB7 \u0935\u0940\u0921\u093F\u092F\u094B \u092B\u0949\u0930\u094D\u092E\u0947\u091F", stepAudioFormat: "\u0938\u094D\u091F\u0947\u092A 2/3 \xB7 \u0911\u0921\u093F\u092F\u094B \u092B\u0949\u0930\u094D\u092E\u0947\u091F", stepResolution: "\u0938\u094D\u091F\u0947\u092A 3/3 \xB7 \u0930\u093F\u091C\u093C\u0949\u0932\u094D\u092F\u0942\u0936\u0928", stepFps: "\u0938\u094D\u091F\u0947\u092A 3/3 \xB7 \u092B\u094D\u0930\u0947\u092E \u092A\u094D\u0930\u0924\u093F \u0938\u0947\u0915\u0902\u0921", stepBitrate: "\u0938\u094D\u091F\u0947\u092A 3/3 \xB7 \u0911\u0921\u093F\u092F\u094B \u092C\u093F\u091F\u0930\u0947\u091F", videoOption: "\u0935\u0940\u0921\u093F\u092F\u094B", audioOption: "\u0911\u0921\u093F\u092F\u094B", recommended: "\u0938\u0941\u091D\u093E\u092F\u093E", bestQuality: "\u0938\u092C\u0938\u0947 \u092C\u0922\u093C\u093F\u092F\u093E \u0915\u094D\u0935\u093E\u0932\u093F\u091F\u0940", grab: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921", history: "\u0907\u0924\u093F\u0939\u093E\u0938", quit: "\u092C\u093E\u0939\u0930", cancel: "\u0930\u0926\u094D\u0926", choose: "\u091A\u0941\u0928\u094B", select: "\u091A\u0941\u0928\u094B", back: "\u092A\u0940\u091B\u0947", theme: "\u0925\u0940\u092E", downloading: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0939\u094B \u0930\u0939\u093E\u2026", processing: "\u092A\u094D\u0930\u094B\u0938\u0947\u0938 \u0939\u094B \u0930\u0939\u0947\u2026", starting: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0936\u0941\u0930\u0942\u2026", grabbed: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0939\u094B \u0917\u092F\u093E!", savedTo: "\u0938\u0947\u0935 \u0915\u093F\u092F\u093E:", grabAnother: "\u21B5 \u0914\u0930 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u094B", tryAgain: "\u092B\u093F\u0930 \u0915\u094B\u0936\u093F\u0936 \u0915\u0930\u094B", tip: "\u0938\u0941\u091D\u093E\u0935", lblTitle: "\u0936\u0940\u0930\u094D\u0937\u0915", lblArtist: "\u0915\u0932\u093E\u0915\u093E\u0930", lblAlbum: "\u090F\u0932\u094D\u092C\u092E", lblRelease: "\u0930\u093F\u0932\u0940\u091C\u093C", lblTime: "\u0905\u0935\u0927\u093F", lblSource: "\u0938\u094D\u0930\u094B\u0924", updateAvailable: "\u0915\u093E\u0930\u094D\u092C\u0928 \u0905\u092A\u0921\u0947\u091F \u0909\u092A\u0932\u092C\u094D\u0927 \u0939\u0948", langPickerTitle: "\u092D\u093E\u0937\u093E \u091A\u0941\u0928\u094B", langPickerSearch: "\u0916\u094B\u091C\u094B\u2026", lang: "\u092D\u093E\u0937\u093E" },
+  syr: { tagline: "\u0712\u071D\u0718\u071D\u0715\u0718 \u0710\u0718 \u0721\u0718\u0723\u071D\u071F\u0710 \u0722\u0715\u0718\u0722. \u071A\u0718\u0715. \u0722\u0715\u0718\u0722. \u072B\u0721\u072A\u072B.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0712\u071D\u0718\u0715\u0710", pasteLink: "\u0710\u0723\u072A \u0720\u071D\u0722\u071F", supportsLine: "\u0721\u0723\u072A \u0712\u071D\u0718\u0715\u0718 1800+ \u0712\u071D\u0718\u0715\u0710", notUrl: "\u0717\u071D \u0720\u071D\u0722\u071F \u071D\u0718\u0722. \u071F\u0718\u0720\u0710 \u0720\u071D\u0722\u071F \u0710\u0723\u072A", analyzing: "\u0712\u072B\u0721\u0710", warmingUp: "\u0721\u072B\u0720\u071A\u0710\u2026", fetchingInfo: "\u0712\u072B\u0721\u0710 \u0715\u071A\u0710\u072B\u2026", stepType: "\u072A\u0715\u0718\u0722 1/3 \xB7 \u0715\u0718 \u072C\u0728\u0712\u0710?", stepVideoFormat: "\u072A\u0715\u0718\u0722 2/3 \xB7 \u0715\u071D\u0718\u0715\u0718 \u072B\u0718\u072A\u0721", stepAudioFormat: "\u072A\u0715\u0718\u0722 2/3 \xB7 \u0710\u0718\u0715\u071D\u0718 \u072B\u0718\u072A\u0721", stepResolution: "\u072A\u0715\u0718\u0722 3/3 \xB7 \u0726\u0718\u0729\u0718\u0721", stepFps: "\u072A\u0715\u0718\u0722 3/3 \xB7 \u072A\u072B\u072A\u0710/\u0722\u0715\u0722\u0710", stepBitrate: "\u072A\u0715\u0718\u0722 3/3 \xB7 \u0710\u0718\u0715\u071D\u0718 \u0712\u071D\u072C\u072A\u071D\u072C", videoOption: "\u0712\u071D\u0718\u0715\u0718", audioOption: "\u0710\u0718\u0715\u071D\u0718", recommended: "\u0721\u0726\u072C\u0710", bestQuality: "\u0712\u072A\u071D \u071A\u0721\u0715\u071D\u072C", grab: "\u0722\u0715\u0718\u0722", history: "\u072C\u072A\u071D\u071A\u0715", quit: "\u0726\u072A\u071A\u0718\u0722", cancel: "\u0720\u0712\u0710", choose: "\u071A\u0718\u0715", select: "\u0729\u0718\u0721", back: "\u0717\u0718\u0715\u0718\u0722", theme: "\u0715\u072A\u072B\u0710", downloading: "\u0722\u0715\u0718\u0722\u2026", processing: "\u0725\u0720\u0721\u2026", starting: "\u0722\u0715\u0718\u0722 \u072B\u0715\u071D\u0720\u0710\u2026", grabbed: "\u0722\u0728\u072C\u071D!", savedTo: "\u071A\u071D\u0710:", grabAnother: "\u21B5 \u0710\u071A\u072A \u0722\u0715\u0718\u0722", tryAgain: "\u0726\u0718\u071A \u0717\u0718\u0715\u0718\u0722", tip: "\u071D\u0718\u072A\u0722\u0710", lblTitle: "\u0725\u0718\u072C\u0710", lblArtist: "\u0723\u071D\u0718\u0722\u0710", lblAlbum: "\u0710\u0720\u0712\u0718\u0721", lblRelease: "\u0726\u0720\u0729\u0710", lblTime: "\u0718\u0721\u072A\u0710", lblSource: "\u0721\u0712\u072A\u0710", updateAvailable: "\u072C\u0718\u0715\u071D \u0722\u0718\u0729\u0710\u072A \u072B\u0721\u072A\u072B", langPickerTitle: "\u0720\u072B\u0718\u0722 \u071A\u0718\u0715", langPickerSearch: "\u0712\u072B\u071D\u0715\u2026", lang: "\u0720\u072B\u0718\u0722" },
+  za: { tagline: "doengh video caeuq boq gwnz. xaen. doengh. wceq lau.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 gwnz", pasteLink: "Cungj lienz", supportsLine: "goeng 1800+ gwnz ndeq video caeuq ba gwnz", notUrl: "Mwng ba lienz \u2014 cungj liuj URL", analyzing: "Zejz", warmingUp: "Gwnz\u2026", fetchingInfo: "Zungz\u2026", stepType: "Bu 1/3 \xB7 Gwnz download?", stepVideoFormat: "Bu 2/3 \xB7 Video format", stepAudioFormat: "Bu 2/3 \xB7 Gwnz format", stepResolution: "Bu 3/3 \xB7 Roek", stepFps: "Bu 3/3 \xB7 Feiq cinz", stepBitrate: "Bu 3/3 \xB7 Gwnz bitrate", videoOption: "Video", audioOption: "Gwnz", recommended: "Cwnz", bestQuality: "Roek ndeq", grab: "Download", history: "Laux", quit: "Ciu", cancel: "Cancu", choose: "Xaen", select: "Gwnz", back: "Faem", theme: "Theme", downloading: "Download\u2026", processing: "Zing\u2026", starting: "Download\u2026", grabbed: "Download lau!", savedTo: "Cungj gwnz:", grabAnother: "\u21B5 Download boux", tryAgain: "Caem boux", tip: "Ciuq", lblTitle: "Cungh", lblArtist: "Gwnz yiny", lblAlbum: "Albom", lblRelease: "Faeg", lblTime: "Cawx", lblSource: "Gwnz", updateAvailable: "Carbon biangh gwnz", langPickerTitle: "Yen cuengh", langPickerSearch: "Cing\u2026", lang: "Yen" },
+  bua: { tagline: "\u0432\u0438\u0434\u0435\u043E \u044D\u0431\u044D \u0434\u0443\u0443 \u0431\u0443\u0443\u043B\u0430\u043D. \u0441\u043E\u043D\u0433\u043E. \u0431\u0443\u0443\u043B\u0430\u043D. \u0431\u04AF\u0442\u044D\u0445.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0431\u0443\u0441\u0430\u0434", pasteLink: "\u0425\u043E\u043B\u0431\u043E\u043E \u04AF\u04AF\u0441\u0433\u044D", supportsLine: "1800+ \u0441\u0430\u0439\u0442\u043D\u0430\u0430\u0441 \u0432\u0438\u0434\u0435\u043E \u0431\u0430 \u0434\u0443\u0443\u0433 \u0434\u04AF\u04AF\u0440\u043D\u044D", notUrl: "\u042D\u043D\u044D \u0445\u043E\u043B\u0431\u043E\u043E \u0431\u0438\u0448 \u2014 \u0431\u04AF\u0442\u044D\u043D URL \u04AF\u04AF\u0441\u0433\u044D", analyzing: "\u0428\u0430\u043B\u0433\u0430\u0436 \u0431\u0430\u0439\u043D\u0430", warmingUp: "\u0414\u0443\u043B\u0430\u0430\u0436\u2026", fetchingInfo: "\u041C\u044D\u0434\u044D\u044D\u043B\u044D\u043B \u0430\u0432\u0447\u2026", stepType: "1-\u0440 \u0430\u043B\u0445\u0430\u043C \xB7 \u042E\u0443 \u0430\u0432\u0430\u0445 \u0432\u044D?", stepVideoFormat: "2-\u0440 \u0430\u043B\u0445\u0430\u043C \xB7 \u0412\u0438\u0434\u0435\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepAudioFormat: "2-\u0440 \u0430\u043B\u0445\u0430\u043C \xB7 \u0410\u0443\u0434\u0438\u043E \u0444\u043E\u0440\u043C\u0430\u0442", stepResolution: "3-\u0440 \u0430\u043B\u0445\u0430\u043C \xB7 \u043D\u044F\u0433\u0442", stepFps: "3-\u0440 \u0430\u043B\u0445\u0430\u043C \xB7 \u043A\u0430\u0434\u0440/\u0441\u0435\u043A\u0443\u043D\u0434", stepBitrate: "3-\u0440 \u0430\u043B\u0445\u0430\u043C \xB7 \u0430\u0443\u0434\u0438\u043E \u0431\u0438\u0442\u0440\u0435\u0439\u0442", videoOption: "\u0412\u0438\u0434\u0435\u043E", audioOption: "\u0410\u0443\u0434\u0438\u043E", recommended: "\u0437\u04E9\u0432\u043B\u04E9\u043C\u04E9", bestQuality: "\u0434\u044D\u044D\u0434 \u0447\u0430\u043D\u0430\u0440", grab: "\u0430\u0432\u0430\u0445", history: "\u0422\u04AF\u04AF\u0445", quit: "\u0433\u0430\u0440\u0433\u0430\u0445", cancel: "\u0446\u0443\u0446\u043B\u0430\u0445", choose: "\u0441\u043E\u043D\u0433\u043E\u0445", select: "\u0441\u043E\u043D\u0433\u043E\u0445", back: "\u0431\u0443\u0446\u0430\u0445", theme: "\u0417\u0430\u0433\u0432\u0430\u0440", downloading: "\u0430\u0432\u0430\u0445\u2026", processing: "\u0431\u043E\u043B\u043E\u0432\u0441\u0440\u0443\u0443\u043B\u0430\u0445\u2026", starting: "\u044D\u0445\u043B\u044D\u0445\u2026", grabbed: "\u0430\u0432\u043B\u0430\u0430!", savedTo: "\u0445\u0430\u0434\u0433\u0430\u043B\u0441\u0430\u043D:", grabAnother: "\u21B5 \u04E9\u04E9\u0440 \u0430\u0432\u0430\u0445", tryAgain: "\u0434\u0430\u0445\u0438\u043D \u043E\u0440\u043E\u043B\u0442\u043E", tip: "\u0417\u04E9\u0432\u043B\u04E9\u043C\u04E9", lblTitle: "\u041D\u044D\u0440", lblArtist: "\u0425\u04E9\u0433\u0436\u0438\u043C\u0447", lblAlbum: "\u0410\u043B\u044C\u0431\u043E\u043C", lblRelease: "\u0413\u0430\u0440\u0433\u0430\u0441\u0430\u043D", lblTime: "\u0425\u0443\u0433\u0430\u0446\u0430", lblSource: "\u042D\u0445 \u0441\u0443\u0440\u0432\u0430\u043B\u0436", updateAvailable: "Carbon \u0448\u0438\u043D\u044D\u0447\u043B\u044D\u0433\u0434\u044D\u044D", langPickerTitle: "\u0425\u044D\u043B \u0441\u043E\u043D\u0433\u043E", langPickerSearch: "\u0425\u0430\u0439\u2026", lang: "\u0425\u044D\u043B" },
+  dz: { tagline: "\u0F56\u0FB1\u0F72\u0F53\u0F0B\u0F62\u0FA9\u0F7A\u0F0B\u0F61\u0F44\u0F0B\u0F42\u0F0B\u0F63\u0F7A\u0F53\u0F0B\u0F60\u0F51\u0F7A\u0F56\u0F66\u0F0B\u0F51\u0F44\u0F0B\u0F63\u0F9F\u0F0B\u0F60\u0F51\u0F7A\u0F56\u0F66\u0F0D \u0F63\u0FB7\u0F42\u0F0B\u0F42\u0F45\u0F72\u0F42 \u0F56\u0F66\u0F9F\u0F62\u0F0D", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0F61\u0F7C\u0F51\u0F0B\u0F51\u0F74\u0F0B\u0F58\u0F44\u0F0B", pasteLink: "\u0F60\u0F51\u0FB2\u0F72\u0F66\u0F0B\u0F66\u0FA6\u0FB1\u0F7C\u0F62\u0F0B\u0F56\u0F64\u0F74\u0F66\u0F0B\u0F56\u0F40\u0F7C\u0F51", supportsLine: "1800+ \u0F5D\u0F66\u0F0B\u0F66\u0F9F\u0F7A\u0F60\u0F72\u0F0B\u0F53\u0F44\u0F0B\u0F53\u0F66\u0F0B\u0F56\u0FB1\u0F72\u0F53\u0F0B\u0F62\u0FA9\u0F7A\u0F0B\u0F51\u0F44\u0F0B\u0F42\u0F0B\u0F63\u0F7A\u0F53\u0F0B\u0F56\u0F66\u0F9F\u0F62\u0F0B\u0F50\u0F74\u0F56", notUrl: "\u0F60\u0F51\u0F72\u0F0B\u0F60\u0F51\u0FB2\u0F72\u0F66\u0F0B\u0F58\u0F72\u0F53\u0F0D \u0F5A\u0F44\u0F0B\u0F58\u0F60\u0F72\u0F0BURL \u0F56\u0F64\u0F74\u0F66\u0F0B\u0F56\u0F40\u0F7C\u0F51", analyzing: "\u0F56\u0F62\u0F9F\u0F42\u0F0B\u0F56\u0F66\u0F9F\u0F62", warmingUp: "\u0F51\u0FB2\u0F7C\u0F0B\u0F56\u0F62\u0FA9\u0F7A\u2026", fetchingInfo: "\u0F42\u0F53\u0F66\u0F0B\u0F5A\u0F74\u0F63\u0F0B\u0F60\u0F51\u0F7A\u0F56\u0F66\u2026", stepType: "\u0F42\u0F53\u0F66\u0F0B\u0F5A\u0F74\u0F63\u0F0B \u0F21/\u0F23 \xB7 \u0F42\u0F44\u0F0B\u0F60\u0F51\u0F7A\u0F56\u0F66\u0F0B\u0F56\u0F66\u0F9F\u0F62\u0F0B\u0F58\u0F72\u0F53?", stepVideoFormat: "\u0F42\u0F53\u0F66\u0F0B\u0F5A\u0F74\u0F63\u0F0B \u0F22/\u0F23 \xB7 \u0F56\u0FB1\u0F72\u0F53\u0F0B\u0F62\u0FA9\u0F7A\u0F60\u0F72\u0F0B\u0F62\u0F92\u0FB1\u0F74\u0F60\u0F72\u0F0B\u0F62\u0FA9\u0F63", stepAudioFormat: "\u0F42\u0F53\u0F66\u0F0B\u0F5A\u0F74\u0F63\u0F0B \u0F22/\u0F23 \xB7 \u0F42\u0F0B\u0F63\u0F7A\u0F53\u0F0B\u0F62\u0F92\u0FB1\u0F74\u0F60\u0F72\u0F0B\u0F62\u0FA9\u0F63", stepResolution: "\u0F42\u0F53\u0F66\u0F0B\u0F5A\u0F74\u0F63\u0F0B \u0F23/\u0F23 \xB7 \u0F58\u0F50\u0F62\u0F0B\u0F5A\u0F51", stepFps: "\u0F42\u0F53\u0F66\u0F0B\u0F5A\u0F74\u0F63\u0F0B \u0F23/\u0F23 \xB7 \u0F66\u0F90\u0F62\u0F0B\u0F58\u0F60\u0F72\u0F0B\u0F58\u0F5A\u0F7C\u0F0B\u0F66\u0F92\u0FB2", stepBitrate: "\u0F42\u0F53\u0F66\u0F0B\u0F5A\u0F74\u0F63\u0F0B \u0F23/\u0F23 \xB7 \u0F42\u0F0B\u0F63\u0F7A\u0F53\u0F0B\u0F56\u0F62\u0FA1\u0F74\u0F66", videoOption: "\u0F56\u0FB1\u0F72\u0F53\u0F0B\u0F62\u0FA9\u0F7A", audioOption: "\u0F42\u0F0B\u0F63\u0F7A\u0F53", recommended: "\u0F56\u0F66\u0F9F\u0F62\u0F0B\u0F42\u0FB2\u0F7C\u0F66", bestQuality: "\u0F58\u0F50\u0F62\u0F0B\u0F46\u0F7A\u0F60\u0F72\u0F0B\u0F41\u0FB1\u0F51\u0F0B\u0F50\u0F74\u0F56", grab: "\u0F56\u0F66\u0F9F\u0F62", history: "\u0F63\u0F7C\u0F0B\u0F62\u0F92\u0FB1\u0F74\u0F51", quit: "\u0F60\u0F51\u0F7C\u0F53\u0F0B\u0F63\u0F66", cancel: "\u0F60\u0F51\u0F7C\u0F53\u0F0B\u0F60\u0F51\u0F74\u0F42", choose: "\u0F63\u0FB7\u0F42\u0F0B\u0F42\u0F45\u0F72\u0F42", select: "\u0F60\u0F51\u0F74\u0F42", back: "\u0F63\u0F7C\u0F42", theme: "\u0F62\u0FA3\u0F58\u0F0B\u0F42\u0F5E\u0F42", downloading: "\u0F56\u0F66\u0F9F\u0F62\u0F0B\u0F56\u0FB1\u0F7A\u0F51\u2026", processing: "\u0F66\u0F92\u0FB2\u0F74\u0F56\u0F0B\u0F56\u0F66\u0F90\u0F62\u2026", starting: "\u0F60\u0F42\u0F7C\u0F0B\u0F56\u0F66\u0F9F\u0F62\u2026", grabbed: "\u0F56\u0F66\u0F9F\u0F62\u0F0B\u0F66\u0F7C\u0F44\u0F0B\u0F0D", savedTo: "\u0F49\u0F42\u0F66\u0F0B\u0F60\u0F51\u0F72\u0F62\u0F0B\u0F56\u0F66\u0F9F\u0F62\u0F0D", grabAnother: "\u21B5 \u0F42\u0F5E\u0F53\u0F0B\u0F56\u0F66\u0F9F\u0F62", tryAgain: "\u0F61\u0F44\u0F0B\u0F56\u0F66\u0F9F\u0F62", tip: "\u0F51\u0F7C\u0F53\u0F0B\u0F66\u0F90\u0FB1\u0F7C\u0F53", lblTitle: "\u0F58\u0F5A\u0F7C\u0F53", lblArtist: "\u0F66\u0F92\u0FB2\u0F74\u0F56\u0F0B\u0F54", lblAlbum: "\u0F58\u0F5B\u0F7C\u0F51", lblRelease: "\u0F60\u0F56\u0FB1\u0F74\u0F44\u0F66", lblTime: "\u0F5A\u0F7A\u0F0B\u0F66\u0F90\u0F62", lblSource: "\u0F60\u0F56\u0FB2\u0F7A\u0F42\u0F0B\u0F61\u0F7C\u0F51", updateAvailable: "Carbon \u0F42\u0F66\u0F62\u0F0B\u0F46\u0F7A\u0F53\u0F0B\u0F61\u0F7C\u0F51", langPickerTitle: "\u0F66\u0F90\u0F51\u0F0B\u0F63\u0FB7\u0F42\u0F0B\u0F42\u0F45\u0F72\u0F42", langPickerSearch: "\u0F56\u0F64\u0F7A\u0F62\u2026", lang: "\u0F66\u0F90\u0F51" },
+  shn: { tagline: "\u1017\u102E\u1012\u102E\u101A\u102D\u102F \u101E\u102D\u102F\u1037\u1019\u101F\u102F\u1010\u103A \u101E\u1036\u1002\u1005\u103A\u102C \u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A\u104B \u101B\u103D\u1031\u1038\u104B \u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A\u104B \u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E\u104B", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u101D\u1018\u103A\u1006\u102D\u102F\u1000\u103A", pasteLink: "\u101C\u1004\u1037\u103A\u1001\u103A\u1000\u102D\u102F\u1000\u1030\u1038\u1015\u102B", supportsLine: "1800+ \u101D\u1018\u103A\u1006\u102D\u102F\u1000\u103A\u1019\u103B\u102C\u1038\u1019\u103E \u1017\u102E\u1012\u102E\u101A\u102D\u102F\u1014\u103E\u1004\u1037\u103A \u1021\u101E\u1036\u1000\u102D\u102F \u1015\u1036\u1037\u1015\u102D\u102F\u1038\u1015\u1031\u1038\u101E\u100A\u103A", notUrl: "\u1024\u101E\u100A\u103A\u1019\u103E\u101C\u1004\u1037\u103A\u1001\u103A\u1019\u101F\u102F\u1010\u103A\u1015\u102B \u2014 \u1015\u103C\u100A\u1037\u103A\u1005\u102F\u1036\u101E\u1031\u102C URL \u1000\u1030\u1038\u1015\u102B", analyzing: "\u1005\u1005\u103A\u1006\u1031\u1038\u1014\u1031\u101E\u100A\u103A", warmingUp: "\u1014\u103D\u1031\u1038\u1011\u103D\u1031\u1038\u1014\u1031\u2026", fetchingInfo: "\u1021\u1001\u103B\u1000\u103A\u1021\u101C\u1000\u103A\u101A\u1030\u1014\u1031\u2026", stepType: "\u1021\u1006\u1004\u1037\u103A \u1041/\u1043 \xB7 \u1018\u102C\u1012\u1031\u102B\u1004\u103A\u1038\u1019\u101C\u1032", stepVideoFormat: "\u1021\u1006\u1004\u1037\u103A \u1042/\u1043 \xB7 \u1017\u102E\u1012\u102E\u101A\u102D\u102F\u1016\u102D\u102F\u1004\u103A\u1016\u1031\u102C\u103A\u1019\u1010\u103A", stepAudioFormat: "\u1021\u1006\u1004\u1037\u103A \u1042/\u1043 \xB7 \u1021\u101E\u1036\u1016\u102D\u102F\u1004\u103A\u1016\u1031\u102C\u103A\u1019\u1010\u103A", stepResolution: "\u1021\u1006\u1004\u1037\u103A \u1043/\u1043 \xB7 \u101B\u103E\u102F\u1011\u1031\u102C\u1004\u103A\u1019\u103E\u102F", stepFps: "\u1021\u1006\u1004\u1037\u103A \u1043/\u1043 \xB7 \u1010\u102D\u102F\u1000\u103A\u1005\u1000\u1039\u1000\u1014\u1037\u103A", stepBitrate: "\u1021\u1006\u1004\u1037\u103A \u1043/\u1043 \xB7 \u1018\u1005\u103A\u1014\u102D\u1010\u103A", videoOption: "\u1017\u102E\u1012\u102E\u101A\u102D\u102F", audioOption: "\u1021\u101E\u1036", recommended: "\u1021\u1000\u103C\u1036\u1015\u103C\u102F\u1011\u102C\u1038", bestQuality: "\u1021\u1019\u103C\u1004\u1037\u103A\u1006\u102F\u1036\u1038\u1021\u101B\u100A\u103A\u1021\u101E\u102C\u1038", grab: "\u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A", history: "\u1019\u103E\u1010\u103A\u1010\u1019\u103A\u1038", quit: "\u1011\u103D\u1000\u103A", cancel: "\u1015\u101A\u103A\u1016\u103B\u1000\u103A", choose: "\u101B\u103D\u1031\u1038", select: "\u101B\u103D\u1031\u1038\u1001\u103B\u101A\u103A", back: "\u1014\u1031\u102C\u1000\u103A\u101E\u102D\u102F\u1037", theme: "\u1021\u1015\u103C\u1004\u103A\u1021\u1006\u1004\u103A", downloading: "\u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A\u1014\u1031\u2026", processing: "\u101C\u102F\u1015\u103A\u1006\u1031\u102C\u1004\u103A\u1014\u1031\u2026", starting: "\u1005\u1010\u1004\u103A\u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A\u2026", grabbed: "\u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A\u1015\u103C\u102E\u1038\u1015\u102B\u1015\u103C\u102E\u104B", savedTo: "\u101E\u102D\u1019\u103A\u1038\u1006\u100A\u103A\u1038\u1011\u102C\u1038\u101E\u100A\u103A\u104B", grabAnother: "\u21B5 \u1014\u1031\u102C\u1000\u103A\u1011\u1015\u103A\u1010\u1005\u103A\u1001\u102F \u1012\u1031\u102B\u1004\u103A\u1038\u101C\u102F\u1012\u103A", tryAgain: "\u1011\u1015\u103A\u1019\u1036\u1000\u103C\u102D\u102F\u1038\u1005\u102C\u1038\u1015\u102B", tip: "\u1021\u1000\u103C\u1036\u1015\u103C\u102F\u1001\u103B\u1000\u103A", lblTitle: "\u1001\u1031\u102B\u1004\u103A\u1038\u1005\u1009\u103A", lblArtist: "\u1021\u1014\u102F\u1015\u100A\u102C\u101B\u103E\u1004\u103A", lblAlbum: "\u1021\u101C\u103A\u1018\u1036", lblRelease: "\u1011\u102F\u1010\u103A\u101C\u103D\u103E\u1004\u1037\u103A\u1019\u103E\u102F", lblTime: "\u1000\u103C\u102C\u1001\u103B\u102D\u1014\u103A", lblSource: "\u101B\u1004\u103A\u1038\u1019\u103C\u1005\u103A", updateAvailable: "Carbon \u1021\u1019\u103D\u1019\u103A\u1038\u101B\u103E\u102D\u1015\u102B\u101E\u100A\u103A", langPickerTitle: "\u1018\u102C\u101E\u102C\u1005\u1000\u102C\u1038 \u101B\u103D\u1031\u1038\u1015\u102B", langPickerSearch: "\u101B\u103E\u102C\u1016\u103D\u1031\u2026", lang: "\u1018\u102C\u101E\u102C\u1005\u1000\u102C\u1038" },
+  hmn: { tagline: "download video loss nkauj nkauj. xaiv. download. ua tawm.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 lwm zais", pasteLink: "Muab link", supportsLine: "Npaj video thiab audio los ntawm 1800+ lub website", notUrl: "Tsis yog link \u2014 muaj tag nrho URL", analyzing: "Tshawb", warmingUp: "Kub\u2026", fetchingInfo: "Tsim nyuaj\u2026", stepType: "Kauj ruam 1/3 \xB7 Yuav download dab tsi?", stepVideoFormat: "Kauj ruam 2/3 \xB7 Video qauv", stepAudioFormat: "Kauj ruam 2/3 \xB7 Audio qauv", stepResolution: "Kauj ruam 3/3 \xB7 Qhov tsaug", stepFps: "Kauj ruam 3/3 \xB7 Frame ib daim", stepBitrate: "Kauj ruam 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Qhia", bestQuality: "Zoo dua li", grab: "download", history: "Keem yees", quit: "Rov", cancel: "Tseg", choose: "Xaiv", select: "Xaiv", back: "Rov qab", theme: "Looj", downloading: "download\u2026", processing: "Ua haujlwm\u2026", starting: "Pib\u2026", grabbed: "download lawm!", savedTo: "Khaws cia: ", grabAnother: "\u21B5 Download lwm", tryAgain: "Sim koj", tip: "Tswv yim", lblTitle: "Ntaub ntawv", lblArtist: "Ntawm zais", lblAlbum: "Album", lblRelease: "Tso tawm", lblTime: "Sijhawm", lblSource: "Qhov chaw", updateAvailable: "Carbon tshiab tau muaj", langPickerTitle: "Xaiv lus", langPickerSearch: "Nrhiav\u2026", lang: "Lus" },
+  gom: { tagline: "\u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0915\u093F\u0902\u0935\u093E \u0938\u0902\u0917\u0940\u0924 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930. \u0928\u093F\u0935\u0921. \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930. \u091D\u093E\u0932\u0947\u0902.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u0938\u0915\u091F", pasteLink: "\u0932\u093F\u0902\u0915 \u0932\u093E\u0917\u0935", supportsLine: "1800+ \u0938\u0915\u091F\u093E\u0902 \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u0906\u0928\u093F \u0911\u0921\u093F\u0913 \u0938\u092A\u094B\u0930\u094D\u091F \u0915\u0930\u0924", notUrl: "\u0939\u0940 \u0932\u093F\u0902\u0915 \u0928\u094D\u0939\u092F \u2014 \u092A\u0942\u0930\u094D\u0923 URL \u0932\u093E\u0917\u0935", analyzing: "\u0924\u092A\u0938\u093E", warmingUp: "\u0917\u0930\u092E \u0915\u0930\u0924\u2026", fetchingInfo: "\u092E\u093E\u0939\u093F\u0924\u0940 \u0915\u093E\u0922\u0924\u2026", stepType: "\u092A\u093E\u0933\u093E\u0935 1/3 \xB7 \u0915\u093E\u092F \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u093E\u092F\u091A\u0947?", stepVideoFormat: "\u092A\u093E\u0933\u093E\u0935 2/3 \xB7 \u0935\u094D\u0939\u093F\u0921\u093F\u0913 \u092B\u0949\u0930\u092E\u0945\u091F", stepAudioFormat: "\u092A\u093E\u0933\u093E\u0935 2/3 \xB7 \u0911\u0921\u093F\u0913 \u092B\u0949\u0930\u092E\u0945\u091F", stepResolution: "\u092A\u093E\u0933\u093E\u0935 3/3 \xB7 \u0930\u093F\u091D\u094B\u0932\u094D\u092F\u0941\u0936\u0928", stepFps: "\u092A\u093E\u0933\u093E\u0935 3/3 \xB7 \u092B\u094D\u0930\u0947\u092E\u094D\u0938 \u092A\u094D\u0930\u0924\u093F \u0938\u0947\u0915\u0902\u0926", stepBitrate: "\u092A\u093E\u0933\u093E\u0935 3/3 \xB7 \u0911\u0921\u093F\u0913 \u092C\u093F\u091F\u0930\u0947\u091F", videoOption: "\u0935\u094D\u0939\u093F\u0921\u093F\u0913", audioOption: "\u0911\u0921\u093F\u0913", recommended: "\u0938\u0941\u091A\u0935\u0932\u0947\u0932\u0947\u0902", bestQuality: "\u0938\u0930\u094D\u0935\u094B\u0924\u094D\u0924\u092E \u0926\u0930\u094D\u091C\u093E", grab: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921", history: "\u0907\u0924\u093F\u0939\u093E\u0938", quit: "\u092C\u093E\u0939\u0947\u0930", cancel: "\u0930\u0926\u094D\u0926 \u0915\u0930", choose: "\u0928\u093F\u0935\u0921", select: "\u0928\u093F\u0935\u0921", back: "\u092B\u093E\u091F\u0940", theme: "\u0925\u0940\u092E", downloading: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930\u0924\u092F\u2026", processing: "\u092A\u094D\u0930\u0915\u094D\u0930\u093F\u092F\u093E \u0915\u0930\u0924\u092F\u2026", starting: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0938\u0941\u0930\u0942\u2026", grabbed: "\u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u091D\u093E\u0932\u0947\u0902!", savedTo: "\u091C\u0924\u094D\u0928 \u0915\u0947\u0932\u0947\u0902:", grabAnother: "\u21B5 \u0906\u0923\u0940\u0915 \u0921\u093E\u0909\u0928\u0932\u094B\u0921 \u0915\u0930", tryAgain: "\u092A\u0941\u0928\u094D\u0939\u093E \u092A\u094D\u0930\u092F\u0924\u094D\u0928 \u0915\u0930", tip: "\u0938\u0942\u091A\u0928\u093E", lblTitle: "\u0936\u0940\u0930\u094D\u0937\u0915", lblArtist: "\u0915\u0932\u093E\u0915\u093E\u0930", lblAlbum: "\u0905\u0932\u094D\u092C\u092E", lblRelease: "\u0930\u093F\u0932\u0940\u091C", lblTime: "\u0915\u093E\u0932\u093E\u0935\u0927\u0940", lblSource: "\u0938\u094D\u0930\u094B\u0924", updateAvailable: "\u0915\u093E\u0930\u094D\u092C\u0928 \u0905\u0926\u094D\u092F\u0924\u0928 \u0909\u092A\u0932\u092C\u094D\u0927", langPickerTitle: "\u092D\u093E\u0938 \u0928\u093F\u0935\u0921", langPickerSearch: "\u0936\u094B\u0927\u2026", lang: "\u092D\u093E\u0938" },
+  tw: { tagline: "de sor kwan edi nka. chose. de sor. wiei.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 kuo", pasteLink: "Hy\u025B URL bi k\u0254", supportsLine: "Y\u025Btumi de sor kwan ne nnansa a 1800+ website ho", notUrl: "Y\u025Bn ny\u025B link da \u2014 hy\u025B URL ny\u025B h\u0254 k\u0254", analyzing: "Y\u025Bhw\u025Bmu", warmingUp: "B\u025B\u2026", fetchingInfo: "Nyansahu de\u025B\u2026", stepType: "Nhy\u025Bmu 1/3 \xB7 De\u025B wo p\u025B s\u025B de sor?", stepVideoFormat: "Nhy\u025Bmu 2/3 \xB7 Video format", stepAudioFormat: "Nhy\u025Bmu 2/3 \xB7 Audio format", stepResolution: "Nhy\u025Bmu 3/3 \xB7 S\u0254k\u0254m", stepFps: "Nhy\u025Bmu 3/3 \xB7 Frames per second", stepBitrate: "Nhy\u025Bmu 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Akyer\u025B", bestQuality: "S\u025Bn optim\u025Bm", grab: "de sor", history: "Nkyer\u025Bkyer\u025B", quit: "K\u0254", cancel: "Hwe", choose: "Chose", select: "Chose", back: "K\u0254 de ba", theme: "Nkwaeye", downloading: "De sor\u2026", processing: "Nyansahu\u2026", starting: "De b\u025Bka\u2026", grabbed: "Akoa!", savedTo: "Aky\u025B w\u0254:", grabAnother: "\u21B5 de sor fofor\u0254", tryAgain: "Y\u025B b\u0254 hw\u025B no", tip: "Nnansahy\u025B", lblTitle: "Anoh\u025Bm", lblArtist: "\u0186kasa", lblAlbum: "Album", lblRelease: "Atump\u025B", lblTime: "Aboa", lblSource: "Nkyer\u025Bkyer\u025B", updateAvailable: "Carbon updates de ns\u025B", langPickerTitle: "Chose kasa", langPickerSearch: "Hwe\u2026", lang: "Kasa" },
+  ee: { tagline: "x\u0254 video alo music. choe. x\u0254. di va.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 web site", pasteLink: "\u014Al\u0254 URL \u0256e kp\xE3", supportsLine: "Mie x\u0254 video kple music 1800+ web sitewo", notUrl: "E\u0256a link ye \u2014 \u014Al\u0254 URL dz\xED voe", analyzing: "\u014Al\u0254y\u025B \u0256e", warmingUp: "H\u014Bl\u0254\u2026", fetchingInfo: "Afotu k\u0254\u2026", stepType: "Af\u0254 1/3 \xB7 N\xE3a mia \xE3 mi?", stepVideoFormat: "Af\u0254 2/3 \xB7 Video\u0192ormat", stepAudioFormat: "Af\u0254 2/3 \xB7 Audio\u0192ormat", stepResolution: "Af\u0254 3/3 \xB7 \u0189owo", stepFps: "Af\u0254 3/3 \xB7 Framewo sek\u0254nd", stepBitrate: "Af\u0254 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "\u014Al\u0254\u0256u\u0256owo", bestQuality: "Kpl\u0254 ewo \u014Bud\u0254w\u0254", grab: "x\u0254", history: "Xo\u0256owo", quit: "Gbo", cancel: "\u0189e \u0256i", choose: "Choe", select: "Choe", back: "\u0189i de", theme: "Akpa", downloading: "X\u0254 edi\u2026", processing: "\u0189e\u2026", starting: "X\u0254 gbegbe\u2026", grabbed: "X\u0254 li!", savedTo: "A\u0256e:", grabAnother: "\u21B5 x\u0254 fia\u0192u\u0256e", tryAgain: "\u0189o\u0256ewo n\u0254", tip: "Nyadz\u0254dz\u0254", lblTitle: "\u0192o\u0192o", lblArtist: "S\u0254\u0303", lblAlbum: "Album", lblRelease: "\u0192e\u0256e\u0256e", lblTime: "A\u0256aba", lblSource: "Wo\u0192e", updateAvailable: "Carbon \u0256e\u0256e\u0256ewo si na", langPickerTitle: "Choe kasa", langPickerSearch: "H\u014Bl\u0254\u2026", lang: "Kasa" },
+  ff: { tagline: "te\u0253\u0253e video walli ko kooli. suo. te\u0253\u0253e. \u0257um.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 wele", pasteLink: "URL le\u01B4i e\u0253\u0253e", supportsLine: "Faa\u0253\u0253e e\u0253\u0253e video walli 1800+ wele\u0257e", notUrl: "Mo link woni \u2014 URL f Complim e\u0253\u0253e", analyzing: "\u019Do\u0253\u0253e", warmingUp: "Sise\u2026", fetchingInfo: "\u0189o\u0253\u0253e yi\u2026", stepType: "Ba\u0199e 1/3 \xB7 M\u0257\u0253\u0253e n\u0253\u0253e?", stepVideoFormat: "Ba\u0199e 2/3 \xB7 Video format", stepAudioFormat: "Ba\u0199e 2/3 \xB7 Audio format", stepResolution: "Ba\u0199e 3/3 \xB7 Hakke", stepFps: "Ba\u0199e 3/3 \xB7 Frame kulli lookup", stepBitrate: "Ba\u0199e 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "\u019Da\u0257\u0253e", bestQuality: "Na\u0253\u0253\u0253\u0253e yi\u0253\u0253\u0253", grab: "te\u0253\u0253e", history: "Taariikh", quit: "Ka\u0253\u0253e", cancel: "Satte", choose: "Suo", select: "Suo", back: "Les", theme: "Fude", downloading: "Te\u0253\u0253e\u2026", processing: "\u0189i\u0253\u0253e\u2026", starting: "Boppi\u2026", grabbed: "Te\u0253\u0253e li!", savedTo: "Se\u0253\u0253e:", grabAnother: "\u21B5 te\u0253\u0253e f\u0253\u0253e", tryAgain: "\u019Di\u0253\u0253e n\u0254", tip: "Hudde", lblTitle: "Tiite", lblArtist: "Fello", lblAlbum: "Album", lblRelease: "Di\u0253\u0253e", lblTime: "Wa\u0257e", lblSource: "I\u0253\u0253e", updateAvailable: "Carbon \u0253\u0253\u0253\u0253\u0253e ndi", langPickerTitle: "Suo \u0257eme", langPickerSearch: "\u019Do\u0253\u0253e\u2026", lang: "\u0257eme" },
+  wol: { tagline: "tambali video walli musique. t\xE0mb. tambali. dund.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 sit", pasteLink: "Kop URL bi", supportsLine: "Koy supports video walli audio 1800+ sit", notUrl: "Mooy URL bi \u2014 koy URL bu bees", analyzing: "Sekan", warmingUp: "S\xEBkk\u2026", fetchingInfo: "Kan ci sur\u2026", stepType: "\xCBmstep 1/3 \xB7 Lii lay defas?", stepVideoFormat: "\xCBmstep 2/3 \xB7 Format vid\xE9o", stepAudioFormat: "\xCBmstep 2/3 \xB7 Format audio", stepResolution: "\xCBmstep 3/3 \xB7 R\xE9solution", stepFps: "\xCBmstep 3/3 \xB7 Images par seconde", stepBitrate: "\xCBmstep 3/3 \xB7 D\xE9bit audio", videoOption: "Vid\xE9o", audioOption: "Audio", recommended: "M\xEBgg nu", bestQuality: "Kalit\xE9 superior", grab: "Tambali", history: "Historique", quit: "Dugg", cancel: "Kans", choose: "T\xE0mb", select: "T\xE0mb", back: "Tir", theme: "Th\xE8me", downloading: "Tambali\u2026", processing: "Traitement\u2026", starting: "Commence\u2026", grabbed: "Tambali!", savedTo: "Enregistr\xE9 te:", grabAnother: "\u21B5 Tambali enn go", tryAgain: "\u0181amale ci", tip: "Astuce", lblTitle: "Titre", lblArtist: "Artiste", lblAlbum: "Album", lblRelease: "Sortie", lblTime: "Dur\xE9e", lblSource: "Source", updateAvailable: "Mise \xE0 jour de Carbon disponible", langPickerTitle: "Choix la langue", langPickerSearch: "S\xEBkk\u2026", lang: "Langue" },
+  ti: { tagline: "\u126A\u12F2\u12EE \u12C8\u12ED\u121D \u1219\u12DA\u12AD \u12A0\u12CD\u122D\u12F5\u1362 \u121D\u1228\u1325\u1362 \u12A0\u12CD\u122D\u12F5\u1362 \u1270\u1320\u1293\u124B\u120D\u1362", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 \u12F5\u1228-\u1308\u133E\u127D", pasteLink: "\u120A\u1295\u12AD \u1245\u12F3", supportsLine: "\u12A81800+ \u12F5\u1228-\u1308\u133E\u127D \u126A\u12F2\u12EE\u1293 \u12F5\u121D\u1345 \u12ED\u12F0\u1308\u134B\u120D", notUrl: "\u12ED\u1205 \u120A\u1295\u12AD \u12A0\u12ED\u12F0\u1208\u121D \u2014 \u1219\u1209 \u120A\u1295\u12AD \u1245\u12F3", analyzing: "\u1218\u122D\u121D\u122D", warmingUp: "\u1218\u1245\u1228\u1275\u2026", fetchingInfo: "\u1218\u1228\u1303 \u121B\u1235\u12A8\u1263\u122D\u2026", stepType: "\u12F0\u1228\u1303 1/3 \xB7 \u121D\u1295 \u12A0\u12CD\u122D\u12F5?", stepVideoFormat: "\u12F0\u1228\u1303 2/3 \xB7 \u12E8\u126A\u12F2\u12EE \u1245\u122D\u1345", stepAudioFormat: "\u12F0\u1228\u1303 2/3 \xB7 \u12E8\u12F5\u121D\u1345 \u1245\u122D\u1345", stepResolution: "\u12F0\u1228\u1303 3/3 \xB7 \u130D\u122B\u132B", stepFps: "\u12F0\u1228\u1303 3/3 \xB7 \u1260\u1230\u12A8\u1295\u12F5 \u134D\u122B\u121E\u127D", stepBitrate: "\u12F0\u1228\u1303 3/3 \xB7 \u12E8\u12F5\u121D\u1345 \u1262\u1275\u122C\u1275", videoOption: "\u126A\u12F2\u12EE", audioOption: "\u12F5\u121D\u1345", recommended: "\u12E8\u1270\u1218\u12A8\u1228", bestQuality: "\u12A8\u134D\u1270\u129B \u1325\u122B\u1275", grab: "\u12A0\u12CD\u122D\u12F5", history: "\u1273\u122A\u12AD", quit: "\u12CD\u1323", cancel: "\u1230\u122D\u12DD", choose: "\u121D\u1228\u1325", select: "\u121D\u1228\u1325", back: "\u1270\u1218\u1208\u1235", theme: "\u1308\u133D\u1273", downloading: "\u1260\u1218\u1238\u1323\u1275 \u120B\u12ED\u2026", processing: "\u1260\u1218\u1295\u1308\u1325 \u120B\u12ED\u2026", starting: "\u121B\u12CD\u1228\u12F5 \u1240\u122D\u1277\u120D\u2026", grabbed: "\u1270\u1290\u1233\u120D!", savedTo: "\u1270\u1240\u121D\u1327\u120D \u1260\u1361", grabAnother: "\u21B5 \u120C\u120B \u12A0\u12CD\u122D\u12F5", tryAgain: "\u12A5\u1295\u12F0\u1308\u1293 \u121E\u12AD\u122D", tip: "\u121D\u12AD\u122D", lblTitle: "\u122D\u12D5\u1235", lblArtist: "\u12D8\u121B\u12D5\u12AB\u122A", lblAlbum: "\u12A0\u120D\u1260\u121D", lblRelease: "\u121D\u1235\u1275", lblTime: "\u130A\u12DC", lblSource: "\u121D\u1295\u132D", updateAvailable: "\u12E8Carbon \u121B\u123B\u123B\u12EB \u12DD\u130D\u1301 \u1290\u12CD", langPickerTitle: "\u124B\u1295\u124B \u12ED\u121D\u1228\u1321", langPickerSearch: "\u1348\u120D\u130D\u2026", lang: "\u124B\u1295\u124B" },
+  om: { tagline: "viidiyoo yoo muuziqaa buufata. filadhu. buufata. xumurame.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 websayitii", pasteLink: "URL barqadhu", supportsLine: "1800+ websayitii irraa viidiyoo fi muuziqaa ni dhaabbata", notUrl: "Kun link hin dhaabbatu \u2014 URL guutuu barqadhu", analyzing: "Qophisuu", warmingUp: "Qabsiisuu\u2026", fetchingInfo: "Ooltii fudhdoo\u2026", stepType: "Qabxii 1/3 \xB7 Ma buufata?", stepVideoFormat: "Qabxii 2/3 \xB7 Viidiyoo formaatii", stepAudioFormat: "Qabxii 2/3 \xB7 Muuziqaa formaatii", stepResolution: "Qabxii 3/3 \xB7 Qulqullina", stepFps: "Qabxii 3/3 \xB7 Faraamaa sekii dhufu", stepBitrate: "Qabxii 3/3 \xB7 Muuziqaa bita riti", videoOption: "Viidiyoo", audioOption: "Muuziqaa", recommended: "Qarsaa", bestQuality: "Qulqullina olaanaa", grab: "buufata", history: "Taariiffa", quit: "Baa", cancel: "Haquu", choose: "Filadhu", select: "Filadhu", back: "Duubatti", theme: "Bifa", downloading: "Buufachuu\u2026", processing: "Hojjetuu\u2026", starting: "Jalqabaa\u2026", grabbed: "Buufame!", savedTo: "Qabsiistani:", grabAnother: "\u21B5 kan biraa buufata", tryAgain: "Irra deebiitii", tip: "Qarsaa", lblTitle: "Maqaa", lblArtist: "Ogeessa", lblAlbum: "Album", lblRelease: "Baafatama", lblTime: "Yeroo", lblSource: "Madda", updateAvailable: "Carbon fooyyaa jira", langPickerTitle: "Afaan filadhu", langPickerSearch: "Barbaadhu\u2026", lang: "Afaan" },
+  ts: { tagline: "tsikona movha kutani. hika. tsikona. hetika.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 webusite", pasteLink: "Kopela URL", supportsLine: "U tika movha ni rivhumu hi 1800+ webusite", notUrl: "A hi URL \u2014 Kopela URL hinkwaro", analyzing: "Tika", warmingUp: "Tshama\u2026", fetchingInfo: "Kumela tinthumelo\u2026", stepType: "Nhloko 1/3 \xB7 U tika ini?", stepVideoFormat: "Nhloko 2/3 \xB7 Movha xitand", stepAudioFormat: "Nhloko 2/3 \xB7 Rivhumu xitand", stepResolution: "Nhloko 3/3 \xB7 Nhlamusela", stepFps: "Nhloko 3/3 \xB7 Mari ya sekhondo", stepBitrate: "Nhloko 3/3 \xB7 Rivhumu bit rate", videoOption: "Movha", audioOption: "Rivhumu", recommended: "Kumedzi", bestQuality: "Nhlamusela ya leha", grab: "tsika", history: "Matimu", quit: "Rhurhela", cancel: "Tika", choose: "Hika", select: "Hika", back: "Fambela", theme: "Tshanisi", downloading: "Tsika\u2026", processing: "Kumela\u2026", starting: "Tika\u2026", grabbed: "Tsikeri!", savedTo: "Kuma:", grabAnother: "\u21B5 tsika yinwana", tryAgain: "Lava", tip: "Mahungu", lblTitle: "Nhloko", lblArtist: "Mculu", lblAlbum: "Album", lblRelease: "Khumana", lblTime: "Nkarhi", lblSource: "Mundlangu", updateAvailable: "Carbon update ni kona", langPickerTitle: "Hika tindzimi", langPickerSearch: "Lava\u2026", lang: "Tindzimi" },
+  ve: { tagline: "u \u1E71auha video kana music. nda. \u1E71auha. \u1E71auha.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopela URL", supportsLine: "U \u1E71auha video na music kha website dza 1800+", notUrl: "A hi URL \u2014 Kopela URL hofhadwa", analyzing: "Tala", warmingUp: "\u1E71angama\u2026", fetchingInfo: "\u1E3Da\u1E3Do\u2026", stepType: "Tiho 1/3 \xB7 Ino \u1E71auha?", stepVideoFormat: "Tiho 2/3 \xB7 Video fomu", stepAudioFormat: "Tiho 2/3 \xB7 Music fomu", stepResolution: "Tiho 3/3 \xB7 Boni", stepFps: "Tiho 3/3 \xB7 Framethi wa sekhondo", stepBitrate: "Tiho 3/3 \xB7 Music bit rate", videoOption: "Video", audioOption: "Music", recommended: "Kudumela", bestQuality: "Boni eholwini", grab: "\u1E71auha", history: "Matimu", quit: "Kuma", cancel: "Tiho", choose: "Nda", select: "Nda", back: "Fambela", theme: "Tshanisi", downloading: "\u1E71auha\u2026", processing: "\u1E71anga\u2026", starting: "Thoma\u2026", grabbed: "\u1E71auhiwe!", savedTo: "\u1E3Da:", grabAnother: "\u21B5 \u1E71auha inwe", tryAgain: "Lava", tip: "Khuthi", lblTitle: "N\u1E3Dungula", lblArtist: "Vimbi", lblAlbum: "Album", lblRelease: "\u1E71auwa", lblTime: "Nkarhi", lblSource: "Mundlangu", updateAvailable: "Carbon update i \u1D53ha", langPickerTitle: "Nda tindzimi", langPickerSearch: "Lava\u2026", lang: "Tindzimi" },
+  nr: { tagline: "dlala ivideo noma imusic. khetha. dlala. kuphela.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 amawebhu", pasteLink: "Kopela i-URL", supportsLine: "U tshama ivideo ne imusic emawebhu angu 1800+", notUrl: "Akukho i-URL \u2014 kopela i-URL ephelele", analyzing: "Hlola", warmingUp: "Futhuma\u2026", fetchingInfo: "Thola ulwazi\u2026", stepType: "Isinyathelo 1/3 \xB7 Udlala ini?", stepVideoFormat: "Isinyathelo 2/3 \xB7 Ifomu yevideo", stepAudioFormat: "Isinyathelo 2/3 \xB7 Ifomu yemusic", stepResolution: "Isinyathelo 3/3 \xB7 Ukuncoma", stepFps: "Isinyathelo 3/3 \xB7 Amakhokhala ngomunye", stepBitrate: "Isinyathelo 3/3 \xB7 Ibitrate yemusic", videoOption: "Ivideo", audioOption: "Imusic", recommended: "Kucetwayo", bestQuality: "Ikhono elimangalisayo", grab: "dlala", history: "Umlando", quit: "Phuma", cancel: "Khansela", choose: "Khetha", select: "Khetha", back: "Emuva", theme: "Itheme", downloading: "Idlala\u2026", processing: "Isebenza\u2026", starting: "Iqala\u2026", grabbed: "Idlalile!", savedTo: "Gcina kwelapha:", grabAnother: "\u21B5 dlala olunye", tryAgain: "Zameka", tip: "Ithiphu", lblTitle: "Isihloko", lblArtist: "Umculi", lblAlbum: "I-albhamu", lblRelease: "Ukukhishwa", lblTime: "Isikhathi", lblSource: "Umthombo", updateAvailable: "Ikhona lokubuyekeziwe lweCarbon", langPickerTitle: "Khetha ulimi", langPickerSearch: "Thola\u2026", lang: "Ulimi" },
+  tpi: { tagline: "download video o musik. makim. download. pinis.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 sait", pasteLink: "Pasim URL", supportsLine: "Ingg-gapim video na musik long 1800+ sait", notUrl: "Disait i no URL \u2014 pasim long URL", analyzing: "Chesim", warmingUp: "Hotim\u2026", fetchingInfo: "Tokim infomeshen\u2026", stepType: "Step 1/3 \xB7 Yu la downloadim?", stepVideoFormat: "Step 2/3 \xB7 Video format", stepAudioFormat: "Step 2/3 \xB7 Audio format", stepResolution: "Step 3/3 \xB7 Kwaliti", stepFps: "Step 3/3 \xB7 Frame por sekon", stepBitrate: "Step 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Musik", recommended: "Gutman", bestQuality: "Namba bilong kwaliti", grab: "download", history: "Hisitori", quit: "Lus", cancel: "Kansel", choose: "Makim", select: "Makim", back: "Baks", theme: "Lukaut", downloading: "Downloadim\u2026", processing: "Prosesim\u2026", starting: "Statim\u2026", grabbed: "Download pinis!", savedTo: "Sait long:", grabAnother: "\u21B5 download gen", tryAgain: "Tanim", tip: "Tok", lblTitle: "Titl", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Sailim", lblTime: "Taim", lblSource: "Asis", updateAvailable: "Carbon updeit i stap", langPickerTitle: "Makim tok", langPickerSearch: "Lukaut\u2026", lang: "Tok" },
+  bis: { tagline: "download video o musik. selekta. download. finis.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 sait", pasteLink: "Kopem URL", supportsLine: "E support video mo musik long 1800+ sait", notUrl: "Nokala i no URL \u2014 kopem ful URL", analyzing: "Lukautem", warmingUp: "Warm\u2026", fetchingInfo: "Lukaut infomesen\u2026", stepType: "Step 1/3 \xB7 Yu la downloadem?", stepVideoFormat: "Step 2/3 \xB7 Video format", stepAudioFormat: "Step 2/3 \xB7 Audio format", stepResolution: "Step 3/3 \xB7 Kwaliti", stepFps: "Step 3/3 \xB7 Frame long wan sekon", stepBitrate: "Step 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Musik", recommended: "Gud", bestQuality: "Namba bilong kwaliti", grab: "download", history: "Histori", quit: "Lus", cancel: "Kansel", choose: "Selekta", select: "Selekta", back: "Baks", theme: "Lukaut", downloading: "Downloadem\u2026", processing: "Prosesem\u2026", starting: "Statem\u2026", grabbed: "Download finis!", savedTo: "Sait long:", grabAnother: "\u21B5 download wan nar", tryAgain: "Tanim", tip: "Tup", lblTitle: "Titl", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Sailim", lblTime: "Taim", lblSource: "Asis", updateAvailable: "Carbon updeit i stap", langPickerTitle: "Selekta tok", langPickerSearch: "Lukaut\u2026", lang: "Tok" },
+  tvl: { tagline: "download ata video po o fuafo. filiga. download. oti.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 oko", pasteLink: "Kopi atu URL", supportsLine: "E tautoko a ata video mo fuafo mai oko 1800+", notUrl: "E lei a URL \u2014 kopi atu URL", analyzing: "Faiake", warmingUp: "Mafoga\u2026", fetchingInfo: "Ako mai pologo\u2026", stepType: "Pase 1/3 \xB7 Ko e a download ai?", stepVideoFormat: "Pase 2/3 \xB7 Ata video", stepAudioFormat: "Pase 2/3 \xB7 Fuafo", stepResolution: "Pase 3/3 \xB7 Fale", stepFps: "Pase 3/3 \xB7 Fale i te sekene", stepBitrate: "Pase 3/3 \xB7 Fuafo bitrate", videoOption: "Video", audioOption: "Fuafo", recommended: "Fautua", bestQuality: "Fale sili", grab: "download", history: "Tohi", quit: "Ese", cancel: "Cancele", choose: "Filiga", select: "Filiga", back: "Foki", theme: "Lauti", downloading: "E download mai\u2026", processing: "E fai mai\u2026", starting: "E amu mai\u2026", grabbed: "E download!", savedTo: "E taua ki:", grabAnother: "\u21B5 download tasi", tryAgain: "Tataufo", tip: "Fautua", lblTitle: "Tauti", lblArtist: "Tauti", lblAlbum: "Album", lblRelease: "Faiga", lblTime: "Taimi", lblSource: "Puna", updateAvailable: "E iai Carbon update", langPickerTitle: "Filiga a gagana", langPickerSearch: "Mafoga\u2026", lang: "Gagana" },
+  pau: { tagline: "download a video ba music. moak. download. koi.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kemedek URL", supportsLine: "E support a video ba music mai website 1800+", notUrl: "Ngai er a URL \u2014 kemedek i nggeol er a URL", analyzing: "Ereb er", warmingUp: "Emiich\u2026", fetchingInfo: "Temii a tekoi\u2026", stepType: "Beni 1/3 \xB7 A koe a download?", stepVideoFormat: "Beni 2/3 \xB7 Video format", stepAudioFormat: "Beni 2/3 \xB7 Music format", stepResolution: "Beni 3/3 \xB7 Resolution", stepFps: "Beni 3/3 \xB7 Frame i te sekond", stepBitrate: "Beni 3/3 \xB7 Music bitrate", videoOption: "Video", audioOption: "Music", recommended: "I ngimes", bestQuality: "Resolution ngimes", grab: "download", history: "Tekoi er a mesei", quit: "E esei", cancel: "Tokar", choose: "Moak", select: "Moak", back: "Ulong", theme: "Style", downloading: "E download mai\u2026", processing: "E process mai\u2026", starting: "E onchop elii\u2026", grabbed: "E download!", savedTo: "E saveot elii:", grabAnother: "\u21B5 download o tek", tryAgain: "Emwi", tip: "Ngimes", lblTitle: "Titiol", lblArtist: "Chuuk", lblAlbum: "Album", lblRelease: "Boel", lblTime: "Ole", lblSource: "Oar", updateAvailable: "E ari Carbon update", langPickerTitle: "Moak a eri", langPickerSearch: "Rearch\u2026", lang: "Eri" },
+  niu: { tagline: "download e video po e music. filiga. download. oti.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 ngaue", pasteLink: "Kopaki e URL", supportsLine: "E tautoko e video mo e music mai ngaue 1800+", notUrl: "Oki e URL \u2014 kopaki e URL", analyzing: "Faiake", warmingUp: "Hifi\u2026", fetchingInfo: "Ako e pologo\u2026", stepType: "Pase 1/3 \xB7 Ko e a download ai?", stepVideoFormat: "Pase 2/3 \xB7 Ata video", stepAudioFormat: "Pase 2/3 \xB7 Ata music", stepResolution: "Pase 3/3 \xB7 Fale", stepFps: "Pase 3/3 \xB7 Ata frame i te sekene", stepBitrate: "Pase 3/3 \xB7 Ata music bitrate", videoOption: "Video", audioOption: "Music", recommended: "Fautua", bestQuality: "Fale matua", grab: "download", history: "Tohi", quit: "E faka", cancel: "Cancel", choose: "Filiga", select: "Filiga", back: "Foki", theme: "Lauti", downloading: "E download nei\u2026", processing: "E fai nei\u2026", starting: "E amu nei\u2026", grabbed: "E download!", savedTo: "E tauhi ki:", grabAnother: "\u21B5 download e tahi", tryAgain: "Tataufo", tip: "Fautua", lblTitle: "Tauti", lblArtist: "Tauti", lblAlbum: "Album", lblRelease: "Faiga", lblTime: "Taimi", lblSource: "Puna", updateAvailable: "E iai Carbon update", langPickerTitle: "Filiga e gagana", langPickerSearch: "Hifi\u2026", lang: "Gagana" },
+  rar: { tagline: "download i te ata ata no te oro. atoa. download. oti.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 pae", pasteLink: "Tape atu te URL", supportsLine: "E tautoko i te ata ata me te oro mai i te pae 1800+", notUrl: "Kore e URL \u2014 tape atu te URL", analyzing: "Faiake", warmingUp: "Mafoga\u2026", fetchingInfo: "Ako mai te pologo\u2026", stepType: "Pase 1/3 \xB7 Ko e auta ai?", stepVideoFormat: "Pase 2/3 \xB7 Ata ata", stepAudioFormat: "Pase 2/3 \xB7 Te oro", stepResolution: "Pase 3/3 \xB7 Nui", stepFps: "Pase 3/3 \xB7 Nga ata i te sekene", stepBitrate: "Pase 3/3 \xB7 Te oro bitrate", videoOption: "Video", audioOption: "Oro", recommended: "Meitaki", bestQuality: "Nui rahi", grab: "auta", history: "Tohi", quit: "E kaore", cancel: "Cancel", choose: "Atoa", select: "Atoa", back: "Toki mai", theme: "Lauti", downloading: "E auta mai\u2026", processing: "E fai mai\u2026", starting: "E amu mai\u2026", grabbed: "E oti!", savedTo: "E tiaki ki:", grabAnother: "\u21B5 auta tetahi", tryAgain: "Tataufo", tip: "Meitaki", lblTitle: "Taitai", lblArtist: "Tautai", lblAlbum: "Album", lblRelease: "Faikati", lblTime: "Te tau", lblSource: "Puna", updateAvailable: "E iai te Carbon update", langPickerTitle: "Atoa te reo", langPickerSearch: "Mafoga\u2026", lang: "Reo" },
+  hif: { tagline: "video ya music download karo. chuno. download. ho gaya.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "URL copy karo", supportsLine: "1800+ website se video aur music support karta hai", notUrl: "Yeh URL nahi hai \u2014 pura URL copy karo", analyzing: "Check kar raha", warmingUp: "Garam ho raha\u2026", fetchingInfo: "Jaankari le raha\u2026", stepType: "Step 1/3 \xB7 Kya download karna hai?", stepVideoFormat: "Step 2/3 \xB7 Video format", stepAudioFormat: "Step 2/3 \xB7 Audio format", stepResolution: "Step 3/3 \xB7 Quality", stepFps: "Step 3/3 \xB7 Frames per second", stepBitrate: "Step 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Khaas", bestQuality: "Sab se achhi quality", grab: "download", history: "Itihas", quit: "Bahar", cancel: "Cancel", choose: "Chuno", select: "Chuno", back: "Wapas", theme: "Theme", downloading: "Download ho raha\u2026", processing: "Process ho raha\u2026", starting: "Shuru ho raha\u2026", grabbed: "Ho gaya!", savedTo: "Save kiya:", grabAnother: "\u21B5 aur download karo", tryAgain: "Phir try karo", tip: "Tip", lblTitle: "Title", lblArtist: "Artist", lblAlbum: "Album", lblRelease: "Release", lblTime: "Waqt", lblSource: "Source", updateAvailable: "Carbon update aa gaya hai", langPickerTitle: "Bhasha chuno", langPickerSearch: "Dhoondo\u2026", lang: "Bhasha" },
+  gn: { tagline: "ipe\u2019a ha video t\xE9r\xE3 m\xFAsica. eiporavo. ipe\u2019a. ijap\xF3.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 kuati\xE1na", pasteLink: "Embohasa ha URL", supportsLine: "Omomba\u2019e video ha audio 1800+ kuati\xE1na-pe", notUrl: "Nda\u2019e ha URL \u2014 embohasa URL hovy", analyzing: "Ehecha", warmingUp: "Mop\xED\u2026", fetchingInfo: "E\xF1e\u2019e\u2026", stepType: "PASO 1/3 \xB7 Mba\u2019\xE9 rejape?", stepVideoFormat: "PASO 2/3 \xB7 Formato de video", stepAudioFormat: "PASO 2/3 \xB7 Formato de audio", stepResolution: "PASO 3/3 \xB7 Resoluci\xF3n", stepFps: "PASO 3/3 \xB7 Fotogramas por segundo", stepBitrate: "PASO 3/3 \xB7 Tasa de bits", videoOption: "Video", audioOption: "Audio", recommended: "Tekopor\xE3", bestQuality: "Resoluci\xF3n i-m\xE1va", grab: "ipe\u2019a", history: "Tembipuru", quit: "E\xF1e", cancel: "Eheja", choose: "Eiporavo", select: "Eiporavo", back: "Ema\xF1e", theme: "Tema", downloading: "Ipe\u2019a\u2026", processing: "I\xF1aranduva\u2026", starting: "Ih\xFA\u2026", grabbed: "\xA1Ipe\u2019a!", savedTo: "Ijejogua:", grabAnother: "\u21B5 o\xEDna ipe\u2019a", tryAgain: "Eha\u2019\xE3jey", tip: "Tekopor\xE3", lblTitle: "T\xEDtulo", lblArtist: "Artista", lblAlbum: "\xC1lbum", lblRelease: "Publicaci\xF3n", lblTime: "Kara\xF1a", lblSource: "\xD1eindy", updateAvailable: "Carbon update o\u0129 mbohapy", langPickerTitle: "Eiporavo \xF1e\u2019\u1EBD", langPickerSearch: "Eheka\u2026", lang: "\xD1e\u2019\u1EBD" },
+  qu: { tagline: "video utaq musika urquy. akllay. urquy. tukisqa.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 web sayis", pasteLink: "URL nisqayki", supportsLine: "1800+ web sayispi video y musikata qhawana", notUrl: "Mana URL mana \u2014 llapan URLta nisqayki", analyzing: "Qhawachkan", warmingUp: "Qic\xF1ichkan\u2026", fetchingInfo: "Willayta qichkan\u2026", stepType: "\xD1iqin 1/3 \xB7 Imata urquqayta?", stepVideoFormat: "\xD1iqin 2/3 \xB7 Video forma", stepAudioFormat: "\xD1iqin 2/3 \xB7 Musika forma", stepResolution: "\xD1iqin 3/3 \xB7 Sumaq rikuchaq", stepFps: "\xD1iqin 3/3 \xB7 Fotograma sapa tinkiti", stepBitrate: "\xD1iqin 3/3 \xB7 Musika bitrate", videoOption: "Video", audioOption: "Musika", recommended: "Akllaysqa", bestQuality: "Huch\u2019uy hamuy", grab: "urquy", history: "\xD1awpaq", quit: "Lloqsimuy", cancel: "Sisqa", choose: "Akllay", select: "Akllay", back: "Qam", theme: "Munay", downloading: "Urquchkan\u2026", processing: "Rurachkan\u2026", starting: "Qallarispa\u2026", grabbed: "Urquysqa!", savedTo: "Kaypi waqaychqa:", grabAnother: "\u21B5 hukta urquy", tryAgain: "Rurayki", tip: "Kamachiy", lblTitle: "Sutin", lblArtist: "Kamaqkuna", lblAlbum: "Album", lblRelease: "Churay", lblTime: "Pacha", lblSource: "Pukyu", updateAvailable: "Carbonpiykiy riniy rikuchisqa", langPickerTitle: "Simi-ta akllay", langPickerSearch: "Maskana\u2026", lang: "Simi" },
+  ay: { tagline: "video uta musika aptay. akllay. aptay. tukusqa.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 web sayis", pasteLink: "URL apachiyay", supportsLine: "1800+ web sayispi video y musika qhaway", notUrl: "Mana URL mana \u2014 hunt\u2019a URL apachiyay", analyzing: "Qhawana", warmingUp: "Qichuriyani\u2026", fetchingInfo: "Willay qichuriani\u2026", stepType: "QALLT 1/3 \xB7 Kanki aptayta?", stepVideoFormat: "QALLT 2/3 \xB7 Video formato", stepAudioFormat: "QALLT 2/3 \xB7 Musika formato", stepResolution: "QALLT 3/3 \xB7 Sumaq uyari", stepFps: "QALLT 3/3 \xB7 Fotograma sapa t\u2019ika", stepBitrate: "QALLT 3/3 \xB7 Musika bitrate", videoOption: "Video", audioOption: "Musika", recommended: "Yachaya\xF1a", bestQuality: "Jilata uyari", grab: "aptay", history: "Tayka", quit: "Luray", cancel: "Sisqa", choose: "Akllay", select: "Akllay", back: "Qhipa", theme: "Maycha", downloading: "Aptaychkani\u2026", processing: "Ruraychkani\u2026", starting: "Qallariyachkani\u2026", grabbed: "Aptayqa!", savedTo: "Kaypi waqayqa:", grabAnother: "\u21B5 wich\u2019a aptay", tryAgain: "Ruraykama", tip: "Kamachiy", lblTitle: "Sutin", lblArtist: "Kamaqkuna", lblAlbum: "Album", lblRelease: "Qulltani", lblTime: "Pacha", lblSource: "Pukyu", updateAvailable: "Carbonpiykiy riniy rikuchisqa", langPickerTitle: "Simi akllay", langPickerSearch: "Maskana\u2026", lang: "Simi" },
+  nah: { tagline: "video o music tiquijxitl. tiquilih. tiquijxitl. ye tiquic.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 tebe web", pasteLink: "Tlacopia in URL", supportsLine: "Tiquijxitl video ahuan music 1800+ tebe web ti", notUrl: "Amo in URL \u2014 tlacopia in URL ome", analyzing: "Tiquicxatilia", warmingUp: "Piltia\u2026", fetchingInfo: "Tinquixtochitl\u2026", stepType: "Tlapalli 1/3 \xB7 Tleicu tiquijxitl?", stepVideoFormat: "Tlapalli 2/3 \xB7 In video tlapalli", stepAudioFormat: "Tlapalli 2/3 \xB7 In music tlapalli", stepResolution: "Tlapalli 3/3 \xB7 In tlahuitl", stepFps: "Tlapalli 3/3 \xB7 Fotogramas tlapalli", stepBitrate: "Tlapalli 3/3 \xB7 In music bitrate", videoOption: "Video", audioOption: "Music", recommended: "Miqui", bestQuality: "Ilami tlahuitl", grab: "tiquijxitl", history: "In tlanextli", quit: "Noquiti", cancel: "Tlanahuilli", choose: "Tiquilih", select: "Tiquilih", back: "Tlabuaya", theme: "Itlapalli", downloading: "Tiquijxitl\u2026", processing: "Tihuani\u2026", starting: "Tlan-peya\u2026", grabbed: "\xA1Tiquijxitl!", savedTo: "Motlacaloc:", grabAnother: "\u21B5 oc tiquijxitl", tryAgain: "Tlanese", tip: "Tlanextli", lblTitle: "Tlanextli", lblArtist: "Cuahpipiltin", lblAlbum: "Album", lblRelease: "Tlanextli", lblTime: "Tlahu", lblSource: "Tlacuitlatl", updateAvailable: "Tlacelotl Carbon tlahtli", langPickerTitle: "Tiquilih tlahtli", langPickerSearch: "Tlatlax\u2026", lang: "Tlahtli" },
+  ch: { tagline: "diskarga un video yan una musica. pule. diskarga. tine.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 websites", pasteLink: "Pega i URL", supportsLine: "Soporta video yan audio di 1800+ websites", notUrl: "Este i ta'i URL \u2014 pega i URL completo", analyzing: "Ta'a", warmingUp: "Mafana\u2026", fetchingInfo: "Man informa\u2026", stepType: "Gu\xE5hi 1/3 \xB7 K\xE5 para h\xE5\xF1 gi diskarga?", stepVideoFormat: "Gu\xE5hi 2/3 \xB7 Formato de video", stepAudioFormat: "Gu\xE5hi 2/3 \xB7 Formato de audio", stepResolution: "Gu\xE5hi 3/3 \xB7 Resolosion", stepFps: "Gu\xE5hi 3/3 \xB7 Fotogramas ku i segundu", stepBitrate: "Gu\xE5hi 3/3 \xB7 Bitrate de audio", videoOption: "Video", audioOption: "Audio", recommended: "Rekomenda", bestQuality: "M\xE5sigi\xF1\xE5 na resolusion", grab: "diskarga", history: "Istoria", quit: "Sali", cancel: "Kansela", choose: "Pule", select: "Pule", back: "B\xE5ta", theme: "Tema", downloading: "Diskirka\u2026", processing: "Prosesa\u2026", starting: "Kompleta\u2026", grabbed: "\xA1Diskarga!", savedTo: "Nasa'i gi:", grabAnother: "\u21B5 diskarga otro", tryAgain: "Prueba tan", tip: "KONSEYU", lblTitle: "Titulu", lblArtist: "Artistu", lblAlbum: "Album", lblRelease: "Publicasion", lblTime: "Timpu", lblSource: "Fuenti", updateAvailable: "Ta' gi me\xE5\xF1ao na Carbon", langPickerTitle: "Pule i lengua", langPickerSearch: "H\xE5buska\u2026", lang: "Lengua" },
+  ceb: { tagline: "download og video o musika. pilia. download. nahuman.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopyaha ang URL", supportsLine: "Suporta og video ug musika sa 1800+ website", notUrl: "Dili nga URL ni \u2014 kopyaha ang tibuk-ang URL", analyzing: "Nagtukot", warmingUp: "Gi warms up\u2026", fetchingInfo: "Gip fetch sa impormasyon\u2026", stepType: "Hakbang 1/3 \xB7 Unsaon nimo i-download?", stepVideoFormat: "Hakbang 2/3 \xB7 Video format", stepAudioFormat: "Hakbang 2/3 \xB7 Audio format", stepResolution: "Hakbang 3/3 \xB7 Resolution", stepFps: "Hakbang 3/3 \xB7 Frame kada segundo", stepBitrate: "Hakbang 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Girekomenda", bestQuality: "Kinatas-ang kalidad", grab: "download", history: "Kasaysayan", quit: "Mga-out", cancel: "Kanselahon", choose: "Pilia", select: "Pilia", back: "Balik", theme: "Tema", downloading: "Nag-download\u2026", processing: "Nag-process\u2026", starting: "Nagsugod\u2026", grabbed: "Na-download na!", savedTo: "Ni-save sa:", grabAnother: "\u21B5 download la", tryAgain: "Sulitani", tip: "Konsilyo", lblTitle: "Titulo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Paglabaw", lblTime: "Tagal", lblSource: "Pinagmulan", updateAvailable: "Naa ang Carbon update", langPickerTitle: "Pilia ang pinulongan", langPickerSearch: "Pugsa\u2026", lang: "Pinulongan" },
+  ilo: { tagline: "download ti video wenno a music. pilien. download. nasakalen.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopyahen ti URL", supportsLine: "Suportaran ti video ken musika iti 1800+ website", notUrl: "Diton ti URL \u2014 kopyahen ti kudaw a URL", analyzing: "Birken", warmingUp: "Magrangit\u2026", fetchingInfo: "Dokumen ti impormasion\u2026", stepType: "Yugto 1/3 \xB7 Isa nga panagdownload?", stepVideoFormat: "Yugto 2/3 \xB7 Ti format ti video", stepAudioFormat: "Yugto 2/3 \xB7 Ti format ti audio", stepResolution: "Yugto 3/3 \xB7 Resolution", stepFps: "Yugto 3/3 \xB7 Frame kada segundo", stepBitrate: "Yugto 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Irekomenda", bestQuality: "Kaqi may kalidad", grab: "download", history: "Kasaysayan", quit: "Exit", cancel: "Kanselahon", choose: "Pilien", select: "Pilien", back: "Lakad", theme: "Tema", downloading: "Nagdownload\u2026", processing: "Napproseso\u2026", starting: "Nanumpis\u2026", grabbed: "Na-download!", savedTo: "Naisurat idi:", grabAnother: "\u21B5 download pay", tryAgain: "Balikasem", tip: "Konsilio", lblTitle: "Titulo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Publikasion", lblTime: "Katayunan", lblSource: "Ti purok", updateAvailable: "Adyay ngayon an Carbon update", langPickerTitle: "Pilien tiwen", langPickerSearch: "Agpang\u2026", lang: "Wen" },
+  war: { tagline: "download an video o ha musika. pili. download. natapos.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopyaha an URL", supportsLine: "Ginso-support an video ngan musika ha 1800+ nga website", notUrl: "Ini nga URL ni \u2014 kopyaha an kudaw nga URL", analyzing: "Nagsusuri", warmingUp: "Nangangisum\u2026", fetchingInfo: "Nakuha an impormasyon\u2026", stepType: "Hakbang 1/3 \xB7 Ano an i-download?", stepVideoFormat: "Hakbang 2/3 \xB7 Video format", stepAudioFormat: "Hakbang 2/3 \xB7 Audio format", stepResolution: "Hakbang 3/3 \xB7 Resolution", stepFps: "Hakbang 3/3 \xB7 Frame kada segundo", stepBitrate: "Hakbang 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Ginrekomenda", bestQuality: "Kinatas-ang kalidad", grab: "download", history: "Kasaysayan", quit: "Gquit", cancel: "Kanselahon", choose: "Pili", select: "Pili", back: "Nabalik", theme: "Tema", downloading: "Nagdownload\u2026", processing: "Nagproseso\u2026", starting: "Nagsugdan\u2026", grabbed: "Nadownload na!", savedTo: "Naisayrat adi:", grabAnother: "\u21B5 download adi", tryAgain: "Susubukan ten", tip: "Konsilio", lblTitle: "Titulo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Publisidad", lblTime: "Tagur", lblSource: "Pinagtubusan", updateAvailable: "May yana nga Carbon update", langPickerTitle: "Pili an tongue", langPickerSearch: "Pangnga\u2026", lang: "Tongue" },
+  hil: { tagline: "download ang video o music. pili. download. natapos.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopyahon ang URL", supportsLine: "Gin-suportahan ang video kag music sa 1800+ website", notUrl: "Indi URL ni \u2014 kopyahon ang full URL", analyzing: "Nagtukot", warmingUp: "Gi warms up\u2026", fetchingInfo: "Gip fetch nga impormasyon\u2026", stepType: "Hakbang 1/3 \xB7 Ano ang i-download?", stepVideoFormat: "Hakbang 2/3 \xB7 Video format", stepAudioFormat: "Hakbang 2/3 \xB7 Audio format", stepResolution: "Hakbang 3/3 \xB7 Resolution", stepFps: "Hakbang 3/3 \xB7 Frame kada segundo", stepBitrate: "Hakbang 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Music", recommended: "Gin-rekomenda", bestQuality: "Kinatas-ang kalidad", grab: "download", history: "Kasaysayan", quit: "Exit", cancel: "Kanselahon", choose: "Pili", select: "Pili", back: "Balik", theme: "Tema", downloading: "Nag-download\u2026", processing: "Nag-process\u2026", starting: "Nag-start\u2026", grabbed: "Na-download na!", savedTo: "Ni-save sa:", grabAnother: "\u21B5 download pa", tryAgain: "Sulihi tan", tip: "Konsilio", lblTitle: "Titulo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Pag-release", lblTime: "Tagal", lblSource: "Pinagmulan", updateAvailable: "Adlaw na an Carbon update", langPickerTitle: "Pili an language", langPickerSearch: "Pangnga\u2026", lang: "Language" },
+  pam: { tagline: "download a video ba music. pili. download. tamumpa.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopyahon ang URL", supportsLine: "Sinusuportahan ang video kag music sa 1800+ website", notUrl: "Ala URL ito \u2014 kopyahon ang buong URL", analyzing: "Sinusuri", warmingUp: "Nginit\u2026", fetchingInfo: "Kinukuha ang impormasyon\u2026", stepType: "Hakbang 1/3 \xB7 Ano ang i-download?", stepVideoFormat: "Hakbang 2/3 \xB7 Video format", stepAudioFormat: "Hakbang 2/3 \xB7 Audio format", stepResolution: "Hakbang 3/3 \xB7 Resolution", stepFps: "Hakbang 3/3 \xB7 Frame kada segundo", stepBitrate: "Hakbang 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Music", recommended: "Ipinapayong", bestQuality: "Pinakamataas na kalidad", grab: "download", history: "Kasaysayan", quit: "Umalis", cancel: "Kanselahin", choose: "Pumili", select: "Pumili", back: "Balik", theme: "Tema", downloading: "Nagda-download\u2026", processing: "Pinoproseso\u2026", starting: "Nagsisimula\u2026", grabbed: "Na-download na!", savedTo: "Ni-save sa:", grabAnother: "\u21B5 mag-download pa", tryAgain: "Subukan ulit", tip: "Payo", lblTitle: "Pamagat", lblArtist: "Alang-alang", lblAlbum: "Album", lblRelease: "Paglabas", lblTime: "Oras", lblSource: "Pinagmulan", updateAvailable: "Mayroon nang Carbon update", langPickerTitle: "Pumili ng wika", langPickerSearch: "Hanapin\u2026", lang: "Wika" },
+  bkl: { tagline: "download an video o musika. pili. download. natapos.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopyahon an URL", supportsLine: "Sinusuportaran an video kan musika sa 1800+ website", notUrl: "Ini ba URL \u2014 kopyahon an bugon an URL", analyzing: "Sinusuri", warmingUp: "Nagnngit\u2026", fetchingInfo: "Kinukoha an impormasyon\u2026", stepType: "Hakbang 1/3 \xB7 Ano an maidownload?", stepVideoFormat: "Hakbang 2/3 \xB7 Video format", stepAudioFormat: "Hakbang 2/3 \xB7 Audio format", stepResolution: "Hakbang 3/3 \xB7 Resolution", stepFps: "Hakbang 3/3 \xB7 Frame kada segundo", stepBitrate: "Hakbang 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Rinircommenda", bestQuality: "Kinatas-ang kalidad", grab: "download", history: "Kasaysayan", quit: "Exit", cancel: "Kanselahon", choose: "Pili", select: "Pili", back: "Balik", theme: "Tema", downloading: "Nadada-download\u2026", processing: "Pinoproseso\u2026", starting: "Nagsisimula\u2026", grabbed: "Nadownload na!", savedTo: "Nisalvat adi:", grabAnother: "\u21B5 mag-download pa", tryAgain: "Isubukan adi", tip: "Konsilio", lblTitle: "Titolo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Paglabaw", lblTime: "Oras", lblSource: "Pinagkunan", updateAvailable: "Mayroon nang Carbon update", langPickerTitle: "Pili an wikang", langPickerSearch: "Hapag\u2026", lang: "Wikang" },
+  tsg: { tagline: "download a video o music. pili. download. tapos.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 website", pasteLink: "Kopyahun a URL", supportsLine: "Sinusuportuhan a video kag music sa 1800+ website", notUrl: "Dimo i URL ni \u2014 kopyahun a tibuk-ang URL", analyzing: "Sinusuri", warmingUp: "Na init\u2026", fetchingInfo: "Nakuha a impormasyon\u2026", stepType: "Hakbang 1/3 \xB7 Ano a i-download?", stepVideoFormat: "Hakbang 2/3 \xB7 Video format", stepAudioFormat: "Hakbang 2/3 \xB7 Audio format", stepResolution: "Hakbang 3/3 \xB7 Resolution", stepFps: "Hakbang 3/3 \xB7 Frame kada segundo", stepBitrate: "Hakbang 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Music", recommended: "Gin-rekomenda", bestQuality: "Kinatas-ang kalidad", grab: "download", history: "Kasaysayan", quit: "Exit", cancel: "Kanselahun", choose: "Pili", select: "Pili", back: "Balik", theme: "Tema", downloading: "Nagda-download\u2026", processing: "Pinoproseso\u2026", starting: "Nagsugdan\u2026", grabbed: "Na-download na!", savedTo: "Ni-save ha:", grabAnother: "\u21B5 mag-download pa", tryAgain: "Sulihon ta", tip: "Konsilio", lblTitle: "Titulo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Pag-release", lblTime: "Tagal", lblSource: "Pinagmulan", updateAvailable: "May ada nga Carbon update", langPickerTitle: "Pili a language", langPickerSearch: "Hapag\u2026", lang: "Language" },
+  pap: { tagline: "descarga video y musica. elegi. descarga. keda.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 sitiunan", pasteLink: "Kopia e URL", supportsLine: "Soporta video y audio di 1800+ sitiunan", notUrl: "Esaki un URL \u2014 kopia e URL completo", analyzing: "Ta Mira", warmingUp: "Ta bashi\u2026", fetchingInfo: "Ta hakken\u2026", stepType: "Paso 1/3 \xB7 Kiko ta wants download?", stepVideoFormat: "Paso 2/3 \xB7 Formato di video", stepAudioFormat: "Paso 2/3 \xB7 Formato di audio", stepResolution: "Paso 3/3 \xB7 Resolushon", stepFps: "Paso 3/3 \xB7 Frame pa segundo", stepBitrate: "Paso 3/3 \xB7 Audio bitrate", videoOption: "Video", audioOption: "Audio", recommended: "Recomend\xE1", bestQuality: "Resolushon mas alto", grab: "descarga", history: "Historia", quit: "Sali", cancel: "Kansela", choose: "Elegi", select: "Elegi", back: "Bai bek", theme: "Tema", downloading: "Ta download\u2026", processing: "Ta procesa\u2026", starting: "Ta start\u2026", grabbed: "Descarrega!", savedTo: "Ta warda den:", grabAnother: "\u21B5 descarga otro", tryAgain: "Purba atrobe", tip: "Konsuelo", lblTitle: "Titolo", lblArtist: "Artista", lblAlbum: "Album", lblRelease: "Publicashon", lblTime: "Tempo", lblSource: "Fuente", updateAvailable: "Ta warda un actualisashon di Carbon", langPickerTitle: "Elegi un idioma", langPickerSearch: "Buska\u2026", lang: "Idioma" },
+  su: { tagline: "download video atawa musik. pilih. download. rampung.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 situs", pasteLink: "Salin URL", supportsLine: "Nyokong video jeung musik tina 1800+ situs", notUrl: "Ieu lain URL \u2014 salin URL lengkung", analyzing: "Ngajajah", warmingUp: "Haseup\u2026", fetchingInfo: "Nyokot inpormasi\u2026", stepType: "Langkah 1/3 \xB7 Naon anu r\xE9k di download?", stepVideoFormat: "Langkah 2/3 \xB7 Format video", stepAudioFormat: "Langkah 2/3 \xB7 Format musik", stepResolution: "Langkah 3/3 \xB7 Resolusi", stepFps: "Langkah 3/3 \xB7 Frame per detik", stepBitrate: "Langkah 3/3 \xB7 Bitrate musik", videoOption: "Video", audioOption: "Musik", recommended: "Disarankeun", bestQuality: "Kualitas pang pangbest", grab: "download", history: "Sajarah", quit: "Kaleung", cancel: "Batal", choose: "Pilih", select: "Pilih", back: "Deui", theme: "T\xE9ma", downloading: "Lagi download\u2026", processing: "Ngolah\u2026", starting: "Mulai\u2026", grabbed: "Rampung!", savedTo: "Disimpen di:", grabAnother: "\u21B5 download deui", tryAgain: "Coba deui", tip: "Tip", lblTitle: "Judul", lblArtist: "Seniman", lblAlbum: "Album", lblRelease: "Rilis", lblTime: "Lama", lblSource: "Sumber", updateAvailable: "Aya update Carbon", langPickerTitle: "Pilih basa", langPickerSearch: "Cari\u2026", lang: "Basa" },
+  jv: { tagline: "download video utawa musik. pilih. download. rampung.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 situs", pasteLink: "Salin URL", supportsLine: "Ndhukung video lan musik saka 1800+ situs", notUrl: "Iku duduh URL \u2014 salin URL lengkap", analyzing: "Ngriksa", warmingUp: "Panas\u2026", fetchingInfo: "Ntaking info\u2026", stepType: "Tangkah 1/3 \xB7 Apa sing arep diundhuh?", stepVideoFormat: "Tangkah 2/3 \xB7 Format video", stepAudioFormat: "Tangkah 2/3 \xB7 Format musik", stepResolution: "Tangkah 3/3 \xB7 Resolusi", stepFps: "Tangkah 3/3 \xB7 Frame per detik", stepBitrate: "Tangkah 3/3 \xB7 Bitrate musik", videoOption: "Video", audioOption: "Musik", recommended: "Disaranake", bestQuality: "Kualitas paling apik", grab: "undhuh", history: "Sejarah", quit: "Kowe", cancel: "Batal", choose: "Pilih", select: "Pilih", back: "Bali", theme: "Tema", downloading: "Ngundhuh\u2026", processing: "Nolah\u2026", starting: "Miwah\u2026", grabbed: "Rampung!", savedTo: "Disimpen ing:", grabAnother: "\u21B5 undhuh liya", tryAgain: "Coba maneh", tip: "Tip", lblTitle: "Judhul", lblArtist: "Seniman", lblAlbum: "Album", lblRelease: "Rilis", lblTime: "Wektu", lblSource: "Sumber", updateAvailable: "Ana update Carbon", langPickerTitle: "Pilih basa", langPickerSearch: "Cari\u2026", lang: "Basa" },
+  ban: { tagline: "download video atau musik. pilih. download. rampung.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 situs", pasteLink: "Salin URL", supportsLine: "Ngadukung video lan musik saka 1800+ situs", notUrl: "Iku teu URL \u2014 salin URL lengkap", analyzing: "Ngajajah", warmingUp: "Haneut\u2026", fetchingInfo: "Ng taking info\u2026", stepType: "Langkah 1/3 \xB7 Napi anu arep diunduhin?", stepVideoFormat: "Langkah 2/3 \xB7 Format video", stepAudioFormat: "Langkah 2/3 \xB7 Format musik", stepResolution: "Langkah 3/3 \xB7 Resolusi", stepFps: "Langkah 3/3 \xB7 Frame per detik", stepBitrate: "Langkah 3/3 \xB7 Bitrate musik", videoOption: "Video", audioOption: "Musik", recommended: "Disaranake", bestQuality: "Kualitas paling aling", grab: "unduhin", history: "Sejarah", quit: "Keluar", cancel: "Batal", choose: "Pilih", select: "Pilih", back: "Bali", theme: "Tema", downloading: "Nganduh\u2026", processing: "Ngolah\u2026", starting: "Miwah\u2026", grabbed: "Rampung!", savedTo: "Disimpen ing:", grabAnother: "\u21B5 unduhin liya", tryAgain: "Coba deui", tip: "Tip", lblTitle: "Judhul", lblArtist: "Seniman", lblAlbum: "Album", lblRelease: "Rilis", lblTime: "Wektu", lblSource: "Sumber", updateAvailable: "Ana update Carbon", langPickerTitle: "Pilih basa", langPickerSearch: "Cari\u2026", lang: "Basa" },
+  mad: { tagline: "download video atawa musik. pilih. download. selesai.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 situs", pasteLink: "Salen URL", supportsLine: "Nyokong video ban musik saka 1800+ situs", notUrl: "Iko bukan URL \u2014 salen URL lengkap", analyzing: "Ngabsah", warmingUp: "Panas\u2026", fetchingInfo: "Ngambil inpormasi\u2026", stepType: "TANGGOL 1/3 \xB7 Apa nang arep diundhuh?", stepVideoFormat: "TANGGOL 2/3 \xB7 Format video", stepAudioFormat: "TANGGOL 2/3 \xB7 Format musik", stepResolution: "TANGGOL 3/3 \xB7 Resolusi", stepFps: "TANGGOL 3/3 \xB7 Frame per detik", stepBitrate: "TANGGOL 3/3 \xB7 Bitrate musik", videoOption: "Video", audioOption: "Musik", recommended: "Disaranaken", bestQuality: "Kualitas paling bagus", grab: "undhuh", history: "Sejarah", quit: "Kalu", cancel: "Batal", choose: "Pilih", select: "Pilih", back: "Balik", theme: "Tema", downloading: "Lagi download\u2026", processing: "Ngolah\u2026", starting: "Miwah\u2026", grabbed: "Rampung!", savedTo: "Disimpen di:", grabAnother: "\u21B5 download laen", tryAgain: "Coba deui", tip: "Tip", lblTitle: "Judhul", lblArtist: "Seniman", lblAlbum: "Album", lblRelease: "Rilis", lblTime: "Waktu", lblSource: "Sumber", updateAvailable: "Ana update Carbon", langPickerTitle: "Pilih bhasa", langPickerSearch: "Cari\u2026", lang: "Bhasa" },
+  sas: { tagline: "download video atawa musik. pilih. download. rampung.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 situs", pasteLink: "Salin URL", supportsLine: "Ndukong video lan musik saka 1800+ situs", notUrl: "Iku lain URL \u2014 salin URL lengkap", analyzing: "Ngabsah", warmingUp: "Panas\u2026", fetchingInfo: "Ambil inpormasi\u2026", stepType: "Tahap 1/3 \xB7 Ape arep diundhuh?", stepVideoFormat: "Tahap 2/3 \xB7 Format video", stepAudioFormat: "Tahap 2/3 \xB7 Format musik", stepResolution: "Tahap 3/3 \xB7 Resolusi", stepFps: "Tahap 3/3 \xB7 Frame per detik", stepBitrate: "Tahap 3/3 \xB7 Bitrate musik", videoOption: "Video", audioOption: "Musik", recommended: "Disaranekan", bestQuality: "Kualitas paling apik", grab: "undhuh", history: "Sejarah", quit: "Keluar", cancel: "Batal", choose: "Pilih", select: "Pilih", back: "Bali", theme: "Tema", downloading: "Ngundhuh\u2026", processing: "Nolah\u2026", starting: "Miwah\u2026", grabbed: "Rampung!", savedTo: "Disimpen ing:", grabAnother: "\u21B5 undhuh sanes", tryAgain: "Coba deui", tip: "Tip", lblTitle: "Judhul", lblArtist: "Seniman", lblAlbum: "Album", lblRelease: "Rilis", lblTime: "Waktu", lblSource: "Sumber", updateAvailable: "Ana update Carbon", langPickerTitle: "Pilih basa", langPickerSearch: "Cari\u2026", lang: "Basa" },
+  bug: { tagline: "download video atawa musik. pilih. download. rampung.", sitesLine: "youtube \xB7 tiktok \xB7 instagram \xB7 x \xB7 soundcloud \xB7 +1800 situs", pasteLink: "Salin URL", supportsLine: "Nyokong video jeung musik dari 1800+ situs", notUrl: "Ito hente URL \u2014 salin URL lengkap", analyzing: "Memeh", warmingUp: "Hangat\u2026", fetchingInfo: "Ambil inpormasi\u2026", stepType: "Tangga 1/3 \xB7 Apa nge arep diunduh?", stepVideoFormat: "Tangga 2/3 \xB7 Format video", stepAudioFormat: "Tangga 2/3 \xB7 Format musik", stepResolution: "Tangga 3/3 \xB7 Resolusi", stepFps: "Tangga 3/3 \xB7 Frame per detik", stepBitrate: "Tangga 3/3 \xB7 Bitrate musik", videoOption: "Video", audioOption: "Musik", recommended: "Dianjur", bestQuality: "Kualitas paling baik", grab: "unduh", history: "Sejarah", quit: "Kalu", cancel: "Batal", choose: "Pilih", select: "Pilih", back: "Balik", theme: "Tema", downloading: "Mengunduh\u2026", processing: "Memproses\u2026", starting: "Mulai\u2026", grabbed: "Rampung!", savedTo: "Disimpen di:", grabAnother: "\u21B5 unduh deui", tryAgain: "Coba deui", tip: "Tip", lblTitle: "Judul", lblArtist: "Seniman", lblAlbum: "Album", lblRelease: "Rilis", lblTime: "Lama", lblSource: "Sumber", updateAvailable: "Ada pembaruan Carbon", langPickerTitle: "Pilih bahasa", langPickerSearch: "Cari\u2026", lang: "Bahasa" }
+};
+var EXTRA_LANGUAGE_NAMES = {
+  // Celtic & regional Romance
+  gd: "G\xE0idhlig",
+  br: "Brezhoneg",
+  oc: "Occitan",
+  ast: "Asturianu",
+  an: "Aragon\xE9s",
+  co: "Corsu",
+  sc: "Sardu",
+  nap: "Napulitano",
+  vec: "Veneto",
+  lmo: "Lombard",
+  pms: "Piemont\xEAs",
+  rm: "Rumantsch",
+  fur: "Furlan",
+  // Germanic & Nordic regional
+  gsw: "Alemannisch",
+  nds: "Plattd\xFC\xFCtsch",
+  vls: "Limburgs",
+  fo: "F\xF8royskt",
+  kl: "Kalaallisut",
+  se: "Davvis\xE1megiella",
+  sma: "\xC5lma\u0161",
+  // Slavic & Romani
+  rom: "Romani",
+  hsb: "Hornjoserbsce",
+  dsb: "Dolnoserbsce",
+  be: "\u0411\u0435\u043B\u0430\u0440\u0443\u0441\u043A\u0430\u044F",
+  // Caucasus & Turkic
+  ce: "\u041D\u043E\u0445\u0447\u0438\u0439\u043D",
+  os: "\u0418\u0440\u043E\u043D",
+  av: "\u0410\u0432\u0430\u0440",
+  tt: "\u0422\u0430\u0442\u0430\u0440\u0447\u0430",
+  krc: "\u041A\u044A\u0430\u0440\u0430\u0447ae\u0432",
+  sah: "\u0421\u0430\u0445\u0430 \u0442\u044B\u043B\u0430",
+  cv: "\u0427\u04D1\u0432\u0430\u0448\u043B\u0430",
+  udm: "\u0423\u0434\u043C\u0443\u0440\u0442 \u043A\u044B\u043B",
+  bak: "\u0411\u0430\u0448\u04A1\u043E\u0440\u0442 \u0442\u0435\u043B\u0435",
+  // Kurdish, Iranian & South Asian
+  ckb: "\u06A9\u0648\u0631\u062F\u06CC\u06CC \u0646\u0627\u0648\u06D5\u0646\u062F\u06CC",
+  kmr: "Kurmanc\xEE",
+  sd: "\u0633\u0646\u068C\u064A",
+  doi: "\u0921\u094B\u0917\u0930\u0940",
+  kok: "\u0915\u094B\u0902\u0915\u0923\u0940",
+  mni: "\u09AE\u09C8\u09A4\u09C8\u09B2\u09CB\u09A8",
+  ks: "\u0915\u0936\u094D\u092E\u0940\u0930\u0940",
+  bho: "\u092D\u094B\u091C\u092A\u0941\u0930\u0940",
+  syr: "\u0723\u0718\u072A\u071D\u071D\u0710",
+  gom: "\u0917\u094B\u0902\u092F \u0915\u094B\u0902\u0915\u0923\u0940",
+  // East & Southeast Asia
+  za: "Vahcuengh",
+  bua: "\u0411\u0443\u0440\u044F\u0430\u0434 \u0445\u044D\u043B\u044D\u043D",
+  dz: "\u0F62\u0FAB\u0F7C\u0F44\u0F0B\u0F41",
+  shn: "\u101B\u103E\u1019\u103A\u1038\u1019\u103C\u1014\u103A\u1019\u102C\u1018\u102C\u101E\u102C",
+  hmn: "Hmoob",
+  // Africa
+  tw: "Twi",
+  ee: "E\u028Begbe",
+  ff: "Fulfulde",
+  wol: "Wollof",
+  ti: "\u1275\u130D\u122D\u129B",
+  om: "Afaan Oromoo",
+  ts: "Xitsonga",
+  ve: "Tshiven\u1E13a",
+  nr: "isiNdebele",
+  // Pacific
+  tpi: "Tok Pisin",
+  bis: "Bislama",
+  tvl: "Tuvaluan",
+  pau: "a tekoi er Belau",
+  niu: "Fakaofo",
+  rar: "Te Reo M\u0101ori",
+  hif: "Fiji Hindi",
+  // Americas
+  gn: "Ava\xF1e'\u1EBD",
+  qu: "Runasimi",
+  ay: "Aymar aru",
+  nah: "N\u0101huatl",
+  // Southeast Asia regional
+  ch: "Chamoru",
+  ceb: "Cebuano",
+  ilo: "Pagsasa nga Ilocano",
+  war: "Winaray",
+  hil: "Hiligaynon",
+  pam: "Am\xE1nung Kapamp\xE1ngan",
+  bkl: "Bikol",
+  tsg: "Tausug",
+  pap: "Papiamentu",
+  su: "Basa Sunda",
+  jv: "Basa Jawa",
+  ban: "Basa Bali",
+  mad: "Basa Madura",
+  sas: "Basa Sasak",
+  bug: "Basa Bugis"
+};
+
+// src/lib/i18n.ts
 var en = {
   tagline: "grab any video or music. pick. download. done.",
   sitesLine: "YouTube \xB7 X/Twitter \xB7 Instagram \xB7 Threads \xB7 TikTok and 1,800+ other sites",
@@ -93265,6 +93828,18 @@ var en = {
   langPickerTitle: "Choose language",
   langPickerHint: "type to filter",
   langPickerSearch: "search\u2026",
+  // Settings panel
+  settings: "Settings",
+  settingsHint: "\u2191\u2193 select \xB7 \u2190\u2192 change \xB7 \u21B5 change \xB7 esc close",
+  settingTheme: "Theme",
+  settingSound: "Notification sound",
+  settingVolume: "Volume",
+  settingLanguage: "Language",
+  settingClearHistory: "Clear history",
+  settingOn: "on",
+  settingOff: "off",
+  settingPreview: "preview",
+  historyCleared: "History cleared",
   lang: "language"
 };
 var id = {
@@ -93348,6 +93923,18 @@ var id = {
   langPickerTitle: "Pilih bahasa",
   langPickerHint: "ketik untuk memfilter",
   langPickerSearch: "cari\u2026",
+  // Settings panel
+  settings: "Pengaturan",
+  settingsHint: "\u2191\u2193 pilih \xB7 \u2190\u2192 ubah \xB7 \u21B5 ubah \xB7 esc tutup",
+  settingTheme: "Tema",
+  settingSound: "Suara notifikasi",
+  settingVolume: "Volume",
+  settingLanguage: "Bahasa",
+  settingClearHistory: "Bersihkan riwayat",
+  settingOn: "nyala",
+  settingOff: "mati",
+  settingPreview: "pratinjau",
+  historyCleared: "Riwayat dibersihkan",
   lang: "bahasa"
 };
 var es = {
@@ -93400,6 +93987,16 @@ var es = {
   langPickerTitle: "Elegir idioma",
   langPickerHint: "escribe para filtrar",
   langPickerSearch: "buscar\u2026",
+  settings: "Ajustes",
+  settingsHint: "\u2191\u2193 seleccionar \xB7 \u2190\u2192 cambiar \xB7 \u21B5 cambiar \xB7 esc cerrar",
+  settingTheme: "Tema",
+  settingSound: "Sonido de notificaci\xF3n",
+  settingVolume: "Volumen",
+  settingLanguage: "Idioma",
+  settingClearHistory: "Borrar historial",
+  settingOn: "activado",
+  settingOff: "desactivado",
+  historyCleared: "Historial borrado",
   lang: "idioma"
 };
 var fr = {
@@ -93452,6 +94049,16 @@ var fr = {
   langPickerTitle: "Choisir la langue",
   langPickerHint: "tapez pour filtrer",
   langPickerSearch: "rechercher\u2026",
+  settings: "R\xE9glages",
+  settingsHint: "\u2191\u2193 choisir \xB7 \u2190\u2192 changer \xB7 \u21B5 changer \xB7 esc fermer",
+  settingTheme: "Th\xE8me",
+  settingSound: "Son de notification",
+  settingVolume: "Volume",
+  settingLanguage: "Langue",
+  settingClearHistory: "Effacer l'historique",
+  settingOn: "activ\xE9",
+  settingOff: "d\xE9sactiv\xE9",
+  historyCleared: "Historique effac\xE9",
   lang: "langue"
 };
 var de = {
@@ -93504,6 +94111,16 @@ var de = {
   langPickerTitle: "Sprache w\xE4hlen",
   langPickerHint: "tippen zum filtern",
   langPickerSearch: "suchen\u2026",
+  settings: "Einstellungen",
+  settingsHint: "\u2191\u2193 w\xE4hlen \xB7 \u2190\u2192 \xE4ndern \xB7 \u21B5 \xE4ndern \xB7 esc schlie\xDFen",
+  settingTheme: "Design",
+  settingSound: "Benachrichtigungston",
+  settingVolume: "Lautst\xE4rke",
+  settingLanguage: "Sprache",
+  settingClearHistory: "Verlauf l\xF6schen",
+  settingOn: "an",
+  settingOff: "aus",
+  historyCleared: "Verlauf gel\xF6scht",
   lang: "sprache"
 };
 var pt = {
@@ -93556,6 +94173,16 @@ var pt = {
   langPickerTitle: "Escolher idioma",
   langPickerHint: "digite para filtrar",
   langPickerSearch: "pesquisar\u2026",
+  settings: "Configura\xE7\xF5es",
+  settingsHint: "\u2191\u2193 selecionar \xB7 \u2190\u2192 alterar \xB7 \u21B5 alterar \xB7 esc fechar",
+  settingTheme: "Tema",
+  settingSound: "Som de notifica\xE7\xE3o",
+  settingVolume: "Volume",
+  settingLanguage: "Idioma",
+  settingClearHistory: "Limpar hist\xF3rico",
+  settingOn: "ligado",
+  settingOff: "desligado",
+  historyCleared: "Hist\xF3rico limpo",
   lang: "idioma"
 };
 var it = {
@@ -93608,6 +94235,16 @@ var it = {
   langPickerTitle: "Scegli lingua",
   langPickerHint: "digita per filtrare",
   langPickerSearch: "cerca\u2026",
+  settings: "Impostazioni",
+  settingsHint: "\u2191\u2193 seleziona \xB7 \u2190\u2192 cambia \xB7 \u21B5 cambia \xB7 esc chiudi",
+  settingTheme: "Tema",
+  settingSound: "Suono di notifica",
+  settingVolume: "Volume",
+  settingLanguage: "Lingua",
+  settingClearHistory: "Cancella cronologia",
+  settingOn: "attivo",
+  settingOff: "disattivo",
+  historyCleared: "Cronologia cancellata",
   lang: "lingua"
 };
 var ru = {
@@ -93660,6 +94297,16 @@ var ru = {
   langPickerTitle: "\u0412\u044B\u0431\u0440\u0430\u0442\u044C \u044F\u0437\u044B\u043A",
   langPickerHint: "\u043D\u0430\u0431\u0435\u0440\u0438\u0442\u0435 \u0434\u043B\u044F \u0444\u0438\u043B\u044C\u0442\u0440\u0430\u0446\u0438\u0438",
   langPickerSearch: "\u043F\u043E\u0438\u0441\u043A\u2026",
+  settings: "\u041D\u0430\u0441\u0442\u0440\u043E\u0439\u043A\u0438",
+  settingsHint: "\u2191\u2193 \u0432\u044B\u0431\u0440\u0430\u0442\u044C \xB7 \u2190\u2192 \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C \xB7 \u21B5 \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C \xB7 esc \u0437\u0430\u043A\u0440\u044B\u0442\u044C",
+  settingTheme: "\u0422\u0435\u043C\u0430",
+  settingSound: "\u0417\u0432\u0443\u043A \u0443\u0432\u0435\u0434\u043E\u043C\u043B\u0435\u043D\u0438\u044F",
+  settingVolume: "\u0413\u0440\u043E\u043C\u043A\u043E\u0441\u0442\u044C",
+  settingLanguage: "\u042F\u0437\u044B\u043A",
+  settingClearHistory: "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u044C \u0438\u0441\u0442\u043E\u0440\u0438\u044E",
+  settingOn: "\u0432\u043A\u043B",
+  settingOff: "\u0432\u044B\u043A\u043B",
+  historyCleared: "\u0418\u0441\u0442\u043E\u0440\u0438\u044F \u043E\u0447\u0438\u0449\u0435\u043D\u0430",
   lang: "\u044F\u0437\u044B\u043A"
 };
 var ja = {
@@ -93712,6 +94359,16 @@ var ja = {
   langPickerTitle: "\u8A00\u8A9E\u3092\u9078\u629E",
   langPickerHint: "\u5165\u529B\u3067\u7D5E\u308A\u8FBC\u307F",
   langPickerSearch: "\u691C\u7D22\u2026",
+  settings: "\u8A2D\u5B9A",
+  settingsHint: "\u2191\u2193 \u9078\u629E \xB7 \u2190\u2192 \u5909\u66F4 \xB7 \u21B5 \u5909\u66F4 \xB7 esc \u9589\u3058\u308B",
+  settingTheme: "\u30C6\u30FC\u30DE",
+  settingSound: "\u901A\u77E5\u97F3",
+  settingVolume: "\u97F3\u91CF",
+  settingLanguage: "\u8A00\u8A9E",
+  settingClearHistory: "\u5C65\u6B74\u3092\u6D88\u53BB",
+  settingOn: "\u30AA\u30F3",
+  settingOff: "\u30AA\u30D5",
+  historyCleared: "\u5C65\u6B74\u3092\u6D88\u53BB\u3057\u307E\u3057\u305F",
   lang: "\u8A00\u8A9E"
 };
 var ko = {
@@ -93764,6 +94421,16 @@ var ko = {
   langPickerTitle: "\uC5B8\uC5B4 \uC120\uD0DD",
   langPickerHint: "\uC785\uB825\uD558\uC5EC \uD544\uD130\uB9C1",
   langPickerSearch: "\uAC80\uC0C9\u2026",
+  settings: "\uC124\uC815",
+  settingsHint: "\u2191\u2193 \uC120\uD0DD \xB7 \u2190\u2192 \uBCC0\uACBD \xB7 \u21B5 \uBCC0\uACBD \xB7 esc \uB2EB\uAE30",
+  settingTheme: "\uD14C\uB9C8",
+  settingSound: "\uC54C\uB9BC \uC18C\uB9AC",
+  settingVolume: "\uBCFC\uB968",
+  settingLanguage: "\uC5B8\uC5B4",
+  settingClearHistory: "\uAE30\uB85D \uC9C0\uC6B0\uAE30",
+  settingOn: "\uCF1C\uC9D0",
+  settingOff: "\uAEBC\uC9D0",
+  historyCleared: "\uAE30\uB85D\uC744 \uC9C0\uC6E0\uC2B5\uB2C8\uB2E4",
   lang: "\uC5B8\uC5B4"
 };
 var zh = {
@@ -93816,6 +94483,16 @@ var zh = {
   langPickerTitle: "\u9009\u62E9\u8BED\u8A00",
   langPickerHint: "\u8F93\u5165\u4EE5\u7B5B\u9009",
   langPickerSearch: "\u641C\u7D22\u2026",
+  settings: "\u8BBE\u7F6E",
+  settingsHint: "\u2191\u2193 \u9009\u62E9 \xB7 \u2190\u2192 \u66F4\u6539 \xB7 \u21B5 \u66F4\u6539 \xB7 esc \u5173\u95ED",
+  settingTheme: "\u4E3B\u9898",
+  settingSound: "\u901A\u77E5\u58F0\u97F3",
+  settingVolume: "\u97F3\u91CF",
+  settingLanguage: "\u8BED\u8A00",
+  settingClearHistory: "\u6E05\u9664\u5386\u53F2\u8BB0\u5F55",
+  settingOn: "\u5F00\u542F",
+  settingOff: "\u5173\u95ED",
+  historyCleared: "\u5386\u53F2\u8BB0\u5F55\u5DF2\u6E05\u9664",
   lang: "\u8BED\u8A00"
 };
 var zhTW = {
@@ -93868,6 +94545,16 @@ var zhTW = {
   langPickerTitle: "\u9078\u64C7\u8A9E\u8A00",
   langPickerHint: "\u8F38\u5165\u4EE5\u7BE9\u9078",
   langPickerSearch: "\u641C\u5C0B\u2026",
+  settings: "\u8A2D\u5B9A",
+  settingsHint: "\u2191\u2193 \u9078\u64C7 \xB7 \u2190\u2192 \u66F4\u6539 \xB7 \u21B5 \u66F4\u6539 \xB7 esc \u95DC\u9589",
+  settingTheme: "\u4E3B\u984C",
+  settingSound: "\u901A\u77E5\u97F3\u6548",
+  settingVolume: "\u97F3\u91CF",
+  settingLanguage: "\u8A9E\u8A00",
+  settingClearHistory: "\u6E05\u9664\u6B77\u53F2\u7D00\u9304",
+  settingOn: "\u958B\u555F",
+  settingOff: "\u95DC\u9589",
+  historyCleared: "\u6B77\u53F2\u7D00\u9304\u5DF2\u6E05\u9664",
   lang: "\u8A9E\u8A00"
 };
 var ar = {
@@ -93920,6 +94607,16 @@ var ar = {
   langPickerTitle: "\u0627\u062E\u062A\u0631 \u0627\u0644\u0644\u063A\u0629",
   langPickerHint: "\u0627\u0643\u062A\u0628 \u0644\u0644\u062A\u0635\u0641\u064A\u0629",
   langPickerSearch: "\u0628\u062D\u062B\u2026",
+  settings: "\u0627\u0644\u0625\u0639\u062F\u0627\u062F\u0627\u062A",
+  settingsHint: "\u2191\u2193 \u0627\u062E\u062A\u064A\u0627\u0631 \xB7 \u2190\u2192 \u062A\u063A\u064A\u064A\u0631 \xB7 \u21B5 \u062A\u063A\u064A\u064A\u0631 \xB7 esc \u0625\u063A\u0644\u0627\u0642",
+  settingTheme: "\u0627\u0644\u0645\u0638\u0647\u0631",
+  settingSound: "\u0635\u0648\u062A \u0627\u0644\u062A\u0646\u0628\u064A\u0647",
+  settingVolume: "\u0645\u0633\u062A\u0648\u0649 \u0627\u0644\u0635\u0648\u062A",
+  settingLanguage: "\u0627\u0644\u0644\u063A\u0629",
+  settingClearHistory: "\u0645\u0633\u062D \u0627\u0644\u0633\u062C\u0644",
+  settingOn: "\u0645\u0641\u0639\u0651\u0644",
+  settingOff: "\u0645\u0639\u0637\u0651\u0644",
+  historyCleared: "\u062A\u0645 \u0645\u0633\u062D \u0627\u0644\u0633\u062C\u0644",
   lang: "\u0644\u063A\u0629"
 };
 var hi = {
@@ -93972,6 +94669,16 @@ var hi = {
   langPickerTitle: "\u092D\u093E\u0937\u093E \u091A\u0941\u0928\u0947\u0902",
   langPickerHint: "\u092B\u093C\u093F\u0932\u094D\u091F\u0930 \u0915\u0930\u0928\u0947 \u0915\u0947 \u0932\u093F\u090F \u091F\u093E\u0907\u092A \u0915\u0930\u0947\u0902",
   langPickerSearch: "\u0916\u094B\u091C\u0947\u0902\u2026",
+  settings: "\u0938\u0947\u091F\u093F\u0902\u0917\u094D\u0938",
+  settingsHint: "\u2191\u2193 \u091A\u0941\u0928\u0947\u0902 \xB7 \u2190\u2192 \u092C\u0926\u0932\u0947\u0902 \xB7 \u21B5 \u092C\u0926\u0932\u0947\u0902 \xB7 esc \u092C\u0902\u0926 \u0915\u0930\u0947\u0902",
+  settingTheme: "\u0925\u0940\u092E",
+  settingSound: "\u0938\u0942\u091A\u0928\u093E \u0927\u094D\u0935\u0928\u093F",
+  settingVolume: "\u0906\u0935\u093E\u091C\u093C",
+  settingLanguage: "\u092D\u093E\u0937\u093E",
+  settingClearHistory: "\u0907\u0924\u093F\u0939\u093E\u0938 \u0938\u093E\u092B\u093C \u0915\u0930\u0947\u0902",
+  settingOn: "\u091A\u093E\u0932\u0942",
+  settingOff: "\u092C\u0902\u0926",
+  historyCleared: "\u0907\u0924\u093F\u0939\u093E\u0938 \u0938\u093E\u092B\u093C \u0915\u0930 \u0926\u093F\u092F\u093E \u0917\u092F\u093E",
   lang: "\u092D\u093E\u0937\u093E"
 };
 var tr = {
@@ -94024,6 +94731,16 @@ var tr = {
   langPickerTitle: "Dil se\xE7in",
   langPickerHint: "filtrelemek i\xE7in yaz\u0131n",
   langPickerSearch: "ara\u2026",
+  settings: "Ayarlar",
+  settingsHint: "\u2191\u2193 se\xE7 \xB7 \u2190\u2192 de\u011Fi\u015Ftir \xB7 \u21B5 de\u011Fi\u015Ftir \xB7 esc kapat",
+  settingTheme: "Tema",
+  settingSound: "Bildirim sesi",
+  settingVolume: "Ses seviyesi",
+  settingLanguage: "Dil",
+  settingClearHistory: "Ge\xE7mi\u015Fi temizle",
+  settingOn: "a\xE7\u0131k",
+  settingOff: "kapal\u0131",
+  historyCleared: "Ge\xE7mi\u015F temizlendi",
   lang: "dil"
 };
 var vi = {
@@ -94076,6 +94793,16 @@ var vi = {
   langPickerTitle: "Ch\u1ECDn ng\xF4n ng\u1EEF",
   langPickerHint: "g\xF5 \u0111\u1EC3 l\u1ECDc",
   langPickerSearch: "t\xECm\u2026",
+  settings: "C\xE0i \u0111\u1EB7t",
+  settingsHint: "\u2191\u2193 ch\u1ECDn \xB7 \u2190\u2192 \u0111\u1ED5i \xB7 \u21B5 \u0111\u1ED5i \xB7 esc \u0111\xF3ng",
+  settingTheme: "Giao di\u1EC7n",
+  settingSound: "\xC2m thanh th\xF4ng b\xE1o",
+  settingVolume: "\xC2m l\u01B0\u1EE3ng",
+  settingLanguage: "Ng\xF4n ng\u1EEF",
+  settingClearHistory: "X\xF3a l\u1ECBch s\u1EED",
+  settingOn: "b\u1EADt",
+  settingOff: "t\u1EAFt",
+  historyCleared: "\u0110\xE3 x\xF3a l\u1ECBch s\u1EED",
   lang: "ng\xF4n ng\u1EEF"
 };
 var th = {
@@ -94128,6 +94855,16 @@ var th = {
   langPickerTitle: "\u0E40\u0E25\u0E37\u0E2D\u0E01\u0E20\u0E32\u0E29\u0E32",
   langPickerHint: "\u0E1E\u0E34\u0E21\u0E1E\u0E4C\u0E40\u0E1E\u0E37\u0E48\u0E2D\u0E01\u0E23\u0E2D\u0E07",
   langPickerSearch: "\u0E04\u0E49\u0E19\u0E2B\u0E32\u2026",
+  settings: "\u0E01\u0E32\u0E23\u0E15\u0E31\u0E49\u0E07\u0E04\u0E48\u0E32",
+  settingsHint: "\u2191\u2193 \u0E40\u0E25\u0E37\u0E2D\u0E01 \xB7 \u2190\u2192 \u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19 \xB7 \u21B5 \u0E40\u0E1B\u0E25\u0E35\u0E48\u0E22\u0E19 \xB7 esc \u0E1B\u0E34\u0E14",
+  settingTheme: "\u0E18\u0E35\u0E21",
+  settingSound: "\u0E40\u0E2A\u0E35\u0E22\u0E07\u0E41\u0E08\u0E49\u0E07\u0E40\u0E15\u0E37\u0E2D\u0E19",
+  settingVolume: "\u0E23\u0E30\u0E14\u0E31\u0E1A\u0E40\u0E2A\u0E35\u0E22\u0E07",
+  settingLanguage: "\u0E20\u0E32\u0E29\u0E32",
+  settingClearHistory: "\u0E25\u0E49\u0E32\u0E07\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34",
+  settingOn: "\u0E40\u0E1B\u0E34\u0E14",
+  settingOff: "\u0E1B\u0E34\u0E14",
+  historyCleared: "\u0E25\u0E49\u0E32\u0E07\u0E1B\u0E23\u0E30\u0E27\u0E31\u0E15\u0E34\u0E41\u0E25\u0E49\u0E27",
   lang: "\u0E20\u0E32\u0E29\u0E32"
 };
 var ms = {
@@ -94180,6 +94917,16 @@ var ms = {
   langPickerTitle: "Pilih bahasa",
   langPickerHint: "taip untuk tapis",
   langPickerSearch: "cari\u2026",
+  settings: "Tetapan",
+  settingsHint: "\u2191\u2193 pilih \xB7 \u2190\u2192 tukar \xB7 \u21B5 tukar \xB7 esc tutup",
+  settingTheme: "Tema",
+  settingSound: "Bunyi notifikasi",
+  settingVolume: "Kelantangan",
+  settingLanguage: "Bahasa",
+  settingClearHistory: "Padam sejarah",
+  settingOn: "hidup",
+  settingOff: "mati",
+  historyCleared: "Sejarah dipadamkan",
   lang: "bahasa"
 };
 var nl = {
@@ -94232,6 +94979,16 @@ var nl = {
   langPickerTitle: "Kies taal",
   langPickerHint: "typ om te filteren",
   langPickerSearch: "zoeken\u2026",
+  settings: "Instellingen",
+  settingsHint: "\u2191\u2193 kiezen \xB7 \u2190\u2192 wijzigen \xB7 \u21B5 wijzigen \xB7 esc sluiten",
+  settingTheme: "Thema",
+  settingSound: "Meldingsgeluid",
+  settingVolume: "Volume",
+  settingLanguage: "Taal",
+  settingClearHistory: "Geschiedenis wissen",
+  settingOn: "aan",
+  settingOff: "uit",
+  historyCleared: "Geschiedenis gewist",
   lang: "taal"
 };
 var pl = {
@@ -94284,6 +95041,16 @@ var pl = {
   langPickerTitle: "Wybierz j\u0119zyk",
   langPickerHint: "wpisz aby filtrowa\u0107",
   langPickerSearch: "szukaj\u2026",
+  settings: "Ustawienia",
+  settingsHint: "\u2191\u2193 wybierz \xB7 \u2190\u2192 zmie\u0144 \xB7 \u21B5 zmie\u0144 \xB7 esc zamknij",
+  settingTheme: "Motyw",
+  settingSound: "D\u017Awi\u0119k powiadomienia",
+  settingVolume: "G\u0142o\u015Bno\u015B\u0107",
+  settingLanguage: "J\u0119zyk",
+  settingClearHistory: "Wyczy\u015B\u0107 histori\u0119",
+  settingOn: "w\u0142.",
+  settingOff: "wy\u0142.",
+  historyCleared: "Historia wyczyszczona",
   lang: "j\u0119zyk"
 };
 var uk = {
@@ -94336,6 +95103,16 @@ var uk = {
   langPickerTitle: "\u0412\u0438\u0431\u0440\u0430\u0442\u0438 \u043C\u043E\u0432\u0443",
   langPickerHint: "\u0432\u0432\u0435\u0434\u0456\u0442\u044C \u0434\u043B\u044F \u0444\u0456\u043B\u044C\u0442\u0440\u0430\u0446\u0456\u0457",
   langPickerSearch: "\u043F\u043E\u0448\u0443\u043A\u2026",
+  settings: "\u041D\u0430\u043B\u0430\u0448\u0442\u0443\u0432\u0430\u043D\u043D\u044F",
+  settingsHint: "\u2191\u2193 \u0432\u0438\u0431\u0440\u0430\u0442\u0438 \xB7 \u2190\u2192 \u0437\u043C\u0456\u043D\u0438\u0442\u0438 \xB7 \u21B5 \u0437\u043C\u0456\u043D\u0438\u0442\u0438 \xB7 esc \u0437\u0430\u043A\u0440\u0438\u0442\u0438",
+  settingTheme: "\u0422\u0435\u043C\u0430",
+  settingSound: "\u0417\u0432\u0443\u043A \u0441\u043F\u043E\u0432\u0456\u0449\u0435\u043D\u043D\u044F",
+  settingVolume: "\u0413\u0443\u0447\u043D\u0456\u0441\u0442\u044C",
+  settingLanguage: "\u041C\u043E\u0432\u0430",
+  settingClearHistory: "\u041E\u0447\u0438\u0441\u0442\u0438\u0442\u0438 \u0456\u0441\u0442\u043E\u0440\u0456\u044E",
+  settingOn: "\u0443\u0432\u0456\u043C\u043A.",
+  settingOff: "\u0432\u0438\u043C\u043A.",
+  historyCleared: "\u0406\u0441\u0442\u043E\u0440\u0456\u044E \u043E\u0447\u0438\u0449\u0435\u043D\u043E",
   lang: "\u043C\u043E\u0432\u0430"
 };
 var fil = {
@@ -94388,6 +95165,16 @@ var fil = {
   langPickerTitle: "Pumili ng wika",
   langPickerHint: "mag-type para i-filter",
   langPickerSearch: "maghanap\u2026",
+  settings: "Mga setting",
+  settingsHint: "\u2191\u2193 pumili \xB7 \u2190\u2192 baguhin \xB7 \u21B5 baguhin \xB7 esc isara",
+  settingTheme: "Tema",
+  settingSound: "Tunog ng abiso",
+  settingVolume: "Lakas ng tunog",
+  settingLanguage: "Wika",
+  settingClearHistory: "Burahin ang kasaysayan",
+  settingOn: "naka-on",
+  settingOff: "naka-off",
+  historyCleared: "Naburahin ang kasaysayan",
   lang: "wika"
 };
 var partial = {
@@ -94481,7 +95268,13 @@ var table = { en, id, es, fr, de, pt, it, ru, ja, ko, zh, "zh-TW": zhTW, ar, hi,
 function merge(base, override) {
   return { ...base, ...override };
 }
+for (const code of Object.keys(table)) {
+  table[code] = merge(en, table[code]);
+}
 for (const [code, p2] of Object.entries(partial)) {
+  table[code] = merge(en, p2);
+}
+for (const [code, p2] of Object.entries(EXTRA_LOCALES)) {
   table[code] = merge(en, p2);
 }
 function normalizeLocale(raw2) {
@@ -94534,7 +95327,9 @@ function useT() {
   return table[currentLang] ?? en;
 }
 function supportedLanguages() {
-  return Object.keys(table).sort();
+  return Object.keys(table).sort(
+    (a2, b) => languageDisplayName(a2).localeCompare(languageDisplayName(b), void 0, { sensitivity: "base" })
+  );
 }
 var LANGUAGE_NAMES = {
   en: "English",
@@ -94643,7 +95438,9 @@ var LANGUAGE_NAMES = {
   mi: "M\u0101ori",
   sm: "Gagana S\u0101moa",
   to: "Lea Faka-Tonga",
-  fj: "Vosa Vakaviti"
+  fj: "Vosa Vakaviti",
+  // Extra language packs (see locales.ts)
+  ...EXTRA_LANGUAGE_NAMES
 };
 function languageDisplayName(code) {
   return LANGUAGE_NAMES[code] ?? code;
@@ -94672,11 +95469,10 @@ function hasBitrateOptions(format2) {
   return Boolean(format2.bitrates && format2.bitrates.length > 0);
 }
 function bitrateItems(format2) {
-  const s2 = t();
   const rates = [...format2.bitrates ?? []].sort((a2, b) => b - a2);
   return rates.map((kbps) => ({
     key: String(kbps),
-    label: `${kbps} kbps${kbps >= 320 ? `  \u2605 ${s2.brHighest}` : kbps >= 192 ? `  ${s2.brHigh}` : kbps >= 128 ? `  ${s2.brStandard}` : `  ${s2.brSmall}`}`,
+    label: `${kbps} kbps`,
     value: kbps
   }));
 }
@@ -94686,6 +95482,21 @@ var FPS_OPTIONS = [
   { value: 30, label: "30 FPS", descKey: "fps30" },
   { value: 60, label: "60 FPS", descKey: "fps60" }
 ];
+function fpsChoices(sourceFps) {
+  const choices = [];
+  for (const opt of FPS_OPTIONS) {
+    if (opt.value === 0) continue;
+    choices.push({
+      value: opt.value,
+      exact: sourceFps.includes(opt.value),
+      reachable: sourceFps.some((f2) => f2 > opt.value * 0.75 && f2 <= opt.value)
+    });
+  }
+  const extras = sourceFps.filter((f2) => !FPS_OPTIONS.some((o2) => o2.value === f2)).sort((a2, b) => b - a2);
+  for (const f2 of extras) choices.push({ value: f2, exact: true, reachable: true });
+  choices.sort((a2, b) => b.value - a2.value);
+  return choices;
+}
 var RESOLUTIONS = [
   { value: 0, label: "Best available", descKey: "resBest" },
   { value: 2160, label: "2160p (4K)", descKey: "res2160" },
@@ -94695,6 +95506,42 @@ var RESOLUTIONS = [
   { value: 480, label: "480p", descKey: "res480" },
   { value: 360, label: "360p", descKey: "res360" }
 ];
+var STANDARD_HEIGHTS = [2160, 1440, 1080, 720, 480, 360];
+var HEIGHT_TAGS = {
+  4320: "8K",
+  2160: "4K",
+  1440: "2K",
+  1080: "Full HD",
+  720: "HD"
+};
+function heightLabel(height) {
+  const tag = HEIGHT_TAGS[height];
+  return tag ? `${height}p (${tag})` : `${height}p`;
+}
+function resolutionChoices(sourceHeights) {
+  const choices = [];
+  for (const step of STANDARD_HEIGHTS) {
+    choices.push({
+      value: step,
+      exact: sourceHeights.includes(step),
+      // A source height counts as "reachable" when it is at least 75% of the
+      // step — a 1080p source still offers a usable 1080p, a 240p-only
+      // source does not.
+      reachable: sourceHeights.some((h) => h > step * 0.75 && h <= step)
+    });
+  }
+  const extras = sourceHeights.filter((h) => h > STANDARD_HEIGHTS[0]).sort((a2, b) => b - a2);
+  for (const h of extras) choices.unshift({ value: h, exact: true, reachable: true });
+  const sourceMax = sourceHeights[0] ?? 0;
+  if (sourceMax > 0 && sourceMax < STANDARD_HEIGHTS[STANDARD_HEIGHTS.length - 1]) {
+    for (const h of sourceHeights) {
+      if (choices.some((c3) => c3.value === h)) continue;
+      choices.push({ value: h, exact: true, reachable: true });
+    }
+    choices.sort((a2, b) => b.value - a2.value);
+  }
+  return choices;
+}
 
 // src/lib/history.ts
 import fs3 from "fs";
@@ -94719,6 +95566,12 @@ function addToHistory(url) {
   } catch {
   }
   return next;
+}
+function clearHistory() {
+  try {
+    fs3.rmSync(HISTORY_FILE, { force: true });
+  } catch {
+  }
 }
 
 // src/lib/platforms.ts
@@ -95126,6 +95979,163 @@ function isProbablyUrl(input) {
   }
 }
 
+// src/lib/paths.ts
+import fs5 from "fs";
+import os4 from "os";
+import path3 from "path";
+
+// src/lib/termux.ts
+import { spawn } from "child_process";
+import fs4 from "fs";
+import fsPromises from "fs/promises";
+import path2 from "path";
+function isAndroid2() {
+  return process.platform === "android";
+}
+function isTermux() {
+  if (!isAndroid2()) return false;
+  const prefix = process.env.PREFIX ?? "";
+  return prefix.includes("com.termux") || prefix.includes("termux");
+}
+function termuxPrefix() {
+  const prefix = process.env.PREFIX;
+  return prefix && prefix.length > 0 ? prefix : void 0;
+}
+function which(cmd) {
+  const pathEnv = process.env.PATH ?? "";
+  const exts = process.platform === "win32" ? (process.env.PATHEXT ?? ".EXE;.CMD;.BAT").split(";") : [""];
+  for (const dir of pathEnv.split(path2.delimiter)) {
+    if (!dir) continue;
+    for (const ext of exts) {
+      const full = path2.join(dir, cmd + ext);
+      try {
+        fs4.accessSync(full, fs4.constants.X_OK);
+        return full;
+      } catch {
+      }
+    }
+  }
+  return void 0;
+}
+function isWritableDir(dir) {
+  try {
+    if (!fs4.statSync(dir).isDirectory()) return false;
+    fs4.accessSync(dir, fs4.constants.W_OK | fs4.constants.X_OK);
+    return true;
+  } catch {
+    return false;
+  }
+}
+function runCommand(cmd, args2, opts = {}) {
+  return new Promise((resolve) => {
+    let child;
+    try {
+      child = spawn(cmd, args2, { stdio: ["ignore", "pipe", "pipe"] });
+    } catch (err) {
+      resolve({ code: -1, stdout: "", stderr: err instanceof Error ? err.message : String(err) });
+      return;
+    }
+    let stdout = "";
+    let stderr = "";
+    let settled = false;
+    const finish = (code) => {
+      if (settled) return;
+      settled = true;
+      resolve({ code, stdout, stderr });
+    };
+    const timer = opts.timeoutMs ? setTimeout(() => {
+      child.kill("SIGKILL");
+      finish(-1);
+    }, opts.timeoutMs) : void 0;
+    child.stdout?.on("data", (chunk) => stdout += chunk.toString());
+    child.stderr?.on("data", (chunk) => stderr += chunk.toString());
+    child.on("error", (err) => {
+      if (timer) clearTimeout(timer);
+      stderr += err instanceof Error ? err.message : String(err);
+      finish(-1);
+    });
+    child.on("close", (code) => {
+      if (timer) clearTimeout(timer);
+      finish(code ?? -1);
+    });
+  });
+}
+async function hasPkg() {
+  if (!isTermux()) return false;
+  const prefix = termuxPrefix();
+  if (prefix) {
+    try {
+      await fsPromises.access(path2.join(prefix, "bin", "pkg"), fs4.constants.X_OK);
+      return true;
+    } catch {
+    }
+  }
+  return which("pkg") !== void 0;
+}
+async function pkgInstall(packages) {
+  if (packages.length === 0) return true;
+  const result = await runCommand("pkg", ["install", "-y", ...packages], { timeoutMs: 15 * 6e4 });
+  return result.code === 0;
+}
+function findPython() {
+  return which("python3") ?? which("python");
+}
+async function pythonHasModule(python, module) {
+  const result = await runCommand(python, ["-c", `import ${module}`], { timeoutMs: 6e4 });
+  return result.code === 0;
+}
+function shellPath() {
+  const prefix = termuxPrefix();
+  const candidates = [
+    prefix ? path2.join(prefix, "bin", "sh") : void 0,
+    prefix ? path2.join(prefix, "bin", "bash") : void 0,
+    "/system/bin/sh",
+    "/bin/sh"
+  ].filter((c3) => Boolean(c3));
+  for (const candidate of candidates) {
+    try {
+      fs4.accessSync(candidate, fs4.constants.X_OK);
+      return candidate;
+    } catch {
+    }
+  }
+  return "/system/bin/sh";
+}
+async function writeYtDlpShim(target, python) {
+  const script = [
+    `#!${shellPath()}`,
+    "# yt-dlp shim for Android/Termux \u2014 generated by Carbon.",
+    "# The official yt-dlp binaries are glibc-linked and cannot run on Android,",
+    "# so the Python module is used instead.",
+    `exec "${python}" -m yt_dlp "$@"`,
+    ""
+  ].join("\n");
+  await fsPromises.mkdir(path2.dirname(target), { recursive: true });
+  await fsPromises.writeFile(target, script);
+  await fsPromises.chmod(target, 493).catch(() => {
+  });
+  return target;
+}
+
+// src/lib/paths.ts
+function resolveDownloadDir() {
+  const override = process.env.CARBON_OUT_DIR?.trim();
+  if (override) return path3.resolve(override);
+  const home = os4.homedir();
+  if (isAndroid2()) {
+    const shared = path3.join(home, "storage", "downloads");
+    if (isWritableDir(shared)) return shared;
+  }
+  return path3.join(home, "Downloads");
+}
+function ensureDownloadDir(dir = resolveDownloadDir()) {
+  try {
+    fs5.mkdirSync(dir, { recursive: true });
+  } catch {
+  }
+  return dir;
+}
+
 // src/lib/tips.ts
 var TIP_INTERVAL_MS = 1e4;
 var EN = [
@@ -95439,6 +96449,7 @@ function randomTip() {
 // src/lib/update-check.ts
 var GITHUB_REPO = "AlFarrizi-Studio/Carbon-DL";
 var CURRENT_VERSION = "1.1.2";
+var BUILD_ID = "2026-10-21 17:17";
 function isNewerVersion(a2, b) {
   const parse = (v) => {
     const clean = v.replace(/^v/, "");
@@ -95487,11 +96498,11 @@ async function checkForUpdate(signal) {
 }
 
 // src/lib/ytdlp.ts
-import { spawn } from "child_process";
+import { spawn as spawn2 } from "child_process";
 import { createWriteStream } from "fs";
-import fs7 from "fs/promises";
-import os5 from "os";
-import path5 from "path";
+import fs10 from "fs/promises";
+import os6 from "os";
+import path7 from "path";
 import { Readable as Readable2 } from "stream";
 import { pipeline as pipeline2 } from "stream/promises";
 
@@ -95636,9 +96647,9 @@ function ytmTrackUrl(track) {
 }
 
 // src/lib/thumbnail.ts
-import fs6 from "fs";
-import path4 from "path";
-import os4 from "os";
+import fs9 from "fs";
+import path6 from "path";
+import os5 from "os";
 
 // src/lib/image-protocol.ts
 var cachedProtocol;
@@ -95862,14 +96873,14 @@ var CPR_QUERY = "\x1B[6n";
 
 // src/lib/thumbnail.ts
 var DEBUG2 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
-var DEBUG_LOG = path4.join(os4.tmpdir(), "carbon-debug.log");
+var DEBUG_LOG = path6.join(os5.tmpdir(), "carbon-debug.log");
 function debugLog2(msg) {
   if (!DEBUG2) return;
   const line = `[thumb] ${(/* @__PURE__ */ new Date()).toISOString()} ${msg}
 `;
   process.stderr.write(line);
   try {
-    fs6.appendFileSync(DEBUG_LOG, line);
+    fs9.appendFileSync(DEBUG_LOG, line);
   } catch {
   }
 }
@@ -96126,7 +97137,7 @@ function intToHex(c3) {
 }
 
 // src/lib/ytdlp.ts
-var CARBON_DIR = path5.join(os5.homedir(), ".carbon", "bin");
+var CARBON_DIR = path7.join(os6.homedir(), ".carbon", "bin");
 var DEBUG3 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
 function debugLog3(msg) {
   if (!DEBUG3) return;
@@ -96137,13 +97148,14 @@ var RELEASE_BASE = "https://github.com/yt-dlp/yt-dlp/releases/latest/download";
 function ytDlpAssetName() {
   if (process.platform === "win32") return "yt-dlp.exe";
   if (process.platform === "darwin") return "yt-dlp_macos";
+  if (isAndroid2()) return void 0;
   return process.arch === "arm64" ? "yt-dlp_linux_aarch64" : "yt-dlp_linux";
 }
 function commandWorks(cmd, args2) {
   return new Promise((resolve) => {
     let child;
     try {
-      child = spawn(cmd, args2, { stdio: "ignore", timeout: 1e4 });
+      child = spawn2(cmd, args2, { stdio: "ignore", timeout: 1e4 });
     } catch {
       resolve(false);
       return;
@@ -96154,30 +97166,85 @@ function commandWorks(cmd, args2) {
 }
 async function ensureYtDlp(onStatus, signal) {
   if (await commandWorks("yt-dlp", ["--version"])) return "yt-dlp";
-  const local = path5.join(CARBON_DIR, process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp");
+  const local = path7.join(CARBON_DIR, process.platform === "win32" ? "yt-dlp.exe" : "yt-dlp");
   if (await commandWorks(local, ["--version"])) return local;
+  if (isAndroid2()) return ensureAndroidYtDlp(local, onStatus);
+  const asset = ytDlpAssetName();
+  if (!asset) {
+    throw new Error(
+      'yt-dlp is not available on this device.\nInstall it in Termux:\n  pkg install python python-pip\n  pip install -U "yt-dlp[default]"'
+    );
+  }
   onStatus("first run: fetching yt-dlp\u2026");
-  await fs7.mkdir(CARBON_DIR, { recursive: true });
-  const url = `${RELEASE_BASE}/${ytDlpAssetName()}`;
+  await fs10.mkdir(CARBON_DIR, { recursive: true });
+  const url = `${RELEASE_BASE}/${asset}`;
   const response = await fetch(url, { signal });
   if (!response.ok || !response.body) {
     throw new Error(`Could not download yt-dlp (${response.status}). Check your connection and try again.`);
   }
   const tmp = `${local}.download`;
   await pipeline2(Readable2.fromWeb(response.body), createWriteStream(tmp), { signal });
-  if (process.platform !== "win32") await fs7.chmod(tmp, 493);
-  await fs7.rename(tmp, local);
+  if (process.platform !== "win32") await fs10.chmod(tmp, 493);
+  await fs10.rename(tmp, local);
   return local;
+}
+var ANDROID_YTDLP_HELP = 'yt-dlp is not available on this Android device.\n\nInstall it inside Termux:\n  pkg install python python-pip\n  pip install -U "yt-dlp[default]"\n\nThen run carbon-dl again.';
+async function ensureAndroidYtDlp(local, onStatus) {
+  let python = findPython();
+  if (!python && await hasPkg()) {
+    onStatus("termux: installing python\u2026");
+    await pkgInstall(["python", "python-pip"]);
+    python = findPython();
+  }
+  if (!python) {
+    throw new Error(ANDROID_YTDLP_HELP);
+  }
+  if (!await pythonHasModule(python, "yt_dlp")) {
+    onStatus("termux: installing yt-dlp (pip, may take a minute)\u2026");
+    const installed = await pipInstallYtDlp(python);
+    if (!installed && !await pythonHasModule(python, "yt_dlp")) {
+      throw new Error(ANDROID_YTDLP_HELP);
+    }
+  }
+  const shim = await writeYtDlpShim(local, python);
+  if (await commandWorks(shim, ["--version"])) return shim;
+  throw new Error(
+    `yt-dlp could not be started on this Android device.
+Tried: ${python} -m yt_dlp
+
+` + ANDROID_YTDLP_HELP
+  );
+}
+async function pipInstallYtDlp(python) {
+  const attempts = [
+    ["-m", "pip", "install", "-U", "--no-input", "yt-dlp[default]", "yt-dlp-ejs"],
+    ["-m", "pip", "install", "-U", "--no-input", "yt-dlp"]
+  ];
+  for (const args2 of attempts) {
+    const result = await runCommand(python, args2, { timeoutMs: 15 * 6e4 });
+    if (result.code === 0) return true;
+  }
+  return false;
 }
 async function ensureFfmpeg(onStatus, signal) {
   if (await commandWorks("ffmpeg", ["-version"])) return void 0;
   const ffmpegName = process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg";
   const ffprobeName = process.platform === "win32" ? "ffprobe.exe" : "ffprobe";
-  const localFfmpeg = path5.join(CARBON_DIR, ffmpegName);
-  const localFfprobe = path5.join(CARBON_DIR, ffprobeName);
+  const localFfmpeg = path7.join(CARBON_DIR, ffmpegName);
+  const localFfprobe = path7.join(CARBON_DIR, ffprobeName);
   if (await commandWorks(localFfmpeg, ["-version"])) return CARBON_DIR;
+  if (isAndroid2()) {
+    if (await hasPkg()) {
+      onStatus?.("termux: installing ffmpeg\u2026");
+      await pkgInstall(["ffmpeg"]);
+      if (await commandWorks("ffmpeg", ["-version"])) return void 0;
+    }
+    throw new Error(
+      "ffmpeg is not available on this Android device.\n\nInstall it inside Termux:\n  pkg install ffmpeg\n\nffmpeg is required to merge video + audio streams and to convert formats."
+    );
+  }
   onStatus?.("first run: fetching ffmpeg\u2026");
-  await fs7.mkdir(CARBON_DIR, { recursive: true });
+  await fs10.mkdir(CARBON_DIR, { recursive: true });
   const platform2 = process.platform;
   const arch = process.arch;
   let downloadUrl;
@@ -96202,12 +97269,12 @@ async function ensureFfmpeg(onStatus, signal) {
     if (!response.ok || !response.body) {
       throw new Error(`HTTP ${response.status}`);
     }
-    const archivePath = path5.join(CARBON_DIR, archiveType === "zip" ? "ffmpeg.zip" : "ffmpeg.tar.xz");
+    const archivePath = path7.join(CARBON_DIR, archiveType === "zip" ? "ffmpeg.zip" : "ffmpeg.tar.xz");
     await pipeline2(Readable2.fromWeb(response.body), createWriteStream(archivePath), { signal });
     if (archiveType === "zip") {
       if (platform2 === "win32") {
         await new Promise((resolve, reject) => {
-          const child = spawn("powershell", [
+          const child = spawn2("powershell", [
             "-NoProfile",
             "-Command",
             `Expand-Archive -Path "${archivePath}" -DestinationPath "${CARBON_DIR}" -Force`
@@ -96217,20 +97284,20 @@ async function ensureFfmpeg(onStatus, signal) {
         });
       } else {
         await new Promise((resolve, reject) => {
-          const child = spawn("unzip", ["-o", archivePath, "-d", CARBON_DIR], { stdio: "ignore" });
+          const child = spawn2("unzip", ["-o", archivePath, "-d", CARBON_DIR], { stdio: "ignore" });
           child.on("error", reject);
           child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`)));
         });
       }
     } else {
       await new Promise((resolve, reject) => {
-        const child = spawn("tar", ["-xf", archivePath, "-C", CARBON_DIR], { stdio: "ignore" });
+        const child = spawn2("tar", ["-xf", archivePath, "-C", CARBON_DIR], { stdio: "ignore" });
         child.on("error", reject);
         child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`)));
       });
     }
     await moveExtractedBinaries(CARBON_DIR, localFfmpeg, localFfprobe);
-    await fs7.unlink(archivePath).catch(() => {
+    await fs10.unlink(archivePath).catch(() => {
     });
     if (await commandWorks(localFfmpeg, ["-version"])) return CARBON_DIR;
   } catch {
@@ -96242,9 +97309,9 @@ async function moveExtractedBinaries(searchDir, targetFfmpeg, targetFfprobe) {
   const ffprobeName = process.platform === "win32" ? "ffprobe.exe" : "ffprobe";
   async function findFile(dir, name) {
     try {
-      const entries = await fs7.readdir(dir, { withFileTypes: true });
+      const entries = await fs10.readdir(dir, { withFileTypes: true });
       for (const entry of entries) {
-        const fullPath = path5.join(dir, entry.name);
+        const fullPath = path7.join(dir, entry.name);
         if (entry.isDirectory()) {
           const found = await findFile(fullPath, name);
           if (found) return found;
@@ -96259,18 +97326,18 @@ async function moveExtractedBinaries(searchDir, targetFfmpeg, targetFfprobe) {
   const foundFfmpeg = await findFile(searchDir, ffmpegName);
   const foundFfprobe = await findFile(searchDir, ffprobeName);
   if (foundFfmpeg) {
-    await fs7.copyFile(foundFfmpeg, targetFfmpeg);
-    if (process.platform !== "win32") await fs7.chmod(targetFfmpeg, 493);
+    await fs10.copyFile(foundFfmpeg, targetFfmpeg);
+    if (process.platform !== "win32") await fs10.chmod(targetFfmpeg, 493);
   }
   if (foundFfprobe) {
-    await fs7.copyFile(foundFfprobe, targetFfprobe);
-    if (process.platform !== "win32") await fs7.chmod(targetFfprobe, 493);
+    await fs10.copyFile(foundFfprobe, targetFfprobe);
+    if (process.platform !== "win32") await fs10.chmod(targetFfprobe, 493);
   }
   try {
-    const entries = await fs7.readdir(searchDir, { withFileTypes: true });
+    const entries = await fs10.readdir(searchDir, { withFileTypes: true });
     for (const entry of entries) {
       if (entry.isDirectory() && entry.name.startsWith("ffmpeg-")) {
-        await fs7.rm(path5.join(searchDir, entry.name), { recursive: true, force: true }).catch(() => {
+        await fs10.rm(path7.join(searchDir, entry.name), { recursive: true, force: true }).catch(() => {
         });
       }
     }
@@ -96286,21 +97353,21 @@ async function downloadMacOsFfmpeg(targetFfmpeg, targetFfprobe, signal) {
     try {
       const response = await fetch(url, { signal, redirect: "follow" });
       if (!response.ok || !response.body) continue;
-      const zipPath = path5.join(CARBON_DIR, `${name}.zip`);
+      const zipPath = path7.join(CARBON_DIR, `${name}.zip`);
       await pipeline2(Readable2.fromWeb(response.body), createWriteStream(zipPath), { signal });
       await new Promise((resolve, reject) => {
-        const child = spawn("unzip", ["-o", zipPath, "-d", CARBON_DIR], { stdio: "ignore" });
+        const child = spawn2("unzip", ["-o", zipPath, "-d", CARBON_DIR], { stdio: "ignore" });
         child.on("error", reject);
         child.on("close", (code) => code === 0 ? resolve() : reject(new Error(`Extract failed: ${code}`)));
       });
-      const extractedPath = path5.join(CARBON_DIR, name);
+      const extractedPath = path7.join(CARBON_DIR, name);
       if (extractedPath !== target) {
-        await fs7.rename(extractedPath, target).catch(() => {
+        await fs10.rename(extractedPath, target).catch(() => {
         });
       }
-      await fs7.chmod(target, 493).catch(() => {
+      await fs10.chmod(target, 493).catch(() => {
       });
-      await fs7.unlink(zipPath).catch(() => {
+      await fs10.unlink(zipPath).catch(() => {
       });
     } catch {
     }
@@ -96501,28 +97568,29 @@ function hashCode(str) {
   }
   return hash;
 }
-async function detectBrowser() {
+async function detectBrowser(ytdlp) {
+  if (isAndroid2()) return void 0;
   const browsers = process.platform === "win32" ? ["chrome", "edge", "firefox", "brave"] : process.platform === "darwin" ? ["chrome", "safari", "firefox", "brave"] : ["chrome", "firefox", "chromium", "brave"];
   for (const browser of browsers) {
-    if (await commandWorks("yt-dlp", ["--cookies-from-browser", browser, "--simulate", "https://www.youtube.com/watch?v=jNQXAC9IVRw"])) {
+    if (await commandWorks(ytdlp, ["--cookies-from-browser", browser, "--simulate", "https://www.youtube.com/watch?v=jNQXAC9IVRw"])) {
       return browser;
     }
   }
   return void 0;
 }
 var cachedBrowser = null;
-async function getBrowserForCookies() {
+async function getBrowserForCookies(ytdlp = "yt-dlp") {
   if (cachedBrowser === null) {
-    cachedBrowser = await detectBrowser();
+    cachedBrowser = await detectBrowser(ytdlp);
   }
   return cachedBrowser ?? void 0;
 }
 async function probe(ytdlp, url, signal, useCookies = false) {
   const doProbe = async (targetUrl, strong = false, withCookies = false, tiktokHostIndex = 0) => {
-    const browser = withCookies ? await getBrowserForCookies() : void 0;
+    const browser = withCookies ? await getBrowserForCookies(ytdlp) : void 0;
     const cookies = browser ? ["--cookies-from-browser", browser] : [];
     const stdout = await new Promise((resolve, reject) => {
-      const child = spawn(ytdlp, ["-J", "--no-playlist", "--no-warnings", ...bypassArgsFor(targetUrl, strong, tiktokHostIndex), ...cookies, targetUrl], { signal });
+      const child = spawn2(ytdlp, ["-J", "--no-playlist", "--no-warnings", ...bypassArgsFor(targetUrl, strong, tiktokHostIndex), ...cookies, targetUrl], { signal });
       let out = "";
       let stderr = "";
       child.stdout.on("data", (chunk) => out += chunk);
@@ -96544,7 +97612,7 @@ async function probe(ytdlp, url, signal, useCookies = false) {
   };
   const doProbeGeneric = async (targetUrl) => {
     const stdout = await new Promise((resolve, reject) => {
-      const child = spawn(
+      const child = spawn2(
         ytdlp,
         ["-J", "--no-playlist", "--no-warnings", "--force-generic-extractor", ...GENERIC_BYPASS_ARGS, targetUrl],
         { signal }
@@ -96606,7 +97674,7 @@ async function probe(ytdlp, url, signal, useCookies = false) {
     const needsCookies = /cookies|log.?in|sign.?in|logged.?in|authentication|blocked|restricted|age|private/i.test(errMsg) && !useCookies;
     if (needsCookies) {
       try {
-        const browser = await getBrowserForCookies();
+        const browser = await getBrowserForCookies(ytdlp);
         if (browser) {
           const info = await doProbe(url, true, true);
           return { info };
@@ -96647,14 +97715,44 @@ function maxHeight(info) {
   const videos = (info.formats ?? []).filter((f2) => f2.vcodec && f2.vcodec !== "none" && f2.height);
   return videos.reduce((max, f2) => Math.max(max, f2.height ?? 0), 0);
 }
+function availableHeights(info) {
+  const heights = /* @__PURE__ */ new Set();
+  for (const f2 of info.formats ?? []) {
+    if (!f2.vcodec || f2.vcodec === "none") continue;
+    const h = f2.height ?? 0;
+    if (h > 0) heights.add(h);
+  }
+  return [...heights].sort((a2, b) => b - a2);
+}
+function fpsForHeight(info, height, force) {
+  const videos = (info.formats ?? []).filter((f2) => f2.vcodec && f2.vcodec !== "none" && f2.fps);
+  const pool = height <= 0 ? videos : videos.filter((f2) => {
+    const h = f2.height ?? 0;
+    return force ? h === height : h <= height;
+  });
+  const set = new Set(pool.map((f2) => Math.round(f2.fps ?? 0)).filter((f2) => f2 > 0));
+  return [...set].sort((a2, b) => b - a2);
+}
 function hasAudio(info) {
   return (info.formats ?? []).some((f2) => f2.acodec && f2.acodec !== "none");
 }
-function buildVideoArgs(format2, resolution, fps) {
-  const heightFilter = resolution > 0 ? `[height<=${resolution}]` : "";
-  const fpsFilter = fps > 0 ? `[fps<=${fps}]` : "";
-  const selector = `bv*${heightFilter}${fpsFilter}+ba/b${heightFilter}${fpsFilter}/bv*${heightFilter}+ba/b`;
-  return ["-f", selector, "--merge-output-format", format2.ext];
+function buildVideoArgs(format2, quality2) {
+  const { resolution, fps, forceResolution, forceFps } = quality2;
+  const height = resolution <= 0 ? "" : forceResolution ? `height=${resolution}` : `height<=${resolution}`;
+  const fpsFilter = fps <= 0 ? "" : forceFps ? `fps>=${fps - 0.5}][fps<=${fps + 0.5}` : `fps<=${fps}`;
+  if (resolution <= 0 && fps <= 0) {
+    return ["-f", "bv*+ba/b", "--merge-output-format", format2.ext];
+  }
+  const video = (h, f2) => h && f2 ? `bv*[${h}][${f2}]+ba` : h ? `bv*[${h}]+ba` : f2 ? `bv*[${f2}]+ba` : "bv*+ba";
+  const merged = (h, f2) => h && f2 ? `b[${h}][${f2}]` : h ? `b[${h}]` : "b";
+  const chain = [
+    video(height, fpsFilter),
+    height ? video(height, "") : "",
+    resolution > 0 && !forceResolution ? video(`height<=${resolution}`, fpsFilter) : "",
+    resolution > 0 && !forceResolution ? video(`height<=${resolution}`, "") : "",
+    merged(height, fpsFilter)
+  ].filter(Boolean);
+  return ["-f", chain.join("/"), "--merge-output-format", format2.ext];
 }
 function buildAudioArgs(format2, bitrateKbps = 0) {
   const args2 = ["-f", "ba/b", "-x", "--audio-format", format2.id];
@@ -96670,105 +97768,194 @@ var PROGRESS_TEMPLATE = `${PROGRESS_PREFIX}%(progress.downloaded_bytes)s|%(progr
 var activeChild;
 process.on("exit", () => activeChild?.kill("SIGTERM"));
 async function download(opts, handlers, signal) {
-  const browser = opts.useCookies ? await getBrowserForCookies() : void 0;
-  const cookieArgs = browser ? ["--cookies-from-browser", browser] : [];
-  const hasFfmpeg = opts.ffmpegLocation !== null;
-  const args2 = [
-    opts.url,
-    ...opts.choice.args,
-    "--no-playlist",
-    "--no-warnings",
-    "--newline",
-    "--no-quiet",
-    "--progress",
-    "--progress-template",
-    `download:${PROGRESS_TEMPLATE}`,
-    "--print",
-    "after_move:filepath",
-    "--no-simulate",
-    // DRM/restriction bypass (strong args only on retry to preserve quality)
-    ...bypassArgsFor(opts.url, opts.strongBypass),
-    // Cookies for age restriction / DRM bypass
-    ...cookieArgs,
-    // Embed metadata (title, artist, album, date…) into the final file so
-    // media players can display them during playback.
-    // NOTE: --embed-thumbnail is intentionally NOT used here. yt-dlp's internal
-    // thumbnail embedding (via ffmpeg post-processing) can corrupt the audio
-    // stream for certain videos, producing files with no playable audio.
-    // Instead, we embed the cover art ourselves after download using
-    // embedSquareCover() which has proper safety checks.
-    ...hasFfmpeg ? ["--embed-metadata"] : [],
-    "-o",
-    path5.join(opts.outDir, "%(title).80s.%(ext)s")
-  ];
-  if (opts.ffmpegLocation) args2.push("--ffmpeg-location", opts.ffmpegLocation);
-  return new Promise((resolve, reject) => {
-    const child = spawn(opts.ytdlp, args2, { signal });
-    activeChild = child;
-    let stderr = "";
-    let filepath = "";
-    let part = 0;
-    let totalParts = 1;
-    let lastDownloaded = 0;
-    let buffer2 = "";
-    const destinations = [];
-    child.stdout.on("data", (chunk) => {
-      buffer2 += chunk.toString();
-      const lines = buffer2.split("\n");
-      buffer2 = lines.pop() ?? "";
-      for (const rawLine of lines) {
-        const line = rawLine.trim();
-        if (!line) continue;
-        if (line.startsWith(PROGRESS_PREFIX)) {
-          const [downloaded, total, totalEstimate, speed, eta] = line.slice(PROGRESS_PREFIX.length).split("|");
-          const downloadedBytes = toNumber(downloaded) ?? 0;
-          if (downloadedBytes < lastDownloaded) part++;
-          lastDownloaded = downloadedBytes;
-          handlers.onProgress({
-            downloadedBytes,
-            totalBytes: toNumber(total) ?? toNumber(totalEstimate),
-            speed: toNumber(speed),
-            eta: toNumber(eta),
-            part,
-            totalParts
-          });
-        } else if (line.includes("Downloading 1 format(s):")) {
-          totalParts = (line.split("format(s):")[1] ?? "").trim().split("+").length;
-        } else if (line.includes("[Merger]") || line.includes("[ExtractAudio]") || line.includes("[VideoConvert]")) {
-          const merging = /^\[Merger\] Merging formats into "(.+)"$/.exec(line)?.[1];
-          const extracting = /^\[ExtractAudio\] Destination: (.+)$/.exec(line)?.[1];
-          const target = merging ?? extracting;
-          if (target) destinations.push(target);
-          handlers.onProcessing();
-        } else if (line.startsWith("[download] Destination: ")) {
-          destinations.push(line.slice("[download] Destination: ".length));
-        } else if (path5.isAbsolute(line)) {
-          filepath = line;
-        }
-      }
+  const run = async (extraArgs = []) => {
+    const browser = opts.useCookies ? await getBrowserForCookies(opts.ytdlp) : void 0;
+    const cookieArgs = browser ? ["--cookies-from-browser", browser] : [];
+    const hasFfmpeg = opts.ffmpegLocation !== null;
+    const args2 = [
+      opts.url,
+      ...opts.choice.args,
+      "--no-playlist",
+      "--no-warnings",
+      "--newline",
+      "--no-quiet",
+      "--progress",
+      "--progress-template",
+      `download:${PROGRESS_TEMPLATE}`,
+      "--print",
+      "after_move:filepath",
+      "--no-simulate",
+      // Overwrite an existing file with the same name. Without this, yt-dlp sees
+      // "Title.mp4" already on disk and SKIPS the download — so asking for
+      // 4K after a 1080p download would silently keep the old 1080p file.
+      "--force-overwrites",
+      // Android shared storage is FAT32/exFAT — characters like ":" or "?" are
+      // illegal in file names there, so let yt-dlp sanitize them.
+      ...isAndroid2() ? ["--windows-filenames"] : [],
+      // DRM/restriction bypass (strong args only on retry to preserve quality)
+      ...bypassArgsFor(opts.url, opts.strongBypass),
+      // Cookies for age restriction / DRM bypass
+      ...cookieArgs,
+      // Extra args used by the escalation retry (cookies, alternate clients).
+      ...extraArgs,
+      // Embed metadata (title, artist, album, date…) into the final file so
+      // media players can display it during playback.
+      // NOTE: --embed-thumbnail is intentionally NOT used here. yt-dlp's internal
+      // thumbnail embedding (via ffmpeg post-processing) can corrupt the audio
+      // stream for certain videos, producing files with no playable audio.
+      // Instead, we embed the cover art ourselves after download using
+      // embedSquareCover() which has proper safety checks.
+      ...hasFfmpeg ? ["--embed-metadata"] : [],
+      "-o",
+      path7.join(opts.outDir, "%(title).80s.%(ext)s")
+    ];
+    if (opts.ffmpegLocation) args2.push("--ffmpeg-location", opts.ffmpegLocation);
+    await fs10.mkdir(opts.outDir, { recursive: true }).catch(() => {
     });
-    child.stderr.on("data", (chunk) => stderr += chunk);
-    child.on("error", reject);
-    child.on("close", (code) => {
-      activeChild = void 0;
+    return new Promise((resolve, reject) => {
       if (signal?.aborted) {
-        void removePartials(destinations);
         reject(new Error("Download cancelled."));
         return;
       }
-      if (code === 0 && filepath) {
-        resolve(filepath);
-      } else {
-        reject(new Error(cleanYtDlpError(stderr) || `Download failed (yt-dlp exit code ${code}).`));
-      }
+      const child = spawn2(opts.ytdlp, args2);
+      activeChild = child;
+      let stderr = "";
+      let filepath = "";
+      let part = 0;
+      let totalParts = 1;
+      let lastDownloaded = 0;
+      let buffer2 = "";
+      const destinations = [];
+      let cleaned = false;
+      const cleanup = async (includeFinal) => {
+        if (cleaned) return;
+        cleaned = true;
+        killTree(child.pid);
+        await removePartials(destinations, includeFinal);
+        await removeStrayPartials(opts.outDir);
+      };
+      const onAbort = () => {
+        killTree(child.pid);
+      };
+      signal?.addEventListener("abort", onAbort, { once: true });
+      child.stdout.on("data", (chunk) => {
+        buffer2 += chunk.toString();
+        const lines = buffer2.split("\n");
+        buffer2 = lines.pop() ?? "";
+        for (const rawLine of lines) {
+          const line = rawLine.trim();
+          if (!line) continue;
+          if (line.startsWith(PROGRESS_PREFIX)) {
+            const [downloaded, total, totalEstimate, speed, eta] = line.slice(PROGRESS_PREFIX.length).split("|");
+            const downloadedBytes = toNumber(downloaded) ?? 0;
+            if (downloadedBytes < lastDownloaded) part++;
+            lastDownloaded = downloadedBytes;
+            handlers.onProgress({
+              downloadedBytes,
+              totalBytes: toNumber(total) ?? toNumber(totalEstimate),
+              speed: toNumber(speed),
+              eta: toNumber(eta),
+              part,
+              totalParts
+            });
+          } else if (line.includes("Downloading 1 format(s):")) {
+            totalParts = (line.split("format(s):")[1] ?? "").trim().split("+").length;
+          } else if (line.includes("[Merger]") || line.includes("[ExtractAudio]") || line.includes("[VideoConvert]")) {
+            const merging = /^\[Merger\] Merging formats into "(.+)"$/.exec(line)?.[1];
+            const extracting = /^\[ExtractAudio\] Destination: (.+)$/.exec(line)?.[1];
+            const target = merging ?? extracting;
+            if (target) destinations.push(target);
+            handlers.onProcessing();
+          } else if (line.startsWith("[download] Destination: ")) {
+            destinations.push(line.slice("[download] Destination: ".length));
+          } else if (path7.isAbsolute(line)) {
+            filepath = line;
+          }
+        }
+      });
+      child.stderr.on("data", (chunk) => stderr += chunk);
+      child.on("error", async (err) => {
+        if (signal?.aborted) {
+          await cleanup(true);
+          reject(new Error("Download cancelled."));
+          return;
+        }
+        reject(err);
+      });
+      child.on("close", async (code) => {
+        activeChild = void 0;
+        signal?.removeEventListener("abort", onAbort);
+        if (signal?.aborted) {
+          await cleanup(code !== 0);
+          reject(new Error("Download cancelled."));
+          return;
+        }
+        if (code === 0 && filepath) {
+          resolve(filepath);
+        } else {
+          reject(new Error(cleanYtDlpError(stderr) || `Download failed (yt-dlp exit code ${code}).`));
+        }
+      });
     });
-  });
+  };
+  try {
+    return await run();
+  } catch (err) {
+    const message = err instanceof Error ? err.message : String(err);
+    if (!/requested format is not available|no video formats found/i.test(message)) throw err;
+    if (opts.choice.kind !== "video" || opts.useCookies) throw err;
+    const browser = await getBrowserForCookies(opts.ytdlp);
+    if (!browser) throw err;
+    debugLog3(`download: escalating with cookies from ${browser} \u2014 ${message}`);
+    return run([
+      "--cookies-from-browser",
+      browser,
+      "--extractor-args",
+      "youtube:player_client=tv,web_safari,ios,default"
+    ]);
+  }
 }
-async function fileHasAudioStream(filepath, ffmpegLocation) {
-  const ffprobeBin = ffmpegLocation ? path5.join(ffmpegLocation, process.platform === "win32" ? "ffprobe.exe" : "ffprobe") : "ffprobe";
+async function inspectMediaFile(filepath, ffmpegLocation) {
+  const ffprobeBin = ffmpegLocation ? path7.join(ffmpegLocation, process.platform === "win32" ? "ffprobe.exe" : "ffprobe") : "ffprobe";
   try {
     const stdout = await new Promise((resolve, reject) => {
-      const child = spawn(ffprobeBin, [
+      const child = spawn2(
+        ffprobeBin,
+        [
+          "-v",
+          "error",
+          "-select_streams",
+          "v:0",
+          "-show_entries",
+          "stream=height,width,avg_frame_rate",
+          "-of",
+          "json",
+          filepath
+        ],
+        { stdio: ["ignore", "pipe", "ignore"], timeout: 2e4 }
+      );
+      let out = "";
+      child.stdout?.on("data", (chunk) => {
+        out += chunk.toString();
+      });
+      child.on("error", reject);
+      child.on("close", (code) => code === 0 ? resolve(out) : reject(new Error(`ffprobe exit ${code}`)));
+    });
+    const parsed = JSON.parse(stdout);
+    const stream2 = parsed.streams?.[0];
+    if (!stream2) return void 0;
+    const [num, den] = (stream2.avg_frame_rate ?? "0/1").split("/").map(Number);
+    const fps = num && den ? Math.round(num / den * 100) / 100 : void 0;
+    return { height: stream2.height, width: stream2.width, fps, hasAudio: true };
+  } catch {
+    return void 0;
+  }
+}
+async function fileHasAudioStream(filepath, ffmpegLocation) {
+  const ffprobeBin = ffmpegLocation ? path7.join(ffmpegLocation, process.platform === "win32" ? "ffprobe.exe" : "ffprobe") : "ffprobe";
+  try {
+    const stdout = await new Promise((resolve, reject) => {
+      const child = spawn2(ffprobeBin, [
         "-v",
         "error",
         "-select_streams",
@@ -96796,7 +97983,7 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal, sq
     debugLog3("embedSquareCover: no candidates, skipping");
     return;
   }
-  const ext = path5.extname(filepath).toLowerCase();
+  const ext = path7.extname(filepath).toLowerCase();
   if (ext === ".wav") {
     debugLog3("embedSquareCover: WAV does not support embedded cover, skipping");
     return;
@@ -96831,8 +98018,8 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal, sq
       }
     }
     debugLog3(`embedSquareCover: cover format=${isJpeg ? "jpeg" : "original"} (${coverData.length} bytes)`);
-    await fs7.writeFile(coverPath, coverData);
-    const ffmpegBin = ffmpegLocation ? path5.join(ffmpegLocation, process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg") : "ffmpeg";
+    await fs10.writeFile(coverPath, coverData);
+    const ffmpegBin = ffmpegLocation ? path7.join(ffmpegLocation, process.platform === "win32" ? "ffmpeg.exe" : "ffmpeg") : "ffmpeg";
     debugLog3(`embedSquareCover: running ffmpeg (${ffmpegBin}) on ${filepath}`);
     const coverCodec = isJpeg ? "mjpeg" : "png";
     const ffmpegArgs = [
@@ -96860,7 +98047,7 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal, sq
     ffmpegArgs.push(tmpOut);
     let stderr = "";
     await new Promise((resolve, reject) => {
-      const child = spawn(ffmpegBin, ffmpegArgs, { signal, stdio: ["ignore", "ignore", "pipe"] });
+      const child = spawn2(ffmpegBin, ffmpegArgs, { signal, stdio: ["ignore", "ignore", "pipe"] });
       child.stderr?.on("data", (chunk) => {
         stderr += chunk.toString();
       });
@@ -96870,32 +98057,62 @@ async function embedSquareCover(filepath, candidates, ffmpegLocation, signal, sq
     const hasAudio2 = await fileHasAudioStream(tmpOut, ffmpegLocation);
     if (!hasAudio2) {
       debugLog3("embedSquareCover: output has NO audio stream \u2014 keeping original file");
-      await fs7.rm(tmpOut, { force: true }).catch(() => {
+      await fs10.rm(tmpOut, { force: true }).catch(() => {
       });
       return;
     }
-    const [origStat, tmpStat] = await Promise.all([fs7.stat(filepath), fs7.stat(tmpOut)]);
+    const [origStat, tmpStat] = await Promise.all([fs10.stat(filepath), fs10.stat(tmpOut)]);
     if (tmpStat.size < origStat.size * 0.5) {
       debugLog3(`embedSquareCover: output suspiciously small (${tmpStat.size} vs ${origStat.size} bytes) \u2014 keeping original`);
-      await fs7.rm(tmpOut, { force: true }).catch(() => {
+      await fs10.rm(tmpOut, { force: true }).catch(() => {
       });
       return;
     }
-    await fs7.rename(tmpOut, filepath);
+    await fs10.rename(tmpOut, filepath);
     debugLog3("embedSquareCover: success \u2014 cover replaced with square crop");
   } catch (err) {
     debugLog3(`embedSquareCover: FAILED \u2014 ${err instanceof Error ? err.message : String(err)}`);
-    await fs7.rm(tmpOut, { force: true }).catch(() => {
+    await fs10.rm(tmpOut, { force: true }).catch(() => {
     });
   } finally {
-    await fs7.rm(coverPath, { force: true }).catch(() => {
+    await fs10.rm(coverPath, { force: true }).catch(() => {
     });
   }
 }
-function removePartials(destinations) {
+function removePartials(destinations, includeFinal = true) {
   return Promise.allSettled(
-    destinations.flatMap((dest) => [dest, `${dest}.part`, `${dest}.ytdl`]).map((file) => fs7.rm(file, { force: true }))
+    destinations.flatMap((dest) => includeFinal ? [dest, `${dest}.part`, `${dest}.ytdl`] : [`${dest}.part`, `${dest}.ytdl`]).map((file) => fs10.rm(file, { force: true }))
   );
+}
+async function removeStrayPartials(outDir, attempts = 6) {
+  for (let attempt = 0; attempt < attempts; attempt++) {
+    try {
+      const entries = await fs10.readdir(outDir, { withFileTypes: true });
+      const strays = entries.filter((e2) => e2.isFile() && (e2.name.endsWith(".part") || e2.name.endsWith(".ytdl")));
+      if (strays.length === 0) return;
+      await Promise.allSettled(
+        strays.map((e2) => fs10.rm(path7.join(outDir, e2.name), { force: true, maxRetries: 3, retryDelay: 200 }))
+      );
+    } catch {
+      return;
+    }
+    await new Promise((r2) => setTimeout(r2, 300));
+  }
+}
+function killTree(pid) {
+  if (!pid) return;
+  try {
+    if (process.platform === "win32") {
+      spawn2("taskkill", ["/PID", String(pid), "/T", "/F"], { stdio: "ignore", windowsHide: true });
+    } else {
+      try {
+        process.kill(-pid, "SIGKILL");
+      } catch {
+        process.kill(pid, "SIGKILL");
+      }
+    }
+  } catch {
+  }
 }
 function toNumber(value) {
   if (!value || value === "NA" || value === "None") return void 0;
@@ -97012,19 +98229,317 @@ function Thumbnail({ grid, png: png3, rgba, cols, rows }) {
   ] }, i2)) });
 }
 
-// src/app.tsx
+// src/lib/sound.ts
+import { spawn as spawn3 } from "child_process";
+import fs11 from "fs";
+import os7 from "os";
+import path8 from "path";
+import { fileURLToPath } from "url";
+var CLIP_FILES = {
+  success: "1.mp3",
+  update: "2.mp3",
+  error: "3.mp3"
+};
+var soundEnabled = true;
+var soundVolume = 80;
+function setSoundEnabled(enabled) {
+  soundEnabled = enabled;
+}
+function setSoundVolume(volume) {
+  soundVolume = Math.min(100, Math.max(0, Math.round(volume)));
+}
+function appDir() {
+  try {
+    return path8.dirname(fileURLToPath(import.meta.url));
+  } catch {
+    return "";
+  }
+}
+function findSoundDir() {
+  const here = appDir();
+  const candidates = [];
+  const override = process.env.CARBON_SOUND_DIR?.trim();
+  if (override) {
+    try {
+      if (fs11.statSync(override).isDirectory()) return override;
+    } catch {
+    }
+  }
+  candidates.push(path8.join(os7.homedir(), ".carbon", "sounds"));
+  if (here) {
+    candidates.push(path8.join(here, "sounds"));
+    candidates.push(path8.join(here, "..", "sound"));
+    candidates.push(path8.join(here, "..", "..", "sound"));
+    candidates.push(path8.join(here, "..", "..", "..", "sound"));
+  }
+  candidates.push(path8.join(process.cwd(), "sound"));
+  for (const dir of candidates) {
+    try {
+      if (fs11.existsSync(path8.join(dir, CLIP_FILES.success))) return dir;
+    } catch {
+    }
+  }
+  return void 0;
+}
+function toFileUrl(filePath) {
+  const normalized = filePath.replace(/\\/g, "/");
+  const withLeadingSlash = normalized.startsWith("/") ? normalized : `/${normalized}`;
+  const encoded = withLeadingSlash.split("/").map((segment) => encodeURIComponent(segment).replace(/%3A/gi, ":")).join("/");
+  return `file://${encoded}`;
+}
+function windowsPowerShellPlayer() {
+  return {
+    cmd: "powershell",
+    args: (file, volume) => {
+      const uri = toFileUrl(file).replace(/'/g, "''");
+      const level = (volume / 100).toFixed(2);
+      const script = [
+        "$ErrorActionPreference = 'SilentlyContinue'",
+        "Add-Type -AssemblyName PresentationCore",
+        "$p = New-Object System.Windows.Media.MediaPlayer",
+        `$p.Volume = ${level}`,
+        `$p.Open((New-Object System.Uri('${uri}')))`,
+        "$p.Play()",
+        "$deadline = (Get-Date).AddSeconds(15)",
+        "while ((Get-Date) -lt $deadline) {",
+        "  Start-Sleep -Milliseconds 100",
+        "  try {",
+        "    $st = $p.PlaybackSession.PlaybackState",
+        "    if ($st -eq [System.Windows.Media.MediaPlayerState]::Ended) { break }",
+        "    if ($st -eq [System.Windows.Media.MediaPlayerState]::Stopped) { break }",
+        "  } catch { break }",
+        "}",
+        "$p.Close()"
+      ].join("; ");
+      return ["-NoProfile", "-NonInteractive", "-WindowStyle", "Hidden", "-Command", script];
+    }
+  };
+}
+function detectPlayer() {
+  const has = (cmd) => which(cmd) !== void 0;
+  if (process.platform === "android") {
+    if (has("termux-media-player")) {
+      return { cmd: "termux-media-player", args: (file) => ["--play", file] };
+    }
+    if (has("mpv")) return { cmd: "mpv", args: (file, vol) => ["--no-video", "--really-quiet", `--volume=${vol}`, "--", file] };
+    if (has("ffplay")) return { cmd: "ffplay", args: (file, vol) => ["-nodisp", "-autoexit", "-loglevel", "quiet", "-volume", String(vol), file] };
+    if (has("cmd")) return { cmd: "cmd", args: (file) => ["player", "play", file] };
+    return void 0;
+  }
+  if (process.platform === "darwin") {
+    if (has("afplay")) return { cmd: "afplay", args: (file, vol) => ["-v", (vol / 100).toFixed(2), file] };
+    if (has("mpv")) return { cmd: "mpv", args: (file, vol) => ["--no-video", "--really-quiet", `--volume=${vol}`, "--", file] };
+    if (has("ffplay")) return { cmd: "ffplay", args: (file, vol) => ["-nodisp", "-autoexit", "-loglevel", "quiet", "-volume", String(vol), file] };
+    return void 0;
+  }
+  if (process.platform === "win32") {
+    if (has("mpv")) return { cmd: "mpv", args: (file, vol) => ["--no-video", "--really-quiet", `--volume=${vol}`, "--", file] };
+    if (has("ffplay")) return { cmd: "ffplay", args: (file, vol) => ["-nodisp", "-autoexit", "-loglevel", "quiet", "-volume", String(vol), file] };
+    if (has("powershell") || has("pwsh")) return windowsPowerShellPlayer();
+    return void 0;
+  }
+  if (has("paplay")) return { cmd: "paplay", args: (file, vol) => [`--volume=${Math.round(vol / 100 * 65536)}`, file] };
+  if (has("mpv")) return { cmd: "mpv", args: (file, vol) => ["--no-video", "--really-quiet", `--volume=${vol}`, "--", file] };
+  if (has("ffplay")) return { cmd: "ffplay", args: (file, vol) => ["-nodisp", "-autoexit", "-loglevel", "quiet", "-volume", String(vol), file] };
+  if (has("mpg123")) return { cmd: "mpg123", args: (file) => ["-q", file] };
+  if (has("cvlc")) return { cmd: "cvlc", args: (file, vol) => ["--intf", "dummy", "--play-and-exit", `--gain=${(vol / 100).toFixed(2)}`, file] };
+  if (has("gst-play-1.0")) return { cmd: "gst-play-1.0", args: (file) => [file] };
+  return void 0;
+}
+function playSound(kind) {
+  if (!soundEnabled) return;
+  if (soundVolume <= 0) return;
+  try {
+    const player = detectPlayer();
+    if (!player) return;
+    const dir = findSoundDir();
+    if (!dir) return;
+    const file = path8.join(dir, CLIP_FILES[kind]);
+    if (!fs11.existsSync(file)) return;
+    const child = spawn3(player.cmd, player.args(file, soundVolume), {
+      stdio: "ignore",
+      detached: true
+    });
+    child.on("error", () => {
+    });
+    child.unref();
+  } catch {
+  }
+}
+
+// src/lib/settings.ts
+import fs12 from "fs";
+import os8 from "os";
+import path9 from "path";
+var DEFAULT_SETTINGS = {
+  sound: true,
+  volume: 80,
+  themeMode: "system"
+};
+var SETTINGS_FILE = path9.join(os8.homedir(), ".config", "carbon", "settings.json");
+function clampVolume(value) {
+  const n2 = typeof value === "number" ? value : Number.NaN;
+  if (!Number.isFinite(n2)) return DEFAULT_SETTINGS.volume;
+  return Math.min(100, Math.max(0, Math.round(n2)));
+}
+function loadSettings() {
+  try {
+    const raw2 = JSON.parse(fs12.readFileSync(SETTINGS_FILE, "utf8"));
+    const themeMode = THEME_MODES.includes(raw2.themeMode ?? "") ? raw2.themeMode : DEFAULT_SETTINGS.themeMode;
+    return {
+      sound: typeof raw2.sound === "boolean" ? raw2.sound : DEFAULT_SETTINGS.sound,
+      volume: clampVolume(raw2.volume),
+      themeMode,
+      language: typeof raw2.language === "string" && raw2.language ? raw2.language : void 0
+    };
+  } catch {
+    return { ...DEFAULT_SETTINGS };
+  }
+}
+function saveSettings(settings) {
+  try {
+    fs12.mkdirSync(path9.dirname(SETTINGS_FILE), { recursive: true });
+    fs12.writeFileSync(SETTINGS_FILE, `${JSON.stringify(settings, null, 2)}
+`);
+  } catch {
+  }
+}
+
+// src/components/settings-panel.tsx
+var import_react41 = __toESM(require_react(), 1);
+
+// src/components/gap.tsx
 var import_jsx_runtime6 = __toESM(require_jsx_runtime(), 1);
-import fs8 from "fs";
-var OUT_DIR = path6.join(os6.homedir(), "Downloads");
+function Gap({ lines = 1 }) {
+  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i2) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: " " }, i2)) });
+}
+
+// src/components/settings-panel.tsx
+var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+var THEME_CYCLE = ["system", "dark", "light"];
+var VOLUME_STEP = 10;
+function SettingsPanel({
+  settings,
+  onChange,
+  onClose,
+  onPickLanguage,
+  onClearHistory,
+  themeMode,
+  onThemeMode,
+  languageName
+}) {
+  const theme = useTheme();
+  const s2 = useT();
+  const [row, setRow] = (0, import_react41.useState)(0);
+  const rows = [
+    "theme",
+    "sound",
+    "volume",
+    "language",
+    "clearHistory"
+  ];
+  const apply = (next) => {
+    onChange({ ...settings, ...next });
+  };
+  const changeTheme = (dir) => {
+    const idx = THEME_CYCLE.indexOf(themeMode);
+    const next = THEME_CYCLE[(idx + dir + THEME_CYCLE.length) % THEME_CYCLE.length];
+    onThemeMode(next);
+    apply({ themeMode: next });
+  };
+  const changeVolume = (dir) => {
+    const next = Math.min(100, Math.max(0, settings.volume + dir * VOLUME_STEP));
+    apply({ volume: next });
+    playSound("success");
+  };
+  const changeSound = () => {
+    const next = !settings.sound;
+    apply({ sound: next });
+    if (next) playSound("success");
+  };
+  use_input_default(
+    (input, key) => {
+      if (key.escape) {
+        onClose();
+        return;
+      }
+      if (key.upArrow) {
+        setRow((r2) => (r2 - 1 + rows.length) % rows.length);
+        return;
+      }
+      if (key.downArrow) {
+        setRow((r2) => (r2 + 1) % rows.length);
+        return;
+      }
+      if (key.leftArrow || key.rightArrow || key.return) {
+        const dir = key.leftArrow ? -1 : 1;
+        switch (rows[row]) {
+          case "theme":
+            changeTheme(dir);
+            break;
+          case "sound":
+            changeSound();
+            break;
+          case "volume":
+            changeVolume(dir);
+            break;
+          case "language":
+            onPickLanguage();
+            break;
+          case "clearHistory":
+            onClearHistory();
+            break;
+        }
+        return;
+      }
+      void input;
+    },
+    { isActive: true }
+  );
+  const themeLabel = (mode) => mode === "system" ? s2.theme ?? "system" : mode;
+  const values = {
+    theme: themeLabel(themeMode),
+    sound: settings.sound ? `\u2713 ${s2.settingOn ?? "on"}` : `\u2717 ${s2.settingOff ?? "off"}`,
+    volume: `${settings.volume}%`,
+    language: languageName,
+    clearHistory: "\u21B5"
+  };
+  const labels = {
+    theme: s2.settingTheme ?? "Theme",
+    sound: s2.settingSound ?? "Notification sound",
+    volume: s2.settingVolume ?? "Volume",
+    language: s2.settingLanguage ?? "Language",
+    clearHistory: s2.settingClearHistory ?? "Clear history"
+  };
+  return /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Panel, { title: s2.settings ?? "Settings", width: 54, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Box_default, { flexDirection: "column", children: rows.map((r2, i2) => {
+      const active = i2 === row;
+      return /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Box_default, { flexDirection: "row", justifyContent: "space-between", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsxs)(Text, { color: active ? theme.accent ?? theme.primary : theme.primary, bold: active, children: [
+          active ? "\u25B6 " : "  ",
+          labels[r2]
+        ] }),
+        /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Text, { color: active ? theme.accent ?? theme.primary : theme.gray, bold: active, children: values[r2] })
+      ] }, r2);
+    }) }),
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Gap, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s2.settingsHint ?? "\u2191\u2193 select \xB7 \u2190\u2192 change \xB7 esc close" })
+  ] }) });
+}
+
+// src/app.tsx
+var import_jsx_runtime8 = __toESM(require_jsx_runtime(), 1);
+import fs13 from "fs";
+var OUT_DIR = ensureDownloadDir(resolveDownloadDir());
 var DEBUG5 = process.env.CARBON_DEBUG === "1" || process.env.CARBON_DEBUG === "true";
-var DEBUG_LOG2 = path6.join(os6.tmpdir(), "carbon-debug.log");
+var DEBUG_LOG2 = path10.join(os9.tmpdir(), "carbon-debug.log");
 function debugLog4(msg) {
   if (!DEBUG5) return;
   const line = `[app] ${(/* @__PURE__ */ new Date()).toISOString()} ${msg}
 `;
   process.stderr.write(line);
   try {
-    fs8.appendFileSync(DEBUG_LOG2, line);
+    fs13.appendFileSync(DEBUG_LOG2, line);
   } catch {
   }
 }
@@ -97032,36 +98547,36 @@ function UpdateBadge({ info }) {
   const theme = useTheme();
   const s2 = useT();
   if (!info?.hasUpdate) return null;
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { position: "absolute", top: 0, right: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.warning ?? theme.accent ?? theme.primary, bold: true, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { position: "absolute", top: 0, right: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.warning ?? theme.accent ?? theme.primary, bold: true, children: [
     "\u2191 ",
     s2.updateAvailable ?? "Update Carbon available",
     ": v",
     info.latestVersion
   ] }) });
 }
-var Gap = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i2) => /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { children: " " }, i2)) });
+var Gap2 = ({ lines = 1 }) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", flexShrink: 0, children: Array.from({ length: lines }, (_, i2) => /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { children: " " }, i2)) });
 function BrandLine() {
   const theme = useTheme();
   const s2 = useT();
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", flexShrink: 0, children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u25C8 CARBON" }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: true, children: "  \xB7  " }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, children: s2.tagline })
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "row", flexShrink: 0, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u25C8 CARBON" }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: true, children: "  \xB7  " }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, children: s2.tagline })
   ] });
 }
 function ChoiceIndicator({ isSelected }) {
   const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { marginRight: 1, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: isSelected ? "\u25B6" : " " }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { marginRight: 1, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, children: isSelected ? "\u25B6" : " " }) });
 }
 function ChoiceItem({ isSelected, label }) {
   const theme = useTheme();
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: isSelected ? theme.accent ?? theme.primary : theme.primary, bold: isSelected, children: label });
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: isSelected ? theme.accent ?? theme.primary : theme.primary, bold: isSelected, children: label });
 }
 function LanguagePicker({ onPick, onCancel, boxWidth }) {
   const { stdout } = use_stdout_default();
   const theme = useTheme();
   const s2 = useT();
-  const [query, setQuery] = (0, import_react41.useState)("");
+  const [query, setQuery] = (0, import_react42.useState)("");
   const all = supportedLanguages();
   const q = query.trim().toLowerCase();
   const items = q ? all.filter((code) => {
@@ -97071,13 +98586,13 @@ function LanguagePicker({ onPick, onCancel, boxWidth }) {
   const visible = items.length > 0 ? items : all;
   const current = getLanguage();
   const listLimit = Math.max(8, Math.min(14, stdout?.rows ? stdout.rows - 14 : 12));
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Panel, { title: s2.langPickerTitle ?? "Choose language", width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", children: [
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: "\u2315 " }),
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(BrandLine, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: s2.langPickerTitle ?? "Choose language", width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "row", children: [
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, children: "\u2315 " }),
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
           TextInput,
           {
             value: query,
@@ -97087,8 +98602,8 @@ function LanguagePicker({ onPick, onCancel, boxWidth }) {
           }
         )
       ] }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
         SelectInput_default,
         {
           indicatorComponent: ChoiceIndicator,
@@ -97102,10 +98617,10 @@ function LanguagePicker({ onPick, onCancel, boxWidth }) {
           onSelect: (item) => onPick(item.value)
         }
       ),
-      items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s2.langPickerHint ?? "type to filter" }) : null
+      items.length === 0 ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s2.langPickerHint ?? "type to filter" }) : null
     ] }) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
       "^l ",
       s2.langPickerHint ?? "type to filter",
       " \xB7 esc ",
@@ -97128,9 +98643,9 @@ function MetadataBlock({ info, platform: platform2, maxWidth }) {
     [s2.lblTime, info.duration ? formatDuration(info.duration) : "-"],
     [s2.lblSource, platform2?.label ?? "-"]
   ];
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", children: rows.map(([label, value]) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.gray, bold: true, children: label.padEnd(labelW) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, children: truncate(value, valueW) })
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", children: rows.map(([label, value]) => /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "row", children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.gray, bold: true, children: label.padEnd(labelW) }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: truncate(value, valueW) })
   ] }, label)) });
 }
 function CoverArt({ candidates, cols, square }) {
@@ -97139,8 +98654,8 @@ function CoverArt({ candidates, cols, square }) {
   const first = candidates[0];
   const aspect = square ? 1 : first?.width && first?.height ? first.width / first.height : 1;
   const rows = Math.max(4, Math.min(18, Math.round(cols * cell.width / (aspect * cell.height))));
-  const [thumb, setThumb] = (0, import_react41.useState)(void 0);
-  (0, import_react41.useEffect)(() => {
+  const [thumb, setThumb] = (0, import_react42.useState)(void 0);
+  (0, import_react42.useEffect)(() => {
     const controller = new AbortController();
     let cancelled = false;
     void (async () => {
@@ -97163,12 +98678,12 @@ function CoverArt({ candidates, cols, square }) {
     };
   }, [candidates, cols, rows, protocol, square]);
   if (!thumb) {
-    return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: cols, height: rows, flexShrink: 0 });
+    return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { width: cols, height: rows, flexShrink: 0 });
   }
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexShrink: 0, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Thumbnail, { grid: thumb.grid, png: thumb.png, rgba: thumb.rgba, cols, rows }) });
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexShrink: 0, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Thumbnail, { grid: thumb.grid, png: thumb.png, rgba: thumb.rgba, cols, rows }) });
 }
 function MediaHeader({ info, platform: platform2, contentWidth, audioMode }) {
-  const candidates = (0, import_react41.useMemo)(() => thumbnailCandidates(info), [info]);
+  const candidates = (0, import_react42.useMemo)(() => thumbnailCandidates(info), [info]);
   const gap = 2;
   const minMeta = 24;
   const square = Boolean(audioMode && hasCompleteMusicMeta(info));
@@ -97179,12 +98694,12 @@ function MediaHeader({ info, platform: platform2, contentWidth, audioMode }) {
   const maxMeta = 42;
   const metaWidth = showCover ? Math.min(maxMeta, Math.max(minMeta, contentWidth - coverCols - gap)) : Math.min(maxMeta, contentWidth);
   debugLog4(`MediaHeader: candidates=${candidates.length} contentWidth=${contentWidth} showCover=${showCover} square=${square} coverCols=${coverCols}`);
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "row", width: contentWidth, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "row", children: [
-    showCover ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(CoverArt, { candidates, cols: coverCols, square }),
-      /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { width: gap, flexShrink: 0 })
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "row", width: contentWidth, justifyContent: "center", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "row", children: [
+    showCover ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(CoverArt, { candidates, cols: coverCols, square }),
+      /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { width: gap, flexShrink: 0 })
     ] }) : null,
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", width: metaWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: metaWidth }) })
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", width: metaWidth, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(MetadataBlock, { info, platform: platform2, maxWidth: metaWidth }) })
   ] }) });
 }
 function ModernProgressBar({ percent, width = 40 }) {
@@ -97193,10 +98708,10 @@ function ModernProgressBar({ percent, width = 40 }) {
   const filled = Math.round(clamped * width);
   const empty = width - filled;
   const pct = Math.round(clamped * 100);
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u2588".repeat(filled) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: true, children: "\u2591".repeat(empty) }),
-    /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.primary, bold: true, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { children: [
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, bold: true, children: "\u2588".repeat(filled) }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: true, children: "\u2591".repeat(empty) }),
+    /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.primary, bold: true, children: [
       " ",
       pct,
       "%"
@@ -97206,50 +98721,86 @@ function ModernProgressBar({ percent, width = 40 }) {
 function TipDisplay({ maxWidth }) {
   const theme = useTheme();
   const s2 = useT();
-  const [tip, setTip] = (0, import_react41.useState)(randomTip);
-  (0, import_react41.useEffect)(() => {
+  const [tip, setTip] = (0, import_react42.useState)(randomTip);
+  (0, import_react42.useEffect)(() => {
     const interval = setInterval(() => {
       setTip(nextTip());
     }, TIP_INTERVAL_MS);
     return () => clearInterval(interval);
   }, []);
   const wrapped = wrapText2(`${s2.tip}: ${tip}`, maxWidth);
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: wrapped.slice(0, 2).map((line, i2) => /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, italic: true, children: [
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", alignItems: "center", children: wrapped.slice(0, 2).map((line, i2) => /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, italic: true, children: [
     i2 === 0 ? "\u{1F4A1} " : "   ",
     line
   ] }, i2)) });
 }
+function explainDownloadError(message, choice) {
+  if (choice.forcedResolution && /requested format is not available/i.test(message)) {
+    return `The source has no ${choice.forcedResolution}p version of this video.
+
+Pick a resolution marked \u2605 (the ones the source really provides), or use "Best available".`;
+  }
+  return message;
+}
 function App2({ initialThemeMode = "system", ...props }) {
-  const [themeMode, setThemeMode] = (0, import_react41.useState)(initialThemeMode);
-  const cycleTheme = (0, import_react41.useCallback)(() => {
-    setThemeMode(nextThemeMode);
+  const [settings] = (0, import_react42.useState)(() => loadSettings());
+  const [themeMode, setThemeMode] = (0, import_react42.useState)(
+    initialThemeMode === "system" ? settings.themeMode : initialThemeMode
+  );
+  const cycleTheme = (0, import_react42.useCallback)(() => {
+    setThemeMode((prev) => {
+      const next = nextThemeMode(prev);
+      saveSettings({ ...loadSettings(), themeMode: next });
+      return next;
+    });
   }, []);
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(AppContent, { ...props, cycleTheme }) });
+  const setTheme = (0, import_react42.useCallback)((mode) => {
+    setThemeMode(mode);
+  }, []);
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(ThemeProvider, { mode: themeMode, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(AppContent, { ...props, cycleTheme, setTheme, settings }) });
 }
 function AppContent({
   initialUrl,
   onOutcome,
-  cycleTheme
+  cycleTheme,
+  setTheme,
+  settings
 }) {
   const theme = useTheme();
   const s2 = useT();
   const { exit } = use_app_default();
   const { stdout } = use_stdout_default();
-  const [url, setUrl] = (0, import_react41.useState)(initialUrl ?? "");
-  const [urlInput, setUrlInput] = (0, import_react41.useState)("");
-  const [history, setHistory] = (0, import_react41.useState)(loadHistory);
-  const [platform2, setPlatform] = (0, import_react41.useState)();
-  const [info, setInfo] = (0, import_react41.useState)();
-  const downloadUrlRef = (0, import_react41.useRef)("");
-  const [wizard, setWizard] = (0, import_react41.useState)({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
-  const ytdlpRef = (0, import_react41.useRef)("");
-  const abortRef = (0, import_react41.useRef)(void 0);
-  const [phase, setPhase] = (0, import_react41.useState)(initialUrl ? { name: "probing", status: s2.warmingUp } : { name: "input" });
-  const [updateInfo, setUpdateInfo] = (0, import_react41.useState)(null);
-  (0, import_react41.useEffect)(() => {
+  const [url, setUrl] = (0, import_react42.useState)(initialUrl ?? "");
+  const [urlInput, setUrlInput] = (0, import_react42.useState)("");
+  const [history, setHistory] = (0, import_react42.useState)(loadHistory);
+  const [platform2, setPlatform] = (0, import_react42.useState)();
+  const [info, setInfo] = (0, import_react42.useState)();
+  const downloadUrlRef = (0, import_react42.useRef)("");
+  const [wizard, setWizard] = (0, import_react42.useState)({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, force: false, fps: 0, forceFps: false, bitrate: 0 });
+  const ytdlpRef = (0, import_react42.useRef)("");
+  const abortRef = (0, import_react42.useRef)(void 0);
+  const [phase, setPhase] = (0, import_react42.useState)(initialUrl ? { name: "probing", status: s2.warmingUp } : { name: "input" });
+  const [updateInfo, setUpdateInfo] = (0, import_react42.useState)(null);
+  const [prefs, setPrefs] = (0, import_react42.useState)(settings);
+  (0, import_react42.useEffect)(() => {
+    setSoundEnabled(prefs.sound);
+    setSoundVolume(prefs.volume);
+  }, [prefs.sound, prefs.volume]);
+  (0, import_react42.useEffect)(() => {
+    if (prefs.language) setLanguage(prefs.language);
+  }, [prefs.language]);
+  const updatePrefs = (0, import_react42.useCallback)((next) => {
+    setPrefs(next);
+    saveSettings(next);
+    setSoundEnabled(next.sound);
+    setSoundVolume(next.volume);
+  }, []);
+  (0, import_react42.useEffect)(() => {
     let cancelled = false;
     void checkForUpdate().then((info2) => {
-      if (!cancelled) setUpdateInfo(info2);
+      if (cancelled) return;
+      setUpdateInfo(info2);
+      if (info2?.hasUpdate) playSound("update");
     });
     return () => {
       cancelled = true;
@@ -97259,7 +98810,7 @@ function AppContent({
   const rows = stdout?.rows && stdout.rows > 0 ? stdout.rows : 24;
   const boxWidth = Math.max(14, Math.min(64, columns - 6));
   const contentWidth = Math.max(10, Math.min(columns - 4, 78));
-  const startProbe = (0, import_react41.useCallback)(async (targetUrl) => {
+  const startProbe = (0, import_react42.useCallback)(async (targetUrl) => {
     const controller = new AbortController();
     abortRef.current = controller;
     setPlatform(detectPlatform(targetUrl));
@@ -97294,25 +98845,26 @@ function AppContent({
       downloadUrlRef.current = downloadUrl;
       if (controller.signal.aborted) return;
       setInfo(videoInfo);
-      setWizard({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
+      setWizard({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, force: false, fps: 0, forceFps: false, bitrate: 0 });
       setPhase({ name: "wizard", step: "type" });
     } catch (error) {
       if (controller.signal.aborted) return;
+      playSound("error");
       setPhase({ name: "error", message: error instanceof Error ? error.message : String(error) });
     }
   }, []);
-  (0, import_react41.useEffect)(() => {
+  (0, import_react42.useEffect)(() => {
     if (initialUrl) void startProbe(initialUrl);
   }, [initialUrl, startProbe]);
-  const resetToInput = (0, import_react41.useCallback)(() => {
+  const resetToInput = (0, import_react42.useCallback)(() => {
     setUrl("");
     setUrlInput("");
     setPlatform(void 0);
     setInfo(void 0);
-    setWizard({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, fps: 0, bitrate: 0 });
+    setWizard({ kind: null, videoFormat: null, audioFormat: null, resolution: 0, force: false, fps: 0, forceFps: false, bitrate: 0 });
     setPhase({ name: "input" });
   }, []);
-  const cancelRun = (0, import_react41.useCallback)(() => {
+  const cancelRun = (0, import_react42.useCallback)(() => {
     abortRef.current?.abort();
     resetToInput();
     setUrlInput(url);
@@ -97323,8 +98875,16 @@ function AppContent({
         cycleTheme();
         return;
       }
+      if (key.ctrl && input === "s" && phase.name !== "settings") {
+        setPhase({ name: "settings", previousPhase: phase });
+        return;
+      }
       if (key.ctrl && input === "l" && phase.name !== "language-picker") {
         setPhase({ name: "language-picker", previousPhase: phase });
+        return;
+      }
+      if (key.escape && phase.name === "settings") {
+        setPhase(phase.previousPhase);
         return;
       }
       if (key.escape && phase.name === "language-picker") {
@@ -97354,7 +98914,7 @@ function AppContent({
     setUrl(trimmed);
     void startProbe(trimmed);
   };
-  const startDownload = (0, import_react41.useCallback)(
+  const startDownload = (0, import_react42.useCallback)(
     (choice) => {
       const controller = new AbortController();
       abortRef.current = controller;
@@ -97387,10 +98947,14 @@ function AppContent({
           }
           onOutcome({ filepath });
           setHistory(addToHistory(url));
-          setPhase({ name: "done", filepath });
+          const actual = choice.kind === "video" ? await inspectMediaFile(filepath, ffmpegLocation ?? void 0) : void 0;
+          setPhase({ name: "done", filepath, actual, requestedHeight: choice.requestedHeight });
+          playSound("success");
         } catch (error) {
           if (controller.signal.aborted) return;
-          setPhase({ name: "error", message: error instanceof Error ? error.message : String(error) });
+          playSound("error");
+          const raw2 = error instanceof Error ? error.message : String(error);
+          setPhase({ name: "error", message: explainDownloadError(raw2, choice) });
         }
       })();
     },
@@ -97437,20 +99001,27 @@ function AppContent({
     startDownload(choice);
   };
   const handleResolutionPick = (item) => {
-    setWizard((w) => ({ ...w, resolution: item.value }));
+    setWizard((w) => ({ ...w, resolution: item.value, force: Boolean(item.force) }));
     setPhase({ name: "wizard", step: "fps" });
   };
   const handleFpsPick = (item) => {
     const fmt = wizard.videoFormat;
     if (!fmt) return;
-    setWizard((w) => ({ ...w, fps: item.value }));
+    setWizard((w) => ({ ...w, fps: item.value, forceFps: Boolean(item.force) }));
     const resLabel = wizard.resolution > 0 ? `${wizard.resolution}p` : "best";
     const fpsLabel = item.value > 0 ? `${item.value}fps` : t().sourceFps;
     const choice = {
       kind: "video",
       label: `video \xB7 ${fmt.label} \xB7 ${resLabel} \xB7 ${fpsLabel}`,
       detail: fmtDesc(fmt.descKey),
-      args: buildVideoArgs(fmt, wizard.resolution, item.value)
+      args: buildVideoArgs(fmt, {
+        resolution: wizard.resolution,
+        fps: item.value,
+        forceResolution: wizard.force,
+        forceFps: Boolean(item.force)
+      }),
+      forcedResolution: wizard.force ? wizard.resolution : void 0,
+      requestedHeight: wizard.resolution
     };
     startDownload(choice);
   };
@@ -97460,16 +99031,36 @@ function AppContent({
     ...sourceHasVideo || !sourceHasAudio ? [{ key: "video", label: `\u25B6  ${t().videoOption}`, value: "video" }] : [],
     ...sourceHasAudio || !sourceHasVideo ? [{ key: "audio", label: `\u266A  ${t().audioOption}`, value: "audio" }] : []
   ];
-  const resolutionItems = RESOLUTIONS.map((r2) => ({
-    key: String(r2.value),
-    label: `${r2.label}  ${fmtDesc(r2.descKey)}`,
-    value: r2.value
-  }));
-  const fpsItems = FPS_OPTIONS.map((f2) => ({
-    key: String(f2.value),
-    label: `${f2.label}  ${fmtDesc(f2.descKey)}`,
-    value: f2.value
-  }));
+  const sourceHeights = info ? availableHeights(info) : [];
+  const resolutionItems = [
+    {
+      key: "best",
+      label: `${RESOLUTIONS[0].label}  ${fmtDesc(RESOLUTIONS[0].descKey)}`,
+      value: 0,
+      force: false
+    },
+    ...resolutionChoices(sourceHeights).map((choice) => ({
+      key: `h${choice.value}`,
+      label: heightLabel(choice.value),
+      value: choice.value,
+      force: choice.exact
+    }))
+  ];
+  const sourceFps = info ? fpsForHeight(info, wizard.resolution, wizard.force) : [];
+  const fpsItems = [
+    {
+      key: "src",
+      label: `${FPS_OPTIONS[0].label}  ${fmtDesc(FPS_OPTIONS[0].descKey)}`,
+      value: 0,
+      force: false
+    },
+    ...fpsChoices(sourceFps).map((choice) => ({
+      key: `f${choice.value}`,
+      label: `${choice.value} FPS`,
+      value: choice.value,
+      force: choice.exact
+    }))
+  ];
   const videoFormatItems = VIDEO_FORMATS.map((f2) => ({
     key: f2.id,
     label: `${f2.label}${f2.recommended ? `  \u2605 ${t().recommended}` : ""}  ${fmtDesc(f2.descKey)}`,
@@ -97481,8 +99072,8 @@ function AppContent({
     value: f2.id
   }));
   const hints = (() => {
-    const base = phase.name === "input" ? [["\u21B5", s2.grab], ["^c", s2.quit]] : phase.name === "probing" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "wizard" ? [["\u2191\u2193", s2.choose], ["\u21B5", s2.select], ["esc", s2.back], ["^c", s2.quit]] : phase.name === "downloading" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "done" ? [["^c", s2.quit]] : phase.name === "language-picker" ? [["esc", s2.back], ["^c", s2.quit]] : [["\u21B5", s2.tryAgain], ["^c", s2.quit]];
-    const extras = phase.name === "language-picker" ? [] : [["^t", `${s2.theme}:${theme.mode}`], ["^l", s2.lang ?? "language"]];
+    const base = phase.name === "input" ? [["\u21B5", s2.grab], ["^c", s2.quit]] : phase.name === "probing" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "wizard" ? [["\u2191\u2193", s2.choose], ["\u21B5", s2.select], ["esc", s2.back], ["^c", s2.quit]] : phase.name === "downloading" ? [["esc", s2.cancel], ["^c", s2.quit]] : phase.name === "done" ? [["^c", s2.quit]] : phase.name === "language-picker" ? [["esc", s2.back], ["^c", s2.quit]] : phase.name === "settings" ? [["\u2191\u2193", s2.choose], ["\u2190\u2192", s2.select], ["esc", s2.back], ["^c", s2.quit]] : [["\u21B5", s2.tryAgain], ["^c", s2.quit]];
+    const extras = phase.name === "language-picker" || phase.name === "settings" ? [] : [["^t", `${s2.theme}:${theme.mode}`], ["^l", s2.lang ?? "language"], ["^s", s2.settings ?? "settings"]];
     const withTheme = [...base, ...extras];
     if (phase.name === "input" && history.length > 0) {
       return [withTheme[0], ["\u2191", s2.history], ...withTheme.slice(1)];
@@ -97507,7 +99098,7 @@ function AppContent({
     if (step === "fps") return s2.stepFps;
     return s2.stepBitrate;
   };
-  return /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(
+  return /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(
     Box_default,
     {
       flexDirection: "column",
@@ -97517,13 +99108,13 @@ function AppContent({
       height: rows,
       backgroundColor: theme.background,
       children: [
-        /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(UpdateBadge, { info: updateInfo }),
-        phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Logo, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, children: s2.tagline }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s2.sitesLine }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, { lines: 2 }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Panel, { title: s2.pasteLink, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(UpdateBadge, { info: updateInfo }),
+        phase.name === "input" && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Logo, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: s2.tagline }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: s2.sitesLine }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, { lines: 2 }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: s2.pasteLink, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
             TextInput,
             {
               value: urlInput,
@@ -97535,23 +99126,23 @@ function AppContent({
               submitOnPaste: isProbablyUrl
             }
           ) }) }),
-          phase.warning ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.danger ?? theme.primary, children: [
+          phase.warning ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.danger ?? theme.primary, children: [
             "\u2717 ",
             phase.warning
           ] }) : null
         ] }),
-        phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Panel, { title: platform2 ? platform2.label : s2.analyzing, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: url.length > boxWidth - 10 ? `${url.slice(0, boxWidth - 11)}\u2026` : url }) })
+        phase.name === "probing" && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(BrandLine, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Panel, { title: platform2 ? platform2.label : s2.analyzing, width: boxWidth, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: url.length > boxWidth - 10 ? `${url.slice(0, boxWidth - 11)}\u2026` : url }) })
         ] }),
-        phase.name === "wizard" && info && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { width: contentWidth, flexDirection: "column", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: wizard.kind === "audio" }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Panel, { title: stepTitle(phase.step), width: Math.max(48, Math.round(contentWidth * 0.8)), children: [
-            phase.step === "type" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        phase.name === "wizard" && info && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { width: contentWidth, flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(BrandLine, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: wizard.kind === "audio" }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Panel, { title: stepTitle(phase.step), width: Math.max(48, Math.round(contentWidth * 0.8)), children: [
+            phase.step === "type" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -97560,7 +99151,7 @@ function AppContent({
                 onSelect: handleTypePick
               }
             ),
-            phase.step === "format" && wizard.kind === "video" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+            phase.step === "format" && wizard.kind === "video" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -97569,7 +99160,7 @@ function AppContent({
                 onSelect: handleFormatPick
               }
             ),
-            phase.step === "format" && wizard.kind === "audio" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+            phase.step === "format" && wizard.kind === "audio" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -97578,25 +99169,25 @@ function AppContent({
                 onSelect: handleFormatPick
               }
             ),
-            phase.step === "resolution" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+            phase.step === "resolution" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
                 itemComponent: ChoiceItem,
                 items: resolutionItems,
-                onSelect: handleResolutionPick
+                onSelect: (item) => handleResolutionPick(item)
               }
             ),
-            phase.step === "fps" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+            phase.step === "fps" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
                 itemComponent: ChoiceItem,
                 items: fpsItems,
-                onSelect: handleFpsPick
+                onSelect: (item) => handleFpsPick(item)
               }
             ),
-            phase.step === "bitrate" && wizard.audioFormat && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+            phase.step === "bitrate" && wizard.audioFormat && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
               SelectInput_default,
               {
                 indicatorComponent: ChoiceIndicator,
@@ -97607,87 +99198,101 @@ function AppContent({
             )
           ] })
         ] }),
-        phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: contentWidth, children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(BrandLine, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          info ? /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: phase.choice.kind === "audio" }) : null,
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.accent ?? theme.primary, bold: true, children: [
+        phase.name === "downloading" && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", width: contentWidth, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(BrandLine, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          info ? /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(MediaHeader, { info, platform: platform2, contentWidth, audioMode: phase.choice.kind === "audio" }) : null,
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.accent ?? theme.primary, bold: true, children: [
             "\u25B8 ",
             phase.choice.label
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          phase.processing ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ModernProgressBar, { percent: 1, width: Math.min(40, contentWidth - 10) }),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          phase.processing ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(ModernProgressBar, { percent: 1, width: Math.min(40, contentWidth - 10) }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(build_default, { type: "dots" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
                 " ",
                 s2.processing
               ] })
             ] })
-          ] }) : phase.progress?.totalBytes ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          ] }) : phase.progress?.totalBytes ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
               ModernProgressBar,
               {
                 percent: phase.progress.downloadedBytes / phase.progress.totalBytes,
                 width: Math.min(40, contentWidth - 10)
               }
             ),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: downloadMeta(phase.progress) })
-          ] }) : phase.progress ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: downloadMeta(phase.progress) })
+          ] }) : phase.progress ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(build_default, { type: "dots" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
                 " ",
                 s2.downloading
               ] })
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: indeterminateMeta(phase.progress) })
-          ] }) : /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(ModernProgressBar, { percent: 0, width: Math.min(40, contentWidth - 10) }),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
-              /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: phase.refreshing ? ` ${s2.linkExpired}` : ` ${s2.starting}` })
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: indeterminateMeta(phase.progress) })
+          ] }) : /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(ModernProgressBar, { percent: 0, width: Math.min(40, contentWidth - 10) }),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { children: [
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(build_default, { type: "dots" }) }),
+              /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: phase.refreshing ? ` ${s2.linkExpired}` : ` ${s2.starting}` })
             ] })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(TipDisplay, { maxWidth: contentWidth })
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(TipDisplay, { maxWidth: contentWidth })
         ] }),
-        phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { bold: true, color: theme.success ?? theme.primary, children: [
+        phase.name === "done" && /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Box_default, { flexDirection: "column", alignItems: "center", children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { children: [
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { bold: true, color: theme.success ?? theme.primary, children: [
               "\u2713 ",
               s2.grabbed,
               " "
             ] }),
-            /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.primary, children: s2.savedTo })
+            /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.primary, children: s2.savedTo })
           ] }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(phase.filepath, os6.homedir(), 60) }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, {}),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: shortenPath(phase.filepath, os9.homedir(), 60) }),
+          phase.actual?.height ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+            phase.actual.height,
+            "p",
+            phase.actual.fps ? ` \xB7 ${phase.actual.fps}fps` : "",
+            phase.actual.width ? ` \xB7 ${phase.actual.width}px` : ""
+          ] }) : null,
+          phase.requestedHeight && phase.actual?.height && phase.actual.height < phase.requestedHeight ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.warning ?? theme.accent ?? theme.primary, children: [
+            "\u26A0 source has no ",
+            phase.requestedHeight,
+            "p \u2014 got ",
+            phase.actual.height,
+            "p"
+          ] }) : null,
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, {}),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
             Box_default,
             {
               borderStyle: "double",
               borderColor: theme.accent ?? theme.gray,
               paddingX: 3,
-              children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { bold: true, color: theme.primary, children: s2.grabAnother })
+              children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { bold: true, color: theme.primary, children: s2.grabAnother })
             }
           )
         ] }),
-        phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: Math.max(10, Math.min(columns - 6, 72)), children: /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { bold: true, color: theme.danger ?? theme.primary, children: [
+        phase.name === "error" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Box_default, { flexDirection: "column", alignItems: "center", width: Math.max(10, Math.min(columns - 6, 72)), children: /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { bold: true, color: theme.danger ?? theme.primary, children: [
           "\u2717 ",
           phase.message
         ] }) }),
-        phase.name === "language-picker" && /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        phase.name === "language-picker" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
           LanguagePicker,
           {
             onPick: (code) => {
               setLanguage(code);
+              updatePrefs({ ...prefs, language: code });
               const prev = phase.previousPhase;
               if (prev.name === "probing") setPhase({ ...prev });
               else if (prev.name === "wizard") setPhase({ ...prev });
@@ -97698,15 +99303,31 @@ function AppContent({
             boxWidth
           }
         ),
-        hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(import_jsx_runtime6.Fragment, { children: [
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Gap, { lines: 2 }),
-          /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(
+        phase.name === "settings" && /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
+          SettingsPanel,
+          {
+            settings: prefs,
+            onChange: updatePrefs,
+            onClose: () => setPhase(phase.previousPhase),
+            onPickLanguage: () => setPhase({ name: "language-picker", previousPhase: phase }),
+            onClearHistory: () => {
+              clearHistory();
+              setHistory([]);
+            },
+            themeMode: theme.mode === "system" ? "system" : theme.mode,
+            onThemeMode: setTheme,
+            languageName: languageDisplayName(getLanguage())
+          }
+        ),
+        hints.length > 0 ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(import_jsx_runtime8.Fragment, { children: [
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Gap2, { lines: 2 }),
+          /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(
             Shortcuts,
             {
               items: hints,
-              leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { children: [
-                /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime6.jsx)(build_default, { type: "dots" }) }),
-                /* @__PURE__ */ (0, import_jsx_runtime6.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
+              leading: phase.name === "probing" ? /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { children: [
+                /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(Text, { color: theme.accent ?? theme.primary, children: /* @__PURE__ */ (0, import_jsx_runtime8.jsx)(build_default, { type: "dots" }) }),
+                /* @__PURE__ */ (0, import_jsx_runtime8.jsxs)(Text, { color: theme.gray, dimColor: theme.dimSecondary, children: [
                   " ",
                   phase.status
                 ] })
@@ -97721,7 +99342,7 @@ function AppContent({
 
 // src/lib/args.ts
 function parseArgs(argv) {
-  const result = { help: false, version: false, update: false, uninstall: false, force: false };
+  const result = { help: false, version: false, update: false, uninstall: false, force: false, sound: true, soundExplicit: false, testSound: false };
   const rest = [];
   for (let i2 = 0; i2 < argv.length; i2++) {
     const arg = argv[i2];
@@ -97735,6 +99356,14 @@ function parseArgs(argv) {
       result.uninstall = true;
     } else if (arg === "--force" || arg === "-f") {
       result.force = true;
+    } else if (arg === "--test-sound" || arg === "--test-sounds") {
+      result.testSound = true;
+    } else if (arg === "--no-sound" || arg === "--no-sounds") {
+      result.sound = false;
+      result.soundExplicit = true;
+    } else if (arg === "--sound" || arg === "--sounds") {
+      result.sound = true;
+      result.soundExplicit = true;
     } else if (arg === "--theme") {
       const value = argv[++i2];
       if (!value || value.startsWith("-")) {
@@ -97762,9 +99391,9 @@ function parseArgs(argv) {
 }
 
 // src/lib/self-update.ts
-import fs9 from "fs";
-import path7 from "path";
-import { fileURLToPath } from "url";
+import fs14 from "fs";
+import path11 from "path";
+import { fileURLToPath as fileURLToPath2 } from "url";
 var GITHUB_REPO2 = "AlFarrizi-Studio/Carbon-DL";
 var CLI_URL = `https://raw.githubusercontent.com/${GITHUB_REPO2}/main/dist/cli.js`;
 async function selfUpdate(force = false) {
@@ -97836,20 +99465,20 @@ async function selfUpdate(force = false) {
       message: "The downloaded update appears to be invalid. Please try again."
     };
   }
-  const currentFile = process.argv[1] ? path7.resolve(process.argv[1]) : fileURLToPath(import.meta.url);
-  const targetDir = path7.dirname(currentFile);
-  const tmpFile = path7.join(targetDir, `.cli.js.update-${process.pid}`);
+  const currentFile = process.argv[1] ? path11.resolve(process.argv[1]) : fileURLToPath2(import.meta.url);
+  const targetDir = path11.dirname(currentFile);
+  const tmpFile = path11.join(targetDir, `.cli.js.update-${process.pid}`);
   try {
-    fs9.writeFileSync(tmpFile, newCode, { mode: 493 });
+    fs14.writeFileSync(tmpFile, newCode, { mode: 493 });
     try {
-      fs9.renameSync(tmpFile, currentFile);
+      fs14.renameSync(tmpFile, currentFile);
     } catch {
-      fs9.copyFileSync(tmpFile, currentFile);
-      fs9.unlinkSync(tmpFile);
+      fs14.copyFileSync(tmpFile, currentFile);
+      fs14.unlinkSync(tmpFile);
     }
   } catch (err) {
     try {
-      fs9.unlinkSync(tmpFile);
+      fs14.unlinkSync(tmpFile);
     } catch {
     }
     return {
@@ -97870,13 +99499,13 @@ Try running the installer again, or check that the install directory is writable
 }
 
 // src/lib/self-uninstall.ts
-import fs10 from "fs";
-import os7 from "os";
-import path8 from "path";
+import fs15 from "fs";
+import os10 from "os";
+import path12 from "path";
 import { execSync } from "child_process";
 function rmDir(dir) {
   try {
-    fs10.rmSync(dir, { recursive: true, force: true });
+    fs15.rmSync(dir, { recursive: true, force: true });
     return true;
   } catch {
     return false;
@@ -97884,7 +99513,7 @@ function rmDir(dir) {
 }
 function rmFile(file) {
   try {
-    fs10.unlinkSync(file);
+    fs15.unlinkSync(file);
     return true;
   } catch {
     return false;
@@ -97916,20 +99545,20 @@ function removeFromWindowsPath(installDir) {
 }
 function removeFromShellProfile() {
   const removed = [];
-  const home = os7.homedir();
+  const home = os10.homedir();
   const profiles = [".bashrc", ".zshrc", ".profile", ".bash_profile"];
   for (const profile of profiles) {
-    const profilePath = path8.join(home, profile);
+    const profilePath = path12.join(home, profile);
     try {
-      if (!fs10.existsSync(profilePath)) continue;
-      const content = fs10.readFileSync(profilePath, "utf8");
+      if (!fs15.existsSync(profilePath)) continue;
+      const content = fs15.readFileSync(profilePath, "utf8");
       const lines = content.split("\n");
       const filtered = lines.filter((line) => {
         const trimmed = line.trim();
         return !trimmed.includes("# Added by Carbon installer") && !trimmed.includes(".carbon/bin") && !trimmed.includes(".carbon/node/bin");
       });
       if (filtered.length !== lines.length) {
-        fs10.writeFileSync(profilePath, filtered.join("\n"));
+        fs15.writeFileSync(profilePath, filtered.join("\n"));
         removed.push(profilePath);
       }
     } catch {
@@ -97939,34 +99568,38 @@ function removeFromShellProfile() {
 }
 async function selfUninstall() {
   const removed = [];
-  const home = os7.homedir();
+  const home = os10.homedir();
   const platform2 = process.platform;
   if (platform2 === "win32") {
-    const installDir = path8.join(process.env.LOCALAPPDATA ?? path8.join(home, "AppData", "Local"), "Carbon");
-    if (fs10.existsSync(installDir)) {
+    const installDir = path12.join(process.env.LOCALAPPDATA ?? path12.join(home, "AppData", "Local"), "Carbon");
+    if (fs15.existsSync(installDir)) {
       if (rmDir(installDir)) removed.push(installDir);
     }
     if (removeFromWindowsPath(installDir)) {
       removed.push("PATH entry (User)");
     }
   } else {
-    const carbonDir = path8.join(home, ".carbon");
-    if (fs10.existsSync(carbonDir)) {
+    const carbonDir = path12.join(home, ".carbon");
+    if (fs15.existsSync(carbonDir)) {
       if (rmDir(carbonDir)) removed.push(carbonDir);
     }
     const profileChanges = removeFromShellProfile();
     removed.push(...profileChanges);
   }
-  const binDir = path8.join(home, ".carbon", "bin");
-  if (fs10.existsSync(binDir)) {
+  const binDir = path12.join(home, ".carbon", "bin");
+  if (fs15.existsSync(binDir)) {
     if (rmDir(binDir)) removed.push(binDir);
   }
-  const configDir = path8.join(home, ".config", "carbon");
-  if (fs10.existsSync(configDir)) {
+  const soundDir = path12.join(home, ".carbon", "sounds");
+  if (fs15.existsSync(soundDir)) {
+    if (rmDir(soundDir)) removed.push(soundDir);
+  }
+  const configDir = path12.join(home, ".config", "carbon");
+  if (fs15.existsSync(configDir)) {
     if (rmDir(configDir)) removed.push(configDir);
   }
-  const debugLog5 = path8.join(os7.tmpdir(), "carbon-debug.log");
-  if (fs10.existsSync(debugLog5)) {
+  const debugLog5 = path12.join(os10.tmpdir(), "carbon-debug.log");
+  if (fs15.existsSync(debugLog5)) {
     if (rmFile(debugLog5)) removed.push(debugLog5);
   }
   if (removed.length === 0) {
@@ -97985,7 +99618,7 @@ ${removed.map((r2) => `  \u2022 ${r2}`).join("\n")}`
 }
 
 // src/cli.tsx
-var import_jsx_runtime7 = __toESM(require_jsx_runtime(), 1);
+var import_jsx_runtime9 = __toESM(require_jsx_runtime(), 1);
 var HELP = `
   \u25C8 Carbon \u2014 grab any video or music. pick. download. done.
 
@@ -98005,13 +99638,20 @@ var HELP = `
 
   Options
     --theme <mode>  use system, dark, or light for this run
+    --no-sound      disable notification sounds
+    --test-sound    play the notification clips and exit
     -h, --help      show this help
     -v, --version   show version
 
-  Downloads are saved to ~/Downloads.
+  Downloads are saved to ${resolveDownloadDir()}.
   Powered by yt-dlp \u2014 YouTube, TikTok, Instagram, X, SoundCloud & 1800+ sites.
 `;
 var args = parseArgs(process.argv.slice(2));
+var saved = loadSettings();
+var envSound = process.env.CARBON_SOUND;
+var soundOn = envSound !== void 0 ? envSound !== "0" && envSound.toLowerCase() !== "false" && envSound.toLowerCase() !== "off" : args.soundExplicit ? args.sound : saved.sound;
+setSoundEnabled(soundOn);
+setSoundVolume(saved.volume);
 if (args.error) {
   console.error(`carbon: ${args.error}
 Try "carbon --help" for usage.`);
@@ -98022,18 +99662,38 @@ if (args.help) {
   process.exit(0);
 }
 if (args.version) {
-  console.log(CURRENT_VERSION);
+  console.log(`${CURRENT_VERSION}  (build ${BUILD_ID})`);
   process.exit(0);
 }
-if (args.update) {
+if (args.testSound) {
+  const dir = findSoundDir();
+  console.log(dir ? `Sound folder: ${dir}` : "Sound folder not found \u2014 run the installer to download the clips.");
+  console.log(args.sound ? "Notifications: ON" : "Notifications: MUTED (--no-sound / CARBON_SOUND=0)");
+  const clips = [
+    ["success", 0],
+    ["update", 2200],
+    ["error", 3600]
+  ];
+  for (const [kind, delay] of clips) {
+    setTimeout(() => {
+      console.log(`  \u25B6 ${kind}`);
+      playSound(kind);
+    }, delay);
+  }
+  await new Promise((resolve) => setTimeout(resolve, 6e3));
+  console.log("Done.");
+  process.exitCode = 0;
+} else if (args.update) {
   console.log(`Carbon v${CURRENT_VERSION} \u2014 checking for updates...`);
   const result = await selfUpdate(args.force);
   console.log(result.updated ? `\u2713 ${result.message}` : result.message);
+  playSound(result.ok ? "success" : "error");
   process.exitCode = result.ok ? 0 : 1;
 } else if (args.uninstall) {
   console.log(`Carbon v${CURRENT_VERSION} \u2014 uninstalling...`);
   const result = await selfUninstall();
   console.log(result.message);
+  playSound(result.ok ? "success" : "error");
   process.exitCode = result.ok ? 0 : 1;
 } else {
   await runTui();
@@ -98073,7 +99733,7 @@ async function runTui() {
   }
   let outcome = {};
   const { waitUntilExit } = render_default(
-    /* @__PURE__ */ (0, import_jsx_runtime7.jsx)(
+    /* @__PURE__ */ (0, import_jsx_runtime9.jsx)(
       App2,
       {
         initialUrl,
